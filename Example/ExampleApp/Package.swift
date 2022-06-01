@@ -2,6 +2,18 @@
 
 import PackageDescription
 
+let swiftSettings: [SwiftSetting] = [
+  .unsafeFlags(
+    [
+      "-Xfrontend",
+      "-debug-time-function-bodies",
+      "-Xfrontend",
+      "-debug-time-expression-type-checking",
+    ],
+    .when(configuration: .debug)
+  ),
+]
+
 let package = Package(
   name: "example-app",
   platforms: [
@@ -58,13 +70,15 @@ let package = Package(
           name: "KeychainAccess",
           package: "KeychainAccess"
         ),
-      ]
+      ],
+      swiftSettings: swiftSettings
     ),
     .testTarget(
       name: "AppFeatureTests",
       dependencies: [
         .target(name: "AppFeature"),
-      ]
+      ],
+      swiftSettings: swiftSettings
     ),
     .target(
       name: "LandingFeature",
@@ -77,13 +91,15 @@ let package = Package(
           name: "ElixxirDAppsSDK",
           package: "elixxir-dapps-sdk-swift"
         ),
-      ]
+      ],
+      swiftSettings: swiftSettings
     ),
     .testTarget(
       name: "LandingFeatureTests",
       dependencies: [
         .target(name: "LandingFeature"),
-      ]
+      ],
+      swiftSettings: swiftSettings
     ),
     .target(
       name: "SessionFeature",
@@ -92,13 +108,15 @@ let package = Package(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         ),
-      ]
+      ],
+      swiftSettings: swiftSettings
     ),
     .testTarget(
       name: "SessionFeatureTests",
       dependencies: [
         .target(name: "SessionFeature"),
-      ]
+      ],
+      swiftSettings: swiftSettings
     ),
   ]
 )
