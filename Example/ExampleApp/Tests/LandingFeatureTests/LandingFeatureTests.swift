@@ -1,12 +1,12 @@
 import ComposableArchitecture
 import XCTest
-@testable import AppFeature
+@testable import LandingFeature
 
-final class AppFeatureTests: XCTestCase {
+final class LandingFeatureTests: XCTestCase {
   func testViewDidLoad() throws {
     let store = TestStore(
-      initialState: AppState(),
-      reducer: appReducer,
+      initialState: LandingState(),
+      reducer: landingReducer,
       environment: .failing
     )
 
