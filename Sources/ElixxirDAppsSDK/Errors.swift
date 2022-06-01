@@ -5,3 +5,7 @@ public struct BindingsDownloadAndVerifySignedNdfWithUrlUnknownError: Error, Equa
 public struct BindingsGenerateSecretUnknownError: Error, Equatable {
   public init() {}
 }
+
+public struct PasswordStorageMissingPasswordError: Error, Equatable {
+  public init() {}
+}
