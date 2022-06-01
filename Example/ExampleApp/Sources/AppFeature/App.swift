@@ -1,4 +1,6 @@
+import Combine
 import ComposableArchitecture
+import ElixxirDAppsSDK
 import LandingFeature
 import SessionFeature
 import SwiftUI
@@ -18,8 +20,24 @@ struct App: SwiftUI.App {
 
 extension AppEnvironment {
   static func live() -> AppEnvironment {
-    AppEnvironment(
-      landing: LandingEnvironment(),
+    let clientSubject = CurrentValueSubject<Client?, Never>(nil)
+    let mainScheduler = DispatchQueue.main.eraseToAnyScheduler()
+    let bgScheduler = DispatchQueue(
+      label: "xx.network.dApps.ExampleApp.bg",
+      qos: .background
+    ).eraseToAnyScheduler()
+
+    return AppEnvironment(
+      hasClient: clientSubject.map { $0 != nil }.eraseToAnyPublisher(),
+      mainScheduler: mainScheduler,
+      landing: LandingEnvironment(
+        clientStorage: .live(
+          passwordStorage: .keychain
+        ),
+        setClient: { clientSubject.send($0) },
+        bgScheduler: bgScheduler,
+        mainScheduler: mainScheduler
+      ),
       session: SessionEnvironment()
     )
   }

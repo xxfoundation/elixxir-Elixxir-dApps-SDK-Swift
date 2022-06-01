@@ -1,3 +1,4 @@
+import Combine
 import ComposableArchitecture
 import ComposablePresentation
 import LandingFeature
@@ -38,11 +39,14 @@ extension AppState.Scene {
 
 enum AppAction: Equatable {
   case viewDidLoad
+  case clientDidChange(hasClient: Bool)
   case landing(LandingAction)
   case session(SessionAction)
 }
 
 struct AppEnvironment {
+  var hasClient: AnyPublisher<Bool, Never>
+  var mainScheduler: AnySchedulerOf<DispatchQueue>
   var landing: LandingEnvironment
   var session: SessionEnvironment
 }
@@ -51,6 +55,22 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 { state, action, env in
   switch action {
   case .viewDidLoad:
+    struct HasClientEffectId: Hashable {}
+    return env.hasClient
+      .removeDuplicates()
+      .map(AppAction.clientDidChange(hasClient:))
+      .receive(on: env.mainScheduler)
+      .eraseToEffect()
+      .cancellable(id: HasClientEffectId(), cancelInFlight: true)
+
+  case .clientDidChange(let hasClient):
+    if hasClient {
+      let sessionState = state.scene.asSession ?? SessionState()
+      state.scene = .session(sessionState)
+    } else {
+      let landingState = state.scene.asLanding ?? LandingState()
+      state.scene = .landing(landingState)
+    }
     return .none
 
   case .landing(_), .session(_):
@@ -75,6 +95,8 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 #if DEBUG
 extension AppEnvironment {
   static let failing = AppEnvironment(
+    hasClient: Empty().eraseToAnyPublisher(),
+    mainScheduler: .failing,
     landing: .failing,
     session: .failing
   )

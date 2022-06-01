@@ -15,6 +15,7 @@ public struct SessionView: View {
   public var body: some View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       Text("SessionView")
+        .navigationTitle("Session")
         .task {
           viewStore.send(.viewDidLoad)
         }

@@ -31,6 +31,10 @@ let package = Package(
       url: "https://github.com/darrarski/swift-composable-presentation.git",
       .upToNextMajor(from: "0.5.2")
     ),
+    .package(
+      url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
+      .upToNextMajor(from: "4.2.2")
+    ),
   ],
   targets: [
     .target(
@@ -50,6 +54,10 @@ let package = Package(
           name: "ComposablePresentation",
           package: "swift-composable-presentation"
         ),
+        .product(
+          name: "KeychainAccess",
+          package: "KeychainAccess"
+        ),
       ]
     ),
     .testTarget(
@@ -64,6 +72,10 @@ let package = Package(
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
+        ),
+        .product(
+          name: "ElixxirDAppsSDK",
+          package: "elixxir-dapps-sdk-swift"
         ),
       ]
     ),

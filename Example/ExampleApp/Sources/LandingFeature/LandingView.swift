@@ -9,15 +9,56 @@ public struct LandingView: View {
   let store: Store<LandingState, LandingAction>
 
   struct ViewState: Equatable {
-    init(state: LandingState) {}
+    let hasStoredClient: Bool
+    let isMakingClient: Bool
+    let isRemovingClient: Bool
+
+    init(state: LandingState) {
+      hasStoredClient = state.hasStoredClient
+      isMakingClient = state.isMakingClient
+      isRemovingClient = state.isRemovingClient
+    }
+
+    var isLoading: Bool {
+      isMakingClient ||
+      isRemovingClient
+    }
   }
 
   public var body: some View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
-      Text("LandingView")
-        .task {
-          viewStore.send(.viewDidLoad)
+      Form {
+        Button {
+          viewStore.send(.makeClient)
+        } label: {
+          HStack {
+            Text(viewStore.hasStoredClient ? "Load stored client" : "Create new client")
+            Spacer()
+            if viewStore.isMakingClient {
+              ProgressView()
+            }
+          }
         }
+
+        if viewStore.hasStoredClient {
+          Button(role: .destructive) {
+            viewStore.send(.removeStoredClient)
+          } label: {
+            HStack {
+              Text("Remove stored client")
+              Spacer()
+              if viewStore.isRemovingClient {
+                ProgressView()
+              }
+            }
+          }
+        }
+      }
+      .navigationTitle("Landing")
+      .disabled(viewStore.isLoading)
+      .task {
+        viewStore.send(.viewDidLoad)
+      }
     }
   }
 }
