@@ -37,7 +37,10 @@ struct AppView: View {
                 LandingView(store: store)
               }
               .navigationViewStyle(.stack)
-              .transition(.move(edge: .leading))
+              .transition(.asymmetric(
+                insertion: .move(edge: .leading),
+                removal: .opacity
+              ))
             }
           )
 
@@ -49,7 +52,10 @@ struct AppView: View {
                 SessionView(store: store)
               }
               .navigationViewStyle(.stack)
-              .transition(.move(edge: .trailing))
+              .transition(.asymmetric(
+                insertion: .move(edge: .trailing),
+                removal: .opacity
+              ))
             }
           )
         }
