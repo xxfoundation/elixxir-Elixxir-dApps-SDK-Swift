@@ -1,6 +1,7 @@
 import Combine
 import ComposableArchitecture
 import ElixxirDAppsSDK
+import ErrorFeature
 import LandingFeature
 import SessionFeature
 import SwiftUI
@@ -36,7 +37,8 @@ extension AppEnvironment {
         ),
         setClient: { clientSubject.send($0) },
         bgScheduler: bgScheduler,
-        mainScheduler: mainScheduler
+        mainScheduler: mainScheduler,
+        error: ErrorEnvironment()
       ),
       session: SessionEnvironment()
     )

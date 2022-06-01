@@ -1,4 +1,6 @@
 import ComposableArchitecture
+import ComposablePresentation
+import ErrorFeature
 import SwiftUI
 
 public struct LandingView: View {
@@ -59,6 +61,16 @@ public struct LandingView: View {
       .task {
         viewStore.send(.viewDidLoad)
       }
+      .sheet(
+        store.scope(
+          state: \.error,
+          action: LandingAction.error
+        ),
+        onDismiss: {
+          viewStore.send(.didDismissError)
+        },
+        content: ErrorView.init(store:)
+      )
     }
   }
 }

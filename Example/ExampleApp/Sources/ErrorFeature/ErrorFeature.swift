@@ -6,7 +6,7 @@ public struct ErrorState: Equatable {
     self.error = error
   }
 
-  var error: NSError
+  public var error: NSError
 }
 
 public enum ErrorAction: Equatable {}

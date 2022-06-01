@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import ErrorFeature
 import XCTest
 @testable import LandingFeature
 
@@ -115,6 +116,7 @@ final class LandingFeatureTests: XCTestCase {
     store.receive(.didFailMakingClient(error)) {
       $0.isMakingClient = false
       $0.hasStoredClient = false
+      $0.error = ErrorState(error: error)
     }
   }
 
@@ -180,6 +182,7 @@ final class LandingFeatureTests: XCTestCase {
     store.receive(.didFailRemovingStoredClient(error)) {
       $0.isRemovingClient = false
       $0.hasStoredClient = true
+      $0.error = ErrorState(error: error)
     }
   }
 }
