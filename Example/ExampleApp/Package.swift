@@ -15,6 +15,14 @@ let package = Package(
   ],
   dependencies: [
     .package(path: "../../"), // elixxir-dapps-sdk-swift
+    .package(
+      url: "https://github.com/pointfreeco/swift-composable-architecture.git",
+      .upToNextMajor(from: "0.35.0")
+    ),
+    .package(
+      url: "https://github.com/darrarski/swift-composable-presentation.git",
+      .upToNextMajor(from: "0.5.2")
+    ),
   ],
   targets: [
     .target(
@@ -23,6 +31,14 @@ let package = Package(
         .product(
           name: "ElixxirDAppsSDK",
           package: "elixxir-dapps-sdk-swift"
+        ),
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        ),
+        .product(
+          name: "ComposablePresentation",
+          package: "swift-composable-presentation"
         ),
       ]
     ),
