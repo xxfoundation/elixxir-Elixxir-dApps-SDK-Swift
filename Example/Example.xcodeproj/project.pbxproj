@@ -19,6 +19,7 @@
 		312C371B28475E62003E9E39 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		312C371D28475E63003E9E39 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		312C3728284761DC003E9E39 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		31B3342F2847669900865D82 /* ExampleAppIcon */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ExampleAppIcon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +39,7 @@
 			children = (
 				312C371828475E62003E9E39 /* ExampleApp */,
 				312C3727284761C7003E9E39 /* ExampleApp (iOS) */,
+				31B3342F2847669900865D82 /* ExampleAppIcon */,
 				312C371728475E62003E9E39 /* Products */,
 			);
 			sourceTree = "<group>";
