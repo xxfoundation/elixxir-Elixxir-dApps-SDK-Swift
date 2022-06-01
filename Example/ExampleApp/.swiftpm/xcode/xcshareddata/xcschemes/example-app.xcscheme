@@ -28,6 +28,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ErrorFeature"
+               BuildableName = "ErrorFeature"
+               BlueprintName = "ErrorFeature"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "LandingFeature"
                BuildableName = "LandingFeature"
                BlueprintName = "LandingFeature"
@@ -64,6 +78,16 @@
                BlueprintIdentifier = "AppFeatureTests"
                BuildableName = "AppFeatureTests"
                BlueprintName = "AppFeatureTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ErrorFeatureTests"
+               BuildableName = "ErrorFeatureTests"
+               BlueprintName = "ErrorFeatureTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

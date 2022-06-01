@@ -25,6 +25,10 @@ let package = Package(
       targets: ["AppFeature"]
     ),
     .library(
+      name: "ErrorFeature",
+      targets: ["ErrorFeature"]
+    ),
+    .library(
       name: "LandingFeature",
       targets: ["LandingFeature"]
     ),
@@ -77,6 +81,27 @@ let package = Package(
       name: "AppFeatureTests",
       dependencies: [
         .target(name: "AppFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "ErrorFeature",
+      dependencies: [
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        ),
+        .product(
+          name: "ElixxirDAppsSDK",
+          package: "elixxir-dapps-sdk-swift"
+        ),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ErrorFeatureTests",
+      dependencies: [
+        .target(name: "ErrorFeature"),
       ],
       swiftSettings: swiftSettings
     ),
