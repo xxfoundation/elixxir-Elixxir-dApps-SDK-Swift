@@ -15,8 +15,8 @@
 		312C371628475E62003E9E39 /* dApps Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "dApps Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		312C371D28475E63003E9E39 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		312C3728284761DC003E9E39 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		316D95EB28477ACA008475F9 /* ExampleApp */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ExampleApp; sourceTree = "<group>"; };
-		31B3342F2847669900865D82 /* ExampleAppIcon */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ExampleAppIcon; sourceTree = "<group>"; };
+		316D95EB28477ACA008475F9 /* example-app */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = "example-app"; sourceTree = "<group>"; };
+		31B3342F2847669900865D82 /* example-app-icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = "example-app-icon"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,8 +35,8 @@
 			isa = PBXGroup;
 			children = (
 				312C3727284761C7003E9E39 /* ExampleApp (iOS) */,
-				316D95EB28477ACA008475F9 /* ExampleApp */,
-				31B3342F2847669900865D82 /* ExampleAppIcon */,
+				316D95EB28477ACA008475F9 /* example-app */,
+				31B3342F2847669900865D82 /* example-app-icon */,
 				312C371728475E62003E9E39 /* Products */,
 			);
 			sourceTree = "<group>";
