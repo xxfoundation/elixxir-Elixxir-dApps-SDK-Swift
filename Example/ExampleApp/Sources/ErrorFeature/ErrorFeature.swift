@@ -2,7 +2,11 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct ErrorState: Equatable {
-  public init() {}
+  public init(error: NSError) {
+    self.error = error
+  }
+
+  var error: NSError
 }
 
 public enum ErrorAction: Equatable {}
