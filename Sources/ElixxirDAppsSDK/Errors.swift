@@ -13,3 +13,7 @@ public struct PasswordStorageMissingPasswordError: Error, Equatable {
 public struct BindingsNewClientUnknownError: Error, Equatable {
   public init() {}
 }
+
+public struct BindingsLoginUnknownError: Error, Equatable {
+  public init() {}
+}
