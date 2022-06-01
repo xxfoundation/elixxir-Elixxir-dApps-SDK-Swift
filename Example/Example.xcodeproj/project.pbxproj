@@ -37,7 +37,6 @@
 		312C370D28475E62003E9E39 = {
 			isa = PBXGroup;
 			children = (
-				312C371828475E62003E9E39 /* ExampleApp */,
 				312C3727284761C7003E9E39 /* ExampleApp (iOS) */,
 				31B3342F2847669900865D82 /* ExampleAppIcon */,
 				312C371728475E62003E9E39 /* Products */,
@@ -52,19 +51,12 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		312C371828475E62003E9E39 /* ExampleApp */ = {
+		312C3727284761C7003E9E39 /* ExampleApp (iOS) */ = {
 			isa = PBXGroup;
 			children = (
 				312C371928475E62003E9E39 /* App.swift */,
 				312C371B28475E62003E9E39 /* ContentView.swift */,
 				312C371D28475E63003E9E39 /* Assets.xcassets */,
-			);
-			path = ExampleApp;
-			sourceTree = "<group>";
-		};
-		312C3727284761C7003E9E39 /* ExampleApp (iOS) */ = {
-			isa = PBXGroup;
-			children = (
 				312C3728284761DC003E9E39 /* Info.plist */,
 			);
 			path = "ExampleApp (iOS)";

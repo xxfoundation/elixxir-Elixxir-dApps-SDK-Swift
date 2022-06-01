@@ -15,7 +15,7 @@ let exportURL = URL(fileURLWithPath: #file)
   .deletingLastPathComponent()
   .deletingLastPathComponent()
   .deletingLastPathComponent()
-  .appendingPathComponent("ExampleApp")
+  .appendingPathComponent("ExampleApp (iOS)")
   .appendingPathComponent("Assets.xcassets")
   .appendingPathComponent("AppIcon.appiconset")
 
