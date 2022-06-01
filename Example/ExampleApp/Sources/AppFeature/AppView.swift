@@ -1,16 +1,16 @@
 import SwiftUI
 
-struct ContentView: View {
+struct AppView: View {
   var body: some View {
-    Text("Hello, world!")
+    Text("AppView")
       .padding()
   }
 }
 
 #if DEBUG
-struct ContentView_Previews: PreviewProvider {
+struct AppView_Previews: PreviewProvider {
   static var previews: some View {
-    ContentView()
+    AppView()
   }
 }
 #endif

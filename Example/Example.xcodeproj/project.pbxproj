@@ -7,18 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		312C371A28475E62003E9E39 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312C371928475E62003E9E39 /* App.swift */; };
-		312C371C28475E62003E9E39 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312C371B28475E62003E9E39 /* ContentView.swift */; };
 		312C371E28475E63003E9E39 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 312C371D28475E63003E9E39 /* Assets.xcassets */; };
-		312C372C28476503003E9E39 /* ElixxirDAppsSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 312C372B28476503003E9E39 /* ElixxirDAppsSDK */; };
+		316D95EE28477B0E008475F9 /* AppFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 316D95ED28477B0E008475F9 /* AppFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		312C371628475E62003E9E39 /* dApps Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "dApps Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		312C371928475E62003E9E39 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
-		312C371B28475E62003E9E39 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		312C371D28475E63003E9E39 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		312C3728284761DC003E9E39 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		316D95EB28477ACA008475F9 /* ExampleApp */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ExampleApp; sourceTree = "<group>"; };
 		31B3342F2847669900865D82 /* ExampleAppIcon */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ExampleAppIcon; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -27,7 +24,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				312C372C28476503003E9E39 /* ElixxirDAppsSDK in Frameworks */,
+				316D95EE28477B0E008475F9 /* AppFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,6 +35,7 @@
 			isa = PBXGroup;
 			children = (
 				312C3727284761C7003E9E39 /* ExampleApp (iOS) */,
+				316D95EB28477ACA008475F9 /* ExampleApp */,
 				31B3342F2847669900865D82 /* ExampleAppIcon */,
 				312C371728475E62003E9E39 /* Products */,
 			);
@@ -54,8 +52,6 @@
 		312C3727284761C7003E9E39 /* ExampleApp (iOS) */ = {
 			isa = PBXGroup;
 			children = (
-				312C371928475E62003E9E39 /* App.swift */,
-				312C371B28475E62003E9E39 /* ContentView.swift */,
 				312C371D28475E63003E9E39 /* Assets.xcassets */,
 				312C3728284761DC003E9E39 /* Info.plist */,
 			);
@@ -79,7 +75,7 @@
 			);
 			name = "ExampleApp (iOS)";
 			packageProductDependencies = (
-				312C372B28476503003E9E39 /* ElixxirDAppsSDK */,
+				316D95ED28477B0E008475F9 /* AppFeature */,
 			);
 			productName = ExampleApp;
 			productReference = 312C371628475E62003E9E39 /* dApps Example.app */;
@@ -134,8 +130,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				312C371C28475E62003E9E39 /* ContentView.swift in Sources */,
-				312C371A28475E62003E9E39 /* App.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,9 +334,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		312C372B28476503003E9E39 /* ElixxirDAppsSDK */ = {
+		316D95ED28477B0E008475F9 /* AppFeature */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = ElixxirDAppsSDK;
+			productName = AppFeature;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
