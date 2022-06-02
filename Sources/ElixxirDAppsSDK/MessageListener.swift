@@ -1,13 +1,13 @@
 import Bindings
 
 public struct MessageListener {
-  public var listen: (Int, String, @escaping (Data) -> Void) -> Data
+  public var listen: (Int, String, @escaping (Data) -> Void) -> Void
 
   public func callAsFunction(
     messageType: Int,
     listenerName: String = "MessageListener",
     callback: @escaping (Data) -> Void
-  ) -> Data {
+  ) {
     listen(messageType, listenerName, callback)
   }
 }
@@ -35,10 +35,9 @@ extension MessageListener {
     MessageListener { messageType, listenerName, callback in
       let listener = Listener(listenerName: listenerName, onHear: callback)
       let listenerId = register(messageType, listener)
-      guard let listenerId = listenerId else {
+      guard listenerId != nil else {
         fatalError("BindingsConnection.registerListener returned `nil`")
       }
-      return listenerId
     }
   }
 }
