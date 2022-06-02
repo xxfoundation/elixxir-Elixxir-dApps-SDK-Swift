@@ -20,7 +20,7 @@ extension NDFDownloader {
       throw error
     }
     guard let data = data else {
-      throw BindingsDownloadAndVerifySignedNdfWithUrlUnknownError()
+      fatalError("BindingsDownloadAndVerifySignedNdfWithUrl returned `nil` without providing error")
     }
     return data
   }

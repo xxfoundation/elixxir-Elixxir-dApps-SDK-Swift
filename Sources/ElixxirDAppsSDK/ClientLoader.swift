@@ -12,9 +12,11 @@ extension ClientLoader {
   public static let live = ClientLoader { directoryURL, password in
     var error: NSError?
     let bindingsClient = BindingsLogin(directoryURL.path, password, &error)
-    if let error = error { throw error }
+    if let error = error {
+      throw error
+    }
     guard let bindingsClient = bindingsClient else {
-      throw BindingsLoginUnknownError()
+      fatalError("BindingsLogin returned `nil` without providing error")
     }
     return Client.live(bindingsClient: bindingsClient)
   }

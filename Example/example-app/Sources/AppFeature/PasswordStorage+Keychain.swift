@@ -8,7 +8,7 @@ extension PasswordStorage {
     )
     return PasswordStorage(
       save: { password in keychain[data: "password"] = password},
-      load: { try keychain[data: "password"] ?? { throw PasswordStorageMissingPasswordError() }() }
+      load: { try keychain[data: "password"] ?? { throw MissingPasswordError() }() }
     )
   }()
 }

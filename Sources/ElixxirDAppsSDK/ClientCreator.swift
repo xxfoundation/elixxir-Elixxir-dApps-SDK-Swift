@@ -17,7 +17,7 @@ extension ClientCreator {
       throw error
     }
     if !created {
-      throw BindingsNewClientUnknownError()
+      fatalError("BindingsNewClient returned `false` without providing error")
     }
   }
 }
