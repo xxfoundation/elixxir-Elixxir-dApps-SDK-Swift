@@ -1,16 +1,16 @@
 import Bindings
 
 public struct PasswordGenerator {
-  public var run: () -> Data
+  public var run: (Int) -> Data
 
-  public func callAsFunction() -> Data {
-    run()
+  public func callAsFunction(numBytes: Int = 32) -> Data {
+    run(numBytes)
   }
 }
 
 extension PasswordGenerator {
-  public static let live = PasswordGenerator {
-    guard let secret = BindingsGenerateSecret(32) else {
+  public static let live = PasswordGenerator { numBytes in
+    guard let secret = BindingsGenerateSecret(numBytes) else {
       fatalError("BindingsGenerateSecret returned `nil`")
     }
     return secret
@@ -19,7 +19,7 @@ extension PasswordGenerator {
 
 #if DEBUG
 extension PasswordGenerator {
-  public static let failing = PasswordGenerator {
+  public static let failing = PasswordGenerator { _ in
     Data()
   }
 }
