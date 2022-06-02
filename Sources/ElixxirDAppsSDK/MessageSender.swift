@@ -15,16 +15,20 @@ extension MessageSender {
   public static func live(
     bindingsConnection: BindingsConnection
   ) -> MessageSender {
-    MessageSender { messageType, payload in
-      try bindingsConnection.sendE2E(messageType, payload: payload)
-    }
+    MessageSender.live(sendE2E: bindingsConnection.sendE2E(_:payload:))
   }
 
   public static func live(
     bindingsAuthenticatedConnection: BindingsAuthenticatedConnection
   ) -> MessageSender {
+    MessageSender.live(sendE2E: bindingsAuthenticatedConnection.sendE2E(_:payload:))
+  }
+
+  private static func live(
+    sendE2E: @escaping (Int, Data) throws -> Data
+  ) -> MessageSender {
     MessageSender { messageType, payload in
-      try bindingsAuthenticatedConnection.sendE2E(messageType, payload: payload)
+      try sendE2E(messageType, payload)
     }
   }
 }
