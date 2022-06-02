@@ -1,6 +1,7 @@
 import Bindings
 
 public struct Connection {
+  public var getId: ConnectionIdProvider
   public var isAuthenticated: ConnectionAuthStatusProvider
   public var getPartner: ConnectionPartnerProvider
   public var send: MessageSender
@@ -13,6 +14,7 @@ extension Connection {
     bindingsConnection: BindingsConnection
   ) -> Connection {
     Connection(
+      getId: .live(bindingsConnection: bindingsConnection),
       isAuthenticated: .live(bindingsConnection: bindingsConnection),
       getPartner: .live(bindingsConnection: bindingsConnection),
       send: .live(bindingsConnection: bindingsConnection),
@@ -25,6 +27,7 @@ extension Connection {
     bindingsAuthenticatedConnection: BindingsAuthenticatedConnection
   ) -> Connection {
     Connection(
+      getId: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection),
       isAuthenticated: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection),
       getPartner: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection),
       send: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection),
@@ -37,6 +40,7 @@ extension Connection {
 #if DEBUG
 extension Connection {
   public static let failing = Connection(
+    getId: .failing,
     isAuthenticated: .failing,
     getPartner: .failing,
     send: .failing,
