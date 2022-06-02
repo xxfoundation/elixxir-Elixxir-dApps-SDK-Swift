@@ -2,6 +2,7 @@ import Bindings
 
 public struct Connection {
   public var isAuthenticated: () -> Bool
+  public var send: MessageSender
 }
 
 extension Connection {
@@ -9,7 +10,8 @@ extension Connection {
     bindingsConnection: BindingsConnection
   ) -> Connection {
     Connection(
-      isAuthenticated: { false }
+      isAuthenticated: { false },
+      send: .live(bindingsConnection: bindingsConnection)
     )
   }
 
@@ -17,7 +19,8 @@ extension Connection {
     bindingsAuthenticatedConnection: BindingsAuthenticatedConnection
   ) -> Connection {
     Connection(
-      isAuthenticated: bindingsAuthenticatedConnection.isAuthenticated
+      isAuthenticated: bindingsAuthenticatedConnection.isAuthenticated,
+      send: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection)
     )
   }
 }
@@ -25,7 +28,8 @@ extension Connection {
 #if DEBUG
 extension Connection {
   public static let failing = Connection(
-    isAuthenticated: { false }
+    isAuthenticated: { false },
+    send: .failing
   )
 }
 #endif
