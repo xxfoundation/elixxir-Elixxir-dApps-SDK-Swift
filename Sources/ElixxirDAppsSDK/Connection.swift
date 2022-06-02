@@ -31,7 +31,7 @@ extension Connection {
 #if DEBUG
 extension Connection {
   public static let failing = Connection(
-    isAuthenticated: { false },
+    isAuthenticated: { fatalError("Not implemented") },
     send: .failing,
     listen: .failing
   )

@@ -20,7 +20,7 @@ extension PasswordGenerator {
 #if DEBUG
 extension PasswordGenerator {
   public static let failing = PasswordGenerator { _ in
-    Data()
+    fatalError("Not implemented")
   }
 }
 #endif

@@ -66,7 +66,7 @@ private class Listener: NSObject, BindingsListenerProtocol {
 #if DEBUG
 extension MessageListener {
   public static let failing = MessageListener { _, _, _ in
-    Data()
+    fatalError("Not implemented")
   }
 }
 #endif

@@ -19,7 +19,7 @@ extension NetworkWaiter {
 #if DEBUG
 extension NetworkWaiter {
   public static let failing = NetworkWaiter { _ in
-    false
+    fatalError("Not implemented")
   }
 }
 #endif

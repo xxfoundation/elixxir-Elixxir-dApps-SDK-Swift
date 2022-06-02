@@ -20,7 +20,7 @@ extension NetworkFollowerStatusProvider {
 #if DEBUG
 extension NetworkFollowerStatusProvider {
   public static let failing = NetworkFollowerStatusProvider {
-    .unknown(code: -1)
+    fatalError("Not implemented")
   }
 }
 #endif
