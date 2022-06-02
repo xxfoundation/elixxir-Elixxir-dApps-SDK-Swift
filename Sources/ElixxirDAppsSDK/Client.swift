@@ -10,6 +10,7 @@ public struct Client {
   public var listenErrors: ClientErrorListener
   public var makeIdentity: IdentityMaker
   public var connect: ConnectionMaker
+  public var getContactFromIdentity: ContactFromIdentityProvider
   public var waitForDelivery: MessageDeliveryWaiter
 }
 
@@ -25,6 +26,7 @@ extension Client {
       listenErrors: .live(bindingsClient: bindingsClient),
       makeIdentity: .live(bindingsClient: bindingsClient),
       connect: .live(bindingsClient: bindingsClient),
+      getContactFromIdentity: .live(bindingsClient: bindingsClient),
       waitForDelivery: .live(bindingsClient: bindingsClient)
     )
   }
@@ -42,6 +44,7 @@ extension Client {
     listenErrors: .failing,
     makeIdentity: .failing,
     connect: .failing,
+    getContactFromIdentity: .failing,
     waitForDelivery: .failing
   )
 }
