@@ -9,16 +9,14 @@ public struct LogLevelConfigurator {
 }
 
 extension LogLevelConfigurator {
-  public static func live() -> LogLevelConfigurator {
-    LogLevelConfigurator { logLevel in
-      var error: NSError?
-      let result = BindingsLogLevel(logLevel.rawValue, &error)
-      if let error = error {
-        throw error
-      }
-      if !result {
-        fatalError("BindingsLogLevel returned `false` without providing error")
-      }
+  public static let live = LogLevelConfigurator { logLevel in
+    var error: NSError?
+    let result = BindingsLogLevel(logLevel.rawValue, &error)
+    if let error = error {
+      throw error
+    }
+    if !result {
+      fatalError("BindingsLogLevel returned `false` without providing error")
     }
   }
 }

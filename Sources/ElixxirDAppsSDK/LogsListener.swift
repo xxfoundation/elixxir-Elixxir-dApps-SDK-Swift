@@ -9,11 +9,9 @@ public struct LogsListener {
 }
 
 extension LogsListener {
-  public static func live() -> LogsListener {
-    LogsListener { callback in
-      let listener = Listener(onLog: callback)
-      BindingsRegisterLogWriter(listener)
-    }
+  public static let live = LogsListener { callback in
+    let listener = Listener(onLog: callback)
+    BindingsRegisterLogWriter(listener)
   }
 }
 
