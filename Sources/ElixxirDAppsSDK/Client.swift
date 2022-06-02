@@ -5,6 +5,7 @@ public struct Client {
   public var waitForNetwork: NetworkWaiter
   public var makeIdentity: IdentityMaker
   public var connect: ConnectionMaker
+  public var waitForDelivery: MessageDeliveryWaiter
 }
 
 extension Client {
@@ -13,7 +14,8 @@ extension Client {
       networkFollower: .live(bindingsClient: bindingsClient),
       waitForNetwork: .live(bindingsClient: bindingsClient),
       makeIdentity: .live(bindingsClient: bindingsClient),
-      connect: .live(bindingsClient: bindingsClient)
+      connect: .live(bindingsClient: bindingsClient),
+      waitForDelivery: .live(bindingsClient: bindingsClient)
     )
   }
 }
@@ -24,7 +26,8 @@ extension Client {
     networkFollower: .failing,
     waitForNetwork: .failing,
     makeIdentity: .failing,
-    connect: .failing
+    connect: .failing,
+    waitForDelivery: .failing
   )
 }
 #endif
