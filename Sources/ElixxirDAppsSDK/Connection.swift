@@ -5,6 +5,7 @@ public struct Connection {
   public var getPartner: () -> Data
   public var send: MessageSender
   public var listen: MessageListener
+  public var close: ConnectionCloser
 }
 
 extension Connection {
@@ -20,7 +21,8 @@ extension Connection {
         return data
       },
       send: .live(bindingsConnection: bindingsConnection),
-      listen: .live(bindingsConnection: bindingsConnection)
+      listen: .live(bindingsConnection: bindingsConnection),
+      close: .live(bindingsConnection: bindingsConnection)
     )
   }
 
@@ -36,7 +38,8 @@ extension Connection {
         return data
       },
       send: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection),
-      listen: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection)
+      listen: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection),
+      close: .live(bindingsAuthenticatedConnection: bindingsAuthenticatedConnection)
     )
   }
 }
@@ -47,7 +50,8 @@ extension Connection {
     isAuthenticated: { fatalError("Not implemented") },
     getPartner: { fatalError("Not implemented") },
     send: .failing,
-    listen: .failing
+    listen: .failing,
+    close: .failing
   )
 }
 #endif
