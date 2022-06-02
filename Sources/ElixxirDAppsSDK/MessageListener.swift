@@ -30,14 +30,10 @@ extension MessageListener {
   }
 
   private static func live(
-    register: @escaping (Int, BindingsListenerProtocol) -> Data?
+    register: @escaping (Int, BindingsListenerProtocol) -> Void
   ) -> MessageListener {
     MessageListener { messageType, listenerName, callback in
-      let listener = Listener(listenerName: listenerName, onHear: callback)
-      let listenerId = register(messageType, listener)
-      guard listenerId != nil else {
-        fatalError("BindingsConnection.registerListener returned `nil`")
-      }
+      register(messageType, Listener(listenerName: listenerName, onHear: callback))
     }
   }
 }
