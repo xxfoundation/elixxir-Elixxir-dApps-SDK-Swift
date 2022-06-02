@@ -1,6 +1,7 @@
 import Bindings
 
 public struct Client {
+  public var getId: ClientIdProvider
   public var networkFollower: NetworkFollower
   public var waitForNetwork: NetworkWaiter
   public var isNetworkHealthy: NetworkHealthProvider
@@ -14,6 +15,7 @@ public struct Client {
 extension Client {
   public static func live(bindingsClient: BindingsClient) -> Client {
     Client(
+      getId: .live(bindingsClient: bindingsClient),
       networkFollower: .live(bindingsClient: bindingsClient),
       waitForNetwork: .live(bindingsClient: bindingsClient),
       isNetworkHealthy: .live(bindingsClient: bindingsClient),
@@ -29,6 +31,7 @@ extension Client {
 #if DEBUG
 extension Client {
   public static let failing = Client(
+    getId: .failing,
     networkFollower: .failing,
     waitForNetwork: .failing,
     isNetworkHealthy: .failing,
