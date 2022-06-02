@@ -1,16 +1,9 @@
 import Bindings
 
 public struct MessageDeliveryWaiter {
-  public struct Result: Equatable {
-    public init(delivered: Bool, timedOut: Bool, roundResults: Data?) {
-      self.delivered = delivered
-      self.timedOut = timedOut
-      self.roundResults = roundResults
-    }
-
-    public var delivered: Bool
-    public var timedOut: Bool
-    public var roundResults: Data?
+  public enum Result: Equatable {
+    case delivered(roundResults: Data)
+    case notDelivered(timedOut: Bool)
   }
 
   public var wait: (Data, Int, @escaping (Result) -> Void) throws -> Void
@@ -29,9 +22,7 @@ extension MessageDeliveryWaiter {
     MessageDeliveryWaiter { roundList, timeoutMS, callback in
       try bindingsClient.wait(
         forMessageDelivery: roundList,
-        mdc: Callback(onCallback: { delivered, timedOut, roundResults in
-          callback(Result(delivered: delivered, timedOut: timedOut, roundResults: roundResults))
-        }),
+        mdc: Callback(onCallback: callback),
         timeoutMS: timeoutMS
       )
     }
@@ -39,15 +30,26 @@ extension MessageDeliveryWaiter {
 }
 
 private final class Callback: NSObject, BindingsMessageDeliveryCallbackProtocol {
-  init(onCallback: @escaping (Bool, Bool, Data?) -> Void) {
+  init(onCallback: @escaping (MessageDeliveryWaiter.Result) -> Void) {
     self.onCallback = onCallback
     super.init()
   }
 
-  let onCallback: (Bool, Bool, Data?) -> Void
+  let onCallback: (MessageDeliveryWaiter.Result) -> Void
 
   func eventCallback(_ delivered: Bool, timedOut: Bool, roundResults: Data?) {
-    onCallback(delivered, timedOut, roundResults)
+    if delivered, !timedOut, let roundResults = roundResults {
+      return onCallback(.delivered(roundResults: roundResults))
+    }
+    if !delivered, roundResults == nil {
+      return onCallback(.notDelivered(timedOut: timedOut))
+    }
+    fatalError("""
+      BindingsMessageDeliveryCallback received invalid parameters:
+      - delivered → \(delivered)
+      - timedOut → \(timedOut)
+      - roundResults == nil → \(roundResults == nil)
+      """)
   }
 }
 
