@@ -1,4 +1,4 @@
-public struct ContactFact: Equatable {
+public struct Fact: Equatable {
   public init(
     fact: String,
     type: Int
@@ -11,7 +11,7 @@ public struct ContactFact: Equatable {
   public var type: Int
 }
 
-extension ContactFact: Codable {
+extension Fact: Codable {
   enum CodingKeys: String, CodingKey {
     case fact = "Fact"
     case type = "Type"
