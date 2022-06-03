@@ -2,7 +2,7 @@ import CustomDump
 import XCTest
 @testable import ElixxirDAppsSDK
 
-final class ContactFactTests: XCTestCase {
+final class FactTests: XCTestCase {
   func testCoding() throws {
     let jsonString = """
     {
