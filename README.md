@@ -14,10 +14,11 @@ For usage examples, checkout included example iOS application.
 Create a new client and store it on disk:
 
 ```swift
+let downloadNDF: NDFDownloader = .live
 let createClient: ClientCreator = .live
 try createClient(
   directoryURL: ...,
-  ndf: ...,
+  ndf: try downloadNDF(.mainnet),
   password: ...
 )
 ```
