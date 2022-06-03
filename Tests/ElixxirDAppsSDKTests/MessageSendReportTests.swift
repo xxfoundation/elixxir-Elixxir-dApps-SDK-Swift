@@ -4,13 +4,12 @@ import XCTest
 
 final class MessageSendReportTests: XCTestCase {
   func testCoding() throws {
-    let messageId = secureRandomData(count: 32)
     let jsonString = """
     {
       "RoundList": {
         "Rounds": [1,5,9]
       },
-      "MessageID": \(messageId.jsonEncodedBase64()),
+      "MessageID": "51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=",
       "Timestamp": 1653582683183384000
     }
     """
@@ -21,7 +20,7 @@ final class MessageSendReportTests: XCTestCase {
 
     XCTAssertNoDifference(report, MessageSendReport(
       roundList: [1, 5, 9],
-      messageId: messageId,
+      messageId: Data(base64Encoded: "51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=")!,
       timestamp: 1_653_582_683_183_384_000
     ))
 

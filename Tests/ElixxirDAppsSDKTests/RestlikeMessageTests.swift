@@ -4,13 +4,11 @@ import XCTest
 
 final class RestlikeMessageTests: XCTestCase {
   func testCoding() throws {
-    let headers = secureRandomData(count: 32)
-    let content = secureRandomData(count: 32)
     let jsonString = """
     {
       "Version": 1,
-      "Headers": \(headers.jsonEncodedBase64()),
-      "Content": \(content.jsonEncodedBase64()),
+      "Headers": "Y29udGVudHM6YXBwbGljYXRpb24vanNvbg==",
+      "Content": "VGhpcyBpcyBhIHJlc3RsaWtlIG1lc3NhZ2U=",
       "Method": 2,
       "URI": "xx://CmixRestlike/rest",
       "Error": ""
@@ -23,8 +21,8 @@ final class RestlikeMessageTests: XCTestCase {
 
     XCTAssertNoDifference(message, RestlikeMessage(
       version: 1,
-      headers: headers,
-      content: content,
+      headers: Data(base64Encoded: "Y29udGVudHM6YXBwbGljYXRpb24vanNvbg==")!,
+      content: Data(base64Encoded: "VGhpcyBpcyBhIHJlc3RsaWtlIG1lc3NhZ2U=")!,
       method: 2,
       uri: "xx://CmixRestlike/rest",
       error: ""
