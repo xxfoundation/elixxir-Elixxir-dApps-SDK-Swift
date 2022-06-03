@@ -26,11 +26,28 @@ let package = Package(
       targets: ["ElixxirDAppsSDK"]
     ),
   ],
+  dependencies: [
+    .package(
+      url: "https://github.com/pointfreeco/swift-custom-dump.git",
+      .upToNextMajor(from: "0.4.0")
+    ),
+  ],
   targets: [
     .target(
       name: "ElixxirDAppsSDK",
       dependencies: [
         .target(name: "Bindings"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ElixxirDAppsSDKTests",
+      dependencies: [
+        .target(name: "ElixxirDAppsSDK"),
+        .product(
+          name: "CustomDump",
+          package: "swift-custom-dump"
+        ),
       ],
       swiftSettings: swiftSettings
     ),
