@@ -34,6 +34,13 @@ let package = Package(
       ],
       swiftSettings: swiftSettings
     ),
+    .testTarget(
+      name: "ElixxirDAppsSDKTests",
+      dependencies: [
+        .target(name: "ElixxirDAppsSDK")
+      ],
+      swiftSettings: swiftSettings
+    ),
     .binaryTarget(
       name: "Bindings",
       path: "Frameworks/Bindings.xcframework"
