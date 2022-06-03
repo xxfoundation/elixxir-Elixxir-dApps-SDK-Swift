@@ -1,6 +1,10 @@
 import Foundation
 
 public struct PasswordStorage {
+  public struct MissingPasswordError: Error, Equatable {
+    public init() {}
+  }
+
   public init(
     save: @escaping (Data) throws -> Void,
     load: @escaping () throws -> Data

@@ -30,7 +30,7 @@ extension ClientStorage {
       },
       createClient: {
         let ndf = try downloadNDF(environment)
-        let password = try generatePassword()
+        let password = generatePassword()
         try passwordStorage.save(password)
         try? fileManager.removeItem(at: directoryURL)
         try? fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)

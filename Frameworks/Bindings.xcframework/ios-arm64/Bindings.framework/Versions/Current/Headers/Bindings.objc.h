@@ -17,9 +17,9 @@
 @class BindingsE2ESendReport;
 @class BindingsFact;
 @class BindingsIdentity;
-@class BindingsListenerID;
 @class BindingsMessage;
 @class BindingsRestlikeMessage;
+@class BindingsRoundsList;
 @protocol BindingsClientError;
 @class BindingsClientError;
 @protocol BindingsListener;
@@ -38,10 +38,11 @@
 @protocol BindingsListener <NSObject>
 /**
  * Hear is called to receive a message in the UI
+Accepts a marshalled Message object
  */
 - (void)hear:(NSData* _Nullable)item;
 /**
- * Returns a name, used for debugging
+ * Name returns a name, used for debugging
  */
 - (NSString* _Nonnull)name;
 @end
@@ -67,9 +68,10 @@
 // skipped field AuthenticatedConnection.Connection with unsupported type: gitlab.com/elixxir/client/bindings.Connection
 
 - (void)close;
+- (long)getId;
 - (NSData* _Nullable)getPartner;
 - (BOOL)isAuthenticated;
-- (NSData* _Nullable)registerListener:(long)messageType newListener:(id<BindingsListener> _Nullable)newListener;
+- (void)registerListener:(long)messageType newListener:(id<BindingsListener> _Nullable)newListener;
 - (NSData* _Nullable)sendE2E:(long)mt payload:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
 @end
 
@@ -113,8 +115,7 @@ messages can be sent
  */
 - (BOOL)isNetworkHealthy;
 /**
- * MakeIdentity generates a new cryptographic identity for receving
-messages
+ * MakeIdentity generates a new cryptographic identity for receiving messages
  */
 - (NSData* _Nullable)makeIdentity:(NSError* _Nullable* _Nullable)error;
 /**
@@ -167,6 +168,14 @@ Threads Started:
 		Responds to confirmations of successful rekey operations
  */
 - (BOOL)startNetworkFollower:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
+/**
+ * StopNetworkFollower stops the network follower if it is running.
+It returns errors if the Follower is in the wrong status to stop or if it
+fails to stop it.
+if the network follower is running and this fails, the client object will
+most likely be in an unrecoverable state and need to be trashed.
+ */
+- (BOOL)stopNetworkFollower:(NSError* _Nullable* _Nullable)error;
 - (void)unregisterNetworkHealthCB:(int64_t)funcID;
 /**
  * WaitForMessageDelivery allows the caller to get notified if the rounds a
@@ -189,7 +198,7 @@ passed timeout. It will return true if the network is healthy
 @end
 
 /**
- * Connection is the bindings representation of a connect.Connection object that can be tracked
+ * Connection is the bindings representation of a connect.Connection object that can be tracked by id
  */
 @interface BindingsConnection : NSObject <goSeqRefInterface> {
 }
@@ -202,6 +211,10 @@ passed timeout. It will return true if the network is healthy
  */
 - (void)close;
 /**
+ * GetId returns the Connection.id
+ */
+- (long)getId;
+/**
  * GetPartner returns the partner.Manager for this Connection
  */
 - (NSData* _Nullable)getPartner;
@@ -210,7 +223,7 @@ passed timeout. It will return true if the network is healthy
 and allows for reading data sent from the partner.Manager
 Returns marshalled ListenerID
  */
-- (NSData* _Nullable)registerListener:(long)messageType newListener:(id<BindingsListener> _Nullable)newListener;
+- (void)registerListener:(long)messageType newListener:(id<BindingsListener> _Nullable)newListener;
 /**
  * SendE2E is a wrapper for sending specifically to the Connection's partner.Manager
 Returns marshalled E2ESendReport
@@ -220,6 +233,10 @@ Returns marshalled E2ESendReport
 
 /**
  * E2ESendReport is the bindings representation of the return values of SendE2E
+Example E2ESendReport:
+{"RoundList":{"Rounds":[1,5,9]},
+ "MessageID":"51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=",
+ "Timestamp":1653582683183384000}
  */
 @interface BindingsE2ESendReport : NSObject <goSeqRefInterface> {
 }
@@ -227,13 +244,17 @@ Returns marshalled E2ESendReport
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
+// skipped field E2ESendReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
+
 @property (nonatomic) NSData* _Nullable messageID;
 @property (nonatomic) int64_t timestamp;
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
- * TODO: this seems completely pointless, as the FactList type is effectively the same thing
+ * Fact is an internal fact type for use in the bindings layer
+example marshalled Fact:
+{"Fact":"Zezima","Type":0}
  */
 @interface BindingsFact : NSObject <goSeqRefInterface> {
 }
@@ -270,18 +291,16 @@ Example marshalled Identity:
 @end
 
 /**
- * ListenerID represents the return type of RegisterListener
- */
-@interface BindingsListenerID : NSObject <goSeqRefInterface> {
-}
-@property(strong, readonly) _Nonnull id _ref;
-
-- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (nonnull instancetype)init;
-@end
-
-/**
  * Message is the bindings representation of a receive.Message
+Example Message format:
+{"MessageType":1,
+ "ID":"EB/70R5HYEw5htZ4Hg9ondrn3+cAc/lH2G0mjQMja3w=",
+ "Payload":"7TzZKgNphT5UooNM7mDSwtVcIs8AIu4vMKm4ld6GSR8YX5GrHirixUBAejmsgdroRJyo06TkIVef7UM9FN8YfQ==",
+ "Sender":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+ "RecipientID":"amFrZXh4MzYwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+ "EphemeralID":17,"Timestamp":1653580439357351000,
+ "Encrypted":false,
+ "RoundId":19}
  */
 @interface BindingsMessage : NSObject <goSeqRefInterface> {
 }
@@ -326,6 +345,21 @@ Example marshalled RestlikeMessage:
 @end
 
 /**
+ * Example marshalled roundList object:
+[1001,1003,1006]
+ */
+@interface BindingsRoundsList : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+// skipped field RoundsList.Rounds with unsupported type: []int
+
+- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
  * DownloadAndVerifySignedNdfWithUrl retrieves the NDF from a specified URL.
 The NDF is processed into a protobuf containing a signature which
 is verified using the cert string passed in. The NDF is returned as marshaled
@@ -346,9 +380,19 @@ which should be set to 32, but can be set higher in certain cases.
 FOUNDATION_EXPORT NSData* _Nullable BindingsGenerateSecret(long numBytes);
 
 /**
+ * GetDependencies returns the api DEPENDENCIES
+ */
+FOUNDATION_EXPORT NSString* _Nonnull BindingsGetDependencies(void);
+
+/**
  * GetFactsFromContact accepts a marshalled contact.Contact object, returning its marshalled list of Fact objects
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetFactsFromContact(NSData* _Nullable marshaled, NSError* _Nullable* _Nullable error);
+
+/**
+ * GetGitVersion rturns the api GITVERSION
+ */
+FOUNDATION_EXPORT NSString* _Nonnull BindingsGetGitVersion(void);
 
 /**
  * GetIDFromContact accepts a marshalled contact.Contact object & returns a marshalled id.ID object
@@ -359,6 +403,11 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsGetIDFromContact(NSData* _Nullable m
  * GetPubkeyFromContact accepts a marshalled contact.Contact object & returns a json marshalled large.Int DhPubKey
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetPubkeyFromContact(NSData* _Nullable marshaled, NSError* _Nullable* _Nullable error);
+
+/**
+ * GetVersion returns the api SEMVER
+ */
+FOUNDATION_EXPORT NSString* _Nonnull BindingsGetVersion(void);
 
 /**
  * sets level of logging. All logs the set level and above will be displayed
@@ -453,10 +502,11 @@ time.
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 /**
  * Hear is called to receive a message in the UI
+Accepts a marshalled Message object
  */
 - (void)hear:(NSData* _Nullable)item;
 /**
- * Returns a name, used for debugging
+ * Name returns a name, used for debugging
  */
 - (NSString* _Nonnull)name;
 @end
@@ -472,6 +522,9 @@ time.
 /**
  * MessageDeliveryCallback gets called on the determination if all events
 related to a message send were successful.
+If delivered == true, timedOut == false && roundResults != nil
+If delivered == false, roundResults == nil
+If timedOut == true, delivered == false && roundResults == nil
  */
 @interface BindingsMessageDeliveryCallback : NSObject <goSeqRefInterface, BindingsMessageDeliveryCallback> {
 }
