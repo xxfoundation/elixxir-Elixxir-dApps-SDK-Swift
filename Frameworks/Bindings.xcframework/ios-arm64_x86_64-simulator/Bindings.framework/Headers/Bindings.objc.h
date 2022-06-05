@@ -234,7 +234,7 @@ Returns marshalled E2ESendReport
 /**
  * E2ESendReport is the bindings representation of the return values of SendE2E
 Example E2ESendReport:
-{"RoundList":{"Rounds":[1,5,9]},
+{"Rounds":[1,5,9],
  "MessageID":"51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=",
  "Timestamp":1653582683183384000}
  */
