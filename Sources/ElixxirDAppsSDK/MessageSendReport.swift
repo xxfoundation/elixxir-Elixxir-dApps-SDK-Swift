@@ -2,9 +2,9 @@ import Foundation
 
 public struct MessageSendReport: Equatable {
   public init(
-    roundList: [Int],
-    messageId: Data,
-    timestamp: Int
+    roundList: [Int]?,
+    messageId: Data?,
+    timestamp: Int?
   ) {
     self.roundList = roundList
     self.messageId = messageId
