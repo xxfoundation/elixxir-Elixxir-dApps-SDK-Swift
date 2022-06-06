@@ -7,15 +7,18 @@ public struct SessionState: Equatable {
   public init(
     id: UUID,
     networkFollowerStatus: NetworkFollowerStatus? = nil,
+    isNetworkHealthy: Bool? = nil,
     error: ErrorState? = nil
   ) {
     self.id = id
     self.networkFollowerStatus = networkFollowerStatus
+    self.isNetworkHealthy = isNetworkHealthy
     self.error = error
   }
 
   public var id: UUID
   public var networkFollowerStatus: NetworkFollowerStatus?
+  public var isNetworkHealthy: Bool?
   public var error: ErrorState?
 }
 
@@ -25,8 +28,10 @@ public enum SessionAction: Equatable {
   case didUpdateNetworkFollowerStatus(NetworkFollowerStatus?)
   case runNetworkFollower(Bool)
   case networkFollowerDidFail(NSError)
-  case error(ErrorAction)
+  case monitorNetworkHealth(Bool)
+  case didUpdateNetworkHealth(Bool?)
   case didDismissError
+  case error(ErrorAction)
 }
 
 public struct SessionEnvironment {
@@ -51,6 +56,7 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
   case .viewDidLoad:
     return .merge([
       .init(value: .updateNetworkFollowerStatus),
+      .init(value: .monitorNetworkHealth(true)),
     ])
 
   case .updateNetworkFollowerStatus:
@@ -91,8 +97,39 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
     state.error = ErrorState(error: error)
     return .none
 
+  case .monitorNetworkHealth(let start):
+    struct MonitorEffectId: Hashable {
+      var id: UUID
+    }
+    let effectId = MonitorEffectId(id: state.id)
+    if start {
+      return Effect.run { subscriber in
+        var cancellable = env.getClient()?.monitorNetworkHealth { isHealthy in
+          subscriber.send(.didUpdateNetworkHealth(isHealthy))
+        }
+        return AnyCancellable {
+          cancellable?.cancel()
+        }
+      }
+      .subscribe(on: env.bgScheduler)
+      .receive(on: env.mainScheduler)
+      .eraseToEffect()
+      .cancellable(id: effectId, cancelInFlight: true)
+    } else {
+      return Effect.cancel(id: effectId)
+        .subscribe(on: env.bgScheduler)
+        .eraseToEffect()
+    }
+
+  case .didUpdateNetworkHealth(let isHealthy):
+    state.isNetworkHealthy = isHealthy
+    return .none
+
   case .didDismissError:
     state.error = nil
+    return .none
+
+  case .error(_):
     return .none
   }
 }

@@ -13,9 +13,11 @@ public struct SessionView: View {
 
   struct ViewState: Equatable {
     let networkFollowerStatus: NetworkFollowerStatus?
+    let isNetworkHealthy: Bool?
 
     init(state: SessionState) {
       networkFollowerStatus = state.networkFollowerStatus
+      isNetworkHealthy = state.isNetworkHealthy
     }
   }
 
@@ -40,6 +42,12 @@ public struct SessionView: View {
           .disabled(viewStore.networkFollowerStatus != .running)
         } header: {
           Text("Network follower")
+        }
+
+        Section {
+          NetworkHealthStatusView(status: viewStore.isNetworkHealthy)
+        } header: {
+          Text("Network health")
         }
       }
       .navigationTitle("Session")

@@ -7,6 +7,9 @@ import XCTest
 final class SessionFeatureTests: XCTestCase {
   func testViewDidLoad() {
     var networkFollowerStatus: NetworkFollowerStatus!
+    var didStartMonitoringNetworkHealth = 0
+    var didStopMonitoringNetworkHealth = 0
+    var networkHealthCallback: ((Bool) -> Void)!
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
 
@@ -14,6 +17,13 @@ final class SessionFeatureTests: XCTestCase {
     env.getClient = {
       var client = Client.failing
       client.networkFollower.status.status = { networkFollowerStatus }
+      client.monitorNetworkHealth.listen = { callback in
+        networkHealthCallback = callback
+        didStartMonitoringNetworkHealth += 1
+        return Cancellable {
+          didStopMonitoringNetworkHealth += 1
+        }
+      }
       return client
     }
     env.bgScheduler = bgScheduler.eraseToAnyScheduler()
@@ -28,6 +38,7 @@ final class SessionFeatureTests: XCTestCase {
     store.send(.viewDidLoad)
 
     store.receive(.updateNetworkFollowerStatus)
+    store.receive(.monitorNetworkHealth(true))
 
     networkFollowerStatus = .stopped
     bgScheduler.advance()
@@ -36,6 +47,24 @@ final class SessionFeatureTests: XCTestCase {
     store.receive(.didUpdateNetworkFollowerStatus(.stopped)) {
       $0.networkFollowerStatus = .stopped
     }
+
+    XCTAssertEqual(didStartMonitoringNetworkHealth, 1)
+    XCTAssertEqual(didStopMonitoringNetworkHealth, 0)
+
+    networkHealthCallback(true)
+    bgScheduler.advance()
+    mainScheduler.advance()
+
+    store.receive(.didUpdateNetworkHealth(true)) {
+      $0.isNetworkHealthy = true
+    }
+
+    store.send(.monitorNetworkHealth(false))
+
+    bgScheduler.advance()
+
+    XCTAssertEqual(didStartMonitoringNetworkHealth, 1)
+    XCTAssertEqual(didStopMonitoringNetworkHealth, 1)
   }
 
   func testStartStopNetworkFollower() {
