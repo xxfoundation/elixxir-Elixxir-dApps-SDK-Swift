@@ -42,7 +42,9 @@ extension AppEnvironment {
         error: ErrorEnvironment()
       ),
       session: SessionEnvironment(
-        getClient: { clientSubject.value }
+        getClient: { clientSubject.value },
+        bgScheduler: bgScheduler,
+        mainScheduler: mainScheduler
       )
     )
   }

@@ -135,9 +135,14 @@ let package = Package(
     .target(
       name: "SessionFeature",
       dependencies: [
+        .target(name: "ErrorFeature"),
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
+        ),
+        .product(
+          name: "ComposablePresentation",
+          package: "swift-composable-presentation"
         ),
         .product(
           name: "ElixxirDAppsSDK",
