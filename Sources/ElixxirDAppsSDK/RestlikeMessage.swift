@@ -34,14 +34,4 @@ extension RestlikeMessage: Codable {
     case uri = "URI"
     case error = "Error"
   }
-
-  public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    version = try container.decodeIfPresent(Int.self, forKey: .version)
-    headers = try container.decodeIfPresent(Data.self, forKey: .headers)
-    content = try container.decodeIfPresent(Data.self, forKey: .content)
-    method = try container.decodeIfPresent(Int.self, forKey: .method)
-    uri = try container.decodeIfPresent(String.self, forKey: .uri)
-    error = try container.decodeIfPresent(String.self, forKey: .error)
-  }
 }
