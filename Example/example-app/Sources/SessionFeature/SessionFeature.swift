@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import ElixxirDAppsSDK
 
 public struct SessionState: Equatable {
   public init() {}
@@ -9,7 +10,13 @@ public enum SessionAction: Equatable {
 }
 
 public struct SessionEnvironment {
-  public init() {}
+  public init(
+    getClient: @escaping () -> Client?
+  ) {
+    self.getClient = getClient
+  }
+
+  public var getClient: () -> Client?
 }
 
 public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironment>
@@ -22,6 +29,8 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
 
 #if DEBUG
 extension SessionEnvironment {
-  public static let failing = SessionEnvironment()
+  public static let failing = SessionEnvironment(
+    getClient: { .failing }
+  )
 }
 #endif
