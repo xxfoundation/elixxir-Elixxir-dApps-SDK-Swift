@@ -22,18 +22,4 @@ extension MessageSendReport: Codable {
     case messageId = "MessageID"
     case timestamp = "Timestamp"
   }
-
-  public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    messageId = try container.decodeIfPresent(Data.self, forKey: .messageId)
-    timestamp = try container.decodeIfPresent(Int.self, forKey: .timestamp)
-    roundList = try container.decodeIfPresent([Int].self, forKey: .roundList)
-  }
-
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(messageId, forKey: .messageId)
-    try container.encode(timestamp, forKey: .timestamp)
-    try container.encode(roundList, forKey: .roundList)
-  }
 }
