@@ -29,4 +29,18 @@ final class MessageSendReportTests: XCTestCase {
 
     XCTAssertNoDifference(decodedReport, report)
   }
+
+  func testDecodeEmpty() throws {
+    let jsonString = "{}"
+    let jsonData = jsonString.data(using: .utf8)!
+    let decoder = JSONDecoder()
+    decoder.dataDecodingStrategy = .base64
+    let report = try decoder.decode(MessageSendReport.self, from: jsonData)
+
+    XCTAssertNoDifference(report, MessageSendReport(
+      roundList: nil,
+      messageId: nil,
+      timestamp: nil
+    ))
+  }
 }
