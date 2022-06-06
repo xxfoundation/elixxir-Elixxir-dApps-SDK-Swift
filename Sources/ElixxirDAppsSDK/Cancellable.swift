@@ -1,11 +1,18 @@
 public final class Cancellable {
   public init(cancel: @escaping () -> Void) {
-    self.cancel = cancel
+    self.onCancel = cancel
   }
 
   deinit {
     cancel()
   }
 
-  public let cancel: () -> Void
+  public func cancel() {
+    guard isCancelled == false else { return }
+    isCancelled = true
+    onCancel()
+  }
+
+  private var isCancelled = false
+  private let onCancel: () -> Void
 }
