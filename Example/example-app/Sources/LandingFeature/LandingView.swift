@@ -80,7 +80,7 @@ public struct LandingView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       LandingView(store: .init(
-        initialState: .init(),
+        initialState: .init(id: UUID()),
         reducer: .empty,
         environment: ()
       ))

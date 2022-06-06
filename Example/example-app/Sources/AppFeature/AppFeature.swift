@@ -10,7 +10,8 @@ struct AppState: Equatable {
     case session(SessionState)
   }
 
-  var scene: Scene = .landing(LandingState())
+  var id: UUID = UUID()
+  var scene: Scene = .landing(LandingState(id: UUID()))
 }
 
 extension AppState.Scene {
@@ -45,6 +46,7 @@ enum AppAction: Equatable {
 }
 
 struct AppEnvironment {
+  var makeId: () -> UUID
   var hasClient: AnyPublisher<Bool, Never>
   var mainScheduler: AnySchedulerOf<DispatchQueue>
   var landing: LandingEnvironment
@@ -55,20 +57,22 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 { state, action, env in
   switch action {
   case .viewDidLoad:
-    struct HasClientEffectId: Hashable {}
+    struct HasClientEffectId: Hashable {
+      var id: UUID
+    }
     return env.hasClient
       .removeDuplicates()
       .map(AppAction.clientDidChange(hasClient:))
       .receive(on: env.mainScheduler)
       .eraseToEffect()
-      .cancellable(id: HasClientEffectId(), cancelInFlight: true)
+      .cancellable(id: HasClientEffectId(id: state.id), cancelInFlight: true)
 
   case .clientDidChange(let hasClient):
     if hasClient {
-      let sessionState = state.scene.asSession ?? SessionState()
+      let sessionState = state.scene.asSession ?? SessionState(id: env.makeId())
       state.scene = .session(sessionState)
     } else {
-      let landingState = state.scene.asLanding ?? LandingState()
+      let landingState = state.scene.asLanding ?? LandingState(id: env.makeId())
       state.scene = .landing(landingState)
     }
     return .none
@@ -95,6 +99,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 #if DEBUG
 extension AppEnvironment {
   static let failing = AppEnvironment(
+    makeId: { fatalError() },
     hasClient: Empty().eraseToAnyPublisher(),
     mainScheduler: .failing,
     landing: .failing,

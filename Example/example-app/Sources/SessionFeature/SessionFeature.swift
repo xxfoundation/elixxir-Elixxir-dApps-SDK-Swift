@@ -2,7 +2,13 @@ import ComposableArchitecture
 import ElixxirDAppsSDK
 
 public struct SessionState: Equatable {
-  public init() {}
+  public init(
+    id: UUID
+  ) {
+    self.id = id
+  }
+
+  public var id: UUID
 }
 
 public enum SessionAction: Equatable {

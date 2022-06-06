@@ -27,7 +27,7 @@ public struct SessionView: View {
 public struct SessionView_Previews: PreviewProvider {
   public static var previews: some View {
     SessionView(store: .init(
-      initialState: .init(),
+      initialState: .init(id: UUID()),
       reducer: .empty,
       environment: ()
     ))

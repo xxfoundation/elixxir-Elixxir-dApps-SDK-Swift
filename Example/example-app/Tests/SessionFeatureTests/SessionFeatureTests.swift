@@ -5,7 +5,7 @@ import XCTest
 final class SessionFeatureTests: XCTestCase {
   func testViewDidLoad() throws {
     let store = TestStore(
-      initialState: SessionState(),
+      initialState: SessionState(id: UUID()),
       reducer: sessionReducer,
       environment: .failing
     )

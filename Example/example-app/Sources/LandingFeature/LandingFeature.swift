@@ -5,17 +5,20 @@ import ErrorFeature
 
 public struct LandingState: Equatable {
   public init(
+    id: UUID,
     hasStoredClient: Bool = false,
     isMakingClient: Bool = false,
     isRemovingClient: Bool = false,
     error: ErrorState? = nil
   ) {
+    self.id = id
     self.hasStoredClient = hasStoredClient
     self.isMakingClient = isMakingClient
     self.isRemovingClient = isRemovingClient
     self.error = error
   }
 
+  var id: UUID
   var hasStoredClient: Bool
   var isMakingClient: Bool
   var isRemovingClient: Bool
