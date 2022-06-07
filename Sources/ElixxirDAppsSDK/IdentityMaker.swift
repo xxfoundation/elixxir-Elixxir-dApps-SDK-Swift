@@ -1,9 +1,9 @@
 import Bindings
 
 public struct IdentityMaker {
-  public var make: () throws -> Data
+  public var make: () throws -> Identity
 
-  public func callAsFunction() throws -> Data {
+  public func callAsFunction() throws -> Identity {
     try make()
   }
 }
@@ -11,7 +11,9 @@ public struct IdentityMaker {
 extension IdentityMaker {
   public static func live(bindingsClient: BindingsClient) -> IdentityMaker {
     IdentityMaker {
-      try bindingsClient.makeIdentity()
+      let data = try bindingsClient.makeIdentity()
+      let decoder = JSONDecoder()
+      return try decoder.decode(Identity.self, from: data)
     }
   }
 }
