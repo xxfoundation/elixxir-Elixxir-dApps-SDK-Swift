@@ -6,22 +6,24 @@ public struct MessageDeliveryWaiter {
     case notDelivered(timedOut: Bool)
   }
 
-  public var wait: (Data, Int, @escaping (Result) -> Void) throws -> Void
+  public var wait: (MessageSendReport, Int, @escaping (Result) -> Void) throws -> Void
 
   public func callAsFunction(
-    roundList: Data,
+    report: MessageSendReport,
     timeoutMS: Int,
     callback: @escaping (Result) -> Void
-  ) throws -> Void {
-    try wait(roundList, timeoutMS, callback)
+  ) throws {
+    try wait(report, timeoutMS, callback)
   }
 }
 
 extension MessageDeliveryWaiter {
   public static func live(bindingsClient: BindingsClient) -> MessageDeliveryWaiter {
-    MessageDeliveryWaiter { roundList, timeoutMS, callback in
+    MessageDeliveryWaiter { report, timeoutMS, callback in
+      let encoder = JSONEncoder()
+      let reportData = try encoder.encode(report)
       try bindingsClient.wait(
-        forMessageDelivery: roundList,
+        forMessageDelivery: reportData,
         mdc: Callback(onCallback: callback),
         timeoutMS: timeoutMS
       )
