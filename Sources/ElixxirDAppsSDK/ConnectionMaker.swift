@@ -1,12 +1,12 @@
 import Bindings
 
 public struct ConnectionMaker {
-  public var connect: (Bool, Data, Data) throws -> Connection
+  public var connect: (Bool, Data, Identity) throws -> Connection
 
   public func callAsFunction(
     withAuthentication: Bool,
     recipientContact: Data,
-    myIdentity: Data
+    myIdentity: Identity
   ) throws -> Connection {
     try connect(withAuthentication, recipientContact, myIdentity)
   }
@@ -15,18 +15,20 @@ public struct ConnectionMaker {
 extension ConnectionMaker {
   public static func live(bindingsClient: BindingsClient) -> ConnectionMaker {
     ConnectionMaker { withAuthentication, recipientContact, myIdentity in
+      let encoder = JSONEncoder()
+      let myIdentityData = try encoder.encode(myIdentity)
       if withAuthentication {
         return Connection.live(
           bindingsAuthenticatedConnection: try bindingsClient.connect(
             withAuthentication: recipientContact,
-            myIdentity: myIdentity
+            myIdentity: myIdentityData
           )
         )
       } else {
         return Connection.live(
           bindingsConnection: try bindingsClient.connect(
             recipientContact,
-            myIdentity: myIdentity
+            myIdentity: myIdentityData
           )
         )
       }
