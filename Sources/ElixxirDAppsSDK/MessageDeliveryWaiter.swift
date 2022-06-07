@@ -2,7 +2,7 @@ import Bindings
 
 public struct MessageDeliveryWaiter {
   public enum Result: Equatable {
-    case delivered(roundResults: Data)
+    case delivered(roundResults: [Int])
     case notDelivered(timedOut: Bool)
   }
 
@@ -40,8 +40,14 @@ private final class Callback: NSObject, BindingsMessageDeliveryCallbackProtocol 
   let onCallback: (MessageDeliveryWaiter.Result) -> Void
 
   func eventCallback(_ delivered: Bool, timedOut: Bool, roundResults: Data?) {
-    if delivered, !timedOut, let roundResults = roundResults {
-      return onCallback(.delivered(roundResults: roundResults))
+    if delivered, !timedOut, let roundResultsData = roundResults {
+      let decoder = JSONDecoder()
+      do {
+        let roundResults = try decoder.decode([Int].self, from: roundResultsData)
+        return onCallback(.delivered(roundResults: roundResults))
+      } catch {
+        fatalError("BindingsMessageDeliveryCallback roundResults decoding error: \(error)")
+      }
     }
     if !delivered, roundResults == nil {
       return onCallback(.notDelivered(timedOut: timedOut))
