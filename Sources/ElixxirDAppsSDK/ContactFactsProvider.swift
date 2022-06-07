@@ -1,9 +1,9 @@
 import Bindings
 
 public struct ContactFactsProvider {
-  public var get: (Data) throws -> Data
+  public var get: (Data) throws -> [Fact]
 
-  public func callAsFunction(contact: Data) throws -> Data {
+  public func callAsFunction(contact: Data) throws -> [Fact] {
     try get(contact)
   }
 }
@@ -11,13 +11,15 @@ public struct ContactFactsProvider {
 extension ContactFactsProvider {
   public static let live = ContactFactsProvider { contact in
     var error: NSError?
-    let facts = BindingsGetFactsFromContact(contact, &error)
+    let factsData = BindingsGetFactsFromContact(contact, &error)
     if let error = error {
       throw error
     }
-    guard let facts = facts else {
+    guard let factsData = factsData else {
       fatalError("BindingsGetFactsFromContact returned `nil` without providing error")
     }
+    let decoder = JSONDecoder()
+    let facts = try decoder.decode([Fact].self, from: factsData)
     return facts
   }
 }
