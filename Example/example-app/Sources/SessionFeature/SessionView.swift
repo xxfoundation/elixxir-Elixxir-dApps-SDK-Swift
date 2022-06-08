@@ -2,6 +2,7 @@ import ComposableArchitecture
 import ComposablePresentation
 import ElixxirDAppsSDK
 import ErrorFeature
+import MyContactFeature
 import MyIdentityFeature
 import SwiftUI
 
@@ -61,6 +62,16 @@ public struct SessionView: View {
               Image(systemName: "chevron.forward")
             }
           }
+
+          Button {
+            viewStore.send(.presentMyContact)
+          } label: {
+            HStack {
+              Text("My contact")
+              Spacer()
+              Image(systemName: "chevron.forward")
+            }
+          }
         }
       }
       .navigationTitle("Session")
@@ -87,6 +98,18 @@ public struct SessionView: View {
             viewStore.send(.didDismissMyIdentity)
           },
           destination: MyIdentityView.init(store:)
+        )
+      )
+      .background(
+        NavigationLinkWithStore(
+          store.scope(
+            state: \.myContact,
+            action: SessionAction.myContact
+          ),
+          onDeactivate: {
+            viewStore.send(.didDismissMyContact)
+          },
+          destination: MyContactView.init(store:)
         )
       )
     }

@@ -3,6 +3,7 @@ import ComposableArchitecture
 import ElixxirDAppsSDK
 import ErrorFeature
 import LandingFeature
+import MyContactFeature
 import MyIdentityFeature
 import SessionFeature
 import SwiftUI
@@ -56,7 +57,8 @@ extension AppEnvironment {
           bgScheduler: bgScheduler,
           mainScheduler: mainScheduler,
           error: ErrorEnvironment()
-        )
+        ),
+        myContact: MyContactEnvironment()
       )
     )
   }

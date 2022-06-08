@@ -2,6 +2,7 @@ import Combine
 import ComposableArchitecture
 import ElixxirDAppsSDK
 import ErrorFeature
+import MyContactFeature
 import MyIdentityFeature
 
 public struct SessionState: Equatable {
@@ -10,13 +11,15 @@ public struct SessionState: Equatable {
     networkFollowerStatus: NetworkFollowerStatus? = nil,
     isNetworkHealthy: Bool? = nil,
     error: ErrorState? = nil,
-    myIdentity: MyIdentityState? = nil
+    myIdentity: MyIdentityState? = nil,
+    myContact: MyContactState? = nil
   ) {
     self.id = id
     self.networkFollowerStatus = networkFollowerStatus
     self.isNetworkHealthy = isNetworkHealthy
     self.error = error
     self.myIdentity = myIdentity
+    self.myContact = myContact
   }
 
   public var id: UUID
@@ -24,6 +27,7 @@ public struct SessionState: Equatable {
   public var isNetworkHealthy: Bool?
   public var error: ErrorState?
   public var myIdentity: MyIdentityState?
+  public var myContact: MyContactState?
 }
 
 public enum SessionAction: Equatable {
@@ -37,8 +41,11 @@ public enum SessionAction: Equatable {
   case didDismissError
   case presentMyIdentity
   case didDismissMyIdentity
+  case presentMyContact
+  case didDismissMyContact
   case error(ErrorAction)
   case myIdentity(MyIdentityAction)
+  case myContact(MyContactAction)
 }
 
 public struct SessionEnvironment {
@@ -48,7 +55,8 @@ public struct SessionEnvironment {
     mainScheduler: AnySchedulerOf<DispatchQueue>,
     makeId: @escaping () -> UUID,
     error: ErrorEnvironment,
-    myIdentity: MyIdentityEnvironment
+    myIdentity: MyIdentityEnvironment,
+    myContact: MyContactEnvironment
   ) {
     self.getClient = getClient
     self.bgScheduler = bgScheduler
@@ -56,6 +64,7 @@ public struct SessionEnvironment {
     self.makeId = makeId
     self.error = error
     self.myIdentity = myIdentity
+    self.myContact = myContact
   }
 
   public var getClient: () -> Client?
@@ -64,6 +73,7 @@ public struct SessionEnvironment {
   public var makeId: () -> UUID
   public var error: ErrorEnvironment
   public var myIdentity: MyIdentityEnvironment
+  public var myContact: MyContactEnvironment
 }
 
 public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironment>
@@ -155,7 +165,17 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
     state.myIdentity = nil
     return .none
 
-  case .error(_), .myIdentity(_):
+  case .presentMyContact:
+    if state.myContact == nil {
+      state.myContact = MyContactState(id: env.makeId())
+    }
+    return .none
+
+  case .didDismissMyContact:
+    state.myContact = nil
+    return .none
+
+  case .error(_), .myIdentity(_), .myContact(_):
     return .none
   }
 }
@@ -173,6 +193,13 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
   action: /SessionAction.myIdentity,
   environment: \.myIdentity
 )
+.presenting(
+  myContactReducer,
+  state: .keyPath(\.myContact),
+  id: .keyPath(\.?.id),
+  action: /SessionAction.myContact,
+  environment: \.myContact
+)
 
 #if DEBUG
 extension SessionEnvironment {
@@ -182,7 +209,8 @@ extension SessionEnvironment {
     mainScheduler: .failing,
     makeId: { fatalError() },
     error: .failing,
-    myIdentity: .failing
+    myIdentity: .failing,
+    myContact: .failing
   )
 }
 #endif
