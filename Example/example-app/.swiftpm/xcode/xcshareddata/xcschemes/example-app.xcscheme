@@ -56,6 +56,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "MyIdentityFeature"
+               BuildableName = "MyIdentityFeature"
+               BlueprintName = "MyIdentityFeature"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "SessionFeature"
                BuildableName = "SessionFeature"
                BlueprintName = "SessionFeature"
@@ -98,6 +112,16 @@
                BlueprintIdentifier = "LandingFeatureTests"
                BuildableName = "LandingFeatureTests"
                BlueprintName = "LandingFeatureTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "MyIdentityFeatureTests"
+               BuildableName = "MyIdentityFeatureTests"
+               BlueprintName = "MyIdentityFeatureTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
