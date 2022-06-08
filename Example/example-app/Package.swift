@@ -144,6 +144,10 @@ let package = Package(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         ),
+        .product(
+          name: "ElixxirDAppsSDK",
+          package: "elixxir-dapps-sdk-swift"
+        ),
       ],
       swiftSettings: swiftSettings
     ),

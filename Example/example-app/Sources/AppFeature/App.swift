@@ -23,6 +23,7 @@ struct App: SwiftUI.App {
 extension AppEnvironment {
   static func live() -> AppEnvironment {
     let clientSubject = CurrentValueSubject<Client?, Never>(nil)
+    let identitySubject = CurrentValueSubject<Identity?, Never>(nil)
     let mainScheduler = DispatchQueue.main.eraseToAnyScheduler()
     let bgScheduler = DispatchQueue(
       label: "xx.network.dApps.ExampleApp.bg",
@@ -48,7 +49,12 @@ extension AppEnvironment {
         mainScheduler: mainScheduler,
         makeId: UUID.init,
         error: ErrorEnvironment(),
-        myIdentity: MyIdentityEnvironment()
+        myIdentity: MyIdentityEnvironment(
+          getClient: { clientSubject.value },
+          observeIdentity: { identitySubject.eraseToAnyPublisher() },
+          bgScheduler: bgScheduler,
+          mainScheduler: mainScheduler
+        )
       )
     )
   }

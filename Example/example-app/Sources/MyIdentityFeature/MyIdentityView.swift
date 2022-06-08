@@ -15,6 +15,9 @@ public struct MyIdentityView: View {
   public var body: some View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       Text("MyIdentityView")
+        .task {
+          viewStore.send(.viewDidLoad)
+        }
     }
   }
 }
