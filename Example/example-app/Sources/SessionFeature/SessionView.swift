@@ -2,6 +2,8 @@ import ComposableArchitecture
 import ComposablePresentation
 import ElixxirDAppsSDK
 import ErrorFeature
+import MyContactFeature
+import MyIdentityFeature
 import SwiftUI
 
 public struct SessionView: View {
@@ -49,6 +51,28 @@ public struct SessionView: View {
         } header: {
           Text("Network health")
         }
+
+        Section {
+          Button {
+            viewStore.send(.presentMyIdentity)
+          } label: {
+            HStack {
+              Text("My identity")
+              Spacer()
+              Image(systemName: "chevron.forward")
+            }
+          }
+
+          Button {
+            viewStore.send(.presentMyContact)
+          } label: {
+            HStack {
+              Text("My contact")
+              Spacer()
+              Image(systemName: "chevron.forward")
+            }
+          }
+        }
       }
       .navigationTitle("Session")
       .task {
@@ -63,6 +87,30 @@ public struct SessionView: View {
           viewStore.send(.didDismissError)
         },
         content: ErrorView.init(store:)
+      )
+      .background(
+        NavigationLinkWithStore(
+          store.scope(
+            state: \.myIdentity,
+            action: SessionAction.myIdentity
+          ),
+          onDeactivate: {
+            viewStore.send(.didDismissMyIdentity)
+          },
+          destination: MyIdentityView.init(store:)
+        )
+      )
+      .background(
+        NavigationLinkWithStore(
+          store.scope(
+            state: \.myContact,
+            action: SessionAction.myContact
+          ),
+          onDeactivate: {
+            viewStore.send(.didDismissMyContact)
+          },
+          destination: MyContactView.init(store:)
+        )
       )
     }
   }

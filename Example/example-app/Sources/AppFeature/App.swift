@@ -3,6 +3,8 @@ import ComposableArchitecture
 import ElixxirDAppsSDK
 import ErrorFeature
 import LandingFeature
+import MyContactFeature
+import MyIdentityFeature
 import SessionFeature
 import SwiftUI
 
@@ -22,6 +24,8 @@ struct App: SwiftUI.App {
 extension AppEnvironment {
   static func live() -> AppEnvironment {
     let clientSubject = CurrentValueSubject<Client?, Never>(nil)
+    let identitySubject = CurrentValueSubject<Identity?, Never>(nil)
+    let contactSubject = CurrentValueSubject<Data?, Never>(nil)
     let mainScheduler = DispatchQueue.main.eraseToAnyScheduler()
     let bgScheduler = DispatchQueue(
       label: "xx.network.dApps.ExampleApp.bg",
@@ -44,7 +48,26 @@ extension AppEnvironment {
       session: SessionEnvironment(
         getClient: { clientSubject.value },
         bgScheduler: bgScheduler,
-        mainScheduler: mainScheduler
+        mainScheduler: mainScheduler,
+        makeId: UUID.init,
+        error: ErrorEnvironment(),
+        myIdentity: MyIdentityEnvironment(
+          getClient: { clientSubject.value },
+          observeIdentity: { identitySubject.eraseToAnyPublisher() },
+          updateIdentity: { identitySubject.value = $0 },
+          bgScheduler: bgScheduler,
+          mainScheduler: mainScheduler,
+          error: ErrorEnvironment()
+        ),
+        myContact: MyContactEnvironment(
+          getClient: { clientSubject.value },
+          getIdentity: { identitySubject.value },
+          observeContact: { contactSubject.eraseToAnyPublisher() },
+          updateContact: { contactSubject.value = $0 },
+          bgScheduler: bgScheduler,
+          mainScheduler: mainScheduler,
+          error: ErrorEnvironment()
+        )
       )
     )
   }

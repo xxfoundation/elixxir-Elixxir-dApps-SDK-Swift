@@ -33,6 +33,14 @@ let package = Package(
       targets: ["LandingFeature"]
     ),
     .library(
+      name: "MyContactFeature",
+      targets: ["MyContactFeature"]
+    ),
+    .library(
+      name: "MyIdentityFeature",
+      targets: ["MyIdentityFeature"]
+    ),
+    .library(
       name: "SessionFeature",
       targets: ["SessionFeature"]
     ),
@@ -58,6 +66,8 @@ let package = Package(
       dependencies: [
         .target(name: "ErrorFeature"),
         .target(name: "LandingFeature"),
+        .target(name: "MyContactFeature"),
+        .target(name: "MyIdentityFeature"),
         .target(name: "SessionFeature"),
         .product(
           name: "ElixxirDAppsSDK",
@@ -133,9 +143,63 @@ let package = Package(
       swiftSettings: swiftSettings
     ),
     .target(
+      name: "MyContactFeature",
+      dependencies: [
+        .target(name: "ErrorFeature"),
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        ),
+        .product(
+          name: "ComposablePresentation",
+          package: "swift-composable-presentation"
+        ),
+        .product(
+          name: "ElixxirDAppsSDK",
+          package: "elixxir-dapps-sdk-swift"
+        ),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "MyContactFeatureTests",
+      dependencies: [
+        .target(name: "MyContactFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "MyIdentityFeature",
+      dependencies: [
+        .target(name: "ErrorFeature"),
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        ),
+        .product(
+          name: "ComposablePresentation",
+          package: "swift-composable-presentation"
+        ),
+        .product(
+          name: "ElixxirDAppsSDK",
+          package: "elixxir-dapps-sdk-swift"
+        ),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "MyIdentityFeatureTests",
+      dependencies: [
+        .target(name: "MyIdentityFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
       name: "SessionFeature",
       dependencies: [
         .target(name: "ErrorFeature"),
+        .target(name: "MyContactFeature"),
+        .target(name: "MyIdentityFeature"),
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
