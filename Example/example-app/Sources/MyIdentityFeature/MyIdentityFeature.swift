@@ -7,6 +7,7 @@ import ErrorFeature
 public struct MyIdentityState: Equatable {
   public init(
     id: UUID,
+    identity: Identity? = nil,
     isMakingIdentity: Bool = false,
     error: ErrorState? = nil
   ) {
