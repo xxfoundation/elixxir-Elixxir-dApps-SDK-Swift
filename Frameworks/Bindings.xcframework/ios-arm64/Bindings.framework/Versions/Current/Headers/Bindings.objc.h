@@ -67,7 +67,7 @@ Accepts a marshalled Message object
 - (nonnull instancetype)init;
 // skipped field AuthenticatedConnection.Connection with unsupported type: gitlab.com/elixxir/client/bindings.Connection
 
-- (void)close;
+- (BOOL)close:(NSError* _Nullable* _Nullable)error;
 - (long)getId;
 - (NSData* _Nullable)getPartner;
 - (BOOL)isAuthenticated;
@@ -209,7 +209,7 @@ passed timeout. It will return true if the network is healthy
 /**
  * Close deletes this Connection's partner.Manager and releases resources
  */
-- (void)close;
+- (BOOL)close:(NSError* _Nullable* _Nullable)error;
 /**
  * GetId returns the Connection.id
  */
