@@ -12,7 +12,7 @@ extension ConnectionCloser {
   public static func live(
     bindingsConnection: BindingsConnection
   ) -> ConnectionCloser {
-      ConnectionCloser(close: bindingsConnection.close)
+    ConnectionCloser(close: bindingsConnection.close)
   }
 
   public static func live(
