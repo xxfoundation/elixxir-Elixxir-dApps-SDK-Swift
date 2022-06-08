@@ -62,6 +62,7 @@ let package = Package(
       dependencies: [
         .target(name: "ErrorFeature"),
         .target(name: "LandingFeature"),
+        .target(name: "MyIdentityFeature"),
         .target(name: "SessionFeature"),
         .product(
           name: "ElixxirDAppsSDK",
@@ -157,6 +158,7 @@ let package = Package(
       name: "SessionFeature",
       dependencies: [
         .target(name: "ErrorFeature"),
+        .target(name: "MyIdentityFeature"),
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"

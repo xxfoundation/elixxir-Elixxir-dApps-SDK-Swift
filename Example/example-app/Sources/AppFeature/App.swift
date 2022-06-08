@@ -3,6 +3,7 @@ import ComposableArchitecture
 import ElixxirDAppsSDK
 import ErrorFeature
 import LandingFeature
+import MyIdentityFeature
 import SessionFeature
 import SwiftUI
 
@@ -44,7 +45,9 @@ extension AppEnvironment {
       session: SessionEnvironment(
         getClient: { clientSubject.value },
         bgScheduler: bgScheduler,
-        mainScheduler: mainScheduler
+        mainScheduler: mainScheduler,
+        makeId: UUID.init,
+        myIdentity: MyIdentityEnvironment()
       )
     )
   }

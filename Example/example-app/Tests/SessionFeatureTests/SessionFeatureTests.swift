@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import ElixxirDAppsSDK
 import ErrorFeature
+import MyIdentityFeature
 import XCTest
 @testable import SessionFeature
 
@@ -153,6 +154,27 @@ final class SessionFeatureTests: XCTestCase {
 
     store.send(.didDismissError) {
       $0.error = nil
+    }
+  }
+
+  func testPresentingMyIdentity() {
+    let newId = UUID()
+
+    var env = SessionEnvironment.failing
+    env.makeId = { newId }
+
+    let store = TestStore(
+      initialState: SessionState(id: UUID()),
+      reducer: sessionReducer,
+      environment: env
+    )
+
+    store.send(.presentMyIdentity) {
+      $0.myIdentity = MyIdentityState(id: newId)
+    }
+
+    store.send(.didDismissMyIdentity) {
+      $0.myIdentity = nil
     }
   }
 }

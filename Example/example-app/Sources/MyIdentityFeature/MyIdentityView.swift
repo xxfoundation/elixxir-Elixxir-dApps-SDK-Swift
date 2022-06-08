@@ -24,7 +24,7 @@ public struct MyIdentityView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       MyIdentityView(store: .init(
-        initialState: .init(),
+        initialState: .init(id: UUID()),
         reducer: .empty,
         environment: ()
       ))
