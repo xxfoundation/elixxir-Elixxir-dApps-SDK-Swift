@@ -172,7 +172,7 @@ ElixxirDAppsSDK [Xcode Workspace]
 
 ### Build schemes
 
-- Use `exlixxir-dapps-sdk-swift` scheme to build the package with `ElixxirDAppsSDK` library.
+- Use `exlixxir-dapps-sdk-swift` scheme to build and test the package with `ElixxirDAppsSDK` library.
 - Use `ExampleApp (iOS)` to build and run the example app.
 - Use `example-app` scheme to build and test the example app package with all contained libraries.
 - Use `ExampleAppIcon` scheme with macOS target to build and preview the example app icon.

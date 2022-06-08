@@ -1,10 +1,10 @@
 import Bindings
 
 public struct ConnectionCloser {
-  public var close: () -> Void
+  public var close: () throws -> Void
 
-  public func callAsFunction() {
-    close()
+  public func callAsFunction() throws {
+    try close()
   }
 }
 
