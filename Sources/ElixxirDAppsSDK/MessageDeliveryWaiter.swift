@@ -46,7 +46,7 @@ private final class Callback: NSObject, BindingsMessageDeliveryCallbackProtocol 
         let roundResults = try decoder.decode([Int].self, from: roundResultsData)
         return onCallback(.delivered(roundResults: roundResults))
       } catch {
-        fatalError("BindingsMessageDeliveryCallback roundResults decoding error: \(error)")
+        return onCallback(.delivered(roundResults: [Int]()))
       }
     }
     if !delivered, roundResults == nil {
