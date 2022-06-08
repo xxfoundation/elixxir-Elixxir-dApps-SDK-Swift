@@ -1,16 +1,21 @@
 import Combine
 import ComposableArchitecture
+import ComposablePresentation
 import ElixxirDAppsSDK
+import ErrorFeature
 
 public struct MyIdentityState: Equatable {
   public init(
-    id: UUID
+    id: UUID,
+    error: ErrorState? = nil
   ) {
     self.id = id
+    self.error = error
   }
 
   public var id: UUID
   public var identity: Identity?
+  public var error: ErrorState?
 }
 
 public enum MyIdentityAction: Equatable {
@@ -19,6 +24,8 @@ public enum MyIdentityAction: Equatable {
   case didUpdateMyIdentity(Identity?)
   case makeIdentity
   case didFailMakingIdentity(NSError)
+  case didDismissError
+  case error(ErrorAction)
 }
 
 public struct MyIdentityEnvironment {
@@ -27,13 +34,15 @@ public struct MyIdentityEnvironment {
     observeIdentity: @escaping () -> AnyPublisher<Identity?, Never>,
     updateIdentity: @escaping (Identity?) -> Void,
     bgScheduler: AnySchedulerOf<DispatchQueue>,
-    mainScheduler: AnySchedulerOf<DispatchQueue>
+    mainScheduler: AnySchedulerOf<DispatchQueue>,
+    error: ErrorEnvironment
   ) {
     self.getClient = getClient
     self.observeIdentity = observeIdentity
     self.updateIdentity = updateIdentity
     self.bgScheduler = bgScheduler
     self.mainScheduler = mainScheduler
+    self.error = error
   }
 
   public var getClient: () -> Client?
@@ -41,6 +50,7 @@ public struct MyIdentityEnvironment {
   public var updateIdentity: (Identity?) -> Void
   public var bgScheduler: AnySchedulerOf<DispatchQueue>
   public var mainScheduler: AnySchedulerOf<DispatchQueue>
+  public var error: ErrorEnvironment
 }
 
 public let myIdentityReducer = Reducer<MyIdentityState, MyIdentityAction, MyIdentityEnvironment>
@@ -81,10 +91,22 @@ public let myIdentityReducer = Reducer<MyIdentityState, MyIdentityAction, MyIden
     .receive(on: env.mainScheduler)
     .eraseToEffect()
 
+  case .didDismissError:
+    state.error = nil
+    return .none
+
   case .didFailMakingIdentity(let error):
+    state.error = ErrorState(error: error)
     return .none
   }
 }
+.presenting(
+  errorReducer,
+  state: .keyPath(\.error),
+  id: .keyPath(\.?.error),
+  action: /MyIdentityAction.error,
+  environment: \.error
+)
 
 #if DEBUG
 extension MyIdentityEnvironment {
@@ -93,7 +115,8 @@ extension MyIdentityEnvironment {
     observeIdentity: { fatalError() },
     updateIdentity: { _ in fatalError() },
     bgScheduler: .failing,
-    mainScheduler: .failing
+    mainScheduler: .failing,
+    error: .failing
   )
 }
 #endif

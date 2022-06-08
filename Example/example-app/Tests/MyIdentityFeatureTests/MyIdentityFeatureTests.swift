@@ -2,6 +2,7 @@ import Combine
 import ComposableArchitecture
 import CustomDump
 import ElixxirDAppsSDK
+import ErrorFeature
 import XCTest
 @testable import MyIdentityFeature
 
@@ -74,6 +75,40 @@ final class MyIdentityFeatureTests: XCTestCase {
     XCTAssertNoDifference(didUpdateIdentity, [newIdentity])
 
     mainScheduler.advance()
+  }
+
+  func testMakeIdentityFailure() {
+    let error = NSError(domain: "test", code: 1234)
+    let bgScheduler = DispatchQueue.test
+    let mainScheduler = DispatchQueue.test
+
+    var env = MyIdentityEnvironment.failing
+    env.getClient = {
+      var client = Client.failing
+      client.makeIdentity.make = { throw error }
+      return client
+    }
+    env.bgScheduler = bgScheduler.eraseToAnyScheduler()
+    env.mainScheduler = mainScheduler.eraseToAnyScheduler()
+
+    let store = TestStore(
+      initialState: MyIdentityState(id: UUID()),
+      reducer: myIdentityReducer,
+      environment: env
+    )
+
+    store.send(.makeIdentity)
+
+    bgScheduler.advance()
+    mainScheduler.advance()
+
+    store.receive(.didFailMakingIdentity(error)) {
+      $0.error = ErrorState(error: error)
+    }
+
+    store.send(.didDismissError) {
+      $0.error = nil
+    }
   }
 }
 

@@ -54,7 +54,8 @@ extension AppEnvironment {
           observeIdentity: { identitySubject.eraseToAnyPublisher() },
           updateIdentity: { identitySubject.value = $0 },
           bgScheduler: bgScheduler,
-          mainScheduler: mainScheduler
+          mainScheduler: mainScheduler,
+          error: ErrorEnvironment()
         )
       )
     )
