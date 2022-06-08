@@ -56,6 +56,20 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "MyContactFeature"
+               BuildableName = "MyContactFeature"
+               BlueprintName = "MyContactFeature"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "MyIdentityFeature"
                BuildableName = "MyIdentityFeature"
                BlueprintName = "MyIdentityFeature"
@@ -112,6 +126,16 @@
                BlueprintIdentifier = "LandingFeatureTests"
                BuildableName = "LandingFeatureTests"
                BlueprintName = "LandingFeatureTests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "MyContactFeatureTests"
+               BuildableName = "MyContactFeatureTests"
+               BlueprintName = "MyContactFeatureTests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>

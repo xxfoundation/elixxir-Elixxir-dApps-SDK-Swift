@@ -33,6 +33,10 @@ let package = Package(
       targets: ["LandingFeature"]
     ),
     .library(
+      name: "MyContactFeature",
+      targets: ["MyContactFeature"]
+    ),
+    .library(
       name: "MyIdentityFeature",
       targets: ["MyIdentityFeature"]
     ),
@@ -134,6 +138,23 @@ let package = Package(
       name: "LandingFeatureTests",
       dependencies: [
         .target(name: "LandingFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "MyContactFeature",
+      dependencies: [
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        ),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "MyContactFeatureTests",
+      dependencies: [
+        .target(name: "MyContactFeature"),
       ],
       swiftSettings: swiftSettings
     ),
