@@ -25,6 +25,7 @@ extension AppEnvironment {
   static func live() -> AppEnvironment {
     let clientSubject = CurrentValueSubject<Client?, Never>(nil)
     let identitySubject = CurrentValueSubject<Identity?, Never>(nil)
+    let contactSubject = CurrentValueSubject<Data?, Never>(nil)
     let mainScheduler = DispatchQueue.main.eraseToAnyScheduler()
     let bgScheduler = DispatchQueue(
       label: "xx.network.dApps.ExampleApp.bg",
@@ -58,7 +59,15 @@ extension AppEnvironment {
           mainScheduler: mainScheduler,
           error: ErrorEnvironment()
         ),
-        myContact: MyContactEnvironment()
+        myContact: MyContactEnvironment(
+          getClient: { clientSubject.value },
+          getIdentity: { identitySubject.value },
+          observeContact: { contactSubject.eraseToAnyPublisher() },
+          updateContact: { contactSubject.value = $0 },
+          bgScheduler: bgScheduler,
+          mainScheduler: mainScheduler,
+          error: ErrorEnvironment()
+        )
       )
     )
   }

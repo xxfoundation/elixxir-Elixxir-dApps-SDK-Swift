@@ -1,4 +1,7 @@
 import ComposableArchitecture
+import ComposablePresentation
+import ElixxirDAppsSDK
+import ErrorFeature
 import SwiftUI
 
 public struct MyContactView: View {
@@ -9,17 +12,65 @@ public struct MyContactView: View {
   let store: Store<MyContactState, MyContactAction>
 
   struct ViewState: Equatable {
-    init(state: MyContactState) {}
+    let contact: Data?
+    let isMakingContact: Bool
+
+    init(state: MyContactState) {
+      contact = state.contact
+      isMakingContact = state.isMakingContact
+    }
+
+    var isLoading: Bool {
+      isMakingContact
+    }
   }
 
   public var body: some View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
-      Text("MyContactView")
-        .navigationTitle("My contact")
-        .task {
-          viewStore.send(.viewDidLoad)
+      Form {
+        Section {
+          Text(string(for: viewStore.contact))
+            .textSelection(.enabled)
         }
+
+        Section {
+          Button {
+            viewStore.send(.makeContact)
+          } label: {
+            HStack {
+              Text("Make contact from identity")
+              Spacer()
+              if viewStore.isMakingContact {
+                ProgressView()
+              }
+            }
+          }
+        }
+        .disabled(viewStore.isLoading)
+      }
+      .navigationTitle("My contact")
+      .navigationBarBackButtonHidden(viewStore.isLoading)
+      .task {
+        viewStore.send(.viewDidLoad)
+      }
+      .sheet(
+        store.scope(
+          state: \.error,
+          action: MyContactAction.error
+        ),
+        onDismiss: {
+          viewStore.send(.didDismissError)
+        },
+        content: ErrorView.init(store:)
+      )
     }
+  }
+
+  func string(for contact: Data?) -> String {
+    guard let contact = contact else {
+      return "No contact"
+    }
+    return String(data: contact, encoding: .utf8) ?? "Decoding error"
   }
 }
 
