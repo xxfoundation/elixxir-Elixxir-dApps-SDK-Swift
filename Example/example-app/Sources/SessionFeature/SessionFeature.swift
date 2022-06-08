@@ -47,12 +47,14 @@ public struct SessionEnvironment {
     bgScheduler: AnySchedulerOf<DispatchQueue>,
     mainScheduler: AnySchedulerOf<DispatchQueue>,
     makeId: @escaping () -> UUID,
+    error: ErrorEnvironment,
     myIdentity: MyIdentityEnvironment
   ) {
     self.getClient = getClient
     self.bgScheduler = bgScheduler
     self.mainScheduler = mainScheduler
     self.makeId = makeId
+    self.error = error
     self.myIdentity = myIdentity
   }
 
@@ -60,6 +62,7 @@ public struct SessionEnvironment {
   public var bgScheduler: AnySchedulerOf<DispatchQueue>
   public var mainScheduler: AnySchedulerOf<DispatchQueue>
   public var makeId: () -> UUID
+  public var error: ErrorEnvironment
   public var myIdentity: MyIdentityEnvironment
 }
 
@@ -157,6 +160,13 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
   }
 }
 .presenting(
+  errorReducer,
+  state: .keyPath(\.error),
+  id: .keyPath(\.?.error),
+  action: /SessionAction.error,
+  environment: \.error
+)
+.presenting(
   myIdentityReducer,
   state: .keyPath(\.myIdentity),
   id: .keyPath(\.?.id),
@@ -171,6 +181,7 @@ extension SessionEnvironment {
     bgScheduler: .failing,
     mainScheduler: .failing,
     makeId: { fatalError() },
+    error: .failing,
     myIdentity: .failing
   )
 }

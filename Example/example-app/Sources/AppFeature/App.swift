@@ -47,6 +47,7 @@ extension AppEnvironment {
         bgScheduler: bgScheduler,
         mainScheduler: mainScheduler,
         makeId: UUID.init,
+        error: ErrorEnvironment(),
         myIdentity: MyIdentityEnvironment()
       )
     )
