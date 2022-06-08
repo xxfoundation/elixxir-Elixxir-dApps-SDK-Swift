@@ -15,17 +15,17 @@ public struct ConnectionMaker {
 extension ConnectionMaker {
   public static func live(bindingsClient: BindingsClient) -> ConnectionMaker {
     ConnectionMaker { withAuthentication, recipientContact, myIdentity in
-      if !withAuthentication {
+      if withAuthentication {
         return Connection.live(
-          bindingsConnection: try bindingsClient.connect(
-            recipientContact,
+          bindingsAuthenticatedConnection: try bindingsClient.connect(
+            withAuthentication: recipientContact,
             myIdentity: myIdentity
           )
         )
       } else {
         return Connection.live(
-          bindingsAuthenticatedConnection: try bindingsClient.connect(
-            withAuthentication: recipientContact,
+          bindingsConnection: try bindingsClient.connect(
+            recipientContact,
             myIdentity: myIdentity
           )
         )
