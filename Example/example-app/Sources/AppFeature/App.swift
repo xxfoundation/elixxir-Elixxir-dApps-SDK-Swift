@@ -52,6 +52,7 @@ extension AppEnvironment {
         myIdentity: MyIdentityEnvironment(
           getClient: { clientSubject.value },
           observeIdentity: { identitySubject.eraseToAnyPublisher() },
+          updateIdentity: { identitySubject.value = $0 },
           bgScheduler: bgScheduler,
           mainScheduler: mainScheduler
         )
