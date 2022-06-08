@@ -3,11 +3,21 @@
 ![Swift 5.6](https://img.shields.io/badge/swift-5.6-orange.svg)
 ![platform iOS](https://img.shields.io/badge/platform-iOS-blue.svg)
 
-## 📖 Usage
+## 📱 Demo
+
+Refer to this [demo](https://git.xx.network/elixxir/shielded-help-demo/elixxir-dapp-demo) to see an example of how to build an app with the SDK to send `E2E` messages and send `RestLike` messsage.
+
+Also you can checkout included example iOS application.
+
+## 📖 Documentation 
+
+You can find full documentation with step by step guide [here](https://xxdk-dev.xx.network/mobile%20docs/ios-sdk)
+
+
+## 🚀 Quick Start
 
 Add `ElixxirDAppsSDK` library as a dependency to your project using Swift Package Manager.
 
-For usage examples, checkout included example iOS application.
 
 ### ▶️ Instantiating client
 
