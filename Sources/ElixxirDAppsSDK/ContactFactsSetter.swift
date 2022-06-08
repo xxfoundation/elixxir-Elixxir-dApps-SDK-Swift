@@ -1,17 +1,22 @@
 import Bindings
 
 public struct ContactFactsSetter {
-  public var set: (Data, Data) throws -> Data
+  public var set: (Data, [Fact]) throws -> Data
 
-  public func callAsFunction(contact: Data, facts: Data) throws -> Data {
+  public func callAsFunction(
+    contact: Data,
+    facts: [Fact]
+  ) throws -> Data {
     try set(contact, facts)
   }
 }
 
 extension ContactFactsSetter {
   public static let live = ContactFactsSetter { contact, facts in
+    let encoder = JSONEncoder()
+    let factsData = try encoder.encode(facts)
     var error: NSError?
-    let updatedContact = BindingsSetFactsOnContact(contact, facts, &error)
+    let updatedContact = BindingsSetFactsOnContact(contact, factsData, &error)
     if let error = error {
       throw error
     }

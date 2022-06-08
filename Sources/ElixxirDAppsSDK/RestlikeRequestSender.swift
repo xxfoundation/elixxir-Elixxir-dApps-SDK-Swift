@@ -1,13 +1,13 @@
 import Bindings
 
 public struct RestlikeRequestSender {
-  public var send: (Int, Int, Data) throws -> Data
+  public var send: (Int, Int, RestlikeMessage) throws -> RestlikeMessage
 
   public func callAsFunction(
     clientId: Int,
     connectionId: Int,
-    request: Data
-  ) throws -> Data {
+    request: RestlikeMessage
+  ) throws -> RestlikeMessage {
     try send(clientId, connectionId, request)
   }
 }
@@ -15,20 +15,24 @@ public struct RestlikeRequestSender {
 extension RestlikeRequestSender {
   public static func live(authenticated: Bool) -> RestlikeRequestSender {
     RestlikeRequestSender { clientId, connectionId, request in
+      let encoder = JSONEncoder()
+      let requestData = try encoder.encode(request)
       var error: NSError?
-      let response: Data?
+      let responseData: Data?
       if authenticated {
-        response = BindingsRestlikeRequestAuth(clientId, connectionId, request, &error)
+        responseData = BindingsRestlikeRequestAuth(clientId, connectionId, requestData, &error)
       } else {
-        response = BindingsRestlikeRequest(clientId, connectionId, request, &error)
+        responseData = BindingsRestlikeRequest(clientId, connectionId, requestData, &error)
       }
       if let error = error {
         throw error
       }
-      guard let response = response else {
+      guard let responseData = responseData else {
         let functionName = "BindingsRestlikeRequest\(authenticated ? "Auth" : "")"
         fatalError("\(functionName) returned `nil` without providing error")
       }
+      let decoder = JSONDecoder()
+      let response = try decoder.decode(RestlikeMessage.self, from: responseData)
       return response
     }
   }

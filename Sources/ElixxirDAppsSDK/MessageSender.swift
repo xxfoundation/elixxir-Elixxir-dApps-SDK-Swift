@@ -1,12 +1,12 @@
 import Bindings
 
 public struct MessageSender {
-  public var send: (Int, Data) throws -> Data
+  public var send: (Int, Data) throws -> MessageSendReport
 
   public func callAsFunction(
     messageType: Int,
     payload: Data
-  ) throws -> Data {
+  ) throws -> MessageSendReport {
     try send(messageType, payload)
   }
 }
@@ -28,7 +28,10 @@ extension MessageSender {
     sendE2E: @escaping (Int, Data) throws -> Data
   ) -> MessageSender {
     MessageSender { messageType, payload in
-      try sendE2E(messageType, payload)
+      let reportData = try sendE2E(messageType, payload)
+      let decoder = JSONDecoder()
+      let report = try decoder.decode(MessageSendReport.self, from: reportData)
+      return report
     }
   }
 }

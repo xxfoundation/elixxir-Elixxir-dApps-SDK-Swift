@@ -1,12 +1,12 @@
 import Bindings
 
 public struct MessageListener {
-  public var listen: (Int, String, @escaping (Data) -> Void) -> Void
+  public var listen: (Int, String, @escaping (Message) -> Void) -> Void
 
   public func callAsFunction(
     messageType: Int,
     listenerName: String = "MessageListener",
-    callback: @escaping (Data) -> Void
+    callback: @escaping (Message) -> Void
   ) {
     listen(messageType, listenerName, callback)
   }
@@ -39,18 +39,25 @@ extension MessageListener {
 }
 
 private class Listener: NSObject, BindingsListenerProtocol {
-  init(listenerName: String, onHear: @escaping (Data) -> Void) {
+  init(listenerName: String, onHear: @escaping (Message) -> Void) {
     self.listenerName = listenerName
     self.onHear = onHear
     super.init()
   }
 
   let listenerName: String
-  let onHear: (Data) -> Void
+  let onHear: (Message) -> Void
+  let decoder = JSONDecoder()
 
   func hear(_ item: Data?) {
-    guard let item = item else { return }
-    onHear(item)
+    guard let item = item else {
+      fatalError("BindingsListenerProtocol.hear received `nil`")
+    }
+    do {
+      onHear(try decoder.decode(Message.self, from: item))
+    } catch {
+      fatalError("Message decoding failed with error: \(error)")
+    }
   }
 
   func name() -> String {

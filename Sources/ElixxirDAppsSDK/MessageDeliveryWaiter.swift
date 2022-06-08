@@ -2,26 +2,28 @@ import Bindings
 
 public struct MessageDeliveryWaiter {
   public enum Result: Equatable {
-    case delivered(roundResults: Data)
+    case delivered(roundResults: [Int])
     case notDelivered(timedOut: Bool)
   }
 
-  public var wait: (Data, Int, @escaping (Result) -> Void) throws -> Void
+  public var wait: (MessageSendReport, Int, @escaping (Result) -> Void) throws -> Void
 
   public func callAsFunction(
-    roundList: Data,
+    report: MessageSendReport,
     timeoutMS: Int,
     callback: @escaping (Result) -> Void
-  ) throws -> Void {
-    try wait(roundList, timeoutMS, callback)
+  ) throws {
+    try wait(report, timeoutMS, callback)
   }
 }
 
 extension MessageDeliveryWaiter {
   public static func live(bindingsClient: BindingsClient) -> MessageDeliveryWaiter {
-    MessageDeliveryWaiter { roundList, timeoutMS, callback in
+    MessageDeliveryWaiter { report, timeoutMS, callback in
+      let encoder = JSONEncoder()
+      let reportData = try encoder.encode(report)
       try bindingsClient.wait(
-        forMessageDelivery: roundList,
+        forMessageDelivery: reportData,
         mdc: Callback(onCallback: callback),
         timeoutMS: timeoutMS
       )
@@ -38,8 +40,14 @@ private final class Callback: NSObject, BindingsMessageDeliveryCallbackProtocol 
   let onCallback: (MessageDeliveryWaiter.Result) -> Void
 
   func eventCallback(_ delivered: Bool, timedOut: Bool, roundResults: Data?) {
-    if delivered, !timedOut, let roundResults = roundResults {
-      return onCallback(.delivered(roundResults: roundResults))
+    if delivered, !timedOut, let roundResultsData = roundResults {
+      let decoder = JSONDecoder()
+      do {
+        let roundResults = try decoder.decode([Int].self, from: roundResultsData)
+        return onCallback(.delivered(roundResults: roundResults))
+      } catch {
+        fatalError("BindingsMessageDeliveryCallback roundResults decoding error: \(error)")
+      }
     }
     if !delivered, roundResults == nil {
       return onCallback(.notDelivered(timedOut: timedOut))
