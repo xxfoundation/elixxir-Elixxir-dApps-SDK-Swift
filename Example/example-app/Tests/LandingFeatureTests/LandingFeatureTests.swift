@@ -9,7 +9,7 @@ final class LandingFeatureTests: XCTestCase {
     env.clientStorage.hasStoredClient = { true }
 
     let store = TestStore(
-      initialState: LandingState(),
+      initialState: LandingState(id: UUID()),
       reducer: landingReducer,
       environment: env
     )
@@ -33,7 +33,7 @@ final class LandingFeatureTests: XCTestCase {
     env.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     let store = TestStore(
-      initialState: LandingState(),
+      initialState: LandingState(id: UUID()),
       reducer: landingReducer,
       environment: env
     )
@@ -68,7 +68,7 @@ final class LandingFeatureTests: XCTestCase {
     env.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     let store = TestStore(
-      initialState: LandingState(),
+      initialState: LandingState(id: UUID()),
       reducer: landingReducer,
       environment: env
     )
@@ -101,7 +101,7 @@ final class LandingFeatureTests: XCTestCase {
     env.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     let store = TestStore(
-      initialState: LandingState(),
+      initialState: LandingState(id: UUID()),
       reducer: landingReducer,
       environment: env
     )
@@ -133,7 +133,7 @@ final class LandingFeatureTests: XCTestCase {
     env.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     let store = TestStore(
-      initialState: LandingState(),
+      initialState: LandingState(id: UUID()),
       reducer: landingReducer,
       environment: env
     )
@@ -167,7 +167,7 @@ final class LandingFeatureTests: XCTestCase {
     env.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     let store = TestStore(
-      initialState: LandingState(),
+      initialState: LandingState(id: UUID()),
       reducer: landingReducer,
       environment: env
     )

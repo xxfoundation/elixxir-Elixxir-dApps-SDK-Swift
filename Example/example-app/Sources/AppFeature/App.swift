@@ -29,6 +29,7 @@ extension AppEnvironment {
     ).eraseToAnyScheduler()
 
     return AppEnvironment(
+      makeId: UUID.init,
       hasClient: clientSubject.map { $0 != nil }.eraseToAnyPublisher(),
       mainScheduler: mainScheduler,
       landing: LandingEnvironment(
@@ -40,7 +41,11 @@ extension AppEnvironment {
         mainScheduler: mainScheduler,
         error: ErrorEnvironment()
       ),
-      session: SessionEnvironment()
+      session: SessionEnvironment(
+        getClient: { clientSubject.value },
+        bgScheduler: bgScheduler,
+        mainScheduler: mainScheduler
+      )
     )
   }
 }
