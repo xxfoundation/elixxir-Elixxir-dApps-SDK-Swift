@@ -7,14 +7,17 @@ import ErrorFeature
 public struct MyIdentityState: Equatable {
   public init(
     id: UUID,
+    isMakingIdentity: Bool = false,
     error: ErrorState? = nil
   ) {
     self.id = id
+    self.isMakingIdentity = isMakingIdentity
     self.error = error
   }
 
   public var id: UUID
   public var identity: Identity?
+  public var isMakingIdentity: Bool
   public var error: ErrorState?
 }
 
@@ -23,7 +26,7 @@ public enum MyIdentityAction: Equatable {
   case observeMyIdentity
   case didUpdateMyIdentity(Identity?)
   case makeIdentity
-  case didFailMakingIdentity(NSError)
+  case didFinishMakingIdentity(NSError?)
   case didDismissError
   case error(ErrorAction)
 }
@@ -78,14 +81,14 @@ public let myIdentityReducer = Reducer<MyIdentityState, MyIdentityAction, MyIden
     return .none
 
   case .makeIdentity:
-    return Effect.run { subscriber in
+    state.isMakingIdentity = true
+    return Effect.future { fulfill in
       do {
         env.updateIdentity(try env.getClient()?.makeIdentity())
+        fulfill(.success(.didFinishMakingIdentity(nil)))
       } catch {
-        subscriber.send(.didFailMakingIdentity(error as NSError))
+        fulfill(.success(.didFinishMakingIdentity(error as NSError)))
       }
-      subscriber.send(completion: .finished)
-      return AnyCancellable {}
     }
     .subscribe(on: env.bgScheduler)
     .receive(on: env.mainScheduler)
@@ -95,8 +98,11 @@ public let myIdentityReducer = Reducer<MyIdentityState, MyIdentityAction, MyIden
     state.error = nil
     return .none
 
-  case .didFailMakingIdentity(let error):
-    state.error = ErrorState(error: error)
+  case .didFinishMakingIdentity(let error):
+    state.isMakingIdentity = false
+    if let error = error {
+      state.error = ErrorState(error: error)
+    }
     return .none
   }
 }

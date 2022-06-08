@@ -68,13 +68,19 @@ final class MyIdentityFeatureTests: XCTestCase {
       environment: env
     )
 
-    store.send(.makeIdentity)
+    store.send(.makeIdentity) {
+      $0.isMakingIdentity = true
+    }
 
     bgScheduler.advance()
 
     XCTAssertNoDifference(didUpdateIdentity, [newIdentity])
 
     mainScheduler.advance()
+
+    store.receive(.didFinishMakingIdentity(nil)) {
+      $0.isMakingIdentity = false
+    }
   }
 
   func testMakeIdentityFailure() {
@@ -97,12 +103,15 @@ final class MyIdentityFeatureTests: XCTestCase {
       environment: env
     )
 
-    store.send(.makeIdentity)
+    store.send(.makeIdentity) {
+      $0.isMakingIdentity = true
+    }
 
     bgScheduler.advance()
     mainScheduler.advance()
 
-    store.receive(.didFailMakingIdentity(error)) {
+    store.receive(.didFinishMakingIdentity(error)) {
+      $0.isMakingIdentity = false
       $0.error = ErrorState(error: error)
     }
 
