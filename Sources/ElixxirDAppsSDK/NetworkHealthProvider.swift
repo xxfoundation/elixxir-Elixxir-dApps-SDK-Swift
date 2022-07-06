@@ -9,7 +9,7 @@ public struct NetworkHealthProvider {
 }
 
 extension NetworkHealthProvider {
-  public static func live(bindingsClient: BindingsClient) -> NetworkHealthProvider {
+  public static func live(bindingsClient: BindingsCmix) -> NetworkHealthProvider {
     NetworkHealthProvider(get: bindingsClient.isNetworkHealthy)
   }
 }

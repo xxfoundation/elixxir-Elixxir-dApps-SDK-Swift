@@ -9,7 +9,7 @@ public struct NetworkWaiter {
 }
 
 extension NetworkWaiter {
-  public static func live(bindingsClient: BindingsClient) -> NetworkWaiter {
+  public static func live(bindingsClient: BindingsCmix) -> NetworkWaiter {
     NetworkWaiter { timeoutMS in
       bindingsClient.wait(forNetwork: timeoutMS)
     }

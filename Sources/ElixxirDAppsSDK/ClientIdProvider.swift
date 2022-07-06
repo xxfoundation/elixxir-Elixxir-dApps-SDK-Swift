@@ -9,7 +9,7 @@ public struct ClientIdProvider {
 }
 
 extension ClientIdProvider {
-  public static func live(bindingsClient: BindingsClient) -> ClientIdProvider {
+  public static func live(bindingsClient: BindingsCmix) -> ClientIdProvider {
     ClientIdProvider(get: bindingsClient.getID)
   }
 }

@@ -9,7 +9,7 @@ public struct NetworkFollowerStarter {
 }
 
 extension NetworkFollowerStarter {
-  public static func live(bindingsClient: BindingsClient) -> NetworkFollowerStarter {
+  public static func live(bindingsClient: BindingsCmix) -> NetworkFollowerStarter {
     NetworkFollowerStarter { timeoutMS in
       try bindingsClient.startNetworkFollower(timeoutMS)
     }

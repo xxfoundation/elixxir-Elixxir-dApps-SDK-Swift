@@ -17,7 +17,7 @@ extension ClientCreator {
   public static let live = ClientCreator { directoryURL, ndf, password, regCode in
     var error: NSError?
     let network = String(data: ndf, encoding: .utf8)!
-    let created = BindingsNewClient(network, directoryURL.path, password, regCode, &error)
+    let created = BindingsNewKeystore(network, directoryURL.path, password, regCode, &error)
     if let error = error {
       throw error
     }

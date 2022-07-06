@@ -7,7 +7,7 @@ public struct NetworkFollower {
 }
 
 extension NetworkFollower {
-  public static func live(bindingsClient: BindingsClient) -> NetworkFollower {
+  public static func live(bindingsClient: BindingsCmix) -> NetworkFollower {
     NetworkFollower(
       status: .live(bindingsClient: bindingsClient),
       start: .live(bindingsClient: bindingsClient),
