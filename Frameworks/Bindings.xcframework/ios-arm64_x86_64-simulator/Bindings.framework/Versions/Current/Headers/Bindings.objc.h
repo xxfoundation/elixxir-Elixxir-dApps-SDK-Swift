@@ -12,14 +12,18 @@
 
 
 @class BindingsAuthenticatedConnection;
-@class BindingsClient;
+@class BindingsCmix;
 @class BindingsConnection;
 @class BindingsE2ESendReport;
+@class BindingsE2e;
 @class BindingsFact;
-@class BindingsIdentity;
+@class BindingsIdList;
 @class BindingsMessage;
+@class BindingsReceptionIdentity;
 @class BindingsRestlikeMessage;
 @class BindingsRoundsList;
+@protocol BindingsAuthCallbacks;
+@class BindingsAuthCallbacks;
 @protocol BindingsClientError;
 @class BindingsClientError;
 @protocol BindingsListener;
@@ -30,6 +34,14 @@
 @class BindingsMessageDeliveryCallback;
 @protocol BindingsNetworkHealthCallback;
 @class BindingsNetworkHealthCallback;
+@protocol BindingsProcessor;
+@class BindingsProcessor;
+
+@protocol BindingsAuthCallbacks <NSObject>
+- (void)confirm:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
+- (void)request:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
+- (void)reset:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
+@end
 
 @protocol BindingsClientError <NSObject>
 - (void)report:(NSString* _Nullable)source message:(NSString* _Nullable)message trace:(NSString* _Nullable)trace;
@@ -59,6 +71,11 @@ Accepts a marshalled Message object
 - (void)callback:(BOOL)p0;
 @end
 
+@protocol BindingsProcessor <NSObject>
+- (void)process:(NSData* _Nullable)message receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
+- (NSString* _Nonnull)string;
+@end
+
 @interface BindingsAuthenticatedConnection : NSObject <goSeqRefInterface> {
 }
 @property(strong, readonly) _Nonnull id _ref;
@@ -76,10 +93,10 @@ Accepts a marshalled Message object
 @end
 
 /**
- * Client BindingsClient wraps the api.Client, implementing additional functions
-to support the gomobile Client interface
+ * Cmix BindingsClient wraps the xxdk.Cmix, implementing additional functions
+to support the gomobile Cmix interface
  */
-@interface BindingsClient : NSObject <goSeqRefInterface> {
+@interface BindingsCmix : NSObject <goSeqRefInterface> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
@@ -91,14 +108,10 @@ and returns a Connection object for the newly-created partner.Manager
 This function is to be used sender-side and will block until the
 partner.Manager is confirmed.
 recipientContact - marshalled contact.Contact object
-myIdentity - marshalled Identity object
+myIdentity - marshalled ReceptionIdentity object
  */
-- (BindingsConnection* _Nullable)connect:(NSData* _Nullable)recipientContact myIdentity:(NSData* _Nullable)myIdentity error:(NSError* _Nullable* _Nullable)error;
-- (BindingsAuthenticatedConnection* _Nullable)connectWithAuthentication:(NSData* _Nullable)recipientContact myIdentity:(NSData* _Nullable)myIdentity error:(NSError* _Nullable* _Nullable)error;
-/**
- * GetContactFromIdentity accepts a marshalled Identity object and returns a marshalled contact.Contact object
- */
-- (NSData* _Nullable)getContactFromIdentity:(NSData* _Nullable)identity error:(NSError* _Nullable* _Nullable)error;
+- (BindingsConnection* _Nullable)connect:(long)e2eId recipientContact:(NSData* _Nullable)recipientContact error:(NSError* _Nullable* _Nullable)error;
+- (BindingsAuthenticatedConnection* _Nullable)connectWithAuthentication:(long)e2eId recipientContact:(NSData* _Nullable)recipientContact error:(NSError* _Nullable* _Nullable)error;
 - (long)getID;
 /**
  * HasRunningProcessies checks if any background threads are running.
@@ -252,6 +265,238 @@ Example E2ESendReport:
 @end
 
 /**
+ * E2e BindingsClient wraps the xxdk.E2e, implementing additional functions
+to support the gomobile E2e interface
+ */
+@interface BindingsE2e : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * AddPartnerCallback adds a new callback that overrides the generic auth
+callback for the given partner ID.
+
+Parameters:
+ - partnerID - the marshalled bytes of the id.ID object.
+ */
+- (BOOL)addPartnerCallback:(NSData* _Nullable)partnerID cb:(id<BindingsAuthCallbacks> _Nullable)cb error:(NSError* _Nullable* _Nullable)error;
+/**
+ * AddService adds a service for all partners of the given
+tag, which will call back on the given processor. These can
+be sent to using the tag fields in the Params Object
+Passing nil for the processor allows you to create a
+service which is never called but will be visible by
+notifications. Processes added this way are generally not
+end-to-end encrypted messages themselves, but other
+protocols which piggyback on e2e relationships to start
+communication
+ */
+- (BOOL)addService:(NSString* _Nullable)tag processor:(id<BindingsProcessor> _Nullable)processor error:(NSError* _Nullable* _Nullable)error;
+/**
+ * CallAllReceivedRequests will iterate through all pending contact requests and
+replay them on the callbacks.
+ */
+- (void)callAllReceivedRequests;
+/**
+ * Confirm sends a confirmation for a received request. It can only be called
+once. This both sends keying material to the other party and creates a
+channel in the e2e handler, after which e2e messages can be sent to the
+partner using e2e.Handler.SendE2E.
+The round the request is initially sent on will be returned, but the request
+will be listed as a critical message, so the underlying cMix client will auto
+resend it in the event of failure.
+A confirm cannot be sent for a contact who has not sent a request or who is
+already a partner. This can only be called once for a specific contact.
+The confirm sends as a critical message; if the round it sends on fails, it
+will be auto resend by the cMix client.
+If the confirm must be resent, use ReplayConfirm.
+
+Parameters:
+ - partnerContact - the marshalled bytes of the contact.Contact object.
+Returns:
+ - int64 - ID of the round (convert to uint64)
+ */
+- (BOOL)confirm:(NSData* _Nullable)partnerContact ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
+/**
+ * DeleteAllRequests clears all requests from client's auth storage.
+ */
+- (BOOL)deleteAllRequests:(NSError* _Nullable* _Nullable)error;
+/**
+ * DeletePartnerCallback deletes the callback that overrides the generic
+auth callback for the given partner ID.
+
+Parameters:
+ - partnerID - the marshalled bytes of the id.ID object.
+ */
+- (BOOL)deletePartnerCallback:(NSData* _Nullable)partnerID error:(NSError* _Nullable* _Nullable)error;
+/**
+ * DeleteReceiveRequests clears all received requests from client's auth storage.
+ */
+- (BOOL)deleteReceiveRequests:(NSError* _Nullable* _Nullable)error;
+/**
+ * DeleteRequest deletes sent or received requests for a specific partner ID.
+
+Parameters:
+ - partnerID - the marshalled bytes of the id.ID object.
+ */
+- (BOOL)deleteRequest:(NSData* _Nullable)partnerID error:(NSError* _Nullable* _Nullable)error;
+/**
+ * DeleteSentRequests clears all sent requests from client's auth storage.
+ */
+- (BOOL)deleteSentRequests:(NSError* _Nullable* _Nullable)error;
+/**
+ * FirstPartitionSize returns the max partition payload size for the
+first payload
+ */
+- (long)firstPartitionSize;
+/**
+ * GetAllPartnerIDs returns a marshalled list of all partner IDs that the user has
+an E2E relationship with.
+Returns:
+ - []byte - the marshalled bytes of the IdList object.
+ */
+- (NSData* _Nullable)getAllPartnerIDs:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetContact returns a marshalled contact.Contact object for the E2e ReceptionIdentity
+ */
+- (NSData* _Nullable)getContact;
+/**
+ * GetHistoricalDHPrivkey returns the user's marshalled Historical DH Private Key
+Returns:
+ - []byte - the marshalled bytes of the cyclic.Int object.
+ */
+- (NSData* _Nullable)getHistoricalDHPrivkey:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetHistoricalDHPubkey returns the user's marshalled Historical DH
+Public Key
+Returns:
+ - []byte - the marshalled bytes of the cyclic.Int object.
+ */
+- (NSData* _Nullable)getHistoricalDHPubkey:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetID returns the e2eTracker ID for the E2e object
+ */
+- (long)getID;
+/**
+ * GetReceivedRequest returns a contact if there's a received request for it.
+
+Parameters:
+ - partnerID - the marshalled bytes of the id.ID object.
+Returns:
+ - []byte - the marshalled bytes of the contact.Contact object.
+ */
+- (NSData* _Nullable)getReceivedRequest:(NSData* _Nullable)partnerID error:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetReceptionID returns the marshalled default IDs
+Returns:
+ - []byte - the marshalled bytes of the id.ID object.
+ */
+- (NSData* _Nullable)getReceptionID;
+/**
+ * HasAuthenticatedChannel returns true if an authenticated channel with the
+partner exists, otherwise returns false
+Parameters:
+ - partnerId - the marshalled bytes of the id.ID object.
+ */
+- (BOOL)hasAuthenticatedChannel:(NSData* _Nullable)partnerId ret0_:(BOOL* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
+/**
+ * PartitionSize returns the partition payload size for the given
+payload index. The first payload is index 0.
+ */
+- (long)partitionSize:(long)payloadIndex;
+/**
+ * PayloadSize Returns the max payload size for a partitionable E2E
+message
+ */
+- (long)payloadSize;
+/**
+ * RemoveService removes all services for the given tag
+ */
+- (BOOL)removeService:(NSString* _Nullable)tag error:(NSError* _Nullable* _Nullable)error;
+/**
+ * ReplayConfirm resends a confirm to the partner. It will fail to send if the
+send relationship with the partner has already ratcheted.
+The confirm sends as a critical message; if the round it sends on fails, it
+will be auto resend by the cMix client.
+This will not be useful if either side has ratcheted.
+
+Parameters:
+ - partnerID - the marshalled bytes of the id.ID object.
+Returns:
+ - int64 - ID of the round (convert to uint64)
+ */
+- (BOOL)replayConfirm:(NSData* _Nullable)partnerID ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
+/**
+ * Request sends a contact request from the user identity in the imported e2e
+structure to the passed contact, as well as the passed facts (will error if
+they are too long).
+The other party must accept the request by calling Confirm in order to be
+able to send messages using e2e.Handler.SendE2E. When the other party does
+so, the "confirm" callback will get called.
+The round the request is initially sent on will be returned, but the request
+will be listed as a critical message, so the underlying cMix client will auto
+resend it in the event of failure.
+A request cannot be sent for a contact who has already received a request or
+who is already a partner.
+The request sends as a critical message, if the round send on fails, it will
+be auto resent by the cMix client.
+
+Parameters:
+ - partnerContact - the marshalled bytes of the contact.Contact object.
+ - myFacts - stringified list of fact.FactList.
+Returns:
+ - int64 - ID of the round (convert to uint64)
+ */
+- (BOOL)request:(NSData* _Nullable)partnerContact myFactsString:(NSString* _Nullable)myFactsString ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
+/**
+ * Reset sends a contact reset request from the user identity in the imported
+e2e structure to the passed contact, as well as the passed facts (it will
+error if they are too long).
+This deletes all traces of the relationship with the partner from e2e and
+create a new relationship from scratch.
+The round the reset is initially sent on will be returned, but the request
+will be listed as a critical message, so the underlying cMix client will auto
+resend it in the event of failure.
+A request cannot be sent for a contact who has already received a request or
+who is already a partner.
+
+Parameters:
+ - partnerContact - the marshalled bytes of the contact.Contact object.
+Returns:
+ - int64 - ID of the round (convert to uint64)
+ */
+- (BOOL)reset:(NSData* _Nullable)partnerContact ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SecondPartitionSize returns the max partition payload size for all
+payloads after the first payload
+ */
+- (long)secondPartitionSize;
+/**
+ * SendE2E send a message containing the payload to the
+recipient of the passed message type, per the given
+parameters - encrypted with end-to-end encryption.
+Default parameters can be retrieved through
+Parameters:
+ - recipientId - the marshalled bytes of the id.ID object.
+ - e2eParams - the marshalled bytes of the e2e.Params object.
+Returns:
+ - []byte - the marshalled bytes of the E2ESendReport object.
+ */
+- (NSData* _Nullable)sendE2E:(long)messageType recipientId:(NSData* _Nullable)recipientId payload:(NSData* _Nullable)payload e2eParams:(NSData* _Nullable)e2eParams error:(NSError* _Nullable* _Nullable)error;
+/**
+ * VerifyOwnership checks if the received ownership proof is valid.
+
+Parameters:
+ - receivedContact, verifiedContact - the marshalled bytes of the
+     contact.Contact object.
+ - e2eId - ID of the e2e handler
+ */
+- (BOOL)verifyOwnership:(NSData* _Nullable)receivedContact verifiedContact:(NSData* _Nullable)verifiedContact e2eId:(long)e2eId ret0_:(BOOL* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
  * Fact is an internal fact type for use in the bindings layer
 example marshalled Fact:
 {"Fact":"Zezima","Type":0}
@@ -267,27 +512,16 @@ example marshalled Fact:
 @end
 
 /**
- * Identity struct
-Example marshalled Identity:
-{"ID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",  // User ID (base64)
- // RSA Private key (PEM format)
- "RSAPrivatePem":"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBNU15dTdhYjBJOS9UL1BFUUxtd2x3ejZHV3FjMUNYemVIVXhoVEc4bmg1WWRWSXMxCmJ2THpBVjNOMDJxdXN6K2s4TVFEWjBtejMzdkswUmhPczZIY0NUSFdzTEpXRkE5WWpzWWlCRi9qTDd1bmd1ckIKL2tvK1JJSnNrWGFWaEZaazRGdERoRXhTNWY4RnR0Qmk1NmNLZmdJQlVKT3ozZi9qQllTMkxzMlJ6cWV5YXM3SApjV2RaME9TclBTT3BiYlViU1FPbS9LWnlweGZHU21yZ2oxRUZuU1dZZ2xGZTdUOTRPbHF5MG14QTV5clVXbHorCk9sK3hHbXpCNUp4WUFSMU9oMFQrQTk4RWMrTUZHNm43L1MraDdzRDgybGRnVnJmbStFTzRCdmFKeTRESGZGMWgKNnp6QnVnY25NUVFGc0dLeDFYWC9COTVMdUpPVjdyeXlDbzZGbHdJREFRQUJBb0lCQVFDaUh6OGNlcDZvQk9RTAphUzBVRitHeU5VMnlVcVRNTWtTWThoUkh1c09CMmFheXoybHZVb3RLUHBPbjZRSWRWVTJrcE4vY2dtY0lSb2x5CkhBMDRUOHJBWVNaRlVqaVlRajkzKzRFREpJYXd2Z0YyVEs1bFoyb3oxVTdreStncU82V0RMR2Z0Q0wvODVQWEIKa210aXhnUXpRV3g1RWcvemtHdm03eURBalQxeDloNytsRjJwNFlBam5kT2xTS0dmQjFZeTR1RXBQd0kwc1lWdgpKQWc0MEFxbllZUmt4emJPbmQxWGNjdEJFN2Z1VDdrWXhoeSs3WXYrUTJwVy9BYmh6NGlHOEY1MW9GMGZwV0czCmlISDhsVXZFTkp2SUZEVHZ0UEpESlFZalBRN3lUbGlGZUdrMXZUQkcyQkpQNExzVzhpbDZOeUFuRktaY1hOQ24KeHVCendiSlJBb0dCQVBUK0dGTVJGRHRHZVl6NmwzZmg3UjJ0MlhrMysvUmpvR3BDUWREWDhYNERqR1pVd1RGVQpOS2tQTTNjS29ia2RBYlBDb3FpL0tOOVBibk9QVlZ3R3JkSE9vSnNibFVHYmJGamFTUzJQMFZnNUVhTC9rT2dUCmxMMUdoVFpIUWk1VUlMM0p4M1Z3T0ZRQ3RQOU1UQlQ0UEQvcEFLbDg3VTJXN3JTY1dGV1ZGbFNkQW9HQkFPOFUKVmhHWkRpVGFKTWVtSGZIdVYrNmtzaUlsam9aUVVzeGpmTGNMZ2NjV2RmTHBqS0ZWTzJNN3NqcEJEZ0w4NmFnegorVk14ZkQzZ1l0SmNWN01aMVcwNlZ6TlNVTHh3a1dRY1hXUWdDaXc5elpyYlhCUmZRNUVjMFBlblVoWWVwVzF5CkpkTC8rSlpQeDJxSzVrQytiWU5EdmxlNWdpcjlDSGVzTlR5enVyckRBb0dCQUl0cTJnN1RaazhCSVFUUVNrZ24Kb3BkRUtzRW4wZExXcXlBdENtVTlyaWpHL2l2eHlXczMveXZDQWNpWm5VVEp0QUZISHVlbXVTeXplQ2g5QmRkegoyWkRPNUdqQVBxVHlQS3NudFlNZkY4UDczZ1NES1VSWWVFbHFDejdET0c5QzRzcitPK3FoN1B3cCtqUmFoK1ZiCkNuWllNMDlBVDQ3YStJYUJmbWRkaXpLbEFvR0JBSmo1dkRDNmJIQnNISWlhNUNJL1RZaG5YWXUzMkVCYytQM0sKMHF3VThzOCtzZTNpUHBla2Y4RjVHd3RuUU4zc2tsMk1GQWFGYldmeVFZazBpUEVTb0p1cGJzNXA1enNNRkJ1bwpncUZrVnQ0RUZhRDJweTVwM2tQbDJsZjhlZXVwWkZScGE0WmRQdVIrMjZ4eWYrNEJhdlZJeld3NFNPL1V4Q3crCnhqbTNEczRkQW9HQWREL0VOa1BjU004c1BCM3JSWW9MQ2twcUV2U0MzbVZSbjNJd3c1WFAwcDRRVndhRmR1ckMKYUhtSE1EekNrNEUvb0haQVhFdGZ2S2tRaUI4MXVYM2c1aVo4amdYUVhXUHRteTVIcVVhcWJYUTlENkxWc3B0egpKL3R4SWJLMXp5c1o2bk9IY1VoUUwyVVF6SlBBRThZNDdjYzVzTThEN3kwZjJ0QURTQUZNMmN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==",
- // Salt for identity (base64)
- "Salt":"4kk02v0NIcGtlobZ/xkxqWz8uH/ams/gjvQm14QT0dI=",
- // DH Private key
- "DHKeyPrivate":"eyJWYWx1ZSI6NDU2MDgzOTEzMjA0OTIyODA5Njg2MDI3MzQ0MzM3OTA0MzAyODYwMjM2NDk2NDM5NDI4NTcxMTMwNDMzOTQwMzgyMTIyMjY4OTQzNTMyMjIyMzc1MTkzNTEzMjU4MjA4MDA0NTczMDY4MjEwNzg2NDI5NjA1MjA0OTA3MjI2ODI5OTc3NTczMDkxODY0NTY3NDExMDExNjQxNCwiRmluZ2VycHJpbnQiOjE2ODAxNTQxNTExMjMzMDk4MzYzfQ=="
-}
+ * IdList is a wrapper for a list of marshalled id.ID objects
  */
-@interface BindingsIdentity : NSObject <goSeqRefInterface> {
+@interface BindingsIdList : NSObject <goSeqRefInterface> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-@property (nonatomic) NSData* _Nullable id_;
-@property (nonatomic) NSData* _Nullable rsaPrivatePem;
-@property (nonatomic) NSData* _Nullable salt;
-@property (nonatomic) NSData* _Nullable dhKeyPrivate;
+// skipped field IdList.Ids with unsupported type: [][]byte
+
 @end
 
 /**
@@ -317,6 +551,30 @@ Example Message format:
 @property (nonatomic) int64_t timestamp;
 @property (nonatomic) BOOL encrypted;
 @property (nonatomic) long roundId;
+@end
+
+/**
+ * ReceptionIdentity struct
+Example marshalled ReceptionIdentity:
+{"ID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",  // User ID (base64)
+ // RSA Private key (PEM format)
+ "RSAPrivatePem":"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBNU15dTdhYjBJOS9UL1BFUUxtd2x3ejZHV3FjMUNYemVIVXhoVEc4bmg1WWRWSXMxCmJ2THpBVjNOMDJxdXN6K2s4TVFEWjBtejMzdkswUmhPczZIY0NUSFdzTEpXRkE5WWpzWWlCRi9qTDd1bmd1ckIKL2tvK1JJSnNrWGFWaEZaazRGdERoRXhTNWY4RnR0Qmk1NmNLZmdJQlVKT3ozZi9qQllTMkxzMlJ6cWV5YXM3SApjV2RaME9TclBTT3BiYlViU1FPbS9LWnlweGZHU21yZ2oxRUZuU1dZZ2xGZTdUOTRPbHF5MG14QTV5clVXbHorCk9sK3hHbXpCNUp4WUFSMU9oMFQrQTk4RWMrTUZHNm43L1MraDdzRDgybGRnVnJmbStFTzRCdmFKeTRESGZGMWgKNnp6QnVnY25NUVFGc0dLeDFYWC9COTVMdUpPVjdyeXlDbzZGbHdJREFRQUJBb0lCQVFDaUh6OGNlcDZvQk9RTAphUzBVRitHeU5VMnlVcVRNTWtTWThoUkh1c09CMmFheXoybHZVb3RLUHBPbjZRSWRWVTJrcE4vY2dtY0lSb2x5CkhBMDRUOHJBWVNaRlVqaVlRajkzKzRFREpJYXd2Z0YyVEs1bFoyb3oxVTdreStncU82V0RMR2Z0Q0wvODVQWEIKa210aXhnUXpRV3g1RWcvemtHdm03eURBalQxeDloNytsRjJwNFlBam5kT2xTS0dmQjFZeTR1RXBQd0kwc1lWdgpKQWc0MEFxbllZUmt4emJPbmQxWGNjdEJFN2Z1VDdrWXhoeSs3WXYrUTJwVy9BYmh6NGlHOEY1MW9GMGZwV0czCmlISDhsVXZFTkp2SUZEVHZ0UEpESlFZalBRN3lUbGlGZUdrMXZUQkcyQkpQNExzVzhpbDZOeUFuRktaY1hOQ24KeHVCendiSlJBb0dCQVBUK0dGTVJGRHRHZVl6NmwzZmg3UjJ0MlhrMysvUmpvR3BDUWREWDhYNERqR1pVd1RGVQpOS2tQTTNjS29ia2RBYlBDb3FpL0tOOVBibk9QVlZ3R3JkSE9vSnNibFVHYmJGamFTUzJQMFZnNUVhTC9rT2dUCmxMMUdoVFpIUWk1VUlMM0p4M1Z3T0ZRQ3RQOU1UQlQ0UEQvcEFLbDg3VTJXN3JTY1dGV1ZGbFNkQW9HQkFPOFUKVmhHWkRpVGFKTWVtSGZIdVYrNmtzaUlsam9aUVVzeGpmTGNMZ2NjV2RmTHBqS0ZWTzJNN3NqcEJEZ0w4NmFnegorVk14ZkQzZ1l0SmNWN01aMVcwNlZ6TlNVTHh3a1dRY1hXUWdDaXc5elpyYlhCUmZRNUVjMFBlblVoWWVwVzF5CkpkTC8rSlpQeDJxSzVrQytiWU5EdmxlNWdpcjlDSGVzTlR5enVyckRBb0dCQUl0cTJnN1RaazhCSVFUUVNrZ24Kb3BkRUtzRW4wZExXcXlBdENtVTlyaWpHL2l2eHlXczMveXZDQWNpWm5VVEp0QUZISHVlbXVTeXplQ2g5QmRkegoyWkRPNUdqQVBxVHlQS3NudFlNZkY4UDczZ1NES1VSWWVFbHFDejdET0c5QzRzcitPK3FoN1B3cCtqUmFoK1ZiCkNuWllNMDlBVDQ3YStJYUJmbWRkaXpLbEFvR0JBSmo1dkRDNmJIQnNISWlhNUNJL1RZaG5YWXUzMkVCYytQM0sKMHF3VThzOCtzZTNpUHBla2Y4RjVHd3RuUU4zc2tsMk1GQWFGYldmeVFZazBpUEVTb0p1cGJzNXA1enNNRkJ1bwpncUZrVnQ0RUZhRDJweTVwM2tQbDJsZjhlZXVwWkZScGE0WmRQdVIrMjZ4eWYrNEJhdlZJeld3NFNPL1V4Q3crCnhqbTNEczRkQW9HQWREL0VOa1BjU004c1BCM3JSWW9MQ2twcUV2U0MzbVZSbjNJd3c1WFAwcDRRVndhRmR1ckMKYUhtSE1EekNrNEUvb0haQVhFdGZ2S2tRaUI4MXVYM2c1aVo4amdYUVhXUHRteTVIcVVhcWJYUTlENkxWc3B0egpKL3R4SWJLMXp5c1o2bk9IY1VoUUwyVVF6SlBBRThZNDdjYzVzTThEN3kwZjJ0QURTQUZNMmN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==",
+ // Salt for identity (base64)
+ "Salt":"4kk02v0NIcGtlobZ/xkxqWz8uH/ams/gjvQm14QT0dI=",
+ // DH Private key
+ "DHKeyPrivate":"eyJWYWx1ZSI6NDU2MDgzOTEzMjA0OTIyODA5Njg2MDI3MzQ0MzM3OTA0MzAyODYwMjM2NDk2NDM5NDI4NTcxMTMwNDMzOTQwMzgyMTIyMjY4OTQzNTMyMjIyMzc1MTkzNTEzMjU4MjA4MDA0NTczMDY4MjEwNzg2NDI5NjA1MjA0OTA3MjI2ODI5OTc3NTczMDkxODY0NTY3NDExMDExNjQxNCwiRmluZ2VycHJpbnQiOjE2ODAxNTQxNTExMjMzMDk4MzYzfQ=="
+}
+ */
+@interface BindingsReceptionIdentity : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) NSData* _Nullable id_;
+@property (nonatomic) NSData* _Nullable rsaPrivatePem;
+@property (nonatomic) NSData* _Nullable salt;
+@property (nonatomic) NSData* _Nullable dhKeyPrivate;
 @end
 
 /**
@@ -433,17 +691,40 @@ Login does not block on network connection, and instead loads and
 starts subprocesses to perform network operations.
 TODO: add in custom parameters instead of the default
  */
-FOUNDATION_EXPORT BindingsClient* _Nullable BindingsLogin(NSString* _Nullable storageDir, NSData* _Nullable password, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsCmix* _Nullable BindingsLogin(NSString* _Nullable storageDir, NSData* _Nullable password, NSError* _Nullable* _Nullable error);
 
 /**
- * NewClient creates client storage, generates keys, connects, and registers
+ * LoginE2e creates and returns a new E2e object and adds it to the e2eTrackerSingleton
+identity should be created via MakeIdentity() and passed in here
+If callbacks is left nil, a default auth.Callbacks will be used
+ */
+FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLoginE2e(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSError* _Nullable* _Nullable error);
+
+/**
+ * LoginE2eEphemeral creates and returns a new ephemeral E2e object and adds it to the e2eTrackerSingleton
+identity should be created via MakeIdentity() and passed in here
+If callbacks is left nil, a default auth.Callbacks will be used
+ */
+FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLoginE2eEphemeral(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSError* _Nullable* _Nullable error);
+
+/**
+ * LoginE2eLegacy creates a new E2e backed by the xxdk.Cmix persistent versioned.KV
+Uses the pre-generated transmission ID used by xxdk.Cmix
+If callbacks is left nil, a default auth.Callbacks will be used
+This function is designed to maintain backwards compatibility with previous xx messenger designs
+and should not be used for other purposes
+ */
+FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLoginE2eLegacy(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSError* _Nullable* _Nullable error);
+
+/**
+ * NewKeystore creates client storage, generates keys, connects, and registers
 with the network. Note that this does not register a username/identity, but
 merely creates a new cryptographic identity for adding such information
 at a later date.
 
 Users of this function should delete the storage directory on error.
  */
-FOUNDATION_EXPORT BOOL BindingsNewClient(NSString* _Nullable network, NSString* _Nullable storageDir, NSData* _Nullable password, NSString* _Nullable regCode, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BOOL BindingsNewKeystore(NSString* _Nullable network, NSString* _Nullable storageDir, NSData* _Nullable password, NSString* _Nullable regCode, NSError* _Nullable* _Nullable error);
 
 /**
  * RegisterLogWriter registers a callback on which logs are written.
@@ -471,6 +752,8 @@ Accepts a marshalled contact.Contact object & a marshalled list of Fact objects
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSetFactsOnContact(NSData* _Nullable marshaled, NSData* _Nullable facts, NSError* _Nullable* _Nullable error);
 
+@class BindingsAuthCallbacks;
+
 @class BindingsClientError;
 
 @class BindingsListener;
@@ -480,6 +763,21 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsSetFactsOnContact(NSData* _Nullable 
 @class BindingsMessageDeliveryCallback;
 
 @class BindingsNetworkHealthCallback;
+
+@class BindingsProcessor;
+
+/**
+ * AuthCallbacks is the bindings-specific interface for auth.Callbacks methods.
+ */
+@interface BindingsAuthCallbacks : NSObject <goSeqRefInterface, BindingsAuthCallbacks> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)confirm:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
+- (void)request:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
+- (void)reset:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
+@end
 
 @interface BindingsClientError : NSObject <goSeqRefInterface, BindingsClientError> {
 }
@@ -544,6 +842,18 @@ changes
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (void)callback:(BOOL)p0;
+@end
+
+/**
+ * Processor is the bindings-specific interface for message.Processor methods.
+ */
+@interface BindingsProcessor : NSObject <goSeqRefInterface, BindingsProcessor> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)process:(NSData* _Nullable)message receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
+- (NSString* _Nonnull)string;
 @end
 
 #endif

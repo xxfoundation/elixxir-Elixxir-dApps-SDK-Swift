@@ -9,7 +9,7 @@ public struct NetworkFollowerStopper {
 }
 
 extension NetworkFollowerStopper {
-  public static func live(bindingsClient: BindingsClient) -> NetworkFollowerStopper {
+  public static func live(bindingsClient: BindingsCmix) -> NetworkFollowerStopper {
     NetworkFollowerStopper(stop: bindingsClient.stopNetworkFollower)
   }
 }

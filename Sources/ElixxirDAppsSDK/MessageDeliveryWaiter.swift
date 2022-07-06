@@ -18,7 +18,7 @@ public struct MessageDeliveryWaiter {
 }
 
 extension MessageDeliveryWaiter {
-  public static func live(bindingsClient: BindingsClient) -> MessageDeliveryWaiter {
+  public static func live(bindingsClient: BindingsCmix) -> MessageDeliveryWaiter {
     MessageDeliveryWaiter { report, timeoutMS, callback in
       let encoder = JSONEncoder()
       let reportData = try encoder.encode(report)

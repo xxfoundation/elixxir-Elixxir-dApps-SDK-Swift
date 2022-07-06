@@ -1,19 +1,20 @@
 import Bindings
 
 public struct ContactFromIdentityProvider {
-  public var get: (Identity) throws -> Data
+  public var get: () throws -> Data
 
-  public func callAsFunction(identity: Identity) throws -> Data {
-    try get(identity)
+  public func callAsFunction() throws -> Data {
+    try get()
   }
 }
 
 extension ContactFromIdentityProvider {
-  public static func live(bindingsClient: BindingsClient) -> ContactFromIdentityProvider {
-    ContactFromIdentityProvider { identity in
-      let encoder = JSONEncoder()
-      let identityData = try encoder.encode(identity)
-      let contactData = try bindingsClient.getContactFromIdentity(identityData)
+  public static func live(bindingsClientE2E: BindingsE2e) -> ContactFromIdentityProvider {
+    ContactFromIdentityProvider {
+      let contactData = bindingsClientE2E.getContact()
+        guard let contactData = contactData else {
+            fatalError("BindingsGetContact returned `nil` without providing error")
+        }
       return contactData
     }
   }
@@ -21,7 +22,7 @@ extension ContactFromIdentityProvider {
 
 #if DEBUG
 extension ContactFromIdentityProvider {
-  public static let failing = ContactFromIdentityProvider { _ in
+  public static let failing = ContactFromIdentityProvider {
     struct NotImplemented: Error {}
     throw NotImplemented()
   }

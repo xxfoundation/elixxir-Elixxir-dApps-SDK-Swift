@@ -9,7 +9,7 @@ public struct ClientProcessStatusProvider {
 }
 
 extension ClientProcessStatusProvider {
-  public static func live(bindingsClient: BindingsClient) -> ClientProcessStatusProvider {
+  public static func live(bindingsClient: BindingsCmix) -> ClientProcessStatusProvider {
     ClientProcessStatusProvider(get: bindingsClient.hasRunningProcessies)
   }
 }

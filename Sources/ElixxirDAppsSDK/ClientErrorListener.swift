@@ -9,10 +9,10 @@ public struct ClientErrorListener {
 }
 
 extension ClientErrorListener {
-  public static func live(bindingsClient: BindingsClient) -> ClientErrorListener {
+  public static func live(bindingsClient: BindingsCmix) -> ClientErrorListener {
     ClientErrorListener { callback in
       let listener = Listener(onReport: callback)
-      bindingsClient.registerErrorCallback(listener)
+      bindingsClient.registerClientErrorCallback(listener)
     }
   }
 }

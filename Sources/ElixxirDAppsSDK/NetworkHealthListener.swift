@@ -9,7 +9,7 @@ public struct NetworkHealthListener {
 }
 
 extension NetworkHealthListener {
-  public static func live(bindingsClient: BindingsClient) -> NetworkHealthListener {
+  public static func live(bindingsClient: BindingsCmix) -> NetworkHealthListener {
     NetworkHealthListener { callback in
       let listener = Listener(onCallback: callback)
       let id = bindingsClient.registerNetworkHealthCB(listener)

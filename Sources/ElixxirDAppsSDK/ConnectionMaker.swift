@@ -1,34 +1,32 @@
 import Bindings
 
 public struct ConnectionMaker {
-  public var connect: (Bool, Data, Identity) throws -> Connection
+  public var connect: (Bool, Data, Int) throws -> Connection
 
   public func callAsFunction(
     withAuthentication: Bool,
     recipientContact: Data,
-    myIdentity: Identity
+    e2eId: Int
   ) throws -> Connection {
-    try connect(withAuthentication, recipientContact, myIdentity)
+    try connect(withAuthentication, recipientContact, e2eId)
   }
 }
 
 extension ConnectionMaker {
-  public static func live(bindingsClient: BindingsClient) -> ConnectionMaker {
-    ConnectionMaker { withAuthentication, recipientContact, myIdentity in
-      let encoder = JSONEncoder()
-      let myIdentityData = try encoder.encode(myIdentity)
+  public static func live(bindingsClient: BindingsCmix) -> ConnectionMaker {
+    ConnectionMaker { withAuthentication, recipientContact, e2eId in
       if withAuthentication {
         return Connection.live(
           bindingsAuthenticatedConnection: try bindingsClient.connect(
-            withAuthentication: recipientContact,
-            myIdentity: myIdentityData
+            withAuthentication: e2eId,
+            recipientContact: recipientContact
           )
         )
       } else {
         return Connection.live(
           bindingsConnection: try bindingsClient.connect(
-            recipientContact,
-            myIdentity: myIdentityData
+            e2eId,
+            recipientContact: recipientContact
           )
         )
       }

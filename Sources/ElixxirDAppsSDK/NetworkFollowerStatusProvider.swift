@@ -9,7 +9,7 @@ public struct NetworkFollowerStatusProvider {
 }
 
 extension NetworkFollowerStatusProvider {
-  public static func live(bindingsClient: BindingsClient) -> NetworkFollowerStatusProvider {
+  public static func live(bindingsClient: BindingsCmix) -> NetworkFollowerStatusProvider {
     NetworkFollowerStatusProvider {
       let rawValue = bindingsClient.networkFollowerStatus()
       return NetworkFollowerStatus(rawValue: rawValue)

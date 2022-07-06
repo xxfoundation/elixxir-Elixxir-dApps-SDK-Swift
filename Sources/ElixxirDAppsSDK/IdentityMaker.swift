@@ -9,7 +9,7 @@ public struct IdentityMaker {
 }
 
 extension IdentityMaker {
-  public static func live(bindingsClient: BindingsClient) -> IdentityMaker {
+  public static func live(bindingsClient: BindingsCmix) -> IdentityMaker {
     IdentityMaker {
       let data = try bindingsClient.makeIdentity()
       let decoder = JSONDecoder()
