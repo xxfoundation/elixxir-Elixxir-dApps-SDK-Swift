@@ -90,6 +90,12 @@ Use the client to make a new identity:
 let client: Client = ...
 let myIdentity = try client.makeIdentity()
 ```
+### ▶️ Create new E2E client
+
+```swift
+let client: Client = ...
+let clientE2E = try ClientE2ELogin.live(with: client)
+```
 
 ### ▶️ Connecting to remote
 
@@ -97,10 +103,11 @@ Perform auth key negotiation with the given recipient to get the `Connection`:
 
 ```swift
 let client: Client = ...
+let clientE2E: ClientE2E = ...
 let connection = try client.connect(
   withAuthentication: false,
   recipientContact: ..., 
-  myIdentity: ...
+  e2eId: clientE2E.getId()
 )
 ```
 
