@@ -40,7 +40,9 @@ let package = Package(
     .target(
       name: "ElixxirDAppsSDK",
       dependencies: [
-        .target(name: "Bindings"),
+        .target(
+          name: "Bindings"
+        ),
         .product(
           name: "XCTestDynamicOverlay",
           package: "xctest-dynamic-overlay"
@@ -51,7 +53,9 @@ let package = Package(
     .testTarget(
       name: "ElixxirDAppsSDKTests",
       dependencies: [
-        .target(name: "ElixxirDAppsSDK"),
+        .target(
+          name: "ElixxirDAppsSDK"
+        ),
         .product(
           name: "CustomDump",
           package: "swift-custom-dump"
