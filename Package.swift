@@ -31,12 +31,20 @@ let package = Package(
       url: "https://github.com/pointfreeco/swift-custom-dump.git",
       .upToNextMajor(from: "0.4.0")
     ),
+    .package(
+      url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
+      .upToNextMajor(from: "0.3.3")
+    ),
   ],
   targets: [
     .target(
       name: "ElixxirDAppsSDK",
       dependencies: [
         .target(name: "Bindings"),
+        .product(
+          name: "XCTestDynamicOverlay",
+          package: "xctest-dynamic-overlay"
+        ),
       ],
       swiftSettings: swiftSettings
     ),
