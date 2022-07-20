@@ -2,23 +2,24 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct Login {
-  public var run: (Int, Data, Data) throws -> E2E
+  public var run: (Int, AuthCallbacks?, Data, Data) throws -> E2E
 
   public func callAsFunction(
     cmixId: Int,
+    authCallbacks: AuthCallbacks? = nil,
     identity: Data,
     e2eParamsJSON: Data
   ) throws -> E2E {
-    try run(cmixId, identity, e2eParamsJSON)
+    try run(cmixId, authCallbacks, identity, e2eParamsJSON)
   }
 }
 
 extension Login {
-  public static let live = Login { cmixId, identity, e2eParamsJSON in
+  public static let live = Login { cmixId, authCallbacks, identity, e2eParamsJSON in
     var error: NSError?
     let bindingsE2E = BindingsLogin(
       cmixId,
-      nil, // TODO: pass callbacks
+      authCallbacks?.makeBindingsAuthCallbacks(),
       identity,
       e2eParamsJSON,
       &error
