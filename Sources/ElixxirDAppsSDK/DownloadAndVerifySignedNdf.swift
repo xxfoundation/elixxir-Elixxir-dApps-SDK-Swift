@@ -1,6 +1,7 @@
 import Bindings
+import XCTestDynamicOverlay
 
-public struct NDFDownloader {
+public struct DownloadAndVerifySignedNdf {
   public var run: (Environment) throws -> Data
 
   public func callAsFunction(_ env: Environment) throws -> Data {
@@ -8,8 +9,8 @@ public struct NDFDownloader {
   }
 }
 
-extension NDFDownloader {
-  public static let live = NDFDownloader { env in
+extension DownloadAndVerifySignedNdf {
+  public static let live = DownloadAndVerifySignedNdf { env in
     var error: NSError?
     let data = BindingsDownloadAndVerifySignedNdfWithUrl(
       env.url.absoluteString,
@@ -26,11 +27,8 @@ extension NDFDownloader {
   }
 }
 
-#if DEBUG
-extension NDFDownloader {
-  public static let failing = NDFDownloader { _ in
-    struct NotImplemented: Error {}
-    throw NotImplemented()
-  }
+extension DownloadAndVerifySignedNdf {
+  public static let unimplemented = DownloadAndVerifySignedNdf(
+    run: XCTUnimplemented("\(Self.self)")
+  )
 }
-#endif
