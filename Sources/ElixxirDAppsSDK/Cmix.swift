@@ -1,15 +1,19 @@
 import Bindings
 
 public struct Cmix {
-  // TODO:
+  public var makeReceptionIdentity: MakeReceptionIdentity
 }
 
 extension Cmix {
   public static func live(_ bindingsCmix: BindingsCmix) -> Cmix {
-    Cmix()
+    Cmix(
+      makeReceptionIdentity: .live(bindingsCmix)
+    )
   }
 }
 
 extension Cmix {
-  public static let unimplemented = Cmix()
+  public static let unimplemented = Cmix(
+    makeReceptionIdentity: .unimplemented
+  )
 }
