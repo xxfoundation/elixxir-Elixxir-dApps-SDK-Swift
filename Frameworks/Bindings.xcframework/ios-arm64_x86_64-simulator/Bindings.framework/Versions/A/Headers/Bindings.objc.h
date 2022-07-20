@@ -144,7 +144,7 @@ Accepts a marshalled Message object
 @end
 
 /**
- * Cmix BindingsClient wraps the xxdk.Cmix, implementing additional functions
+ * Cmix wraps the xxdk.Cmix struct, implementing additional functions
 to support the gomobile Cmix interface
  */
 @interface BindingsCmix : NSObject <goSeqRefInterface> {
@@ -153,6 +153,12 @@ to support the gomobile Cmix interface
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
+/**
+ * AddHealthCallback registers the network health callback to be called
+any time the network health changes. Returns a unique ID that can be used to
+unregister the network health callback.
+ */
+- (int64_t)addHealthCallback:(id<BindingsNetworkHealthCallback> _Nullable)nhc;
 /**
  * Connect performs auth key negotiation with the given recipient,
 and returns a Connection object for the newly-created partner.Manager
@@ -174,18 +180,18 @@ state apropreatly. This can be used instead.
  */
 - (BOOL)hasRunningProcessies;
 /**
- * IsNetworkHealthy returns true if the network is read to be in a healthy state where
+ * IsHealthy returns true if the network is read to be in a healthy state where
 messages can be sent
  */
-- (BOOL)isNetworkHealthy;
+- (BOOL)isHealthy;
 /**
- * MakeIdentity generates a new cryptographic identity for receiving messages
+ * MakeLegacyReceptionIdentity generates the legacy identity for receiving messages
  */
-- (NSData* _Nullable)makeIdentity:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)makeLegacyReceptionIdentity:(NSError* _Nullable* _Nullable)error;
 /**
- * MakeLegacyIdentity generates the legacy identity for receiving messages
+ * MakeReceptionIdentity generates a new cryptographic identity for receiving messages
  */
-- (NSData* _Nullable)makeLegacyIdentity:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)makeReceptionIdentity:(NSError* _Nullable* _Nullable)error;
 /**
  * Gets the state of the network follower. Returns:
 Stopped 	- 0
@@ -199,12 +205,7 @@ Stopping	- 3000
 long running threads controlled by StartNetworkFollower and StopNetworkFollower
  */
 - (void)registerClientErrorCallback:(id<BindingsClientError> _Nullable)clientError;
-/**
- * RegisterNetworkHealthCB registers the network health callback to be called
-any time the network health changes. Returns a unique ID that can be used to
-unregister the network health callback.
- */
-- (int64_t)registerNetworkHealthCB:(id<BindingsNetworkHealthCallback> _Nullable)nhc;
+- (void)removeHealthCallback:(int64_t)funcID;
 /**
  * StartNetworkFollower kicks off the tracking of the network. It starts
 long running network client threads and returns an object for checking
@@ -244,7 +245,6 @@ if the network follower is running and this fails, the client object will
 most likely be in an unrecoverable state and need to be trashed.
  */
 - (BOOL)stopNetworkFollower:(NSError* _Nullable* _Nullable)error;
-- (void)unregisterNetworkHealthCB:(int64_t)funcID;
 /**
  * WaitForMessageDelivery allows the caller to get notified if the rounds a
 message was sent in successfully completed. Under the hood, this uses an API
@@ -1018,6 +1018,17 @@ FOUNDATION_EXPORT BindingsFileTransfer* _Nullable BindingsInitFileTransfer(long 
 
 
 /**
+ * LoadCmix will load an existing client from the storageDir
+using the password. This will fail if the client doesn't exist or
+the password is incorrect.
+The password is passed as a byte array so that it can be cleared from
+memory and stored as securely as possible using the memguard library.
+LoadCmix does not block on network connection, and instead loads and
+starts subprocesses to perform network operations.
+ */
+FOUNDATION_EXPORT BindingsCmix* _Nullable BindingsLoadCmix(NSString* _Nullable storageDir, NSData* _Nullable password, NSData* _Nullable cmixParamsJSON, NSError* _Nullable* _Nullable error);
+
+/**
  * LoadReceptionIdentity loads the given identity in Cmix storage with the given key
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsLoadReceptionIdentity(NSString* _Nullable key, long cmixId, NSError* _Nullable* _Nullable error);
@@ -1037,40 +1048,28 @@ The default state without updates is: INFO
 FOUNDATION_EXPORT BOOL BindingsLogLevel(long level, NSError* _Nullable* _Nullable error);
 
 /**
- * Login will load an existing client from the storageDir
-using the password. This will fail if the client doesn't exist or
-the password is incorrect.
-The password is passed as a byte array so that it can be cleared from
-memory and stored as securely as possible using the memguard library.
-Login does not block on network connection, and instead loads and
-starts subprocesses to perform network operations.
-TODO: add in custom parameters instead of the default
- */
-FOUNDATION_EXPORT BindingsCmix* _Nullable BindingsLogin(NSString* _Nullable storageDir, NSData* _Nullable password, NSData* _Nullable cmixParamsJSON, NSError* _Nullable* _Nullable error);
-
-/**
- * LoginE2e creates and returns a new E2e object and adds it to the e2eTrackerSingleton
-identity should be created via MakeIdentity() and passed in here
+ * Login creates and returns a new E2e object and adds it to the e2eTrackerSingleton
+identity should be created via MakeReceptionIdentity() and passed in here
 If callbacks is left nil, a default auth.Callbacks will be used
  */
-FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLoginE2e(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLogin(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * LoginE2eEphemeral creates and returns a new ephemeral E2e object and adds it to the e2eTrackerSingleton
-identity should be created via MakeIdentity() and passed in here
+ * LoginEphemeral creates and returns a new ephemeral E2e object and adds it to the e2eTrackerSingleton
+identity should be created via MakeReceptionIdentity() or MakeLegacyReceptionIdentity() and passed in here
 If callbacks is left nil, a default auth.Callbacks will be used
  */
-FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLoginE2eEphemeral(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLoginEphemeral(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * NewKeystore creates client storage, generates keys, connects, and registers
+ * NewCmix creates client storage, generates keys, connects, and registers
 with the network. Note that this does not register a username/identity, but
 merely creates a new cryptographic identity for adding such information
 at a later date.
 
 Users of this function should delete the storage directory on error.
  */
-FOUNDATION_EXPORT BOOL BindingsNewKeystore(NSString* _Nullable network, NSString* _Nullable storageDir, NSData* _Nullable password, NSString* _Nullable regCode, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BOOL BindingsNewCmix(NSString* _Nullable ndfJSON, NSString* _Nullable storageDir, NSData* _Nullable password, NSString* _Nullable registrationCode, NSError* _Nullable* _Nullable error);
 
 /**
  * RegisterLogWriter registers a callback on which logs are written.
