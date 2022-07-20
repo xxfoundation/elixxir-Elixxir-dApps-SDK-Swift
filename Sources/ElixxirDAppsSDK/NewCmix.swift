@@ -2,10 +2,6 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct NewCmix {
-  public init(run: @escaping (String, String, Data, String?) throws -> Bool) {
-    self.run = run
-  }
-
   public var run: (String, String, Data, String?) throws -> Bool
 
   public func callAsFunction(
