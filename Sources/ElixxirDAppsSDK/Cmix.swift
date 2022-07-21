@@ -11,6 +11,7 @@ public struct Cmix {
   public var stopNetworkFollower: CmixStopNetworkFollower
   public var waitForNetwork: CmixWaitForNetwork
   public var registerClientErrorCallback: CmixRegisterClientErrorCallback
+  public var addHealthCallback: CmixAddHealthCallback
 }
 
 extension Cmix {
@@ -25,7 +26,8 @@ extension Cmix {
       startNetworkFollower: .live(bindingsCmix),
       stopNetworkFollower: .live(bindingsCmix),
       waitForNetwork: .live(bindingsCmix),
-      registerClientErrorCallback: .live(bindingsCmix)
+      registerClientErrorCallback: .live(bindingsCmix),
+      addHealthCallback: .live(bindingsCmix)
     )
   }
 }
@@ -41,6 +43,7 @@ extension Cmix {
     startNetworkFollower: .unimplemented,
     stopNetworkFollower: .unimplemented,
     waitForNetwork: .unimplemented,
-    registerClientErrorCallback: .unimplemented
+    registerClientErrorCallback: .unimplemented,
+    addHealthCallback: .unimplemented
   )
 }
