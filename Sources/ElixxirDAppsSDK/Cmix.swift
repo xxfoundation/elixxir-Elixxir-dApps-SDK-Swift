@@ -4,6 +4,7 @@ public struct Cmix {
   public var getId: CmixGetId
   public var makeReceptionIdentity: MakeReceptionIdentity
   public var isHealthy: CmixIsHealthy
+  public var hasRunningProcesses: CmixHasRunningProcesses
 }
 
 extension Cmix {
