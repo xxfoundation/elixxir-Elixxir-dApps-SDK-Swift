@@ -2,7 +2,7 @@ import Bindings
 
 public struct Cmix {
   public var getId: CmixGetId
-  public var makeReceptionIdentity: MakeReceptionIdentity
+  public var makeReceptionIdentity: CmixMakeReceptionIdentity
   public var isHealthy: CmixIsHealthy
   public var hasRunningProcesses: CmixHasRunningProcesses
   public var networkFollowerStatus: CmixNetworkFollowerStatus
