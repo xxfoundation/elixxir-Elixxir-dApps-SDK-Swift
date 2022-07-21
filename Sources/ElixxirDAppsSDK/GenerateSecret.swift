@@ -1,6 +1,7 @@
 import Bindings
+import XCTestDynamicOverlay
 
-public struct PasswordGenerator {
+public struct GenerateSecret {
   public var run: (Int) -> Data
 
   public func callAsFunction(numBytes: Int = 32) -> Data {
@@ -8,8 +9,8 @@ public struct PasswordGenerator {
   }
 }
 
-extension PasswordGenerator {
-  public static let live = PasswordGenerator { numBytes in
+extension GenerateSecret {
+  public static let live = GenerateSecret { numBytes in
     guard let secret = BindingsGenerateSecret(numBytes) else {
       fatalError("BindingsGenerateSecret returned `nil`")
     }
@@ -17,10 +18,8 @@ extension PasswordGenerator {
   }
 }
 
-#if DEBUG
-extension PasswordGenerator {
-  public static let failing = PasswordGenerator { _ in
-    fatalError("Not implemented")
-  }
+extension GenerateSecret {
+  public static let unimplemented = GenerateSecret(
+    run: XCTUnimplemented("\(Self.self)")
+  )
 }
-#endif
