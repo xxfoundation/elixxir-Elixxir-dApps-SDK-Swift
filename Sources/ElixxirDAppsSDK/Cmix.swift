@@ -7,6 +7,7 @@ public struct Cmix {
   public var hasRunningProcesses: CmixHasRunningProcesses
   public var networkFollowerStatus: CmixNetworkFollowerStatus
   public var startNetworkFollower: CmixStartNetworkFollower
+  public var stopNetworkFollower: CmixStopNetworkFollower
 }
 
 extension Cmix {
@@ -17,7 +18,8 @@ extension Cmix {
       isHealthy: .live(bindingsCmix),
       hasRunningProcesses: .live(bindingsCmix),
       networkFollowerStatus: .live(bindingsCmix),
-      startNetworkFollower: .live(bindingsCmix)
+      startNetworkFollower: .live(bindingsCmix),
+      stopNetworkFollower: .live(bindingsCmix)
     )
   }
 }
@@ -29,6 +31,7 @@ extension Cmix {
     isHealthy: .unimplemented,
     hasRunningProcesses: .unimplemented,
     networkFollowerStatus: .unimplemented,
-    startNetworkFollower: .unimplemented
+    startNetworkFollower: .unimplemented,
+    stopNetworkFollower: .unimplemented
   )
 }
