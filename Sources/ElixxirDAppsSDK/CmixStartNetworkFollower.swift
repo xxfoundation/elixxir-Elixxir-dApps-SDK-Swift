@@ -2,10 +2,10 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct CmixStartNetworkFollower {
-  public var start: (Int) throws -> Void
+  public var run: (Int) throws -> Void
 
   public func callAsFunction(timeoutMS: Int) throws {
-    try start(timeoutMS)
+    try run(timeoutMS)
   }
 }
 
@@ -19,6 +19,6 @@ extension CmixStartNetworkFollower {
 
 extension CmixStartNetworkFollower {
   public static let unimplemented = CmixStartNetworkFollower(
-    start: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)")
   )
 }
