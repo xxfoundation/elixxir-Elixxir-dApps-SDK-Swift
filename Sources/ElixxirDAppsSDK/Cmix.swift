@@ -9,6 +9,7 @@ public struct Cmix {
   public var networkFollowerStatus: CmixNetworkFollowerStatus
   public var startNetworkFollower: CmixStartNetworkFollower
   public var stopNetworkFollower: CmixStopNetworkFollower
+  public var waitForNetwork: CmixWaitForNetwork
 }
 
 extension Cmix {
@@ -21,7 +22,8 @@ extension Cmix {
       hasRunningProcesses: .live(bindingsCmix),
       networkFollowerStatus: .live(bindingsCmix),
       startNetworkFollower: .live(bindingsCmix),
-      stopNetworkFollower: .live(bindingsCmix)
+      stopNetworkFollower: .live(bindingsCmix),
+      waitForNetwork: .live(bindingsCmix)
     )
   }
 }
@@ -35,6 +37,7 @@ extension Cmix {
     hasRunningProcesses: .unimplemented,
     networkFollowerStatus: .unimplemented,
     startNetworkFollower: .unimplemented,
-    stopNetworkFollower: .unimplemented
+    stopNetworkFollower: .unimplemented,
+    waitForNetwork: .unimplemented
   )
 }
