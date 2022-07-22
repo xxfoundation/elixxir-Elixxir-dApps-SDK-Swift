@@ -1,4 +1,5 @@
 import Foundation
+import XCTestDynamicOverlay
 
 public struct PasswordStorage {
   public struct MissingPasswordError: Error, Equatable {
@@ -17,17 +18,9 @@ public struct PasswordStorage {
   public var load: () throws -> Data
 }
 
-#if DEBUG
 extension PasswordStorage {
-  public static let failing = PasswordStorage(
-    save: { _ in
-      struct NotImplemented: Error {}
-      throw NotImplemented()
-    },
-    load: {
-      struct NotImplemented: Error {}
-      throw NotImplemented()
-    }
+  public static let unimplemented = PasswordStorage(
+    save: XCTUnimplemented("\(Self.self).save"),
+    load: XCTUnimplemented("\(Self.self).load")
   )
 }
-#endif
