@@ -46,4 +46,12 @@ extension Message: Codable {
     case encrypted = "Encrypted"
     case roundId = "RoundId"
   }
+
+  static func decode(_ data: Data) throws -> Message {
+    try JSONDecoder().decode(Self.self, from: data)
+  }
+
+  func encode() throws -> Data {
+    try JSONEncoder().encode(self)
+  }
 }

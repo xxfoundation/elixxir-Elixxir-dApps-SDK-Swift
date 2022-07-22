@@ -1,4 +1,54 @@
-//import Bindings
+import Bindings
+import XCTestDynamicOverlay
+
+public struct MessageListener {
+  public init(
+    name: String = "MessageListener",
+    handle: @escaping (Message) -> Void
+  ) {
+    self.name = name
+    self.handle = handle
+  }
+
+  public var name: String
+  public var handle: (Message) -> Void
+}
+
+extension MessageListener {
+  public static let unimplemented = MessageListener(
+    handle: XCTUnimplemented("\(Self.self)")
+  )
+}
+
+extension MessageListener {
+  func makeBindingsListener() -> BindingsListenerProtocol {
+    class Listener: NSObject, BindingsListenerProtocol {
+      init(_ listener: MessageListener) {
+        self.listener = listener
+      }
+
+      let listener: MessageListener
+
+      func hear(_ item: Data?) {
+        guard let item = item else {
+          fatalError("BindingsListener.hear received `nil`")
+        }
+        do {
+          listener.handle(try Message.decode(item))
+        } catch {
+          fatalError("BindingsListener.hear message decoding failed with error: \(error)")
+        }
+      }
+
+      func name() -> String {
+        listener.name
+      }
+    }
+
+    return Listener(self)
+  }
+}
+
 //
 //public struct MessageListener {
 //  public var listen: (Int, String, @escaping (Message) -> Void) -> Void
@@ -38,32 +88,6 @@
 //  }
 //}
 //
-//private class Listener: NSObject, BindingsListenerProtocol {
-//  init(listenerName: String, onHear: @escaping (Message) -> Void) {
-//    self.listenerName = listenerName
-//    self.onHear = onHear
-//    super.init()
-//  }
-//
-//  let listenerName: String
-//  let onHear: (Message) -> Void
-//  let decoder = JSONDecoder()
-//
-//  func hear(_ item: Data?) {
-//    guard let item = item else {
-//      fatalError("BindingsListenerProtocol.hear received `nil`")
-//    }
-//    do {
-//      onHear(try decoder.decode(Message.self, from: item))
-//    } catch {
-//      fatalError("Message decoding failed with error: \(error)")
-//    }
-//  }
-//
-//  func name() -> String {
-//    listenerName
-//  }
-//}
 //
 //#if DEBUG
 //extension MessageListener {
