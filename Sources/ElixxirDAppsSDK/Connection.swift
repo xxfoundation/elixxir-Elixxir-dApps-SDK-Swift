@@ -1,19 +1,25 @@
 import Bindings
 
 public struct Connection {
-  // TODO:
+  public var getId: ConnectionGetId
 }
 
 extension Connection {
   public static func live(_ bindingsConnection: BindingsConnection) -> Connection {
-    Connection()
+    Connection(
+      getId: .live(bindingsConnection)
+    )
   }
 
   public static func live(_ bindingsConnection: BindingsAuthenticatedConnection) -> Connection {
-    Connection()
+    Connection(
+      getId: .live(bindingsConnection)
+    )
   }
 }
 
 extension Connection {
-  public static let unimplemented = Connection()
+  public static let unimplemented = Connection(
+    getId: .unimplemented
+  )
 }
