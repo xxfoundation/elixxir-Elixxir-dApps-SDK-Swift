@@ -22,4 +22,12 @@ extension MessageSendReport: Codable {
     case messageId = "MessageID"
     case timestamp = "Timestamp"
   }
+
+  static func decode(_ data: Data) throws -> MessageSendReport {
+    try JSONDecoder().decode(Self.self, from: data)
+  }
+
+  func encode() throws -> Data {
+    try JSONEncoder().encode(self)
+  }
 }
