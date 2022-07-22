@@ -2,14 +2,14 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct NewCmix {
-  public var run: (String, String, Data, String?) throws -> Bool
+  public var run: (String, String, Data, String?) throws -> Void
 
   public func callAsFunction(
     ndfJSON: String,
     storageDir: String,
     password: Data,
     registrationCode: String?
-  ) throws -> Bool {
+  ) throws {
     try run(ndfJSON, storageDir, password, registrationCode)
   }
 }
@@ -21,7 +21,9 @@ extension NewCmix {
     if let error = error {
       throw error
     }
-    return result
+    if !result {
+      fatalError("BindingsNewCmix returned `false` without providing error")
+    }
   }
 }
 
