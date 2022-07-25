@@ -7,6 +7,7 @@ public struct E2E {
   public var payloadSize: E2EPayloadSize
   public var partitionSize: E2EPartitionSize
   public var addPartnerCallback: E2EAddPartnerCallback
+  public var addService: E2EAddService
 
   // TODO:
 }
@@ -19,7 +20,8 @@ extension E2E {
       getContact: .live(bindingsE2E: bindingsE2E),
       payloadSize: .live(bindingsE2E: bindingsE2E),
       partitionSize: .live(bindingsE2E: bindingsE2E),
-      addPartnerCallback: .live(bindingsE2E)
+      addPartnerCallback: .live(bindingsE2E),
+      addService: .live(bindingsE2E)
     )
   }
 }
@@ -31,6 +33,7 @@ extension E2E {
     getContact: .unimplemented,
     payloadSize: .unimplemented,
     partitionSize: .unimplemented,
-    addPartnerCallback: .unimplemented
+    addPartnerCallback: .unimplemented,
+    addService: .unimplemented
   )
 }
