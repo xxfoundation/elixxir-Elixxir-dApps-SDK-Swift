@@ -12,9 +12,8 @@ final class MessageSendReportTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let decoder = JSONDecoder()
-    decoder.dataDecodingStrategy = .base64
-    let report = try decoder.decode(MessageSendReport.self, from: jsonData)
+
+    let report = try MessageSendReport.decode(jsonData)
 
     XCTAssertNoDifference(report, MessageSendReport(
       roundList: [1, 5, 9],
@@ -22,10 +21,8 @@ final class MessageSendReportTests: XCTestCase {
       timestamp: 1_653_582_683_183_384_000
     ))
 
-    let encoder = JSONEncoder()
-    encoder.dataEncodingStrategy = .base64
-    let encodedReport = try encoder.encode(report)
-    let decodedReport = try decoder.decode(MessageSendReport.self, from: encodedReport)
+    let encodedReport = try report.encode()
+    let decodedReport = try MessageSendReport.decode(encodedReport)
 
     XCTAssertNoDifference(decodedReport, report)
   }
