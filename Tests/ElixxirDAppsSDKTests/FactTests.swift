@@ -4,26 +4,25 @@ import XCTest
 
 final class FactTests: XCTestCase {
   func testCoding() throws {
+    let factString = "Zezima"
+    let factType: Int = 0
     let jsonString = """
     {
-      "Fact": "Zezima",
-      "Type": 0
+      "Fact": "\(factString)",
+      "Type": \(factType)
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let decoder = JSONDecoder()
-    decoder.dataDecodingStrategy = .base64
-    let fact = try decoder.decode(Fact.self, from: jsonData)
+
+    let fact = try Fact.decode(jsonData)
 
     XCTAssertNoDifference(fact, Fact(
-      fact: "Zezima",
-      type: 0
+      fact: factString,
+      type: factType
     ))
 
-    let encoder = JSONEncoder()
-    encoder.dataEncodingStrategy = .base64
-    let encodedFact = try encoder.encode(fact)
-    let decodedFact = try decoder.decode(Fact.self, from: encodedFact)
+    let encodedFact = try fact.encode()
+    let decodedFact = try Fact.decode(encodedFact)
 
     XCTAssertNoDifference(decodedFact, fact)
   }
