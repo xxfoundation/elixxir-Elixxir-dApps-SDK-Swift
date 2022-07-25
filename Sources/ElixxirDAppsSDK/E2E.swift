@@ -18,6 +18,7 @@ public struct E2E {
   public var callAllReceivedRequests: E2ECallAllReceivedRequests
   public var getReceivedRequest: E2EGetReceivedRequest
   public var deleteRequest: E2EDeleteRequest
+  public var verifyOwnership: E2EVerifyOwnership
   public var send: E2ESend
 
   // TODO:
@@ -43,6 +44,7 @@ extension E2E {
       callAllReceivedRequests: .live(bindingsE2E),
       getReceivedRequest: .live(bindingsE2E),
       deleteRequest: .live(bindingsE2E),
+      verifyOwnership: .live(bindingsE2E),
       send: .live(bindingsE2E)
     )
   }
@@ -67,6 +69,7 @@ extension E2E {
     callAllReceivedRequests: .unimplemented,
     getReceivedRequest: .unimplemented,
     deleteRequest: .unimplemented,
+    verifyOwnership: .unimplemented,
     send: .unimplemented
   )
 }
