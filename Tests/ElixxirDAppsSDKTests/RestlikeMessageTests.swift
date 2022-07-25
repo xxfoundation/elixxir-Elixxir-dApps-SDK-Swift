@@ -4,34 +4,37 @@ import XCTest
 
 final class RestlikeMessageTests: XCTestCase {
   func testCoding() throws {
+    let version: Int = 1
+    let headersString = "Y29udGVudHM6YXBwbGljYXRpb24vanNvbg=="
+    let contentString = "VGhpcyBpcyBhIHJlc3RsaWtlIG1lc3NhZ2U="
+    let method: Int = 2
+    let uri = "xx://CmixRestlike/rest"
+    let error = ""
     let jsonString = """
     {
-      "Version": 1,
-      "Headers": "Y29udGVudHM6YXBwbGljYXRpb24vanNvbg==",
-      "Content": "VGhpcyBpcyBhIHJlc3RsaWtlIG1lc3NhZ2U=",
-      "Method": 2,
-      "URI": "xx://CmixRestlike/rest",
-      "Error": ""
+      "Version": \(version),
+      "Headers": "\(headersString)",
+      "Content": "\(contentString)",
+      "Method": \(method),
+      "URI": "\(uri)",
+      "Error": "\(error)"
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let decoder = JSONDecoder()
-    decoder.dataDecodingStrategy = .base64
-    let message = try decoder.decode(RestlikeMessage.self, from: jsonData)
+
+    let message = try RestlikeMessage.decode(jsonData)
 
     XCTAssertNoDifference(message, RestlikeMessage(
-      version: 1,
-      headers: Data(base64Encoded: "Y29udGVudHM6YXBwbGljYXRpb24vanNvbg==")!,
-      content: Data(base64Encoded: "VGhpcyBpcyBhIHJlc3RsaWtlIG1lc3NhZ2U=")!,
-      method: 2,
-      uri: "xx://CmixRestlike/rest",
-      error: ""
+      version: version,
+      headers: Data(base64Encoded: headersString)!,
+      content: Data(base64Encoded: contentString)!,
+      method: method,
+      uri: uri,
+      error: error
     ))
 
-    let encoder = JSONEncoder()
-    encoder.dataEncodingStrategy = .base64
-    let encodedMessage = try encoder.encode(message)
-    let decodedMessage = try decoder.decode(RestlikeMessage.self, from: encodedMessage)
+    let encodedMessage = try message.encode()
+    let decodedMessage = try RestlikeMessage.decode(encodedMessage)
 
     XCTAssertNoDifference(decodedMessage, message)
   }
