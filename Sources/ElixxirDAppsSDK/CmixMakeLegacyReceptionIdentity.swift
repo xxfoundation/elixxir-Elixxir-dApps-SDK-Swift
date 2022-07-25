@@ -2,16 +2,19 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct CmixMakeLegacyReceptionIdentity {
-  public var run: () throws -> Data
+  public var run: () throws -> ReceptionIdentity
 
-  public func callAsFunction() throws -> Data {
+  public func callAsFunction() throws -> ReceptionIdentity {
     try run()
   }
 }
 
 extension CmixMakeLegacyReceptionIdentity {
   public static func live(_ bindingsCmix: BindingsCmix) -> CmixMakeLegacyReceptionIdentity {
-    CmixMakeLegacyReceptionIdentity(run: bindingsCmix.makeLegacyReceptionIdentity)
+    CmixMakeLegacyReceptionIdentity {
+      let data = try bindingsCmix.makeLegacyReceptionIdentity()
+      return try ReceptionIdentity.decode(data)
+    }
   }
 }
 
