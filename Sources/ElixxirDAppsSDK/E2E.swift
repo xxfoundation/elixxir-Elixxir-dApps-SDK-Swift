@@ -14,6 +14,7 @@ public struct E2E {
   public var removeService: E2ERemoveService
   public var hasAuthenticatedChannel: E2EHasAuthenticatedChannel
   public var requestAuthenticatedChannel: E2ERequestAuthenticatedChannel
+  public var resetAuthenticatedChannel: E2EResetAuthenticatedChannel
   public var callAllReceivedRequests: E2ECallAllReceivedRequests
   public var send: E2ESend
 
@@ -36,6 +37,7 @@ extension E2E {
       removeService: .live(bindingsE2E),
       hasAuthenticatedChannel: .live(bindingsE2E),
       requestAuthenticatedChannel: .live(bindingsE2E),
+      resetAuthenticatedChannel: .live(bindingsE2E),
       callAllReceivedRequests: .live(bindingsE2E),
       send: .live(bindingsE2E)
     )
@@ -57,6 +59,7 @@ extension E2E {
     removeService: .unimplemented,
     hasAuthenticatedChannel: .unimplemented,
     requestAuthenticatedChannel: .unimplemented,
+    resetAuthenticatedChannel: .unimplemented,
     callAllReceivedRequests: .unimplemented,
     send: .unimplemented
   )
