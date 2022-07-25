@@ -2,12 +2,12 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct LoadReceptionIdentity {
-  public var run: (String, Int) throws -> Data
+  public var run: (String, Int) throws -> ReceptionIdentity
 
   public func callAsFunction(
     key: String,
     cmixId: Int
-  ) throws -> Data {
+  ) throws -> ReceptionIdentity {
     try run(key, cmixId)
   }
 }
@@ -22,7 +22,7 @@ extension LoadReceptionIdentity {
     guard let data = data else {
       fatalError("BindingsLoadReceptionIdentity returned `nil` without providing error")
     }
-    return data
+    return try ReceptionIdentity.decode(data)
   }
 }
 
