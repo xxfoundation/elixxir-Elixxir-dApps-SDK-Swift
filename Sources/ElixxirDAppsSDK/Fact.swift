@@ -19,21 +19,21 @@ extension Fact: Codable {
     case type = "Type"
   }
 
-  static func decode(_ data: Data) throws -> Fact {
+  public static func decode(_ data: Data) throws -> Fact {
     try JSONDecoder().decode(Self.self, from: data)
   }
 
-  func encode() throws -> Data {
+  public func encode() throws -> Data {
     try JSONEncoder().encode(self)
   }
 }
 
 extension Array where Element == Fact {
-  static func decode(_ data: Data) throws -> [Fact] {
+  public static func decode(_ data: Data) throws -> [Fact] {
     try JSONDecoder().decode(Self.self, from: data)
   }
 
-  func encode() throws -> Data {
+  public func encode() throws -> Data {
     try JSONEncoder().encode(self)
   }
 }
