@@ -2,11 +2,11 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct StoreReceptionIdentity {
-  public var run: (String, Data, Int) throws -> Bool
+  public var run: (String, ReceptionIdentity, Int) throws -> Bool
 
   public func callAsFunction(
     key: String,
-    identity: Data,
+    identity: ReceptionIdentity,
     cmixId: Int
   ) throws -> Bool {
     try run(key, identity, cmixId)
@@ -16,7 +16,8 @@ public struct StoreReceptionIdentity {
 extension StoreReceptionIdentity {
   public static let live = StoreReceptionIdentity { key, identity, cmixId in
     var error: NSError?
-    let result = BindingsStoreReceptionIdentity(key, identity, cmixId, &error)
+    let identityData = try identity.encode()
+    let result = BindingsStoreReceptionIdentity(key, identityData, cmixId, &error)
     if let error = error {
       throw error
     }
