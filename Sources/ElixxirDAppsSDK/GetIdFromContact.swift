@@ -1,15 +1,16 @@
 import Bindings
+import XCTestDynamicOverlay
 
-public struct ContactIdProvider {
-  public var get: (Data) throws -> Data
+public struct GetIdFromContact {
+  public var run: (Data) throws -> Data
 
   public func callAsFunction(contact: Data) throws -> Data {
-    try get(contact)
+    try run(contact)
   }
 }
 
-extension ContactIdProvider {
-  public static let live = ContactIdProvider { contact in
+extension GetIdFromContact {
+  public static let live = GetIdFromContact { contact in
     var error: NSError?
     let id = BindingsGetIDFromContact(contact, &error)
     if let error = error {
@@ -22,11 +23,8 @@ extension ContactIdProvider {
   }
 }
 
-#if DEBUG
-extension ContactIdProvider {
-  public static let failing = ContactIdProvider { _ in
-    struct NotImplemented: Error {}
-    throw NotImplemented()
-  }
+extension GetIdFromContact {
+  public static let unimplemented = GetIdFromContact(
+    run: XCTUnimplemented("\(Self.self)")
+  )
 }
-#endif
