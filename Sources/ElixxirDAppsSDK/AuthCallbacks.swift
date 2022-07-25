@@ -1,12 +1,6 @@
 import Bindings
 import XCTestDynamicOverlay
 
-public enum AuthCallback {
-  case confirm(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
-  case request(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
-  case reset(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
-}
-
 public struct AuthCallbacks {
   public init(handle: @escaping (AuthCallback) -> Void) {
     self.handle = handle
