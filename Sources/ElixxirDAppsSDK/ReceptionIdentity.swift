@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Identity: Equatable {
+public struct ReceptionIdentity: Equatable {
   public init(
     id: Data,
     rsaPrivatePem: Data,
@@ -19,11 +19,19 @@ public struct Identity: Equatable {
   public var dhKeyPrivate: Data
 }
 
-extension Identity: Codable {
+extension ReceptionIdentity: Codable {
   enum CodingKeys: String, CodingKey {
     case id = "ID"
     case rsaPrivatePem = "RSAPrivatePem"
     case salt = "Salt"
     case dhKeyPrivate = "DHKeyPrivate"
+  }
+
+  static func decode(_ data: Data) throws -> ReceptionIdentity {
+    try JSONDecoder().decode(Self.self, from: data)
+  }
+
+  func encode() throws -> Data {
+    try JSONEncoder().encode(self)
   }
 }
