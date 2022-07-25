@@ -4,11 +4,15 @@ import XCTest
 
 final class MessageSendReportTests: XCTestCase {
   func testCoding() throws {
+    let rounds = [1, 5, 9]
+    let messageIdString = "51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ="
+    let timestamp: Int = 1_653_582_683_183_384_000
+
     let jsonString = """
     {
-      "Rounds": [1,5,9],
-      "MessageID": "51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=",
-      "Timestamp": 1653582683183384000
+      "Rounds": [\(rounds.map { "\($0)" }.joined(separator: ", "))],
+      "MessageID": "\(messageIdString)",
+      "Timestamp": \(timestamp)
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
@@ -16,9 +20,9 @@ final class MessageSendReportTests: XCTestCase {
     let report = try MessageSendReport.decode(jsonData)
 
     XCTAssertNoDifference(report, MessageSendReport(
-      roundList: [1, 5, 9],
-      messageId: Data(base64Encoded: "51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=")!,
-      timestamp: 1_653_582_683_183_384_000
+      roundList: rounds,
+      messageId: Data(base64Encoded: messageIdString)!,
+      timestamp: timestamp
     ))
 
     let encodedReport = try report.encode()
