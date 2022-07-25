@@ -12,6 +12,7 @@ public struct E2E {
   public var addPartnerCallback: E2EAddPartnerCallback
   public var addService: E2EAddService
   public var removeService: E2ERemoveService
+  public var hasAuthenticatedChannel: E2EHasAuthenticatedChannel
   public var send: E2ESend
 
   // TODO:
@@ -31,6 +32,7 @@ extension E2E {
       addPartnerCallback: .live(bindingsE2E),
       addService: .live(bindingsE2E),
       removeService: .live(bindingsE2E),
+      hasAuthenticatedChannel: .live(bindingsE2E),
       send: .live(bindingsE2E)
     )
   }
@@ -49,6 +51,7 @@ extension E2E {
     addPartnerCallback: .unimplemented,
     addService: .unimplemented,
     removeService: .unimplemented,
+    hasAuthenticatedChannel: .unimplemented,
     send: .unimplemented
   )
 }
