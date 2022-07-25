@@ -10,7 +10,7 @@ public struct E2EPayloadSize {
 }
 
 extension E2EPayloadSize {
-  public static func live(bindingsE2E: BindingsE2e) -> E2EPayloadSize {
+  public static func live(_ bindingsE2E: BindingsE2e) -> E2EPayloadSize {
     E2EPayloadSize(run: bindingsE2E.payloadSize)
   }
 }

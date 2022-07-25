@@ -10,7 +10,7 @@ public struct E2EGetReceptionId {
 }
 
 extension E2EGetReceptionId {
-  public static func live(bindingsE2E: BindingsE2e) -> E2EGetReceptionId {
+  public static func live(_ bindingsE2E: BindingsE2e) -> E2EGetReceptionId {
     E2EGetReceptionId {
       guard let data = bindingsE2E.getReceptionID() else {
         fatalError("BindingsE2e.getReceptionID returned `nil`")

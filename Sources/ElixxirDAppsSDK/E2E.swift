@@ -16,11 +16,11 @@ public struct E2E {
 extension E2E {
   public static func live(_ bindingsE2E: BindingsE2e) -> E2E {
     E2E(
-      getId: .live(bindingsE2E: bindingsE2E),
-      getReceptionId: .live(bindingsE2E: bindingsE2E),
-      getContact: .live(bindingsE2E: bindingsE2E),
-      payloadSize: .live(bindingsE2E: bindingsE2E),
-      partitionSize: .live(bindingsE2E: bindingsE2E),
+      getId: .live(bindingsE2E),
+      getReceptionId: .live(bindingsE2E),
+      getContact: .live(bindingsE2E),
+      payloadSize: .live(bindingsE2E),
+      partitionSize: .live(bindingsE2E),
       addPartnerCallback: .live(bindingsE2E),
       addService: .live(bindingsE2E),
       removeService: .live(bindingsE2E)

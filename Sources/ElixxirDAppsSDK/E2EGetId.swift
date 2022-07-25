@@ -10,7 +10,7 @@ public struct E2EGetId {
 }
 
 extension E2EGetId {
-  public static func live(bindingsE2E: BindingsE2e) -> E2EGetId {
+  public static func live(_ bindingsE2E: BindingsE2e) -> E2EGetId {
       E2EGetId(run: bindingsE2E.getID)
   }
 }

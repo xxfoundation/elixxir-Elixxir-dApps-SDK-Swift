@@ -12,7 +12,7 @@ public struct E2EPartitionSize {
 }
 
 extension E2EPartitionSize {
-  public static func live(bindingsE2E: BindingsE2e) -> E2EPartitionSize {
+  public static func live(_ bindingsE2E: BindingsE2e) -> E2EPartitionSize {
     E2EPartitionSize(
       first: bindingsE2E.firstPartitionSize,
       second: bindingsE2E.secondPartitionSize,

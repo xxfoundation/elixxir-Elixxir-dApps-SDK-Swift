@@ -10,7 +10,7 @@ public struct E2EGetContact {
 }
 
 extension E2EGetContact {
-  public static func live(bindingsE2E: BindingsE2e) -> E2EGetContact {
+  public static func live(_ bindingsE2E: BindingsE2e) -> E2EGetContact {
     E2EGetContact {
       guard let data = bindingsE2E.getContact() else {
         fatalError("BindingsE2e.getContact returned `nil`")
