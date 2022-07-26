@@ -16,37 +16,37 @@ public struct RestlikeRequest {
 }
 
 extension RestlikeRequest {
-  public static func live() -> RestlikeRequest {
-    RestlikeRequest { authenticated, clientId, connectionId, request, e2eParams in
-      let requestData = try request.encode()
-      var error: NSError?
-      let responseData: Data?
-      if authenticated {
-        responseData = BindingsRestlikeRequest(
-          clientId,
-          connectionId,
-          requestData,
-          e2eParams,
-          &error
-        )
-      } else {
-        responseData = BindingsRestlikeRequestAuth(
-          clientId,
-          connectionId,
-          requestData,
-          e2eParams,
-          &error
-        )
-      }
-      if let error = error {
-        throw error
-      }
-      guard let responseData = responseData else {
-        let functionName = "BindingsRestlikeRequest\(authenticated ? "Auth" : "")"
-        fatalError("\(functionName) returned `nil` without providing error")
-      }
-      return try RestlikeMessage.decode(responseData)
+  public static let live = RestlikeRequest {
+    authenticated, clientId, connectionId, request, e2eParams in
+
+    let requestData = try request.encode()
+    var error: NSError?
+    let responseData: Data?
+    if authenticated {
+      responseData = BindingsRestlikeRequest(
+        clientId,
+        connectionId,
+        requestData,
+        e2eParams,
+        &error
+      )
+    } else {
+      responseData = BindingsRestlikeRequestAuth(
+        clientId,
+        connectionId,
+        requestData,
+        e2eParams,
+        &error
+      )
     }
+    if let error = error {
+      throw error
+    }
+    guard let responseData = responseData else {
+      let functionName = "BindingsRestlikeRequest\(authenticated ? "Auth" : "")"
+      fatalError("\(functionName) returned `nil` without providing error")
+    }
+    return try RestlikeMessage.decode(responseData)
   }
 }
 
