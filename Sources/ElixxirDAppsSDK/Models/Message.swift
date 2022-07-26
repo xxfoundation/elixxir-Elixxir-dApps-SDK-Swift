@@ -47,7 +47,7 @@ extension Message: Codable {
     case roundId = "RoundId"
   }
 
-  public static func decode(_ data: Data) throws -> Message {
+  public static func decode(_ data: Data) throws -> Self {
     try JSONDecoder().decode(Self.self, from: data)
   }
 

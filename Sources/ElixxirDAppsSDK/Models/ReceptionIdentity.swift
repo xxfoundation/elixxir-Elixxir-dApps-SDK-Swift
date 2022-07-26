@@ -27,7 +27,7 @@ extension ReceptionIdentity: Codable {
     case dhKeyPrivate = "DHKeyPrivate"
   }
 
-  public static func decode(_ data: Data) throws -> ReceptionIdentity {
+  public static func decode(_ data: Data) throws -> Self {
     try JSONDecoder().decode(Self.self, from: data)
   }
 

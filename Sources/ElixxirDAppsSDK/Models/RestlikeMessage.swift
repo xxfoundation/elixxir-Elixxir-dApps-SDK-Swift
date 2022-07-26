@@ -35,7 +35,7 @@ extension RestlikeMessage: Codable {
     case error = "Error"
   }
 
-  public static func decode(_ data: Data) throws -> RestlikeMessage {
+  public static func decode(_ data: Data) throws -> Self {
     try JSONDecoder().decode(Self.self, from: data)
   }
 

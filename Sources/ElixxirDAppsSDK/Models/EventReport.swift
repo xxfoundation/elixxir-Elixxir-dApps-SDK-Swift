@@ -27,7 +27,7 @@ extension EventReport: Codable {
     case details = "Details"
   }
 
-  public static func decode(_ data: Data) throws -> EventReport {
+  public static func decode(_ data: Data) throws -> Self {
     try JSONDecoder().decode(Self.self, from: data)
   }
 
