@@ -2,11 +2,17 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct AuthCallbacks {
-  public init(handle: @escaping (AuthCallback) -> Void) {
+  public enum Callback: Equatable {
+    case confirm(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
+    case request(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
+    case reset(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
+  }
+
+  public init(handle: @escaping (Callback) -> Void) {
     self.handle = handle
   }
 
-  public var handle: (AuthCallback) -> Void
+  public var handle: (Callback) -> Void
 }
 
 extension AuthCallbacks {
