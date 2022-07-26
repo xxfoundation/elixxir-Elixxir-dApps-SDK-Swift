@@ -17,7 +17,6 @@ public struct Progress: Equatable {
   // TODO: add error
   // public var error: ???
 }
-import Bindings
 
 extension Progress: Codable {
   enum CodingKeys: String, CodingKey {
