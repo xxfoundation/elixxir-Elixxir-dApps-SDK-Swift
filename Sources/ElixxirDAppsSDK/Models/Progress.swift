@@ -4,18 +4,19 @@ public struct Progress: Equatable {
   public init(
     completed: Bool,
     transmitted: Int,
-    total: Int
+    total: Int,
+    error: String?
   ) {
     self.completed = completed
     self.transmitted = transmitted
     self.total = total
+    self.error = error
   }
 
   public var completed: Bool
   public var transmitted: Int
   public var total: Int
-  // TODO: add error
-  // public var error: ???
+  public var error: String?
 }
 
 extension Progress: Codable {
@@ -23,8 +24,7 @@ extension Progress: Codable {
     case completed = "Completed"
     case transmitted = "Transmitted"
     case total = "Total"
-    // TODO: add error
-    // case error = "Err"
+    case error = "Err"
   }
 
   public static func decode(_ data: Data) throws -> Self {
