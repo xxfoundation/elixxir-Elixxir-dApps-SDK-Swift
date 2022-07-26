@@ -16,6 +16,7 @@ public struct MessageListener {
 
 extension MessageListener {
   public static let unimplemented = MessageListener(
+    name: "unimplemented",
     handle: XCTUnimplemented("\(Self.self)")
   )
 }
