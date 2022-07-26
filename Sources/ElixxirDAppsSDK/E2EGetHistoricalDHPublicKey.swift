@@ -20,4 +20,3 @@ extension E2EGetHistoricalDHPublicKey {
     run: XCTUnimplemented("\(Self.self)")
   )
 }
-
