@@ -17,7 +17,6 @@ final class FileSendTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-
     let fileSend = try FileSend.decode(jsonData)
 
     XCTAssertNoDifference(fileSend, FileSend(

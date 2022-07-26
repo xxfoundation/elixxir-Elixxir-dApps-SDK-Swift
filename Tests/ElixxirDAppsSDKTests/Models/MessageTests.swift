@@ -5,10 +5,10 @@ import XCTest
 final class MessageTests: XCTestCase {
   func testCoding() throws {
     let type: Int = 1
-    let idString = "EB/70R5HYEw5htZ4Hg9ondrn3+cAc/lH2G0mjQMja3w="
-    let payloadString = "7TzZKgNphT5UooNM7mDSwtVcIs8AIu4vMKm4ld6GSR8YX5GrHirixUBAejmsgdroRJyo06TkIVef7UM9FN8YfQ=="
-    let senderString = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
-    let recipientIdString = "amFrZXh4MzYwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
+    let idB64 = "EB/70R5HYEw5htZ4Hg9ondrn3+cAc/lH2G0mjQMja3w="
+    let payloadB64 = "7TzZKgNphT5UooNM7mDSwtVcIs8AIu4vMKm4ld6GSR8YX5GrHirixUBAejmsgdroRJyo06TkIVef7UM9FN8YfQ=="
+    let senderB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
+    let recipientIdB64 = "amFrZXh4MzYwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
     let ephemeralId: Int = 17
     let timestamp: Int = 1_653_580_439_357_351_000
     let encrypted = false
@@ -16,10 +16,10 @@ final class MessageTests: XCTestCase {
     let jsonString = """
     {
       "MessageType": \(type),
-      "ID": "\(idString)",
-      "Payload": "\(payloadString)",
-      "Sender": "\(senderString)",
-      "RecipientID": "\(recipientIdString)",
+      "ID": "\(idB64)",
+      "Payload": "\(payloadB64)",
+      "Sender": "\(senderB64)",
+      "RecipientID": "\(recipientIdB64)",
       "EphemeralID": \(ephemeralId),
       "Timestamp": \(timestamp),
       "Encrypted": \(encrypted),
@@ -27,15 +27,14 @@ final class MessageTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-
     let message = try Message.decode(jsonData)
 
     XCTAssertNoDifference(message, Message(
       messageType: 1,
-      id: Data(base64Encoded: idString)!,
-      payload: Data(base64Encoded: payloadString)!,
-      sender: Data(base64Encoded: senderString)!,
-      recipientId: Data(base64Encoded: recipientIdString)!,
+      id: Data(base64Encoded: idB64)!,
+      payload: Data(base64Encoded: payloadB64)!,
+      sender: Data(base64Encoded: senderB64)!,
+      recipientId: Data(base64Encoded: recipientIdB64)!,
       ephemeralId: ephemeralId,
       timestamp: timestamp,
       encrypted: encrypted,

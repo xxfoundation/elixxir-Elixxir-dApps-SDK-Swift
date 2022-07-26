@@ -4,20 +4,19 @@ import XCTest
 
 final class FactTests: XCTestCase {
   func testCoding() throws {
-    let factString = "Zezima"
+    let factValue = "Zezima"
     let factType: Int = 0
     let jsonString = """
     {
-      "Fact": "\(factString)",
+      "Fact": "\(factValue)",
       "Type": \(factType)
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-
     let fact = try Fact.decode(jsonData)
 
     XCTAssertNoDifference(fact, Fact(
-      fact: factString,
+      fact: factValue,
       type: factType
     ))
 

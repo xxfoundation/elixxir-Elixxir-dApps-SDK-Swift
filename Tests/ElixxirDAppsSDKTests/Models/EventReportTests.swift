@@ -17,7 +17,6 @@ final class EventReportTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-
     let report = try EventReport.decode(jsonData)
 
     XCTAssertNoDifference(report, EventReport(
