@@ -2,10 +2,10 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct CmixWaitForMessageDelivery {
-  public var run: (MessageSendReport, Int, MessageDeliveryCallback) throws -> Void
+  public var run: (E2ESendReport, Int, MessageDeliveryCallback) throws -> Void
 
   public func callAsFunction(
-    report: MessageSendReport,
+    report: E2ESendReport,
     timeoutMS: Int,
     callback: MessageDeliveryCallback
   ) throws {

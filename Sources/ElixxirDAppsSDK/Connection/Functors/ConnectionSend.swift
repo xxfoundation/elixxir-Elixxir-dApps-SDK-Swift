@@ -2,12 +2,12 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct ConnectionSend {
-  public var run: (Int, Data) throws -> MessageSendReport
+  public var run: (Int, Data) throws -> E2ESendReport
 
   public func callAsFunction(
     messageType: Int,
     payload: Data
-  ) throws -> MessageSendReport {
+  ) throws -> E2ESendReport {
     try run(messageType, payload)
   }
 }
@@ -15,7 +15,7 @@ public struct ConnectionSend {
 extension ConnectionSend {
   public static func live(_ bindingsConnection: BindingsConnection) -> ConnectionSend {
     ConnectionSend { messageType, payload in
-      try MessageSendReport.decode(
+      try E2ESendReport.decode(
         bindingsConnection.sendE2E(messageType, payload: payload)
       )
     }
@@ -23,7 +23,7 @@ extension ConnectionSend {
 
   public static func live(_ bindingsConnection: BindingsAuthenticatedConnection) -> ConnectionSend {
     ConnectionSend { messageType, payload in
-      try MessageSendReport.decode(
+      try E2ESendReport.decode(
         bindingsConnection.sendE2E(messageType, payload: payload)
       )
     }

@@ -1,6 +1,6 @@
 import Foundation
 
-public struct MessageSendReport: Equatable {
+public struct E2ESendReport: Equatable {
   public init(
     roundList: [Int]?,
     messageId: Data?,
@@ -16,7 +16,7 @@ public struct MessageSendReport: Equatable {
   public var timestamp: Int?
 }
 
-extension MessageSendReport: Codable {
+extension E2ESendReport: Codable {
   enum CodingKeys: String, CodingKey {
     case roundList = "Rounds"
     case messageId = "MessageID"
