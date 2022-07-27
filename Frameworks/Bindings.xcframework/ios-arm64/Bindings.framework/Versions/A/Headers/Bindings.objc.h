@@ -12,6 +12,10 @@
 
 
 @class BindingsAuthenticatedConnection;
+@class BindingsBroadcastMessage;
+@class BindingsBroadcastReport;
+@class BindingsChannel;
+@class BindingsChannelDef;
 @class BindingsCmix;
 @class BindingsConnection;
 @class BindingsE2ESendReport;
@@ -33,6 +37,8 @@
 @class BindingsSingleUseSendReport;
 @protocol BindingsAuthCallbacks;
 @class BindingsAuthCallbacks;
+@protocol BindingsBroadcastListener;
+@class BindingsBroadcastListener;
 @protocol BindingsClientError;
 @class BindingsClientError;
 @protocol BindingsFileTransferReceiveProgressCallback;
@@ -66,26 +72,48 @@
 - (void)reset:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
 @end
 
+@protocol BindingsBroadcastListener <NSObject>
+- (void)callback:(NSData* _Nullable)p0 p1:(NSError* _Nullable)p1;
+@end
+
 @protocol BindingsClientError <NSObject>
 - (void)report:(NSString* _Nullable)source message:(NSString* _Nullable)message trace:(NSString* _Nullable)trace;
 @end
 
 @protocol BindingsFileTransferReceiveProgressCallback <NSObject>
+/**
+ * Callback is called when a file part is sent or an error occurs.
+
+Parameters:
+ - payload - the JSON marshalled bytes of a Progress object.
+ - t - tracker that allows the lookup of the status of any file part
+ - err - any errors that occurred during sending
+ */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
 @end
 
 @protocol BindingsFileTransferSentProgressCallback <NSObject>
+/**
+ * Callback is called when a file part is sent or an error occurs.
+
+Parameters:
+ - payload - the JSON marshalled bytes of a Progress object.
+ - t - tracker that allows the lookup of the status of any file part
+ - err - any errors that occurred during sending
+ */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
 @end
 
 @protocol BindingsListener <NSObject>
 /**
- * Hear is called to receive a message in the UI
-Accepts a marshalled Message object
+ * Hear is called to receive a message in the UI.
+
+Parameters:
+ - item - JSON marshalled Message object
  */
 - (void)hear:(NSData* _Nullable)item;
 /**
- * Name returns a name, used for debugging
+ * Name returns a name; used for debugging.
  */
 - (NSString* _Nonnull)name;
 @end
@@ -108,6 +136,13 @@ Accepts a marshalled Message object
 @end
 
 @protocol BindingsReceiveFileCallback <NSObject>
+/**
+ * Callback is called when a new file transfer is received.
+
+Parameters:
+ - payload - the JSON marshalled bytes of a ReceivedFile object.
+ - err - any errors that occurred during reception
+ */
 - (void)callback:(NSData* _Nullable)payload err:(NSError* _Nullable)err;
 @end
 
@@ -144,8 +179,114 @@ Accepts a marshalled Message object
 @end
 
 /**
- * Cmix wraps the xxdk.Cmix struct, implementing additional functions
-to support the gomobile Cmix interface
+ * BroadcastMessage is the bindings representation of a broadcast message.
+
+Example JSON:
+ {"RoundID":42,
+  "EphID":[0,0,0,0,0,0,24,61],
+  "Payload":"SGVsbG8sIGJyb2FkY2FzdCBmcmllbmRzIQ=="
+ }
+ */
+@interface BindingsBroadcastMessage : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+// skipped field BroadcastMessage.BroadcastReport with unsupported type: gitlab.com/elixxir/client/bindings.BroadcastReport
+
+@property (nonatomic) NSData* _Nullable payload;
+@end
+
+/**
+ * BroadcastReport is the bindings representation of the info on how a broadcast message was sent
+
+Example JSON:
+ {"RoundID":42,
+  "EphID":[0,0,0,0,0,0,24,61]
+ }
+ */
+@interface BindingsBroadcastReport : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) long roundID;
+// skipped field BroadcastReport.EphID with unsupported type: gitlab.com/xx_network/primitives/id/ephemeral.Id
+
+@end
+
+/**
+ * Channel is a bindings-level struct encapsulating the broadcast.Channel client object.
+ */
+@interface BindingsChannel : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * Broadcast sends a given payload over the broadcast channel using symmetric broadcast.
+ */
+- (NSData* _Nullable)broadcast:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
+/**
+ * BroadcastAsymmetric sends a given payload over the broadcast channel using asymmetric broadcast.
+This mode of encryption requires a private key.
+ */
+- (NSData* _Nullable)broadcastAsymmetric:(NSData* _Nullable)payload pk:(NSData* _Nullable)pk error:(NSError* _Nullable* _Nullable)error;
+/**
+ * Get returns the result of calling json.Marshal on a ChannelDef based on the underlying crypto broadcast.Channel.
+ */
+- (NSData* _Nullable)get:(NSError* _Nullable* _Nullable)error;
+/**
+ * Listen registers a BroadcastListener for a given method.
+This allows users to handle incoming broadcast messages.
+
+Params:
+ - l - BroadcastListener object
+ - method - int corresponding to broadcast.Method constant, 0 for symmetric or 1 for asymmetric
+ */
+- (BOOL)listen:(id<BindingsBroadcastListener> _Nullable)l method:(long)method error:(NSError* _Nullable* _Nullable)error;
+/**
+ * MaxAsymmetricPayloadSize returns the maximum possible payload size which can be broadcast.
+ */
+- (long)maxAsymmetricPayloadSize;
+/**
+ * MaxPayloadSize returns the maximum possible payload size which can be broadcast.
+ */
+- (long)maxPayloadSize;
+/**
+ * Stop stops the channel from listening for more messages.
+ */
+- (void)stop;
+@end
+
+/**
+ * ChannelDef is the bindings representation of an elixxir/crypto broadcast.Channel object.
+
+Example JSON:
+ {"Name": "My broadcast channel",
+  "Description":"A broadcast channel for me to test things",
+  "Salt":"gpUqW7N22sffMXsvPLE7BA==",
+  "PubKey":"LS0tLS1CRUdJTiBSU0EgUFVCTElDIEtFWS0tLS0tCk1DZ0NJUUN2YkZVckJKRFpqT3Y0Y0MvUHZZdXNvQkFtUTFkb3Znb044aHRuUjA2T3F3SURBUUFCCi0tLS0tRU5EIFJTQSBQVUJMSUMgS0VZLS0tLS0="
+ }
+ */
+@interface BindingsChannelDef : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) NSString* _Nonnull name;
+@property (nonatomic) NSString* _Nonnull description;
+@property (nonatomic) NSData* _Nullable salt;
+@property (nonatomic) NSData* _Nullable pubKey;
+@end
+
+/**
+ * Cmix wraps the xxdk.Cmix struct, implementing additional functions to support
+the bindings Cmix interface.
  */
 @interface BindingsCmix : NSObject <goSeqRefInterface> {
 }
@@ -154,104 +295,122 @@ to support the gomobile Cmix interface
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
 /**
- * AddHealthCallback registers the network health callback to be called
-any time the network health changes. Returns a unique ID that can be used to
-unregister the network health callback.
+ * AddHealthCallback adds a callback that gets called whenever the network
+health changes. Returns a registration ID that can be used to unregister.
  */
 - (int64_t)addHealthCallback:(id<BindingsNetworkHealthCallback> _Nullable)nhc;
 /**
- * Connect performs auth key negotiation with the given recipient,
-and returns a Connection object for the newly-created partner.Manager
+ * Connect performs auth key negotiation with the given recipient and returns a
+Connection object for the newly created partner.Manager.
+
 This function is to be used sender-side and will block until the
 partner.Manager is confirmed.
-recipientContact - marshalled contact.Contact object
-myIdentity - marshalled ReceptionIdentity object
+
+Parameters:
+ - e2eId - ID of the E2E object in the e2e tracker
+ - recipientContact - marshalled contact.Contact object
+ - myIdentity - marshalled ReceptionIdentity object
  */
 - (BindingsConnection* _Nullable)connect:(long)e2eId recipientContact:(NSData* _Nullable)recipientContact e2eParamsJSON:(NSData* _Nullable)e2eParamsJSON error:(NSError* _Nullable* _Nullable)error;
 - (BindingsAuthenticatedConnection* _Nullable)connectWithAuthentication:(long)e2eId recipientContact:(NSData* _Nullable)recipientContact e2eParamsJSON:(NSData* _Nullable)e2eParamsJSON error:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetID returns the ID for this Cmix in the cmixTracker.
+ */
 - (long)getID;
 /**
- * HasRunningProcessies checks if any background threads are running.
-returns true if none are running. This is meant to be
-used when NetworkFollowerStatus() returns Stopping.
-Due to the handling of comms on iOS, where the OS can
-block indefiently, it may not enter the stopped
-state apropreatly. This can be used instead.
+ * HasRunningProcessies checks if any background threads are running and returns
+true if one or more are.
+
+This is meant to be used when NetworkFollowerStatus returns xxdk.Stopping.
+Due to the handling of comms on iOS, where the OS can block indefinitely, it
+may not enter the stopped state appropriately. This can be used instead.
  */
 - (BOOL)hasRunningProcessies;
 /**
  * IsHealthy returns true if the network is read to be in a healthy state where
-messages can be sent
+messages can be sent.
  */
 - (BOOL)isHealthy;
 /**
- * MakeLegacyReceptionIdentity generates the legacy identity for receiving messages
+ * MakeLegacyReceptionIdentity generates the legacy identity for receiving
+messages.
  */
 - (NSData* _Nullable)makeLegacyReceptionIdentity:(NSError* _Nullable* _Nullable)error;
 /**
- * MakeReceptionIdentity generates a new cryptographic identity for receiving messages
+ * MakeReceptionIdentity generates a new cryptographic identity for receiving
+messages.
  */
 - (NSData* _Nullable)makeReceptionIdentity:(NSError* _Nullable* _Nullable)error;
 /**
- * Gets the state of the network follower. Returns:
-Stopped 	- 0
-Starting - 1000
-Running	- 2000
-Stopping	- 3000
+ * NetworkFollowerStatus gets the state of the network follower. It returns a
+status with the following values:
+ Stopped  - 0
+ Running  - 2000
+ Stopping - 3000
  */
 - (long)networkFollowerStatus;
 /**
  * RegisterClientErrorCallback registers the callback to handle errors from the
-long running threads controlled by StartNetworkFollower and StopNetworkFollower
+long-running threads controlled by StartNetworkFollower and
+StopNetworkFollower.
  */
 - (void)registerClientErrorCallback:(id<BindingsClientError> _Nullable)clientError;
+/**
+ * RemoveHealthCallback removes a health callback using its registration ID.
+ */
 - (void)removeHealthCallback:(int64_t)funcID;
 /**
- * StartNetworkFollower kicks off the tracking of the network. It starts
-long running network client threads and returns an object for checking
-state and stopping those threads.
-Call this when returning from sleep and close when going back to
-sleep.
+ * StartNetworkFollower kicks off the tracking of the network. It starts long-
+running network threads and returns an object for checking state and
+stopping those threads.
+
+Call this when returning from sleep and close when going back to sleep.
+
 These threads may become a significant drain on battery when offline, ensure
-they are stopped if there is no internet access
+they are stopped if there is no internet access.
+
 Threads Started:
   - Network Follower (/network/follow.go)
-  	tracks the network events and hands them off to workers for handling
+  	tracks the network events and hands them off to workers for handling.
   - Historical Round Retrieval (/network/rounds/historical.go)
-		Retrieves data about rounds which are too old to be stored by the client
+		retrieves data about rounds that are too old to be stored by the client.
 	 - Message Retrieval Worker Group (/network/rounds/retrieve.go)
-		Requests all messages in a given round from the gateway of the last nodes
+		requests all messages in a given round from the gateway of the last
+		nodes.
 	 - Message Handling Worker Group (/network/message/handle.go)
-		Decrypts and partitions messages when signals via the Switchboard
-	 - health Tracker (/network/health)
-		Via the network instance tracks the state of the network
+		decrypts and partitions messages when signals via the Switchboard.
+	 - Health Tracker (/network/health),
+		via the network instance, tracks the state of the network.
 	 - Garbled Messages (/network/message/garbled.go)
-		Can be signaled to check all recent messages which could be be decoded
-		Uses a message store on disk for persistence
+		can be signaled to check all recent messages that could be decoded. It
+		uses a message store on disk for persistence.
 	 - Critical Messages (/network/message/critical.go)
-		Ensures all protocol layer mandatory messages are sent
-		Uses a message store on disk for persistence
+		ensures all protocol layer mandatory messages are sent. It uses a
+		message store on disk for persistence.
 	 - KeyExchange Trigger (/keyExchange/trigger.go)
-		Responds to sent rekeys and executes them
+		responds to sent rekeys and executes them.
   - KeyExchange Confirm (/keyExchange/confirm.go)
-		Responds to confirmations of successful rekey operations
+		responds to confirmations of successful rekey operations.
+  - Auth Callback (/auth/callback.go)
+     handles both auth confirm and requests.
  */
 - (BOOL)startNetworkFollower:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
 /**
- * StopNetworkFollower stops the network follower if it is running.
-It returns errors if the Follower is in the wrong status to stop or if it
-fails to stop it.
-if the network follower is running and this fails, the client object will
+ * StopNetworkFollower stops the network follower if it is running. It returns
+an error if the follower is in the wrong state to stop or if it fails to stop
+it.
+
+if the network follower is running and this fails, the Cmix object will
 most likely be in an unrecoverable state and need to be trashed.
  */
 - (BOOL)stopNetworkFollower:(NSError* _Nullable* _Nullable)error;
 /**
  * WaitForMessageDelivery allows the caller to get notified if the rounds a
 message was sent in successfully completed. Under the hood, this uses an API
-which uses the internal round data, network historical round lookup, and
+that uses the internal round data, network historical round lookup, and
 waiting on network events to determine what has (or will) occur.
 
-The callbacks will return at timeoutMS if no state update occurs
+The callbacks will return at timeoutMS if no state update occurs.
 
 This function takes the marshaled send report to ensure a memory leak does
 not occur as a result of both sides of the bindings holding a reference to
@@ -259,14 +418,15 @@ the same pointer.
  */
 - (BOOL)waitForMessageDelivery:(NSData* _Nullable)roundList mdc:(id<BindingsMessageDeliveryCallback> _Nullable)mdc timeoutMS:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
 /**
- * WaitForNewtwork will block until either the network is healthy or the
-passed timeout. It will return true if the network is healthy
+ * WaitForNetwork will block until either the network is healthy or the passed
+timeout is reached. It will return true if the network is healthy.
  */
 - (BOOL)waitForNetwork:(long)timeoutMS;
 @end
 
 /**
- * Connection is the bindings representation of a connect.Connection object that can be tracked by id
+ * Connection is the bindings' representation of a connect.Connection object
+that can be tracked by ID.
  */
 @interface BindingsConnection : NSObject <goSeqRefInterface> {
 }
@@ -275,36 +435,37 @@ passed timeout. It will return true if the network is healthy
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
 /**
- * Close deletes this Connection's partner.Manager and releases resources
+ * Close deletes this Connection's partner.Manager and releases resources.
  */
 - (BOOL)close:(NSError* _Nullable* _Nullable)error;
 /**
- * GetId returns the Connection.id
+ * GetId returns the Connection ID.
  */
 - (long)getId;
 /**
- * GetPartner returns the partner.Manager for this Connection
+ * GetPartner returns the partner.Manager for this Connection.
  */
 - (NSData* _Nullable)getPartner;
 /**
- * RegisterListener is used for E2E reception
-and allows for reading data sent from the partner.Manager
-Returns marshalled ListenerID
+ * RegisterListener is used for E2E reception and allows for reading data sent
+from the partner.Manager.
  */
 - (BOOL)registerListener:(long)messageType newListener:(id<BindingsListener> _Nullable)newListener error:(NSError* _Nullable* _Nullable)error;
 /**
- * SendE2E is a wrapper for sending specifically to the Connection's partner.Manager
-Returns marshalled E2ESendReport
+ * SendE2E is a wrapper for sending specifically to the Connection's
+partner.Manager. Returns a marshalled E2ESendReport.
  */
 - (NSData* _Nullable)sendE2E:(long)mt payload:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
- * E2ESendReport is the bindings representation of the return values of SendE2E
+ * E2ESendReport is the bindings' representation of the return values of
+SendE2E.
+
 Example E2ESendReport:
-{"Rounds":[1,5,9],
- "MessageID":"51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=",
- "Timestamp":1653582683183384000}
+ {"Rounds":[1,5,9],
+  "MessageID":"51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=",
+  "Timestamp":1653582683183384000}
  */
 @interface BindingsE2ESendReport : NSObject <goSeqRefInterface> {
 }
@@ -320,8 +481,8 @@ Example E2ESendReport:
 @end
 
 /**
- * E2e BindingsClient wraps the xxdk.E2e, implementing additional functions
-to support the gomobile E2e interface
+ * E2e wraps the xxdk.E2e, implementing additional functions
+to support the bindings E2e interface.
  */
 @interface BindingsE2e : NSObject <goSeqRefInterface> {
 }
@@ -338,15 +499,14 @@ Parameters:
  */
 - (BOOL)addPartnerCallback:(NSData* _Nullable)partnerID cb:(id<BindingsAuthCallbacks> _Nullable)cb error:(NSError* _Nullable* _Nullable)error;
 /**
- * AddService adds a service for all partners of the given
-tag, which will call back on the given processor. These can
-be sent to using the tag fields in the Params Object
-Passing nil for the processor allows you to create a
-service which is never called but will be visible by
-notifications. Processes added this way are generally not
-end-to-end encrypted messages themselves, but other
-protocols which piggyback on e2e relationships to start
-communication
+ * AddService adds a service for all partners of the given tag, which will call
+back on the given processor. These can be sent to using the tag fields in the
+Params object.
+
+Passing nil for the processor allows you to create a service that is never
+called but will be visible by notifications. Processes added this way are
+generally not end-to-end encrypted messages themselves, but other protocols
+that piggyback on e2e relationships to start communication.
  */
 - (BOOL)addService:(NSString* _Nullable)tag processor:(id<BindingsProcessor> _Nullable)processor error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -358,24 +518,28 @@ replay them on the callbacks.
  * Confirm sends a confirmation for a received request. It can only be called
 once. This both sends keying material to the other party and creates a
 channel in the e2e handler, after which e2e messages can be sent to the
-partner using e2e.Handler.SendE2E.
+partner using E2e.SendE2E.
+
 The round the request is initially sent on will be returned, but the request
 will be listed as a critical message, so the underlying cMix client will auto
 resend it in the event of failure.
-A confirm cannot be sent for a contact who has not sent a request or who is
-already a partner. This can only be called once for a specific contact.
-The confirm sends as a critical message; if the round it sends on fails, it
-will be auto resend by the cMix client.
-If the confirm must be resent, use ReplayConfirm.
+
+A confirmation cannot be sent for a contact who has not sent a request or who
+is already a partner. This can only be called once for a specific contact.
+The confirmation sends as a critical message; if the round it sends on fails,
+it will be auto resent by the cMix client.
+
+If the confirmation must be resent, use ReplayConfirm.
 
 Parameters:
  - partnerContact - the marshalled bytes of the contact.Contact object.
+
 Returns:
  - int64 - ID of the round (convert to uint64)
  */
 - (BOOL)confirm:(NSData* _Nullable)partnerContact ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
 /**
- * DeleteAllRequests clears all requests from client's auth storage.
+ * DeleteAllRequests clears all requests from auth storage.
  */
 - (BOOL)deleteAllRequests:(NSError* _Nullable* _Nullable)error;
 /**
@@ -387,7 +551,8 @@ Parameters:
  */
 - (BOOL)deletePartnerCallback:(NSData* _Nullable)partnerID error:(NSError* _Nullable* _Nullable)error;
 /**
- * DeleteReceiveRequests clears all received requests from client's auth storage.
+ * DeleteReceiveRequests clears all received requests from auth
+storage.
  */
 - (BOOL)deleteReceiveRequests:(NSError* _Nullable* _Nullable)error;
 /**
@@ -398,144 +563,162 @@ Parameters:
  */
 - (BOOL)deleteRequest:(NSData* _Nullable)partnerID error:(NSError* _Nullable* _Nullable)error;
 /**
- * DeleteSentRequests clears all sent requests from client's auth storage.
+ * DeleteSentRequests clears all sent requests from auth storage.
  */
 - (BOOL)deleteSentRequests:(NSError* _Nullable* _Nullable)error;
 /**
- * FirstPartitionSize returns the max partition payload size for the
-first payload
+ * FirstPartitionSize returns the max partition payload size for the first
+payload.
  */
 - (long)firstPartitionSize;
 /**
- * GetAllPartnerIDs returns a marshalled list of all partner IDs that the user has
-an E2E relationship with.
+ * GetAllPartnerIDs returns a marshalled list of all partner IDs that the user
+has an E2E relationship with.
+
 Returns:
  - []byte - the marshalled bytes of the IdList object.
  */
 - (NSData* _Nullable)getAllPartnerIDs:(NSError* _Nullable* _Nullable)error;
 /**
- * GetContact returns a marshalled contact.Contact object for the E2e ReceptionIdentity
+ * GetContact returns a marshalled contact.Contact object for the E2e
+ReceptionIdentity.
  */
 - (NSData* _Nullable)getContact;
 /**
- * GetHistoricalDHPrivkey returns the user's marshalled Historical DH Private Key
+ * GetHistoricalDHPrivkey returns the user's marshalled historical DH private
+key.
+
 Returns:
  - []byte - the marshalled bytes of the cyclic.Int object.
  */
 - (NSData* _Nullable)getHistoricalDHPrivkey:(NSError* _Nullable* _Nullable)error;
 /**
- * GetHistoricalDHPubkey returns the user's marshalled Historical DH
-Public Key
+ * GetHistoricalDHPubkey returns the user's marshalled historical DH public key.
+
 Returns:
  - []byte - the marshalled bytes of the cyclic.Int object.
  */
 - (NSData* _Nullable)getHistoricalDHPubkey:(NSError* _Nullable* _Nullable)error;
 /**
- * GetID returns the e2eTracker ID for the E2e object
+ * GetID returns the e2eTracker ID for the E2e object.
  */
 - (long)getID;
 /**
- * GetReceivedRequest returns a contact if there's a received request for it.
+ * GetReceivedRequest returns a contact if there is a received request for it.
 
 Parameters:
  - partnerID - the marshalled bytes of the id.ID object.
+
 Returns:
  - []byte - the marshalled bytes of the contact.Contact object.
  */
 - (NSData* _Nullable)getReceivedRequest:(NSData* _Nullable)partnerID error:(NSError* _Nullable* _Nullable)error;
 /**
- * GetReceptionID returns the marshalled default IDs
+ * GetReceptionID returns the marshalled default IDs.
+
 Returns:
  - []byte - the marshalled bytes of the id.ID object.
  */
 - (NSData* _Nullable)getReceptionID;
 /**
  * HasAuthenticatedChannel returns true if an authenticated channel with the
-partner exists, otherwise returns false
+partner exists, otherwise returns false.
+
 Parameters:
  - partnerId - the marshalled bytes of the id.ID object.
  */
 - (BOOL)hasAuthenticatedChannel:(NSData* _Nullable)partnerId ret0_:(BOOL* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
 /**
- * PartitionSize returns the partition payload size for the given
-payload index. The first payload is index 0.
+ * PartitionSize returns the partition payload size for the given payload index.
+The first payload is index 0.
  */
 - (long)partitionSize:(long)payloadIndex;
 /**
- * PayloadSize Returns the max payload size for a partitionable E2E
-message
+ * PayloadSize returns the max payload size for a partitionable E2E message.
  */
 - (long)payloadSize;
 /**
- * RemoveService removes all services for the given tag
+ * RemoveService removes all services for the given tag.
  */
 - (BOOL)removeService:(NSString* _Nullable)tag error:(NSError* _Nullable* _Nullable)error;
 /**
- * ReplayConfirm resends a confirm to the partner. It will fail to send if the
-send relationship with the partner has already ratcheted.
-The confirm sends as a critical message; if the round it sends on fails, it
-will be auto resend by the cMix client.
+ * ReplayConfirm resends a confirmation to the partner. It will fail to send if
+the send relationship with the partner has already ratcheted.
+
+The confirmation sends as a critical message; if the round it sends on fails,
+it will be auto resent by the cMix client.
+
 This will not be useful if either side has ratcheted.
 
 Parameters:
  - partnerID - the marshalled bytes of the id.ID object.
+
 Returns:
  - int64 - ID of the round (convert to uint64)
  */
 - (BOOL)replayConfirm:(NSData* _Nullable)partnerID ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
 /**
- * Request sends a contact request from the user identity in the imported e2e
-structure to the passed contact, as well as the passed facts (will error if
-they are too long).
-The other party must accept the request by calling Confirm in order to be
-able to send messages using e2e.Handler.SendE2E. When the other party does
-so, the "confirm" callback will get called.
+ * Request sends a contact request from the user identity in the imported E2e
+structure to the passed contact, as well as the passed facts (it will error
+if they are too long).
+
+The other party must accept the request by calling Confirm to be able to send
+messages using E2e.SendE2E. When the other party does so, the "confirm"
+callback will get called.
+
 The round the request is initially sent on will be returned, but the request
 will be listed as a critical message, so the underlying cMix client will auto
 resend it in the event of failure.
+
 A request cannot be sent for a contact who has already received a request or
 who is already a partner.
-The request sends as a critical message, if the round send on fails, it will
-be auto resent by the cMix client.
+
+The request sends as a critical message, if the round it sends on fails, it
+will be auto resent by the cMix client.
 
 Parameters:
  - partnerContact - the marshalled bytes of the contact.Contact object.
  - myFacts - stringified list of fact.FactList.
+
 Returns:
  - int64 - ID of the round (convert to uint64)
  */
-- (BOOL)request:(NSData* _Nullable)partnerContact myFactsString:(NSString* _Nullable)myFactsString ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)request:(NSData* _Nullable)partnerContact factsListJson:(NSData* _Nullable)factsListJson ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
 /**
  * Reset sends a contact reset request from the user identity in the imported
 e2e structure to the passed contact, as well as the passed facts (it will
 error if they are too long).
+
 This deletes all traces of the relationship with the partner from e2e and
 create a new relationship from scratch.
+
 The round the reset is initially sent on will be returned, but the request
 will be listed as a critical message, so the underlying cMix client will auto
 resend it in the event of failure.
+
 A request cannot be sent for a contact who has already received a request or
 who is already a partner.
 
 Parameters:
  - partnerContact - the marshalled bytes of the contact.Contact object.
+
 Returns:
  - int64 - ID of the round (convert to uint64)
  */
 - (BOOL)reset:(NSData* _Nullable)partnerContact ret0_:(int64_t* _Nullable)ret0_ error:(NSError* _Nullable* _Nullable)error;
 /**
- * SecondPartitionSize returns the max partition payload size for all
-payloads after the first payload
+ * SecondPartitionSize returns the max partition payload size for all payloads
+after the first payload.
  */
 - (long)secondPartitionSize;
 /**
- * SendE2E send a message containing the payload to the
-recipient of the passed message type, per the given
-parameters - encrypted with end-to-end encryption.
-Default parameters can be retrieved through
+ * SendE2E send a message containing the payload to the recipient of the passed
+message type, per the given parameters--encrypted with end-to-end encryption.
+
 Parameters:
  - recipientId - the marshalled bytes of the id.ID object.
  - e2eParams - the marshalled bytes of the e2e.Params object.
+
 Returns:
  - []byte - the marshalled bytes of the E2ESendReport object.
  */
@@ -552,13 +735,16 @@ Parameters:
 @end
 
 /**
- * EventReport is a public struct which represents the contents of an event report
+ * EventReport is a public struct which represents the contents of an event
+report.
+
 Example JSON:
-{"Priority":1,
- "Category":"Test Events",
- "EventType":"Ping",
- "Details":"This is an example of an event report"
-}
+ {
+  "Priority":1,
+  "Category":"Test Events",
+  "EventType":"Ping",
+  "Details":"This is an example of an event report"
+ }
  */
 @interface BindingsEventReport : NSObject <goSeqRefInterface> {
 }
@@ -573,9 +759,13 @@ Example JSON:
 @end
 
 /**
- * Fact is an internal fact type for use in the bindings layer
-example marshalled Fact:
-{"Fact":"Zezima","Type":0}
+ * Fact is an internal fact type for use in the bindings layer.
+
+JSON example:
+ {
+  "Fact": "Zezima",
+  "Type": 0
+ }
  */
 @interface BindingsFact : NSObject <goSeqRefInterface> {
 }
@@ -588,7 +778,7 @@ example marshalled Fact:
 @end
 
 /**
- * FilePartTracker contains the interfaces.FilePartTracker.
+ * FilePartTracker contains the fileTransfer.FilePartTracker.
  */
 @interface BindingsFilePartTracker : NSObject <goSeqRefInterface> {
 }
@@ -602,23 +792,25 @@ example marshalled Fact:
 - (long)getNumParts;
 /**
  * GetPartStatus returns the status of the file part with the given part number.
+
 The possible values for the status are:
-0 = unsent
-1 = sent (sender has sent a part, but it has not arrived)
-2 = arrived (sender has sent a part, and it has arrived)
-3 = received (receiver has received a part)
+ - 0 < Part does not exist
+ - 0 = unsent
+ - 1 = arrived (sender has sent a part, and it has arrived)
+ - 2 = received (receiver has received a part)
  */
 - (long)getPartStatus:(long)partNum;
 @end
 
 /**
- * FileSend is a public struct which represents a file to be transferred
-{
- "Name":"testfile.txt",  														// File name
- "Type":"text file",     														// File type
- "Preview":"aXQncyBtZSBhIHByZXZpZXc=",  											// Preview of contents
- "Contents":"VGhpcyBpcyB0aGUgZnVsbCBjb250ZW50cyBvZiB0aGUgZmlsZSBpbiBieXRlcw==" 	// Full contents of the file
-}
+ * FileSend is a public struct that contains the file contents and its name,
+type, and preview.
+ {
+  "Name":"testfile.txt",
+  "Type":"text file",
+  "Preview":"aXQncyBtZSBhIHByZXZpZXc=",
+  "Contents":"VGhpcyBpcyB0aGUgZnVsbCBjb250ZW50cyBvZiB0aGUgZmlsZSBpbiBieXRlcw=="
+ }
  */
 @interface BindingsFileSend : NSObject <goSeqRefInterface> {
 }
@@ -633,7 +825,8 @@ The possible values for the status are:
 @end
 
 /**
- * FileTransfer object is a bindings-layer struct which wraps a fileTransfer.FileTransfer interface
+ * FileTransfer object is a bindings-layer struct which wraps a
+fileTransfer.FileTransfer interface.
  */
 @interface BindingsFileTransfer : NSObject <goSeqRefInterface> {
 }
@@ -643,59 +836,89 @@ The possible values for the status are:
 - (nonnull instancetype)init;
 /**
  * CloseSend deletes a file from the internal storage once a transfer has
-completed or reached the retry limit. Returns an error if the transfer
-has not run out of retries.
+completed or reached the retry limit. Returns an error if the transfer has
+not run out of retries.
 
-This function should be called once a transfer completes or errors out
-(as reported by the progress callback).
+This function should be called once a transfer completes or errors out (as
+reported by the progress callback).
+
+Parameters:
+ - tidBytes - file transfer ID
  */
 - (BOOL)closeSend:(NSData* _Nullable)tidBytes error:(NSError* _Nullable* _Nullable)error;
+/**
+ * MaxFileNameLen returns the max number of bytes allowed for a file name.
+ */
 - (long)maxFileNameLen;
+/**
+ * MaxFileSize returns the max number of bytes allowed for a file.
+ */
 - (long)maxFileSize;
+/**
+ * MaxFileTypeLen returns the max number of bytes allowed for a file type.
+ */
 - (long)maxFileTypeLen;
+/**
+ * MaxPreviewSize returns the max number of bytes allowed for a file preview.
+ */
 - (long)maxPreviewSize;
 /**
- * Receive returns the full file on the completion of the transfer.
-It deletes internal references to the data and unregisters any attached
-progress callback. Returns an error if the transfer is not complete, the
-full file cannot be verified, or if the transfer cannot be found.
+ * Receive returns the full file on the completion of the transfer. It deletes
+internal references to the data and unregisters any attached progress
+callbacks. Returns an error if the transfer is not complete, the full file
+cannot be verified, or if the transfer cannot be found.
 
 Receive can only be called once the progress callback returns that the
 file transfer is complete.
+
+Parameters:
+ - tidBytes - file transfer ID
  */
 - (NSData* _Nullable)receive:(NSData* _Nullable)tidBytes error:(NSError* _Nullable* _Nullable)error;
 /**
- * RegisterReceivedProgressCallback allows for the registration of a
-callback to track the progress of an individual received file transfer.
-This should be done when a new transfer is received on the
-ReceiveCallback.
-Accepts ID of the transfer, callback for transfer progress and period between retries
+ * RegisterReceivedProgressCallback allows for the registration of a callback to
+track the progress of an individual received file transfer.
+
+This should be done when a new transfer is received on the ReceiveCallback.
+
+Parameters:
+ - tidBytes - file transfer ID
+ - callback - callback that reports file reception progress
+ - period - duration to wait between progress callbacks triggering
  */
 - (BOOL)registerReceivedProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferReceiveProgressCallback> _Nullable)callback period:(NSString* _Nullable)period error:(NSError* _Nullable* _Nullable)error;
 /**
  * RegisterSentProgressCallback allows for the registration of a callback to
 track the progress of an individual sent file transfer.
+
 SentProgressCallback is auto registered on Send; this function should be
 called when resuming clients or registering extra callbacks.
-Accepts ID of the transfer, callback for transfer progress,
-and period between retries
+
+Parameters:
+ - tidBytes - file transfer ID
+ - callback - callback that reports file reception progress
+ - period - duration to wait between progress callbacks triggering
  */
 - (BOOL)registerSentProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(NSString* _Nullable)period error:(NSError* _Nullable* _Nullable)error;
 /**
- * Send is the bindings-level function for sending a File
-Accepts:
- FileSend JSON payload
- Marshalled recipient ID
- Marshalled e2e Params JSON
- Number of retries allowed
- Limit on duration between retries
- FileTransferSentProgressCallback interface
+ * Send is the bindings-level function for sending a file.
+
+Parameters:
+ - payload - JSON marshalled FileSend
+ - recipientID - marshalled recipient id.ID
+ - paramsJSON - JSON marshalled e2e.Params
+ - retry - number of retries allowed
+ - callback - callback that reports file sending progress
+ - period - duration to wait between progress callbacks triggering
+
+Returns:
+ - []byte - unique file transfer ID
  */
-- (NSData* _Nullable)send:(NSData* _Nullable)payload recipientID:(NSData* _Nullable)recipientID paramsJSON:(NSData* _Nullable)paramsJSON retry:(float)retry period:(NSString* _Nullable)period callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)send:(NSData* _Nullable)payload recipientID:(NSData* _Nullable)recipientID retry:(float)retry callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(NSString* _Nullable)period error:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
- * IdList is a wrapper for a list of marshalled id.ID objects
+ * IdList is a wrapper for a list of marshalled id.ID objects.
  */
 @interface BindingsIdList : NSObject <goSeqRefInterface> {
 }
@@ -708,16 +931,19 @@ Accepts:
 @end
 
 /**
- * Message is the bindings representation of a receive.Message
-Example Message format:
-{"MessageType":1,
- "ID":"EB/70R5HYEw5htZ4Hg9ondrn3+cAc/lH2G0mjQMja3w=",
- "Payload":"7TzZKgNphT5UooNM7mDSwtVcIs8AIu4vMKm4ld6GSR8YX5GrHirixUBAejmsgdroRJyo06TkIVef7UM9FN8YfQ==",
- "Sender":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
- "RecipientID":"amFrZXh4MzYwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
- "EphemeralID":17,"Timestamp":1653580439357351000,
- "Encrypted":false,
- "RoundId":19}
+ * Message is the bindings' representation of a receive.Message.
+
+JSON example:
+ {
+  "MessageType":1,
+  "ID":"EB/70R5HYEw5htZ4Hg9ondrn3+cAc/lH2G0mjQMja3w=",
+  "Payload":"7TzZKgNphT5UooNM7mDSwtVcIs8AIu4vMKm4ld6GSR8YX5GrHirixUBAejmsgdroRJyo06TkIVef7UM9FN8YfQ==",
+  "Sender":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+  "RecipientID":"amFrZXh4MzYwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+  "EphemeralID":17,"Timestamp":1653580439357351000,
+  "Encrypted":false,
+  "RoundId":19
+ }
  */
 @interface BindingsMessage : NSObject <goSeqRefInterface> {
 }
@@ -737,13 +963,16 @@ Example Message format:
 @end
 
 /**
- * Progress is a public struct which represents the progress of an in-progress file transfer
+ * Progress is a public struct that represents the progress of an in-progress
+file transfer.
+
 Example JSON:
-{"Completed":false,	// Status of transfer (true if done)
- "Transmitted":128,	// Bytes transferred so far
- "Total":2048,		// Total size of file
- "Err":null			// Error status (if any)
-}
+ {
+  "Completed":false,
+  "Transmitted":128,
+  "Total":2048,
+  "Err":null
+ }
  */
 @interface BindingsProgress : NSObject <goSeqRefInterface> {
 }
@@ -758,16 +987,18 @@ Example JSON:
 @end
 
 /**
- * ReceivedFile is a public struct which represents the contents of an incoming file
+ * ReceivedFile is a public struct that contains the metadata of a new file
+transfer.
+
 Example JSON:
-{
- "TransferID":"B4Z9cwU18beRoGbk5xBjbcd5Ryi9ZUFA2UBvi8FOHWo=", // ID of the incoming transfer for receiving
- "SenderID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",   // ID of sender of incoming file
- "Preview":"aXQncyBtZSBhIHByZXZpZXc=",                        // Preview of the incoming file
- "Name":"testfile.txt",                                       // Name of incoming file
- "Type":"text file",                                          // Incoming file type
- "Size":2048                                                  // Incoming file size
-}
+ {
+  "TransferID":"B4Z9cwU18beRoGbk5xBjbcd5Ryi9ZUFA2UBvi8FOHWo=",
+  "SenderID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+  "Preview":"aXQncyBtZSBhIHByZXZpZXc=",
+  "Name":"testfile.txt",
+  "Type":"text file",
+  "Size":2048
+ }
  */
 @interface BindingsReceivedFile : NSObject <goSeqRefInterface> {
 }
@@ -784,16 +1015,15 @@ Example JSON:
 @end
 
 /**
- * ReceptionIdentity struct
-Example marshalled ReceptionIdentity:
-{"ID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",  // User ID (base64)
- // RSA Private key (PEM format)
- "RSAPrivatePem":"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBNU15dTdhYjBJOS9UL1BFUUxtd2x3ejZHV3FjMUNYemVIVXhoVEc4bmg1WWRWSXMxCmJ2THpBVjNOMDJxdXN6K2s4TVFEWjBtejMzdkswUmhPczZIY0NUSFdzTEpXRkE5WWpzWWlCRi9qTDd1bmd1ckIKL2tvK1JJSnNrWGFWaEZaazRGdERoRXhTNWY4RnR0Qmk1NmNLZmdJQlVKT3ozZi9qQllTMkxzMlJ6cWV5YXM3SApjV2RaME9TclBTT3BiYlViU1FPbS9LWnlweGZHU21yZ2oxRUZuU1dZZ2xGZTdUOTRPbHF5MG14QTV5clVXbHorCk9sK3hHbXpCNUp4WUFSMU9oMFQrQTk4RWMrTUZHNm43L1MraDdzRDgybGRnVnJmbStFTzRCdmFKeTRESGZGMWgKNnp6QnVnY25NUVFGc0dLeDFYWC9COTVMdUpPVjdyeXlDbzZGbHdJREFRQUJBb0lCQVFDaUh6OGNlcDZvQk9RTAphUzBVRitHeU5VMnlVcVRNTWtTWThoUkh1c09CMmFheXoybHZVb3RLUHBPbjZRSWRWVTJrcE4vY2dtY0lSb2x5CkhBMDRUOHJBWVNaRlVqaVlRajkzKzRFREpJYXd2Z0YyVEs1bFoyb3oxVTdreStncU82V0RMR2Z0Q0wvODVQWEIKa210aXhnUXpRV3g1RWcvemtHdm03eURBalQxeDloNytsRjJwNFlBam5kT2xTS0dmQjFZeTR1RXBQd0kwc1lWdgpKQWc0MEFxbllZUmt4emJPbmQxWGNjdEJFN2Z1VDdrWXhoeSs3WXYrUTJwVy9BYmh6NGlHOEY1MW9GMGZwV0czCmlISDhsVXZFTkp2SUZEVHZ0UEpESlFZalBRN3lUbGlGZUdrMXZUQkcyQkpQNExzVzhpbDZOeUFuRktaY1hOQ24KeHVCendiSlJBb0dCQVBUK0dGTVJGRHRHZVl6NmwzZmg3UjJ0MlhrMysvUmpvR3BDUWREWDhYNERqR1pVd1RGVQpOS2tQTTNjS29ia2RBYlBDb3FpL0tOOVBibk9QVlZ3R3JkSE9vSnNibFVHYmJGamFTUzJQMFZnNUVhTC9rT2dUCmxMMUdoVFpIUWk1VUlMM0p4M1Z3T0ZRQ3RQOU1UQlQ0UEQvcEFLbDg3VTJXN3JTY1dGV1ZGbFNkQW9HQkFPOFUKVmhHWkRpVGFKTWVtSGZIdVYrNmtzaUlsam9aUVVzeGpmTGNMZ2NjV2RmTHBqS0ZWTzJNN3NqcEJEZ0w4NmFnegorVk14ZkQzZ1l0SmNWN01aMVcwNlZ6TlNVTHh3a1dRY1hXUWdDaXc5elpyYlhCUmZRNUVjMFBlblVoWWVwVzF5CkpkTC8rSlpQeDJxSzVrQytiWU5EdmxlNWdpcjlDSGVzTlR5enVyckRBb0dCQUl0cTJnN1RaazhCSVFUUVNrZ24Kb3BkRUtzRW4wZExXcXlBdENtVTlyaWpHL2l2eHlXczMveXZDQWNpWm5VVEp0QUZISHVlbXVTeXplQ2g5QmRkegoyWkRPNUdqQVBxVHlQS3NudFlNZkY4UDczZ1NES1VSWWVFbHFDejdET0c5QzRzcitPK3FoN1B3cCtqUmFoK1ZiCkNuWllNMDlBVDQ3YStJYUJmbWRkaXpLbEFvR0JBSmo1dkRDNmJIQnNISWlhNUNJL1RZaG5YWXUzMkVCYytQM0sKMHF3VThzOCtzZTNpUHBla2Y4RjVHd3RuUU4zc2tsMk1GQWFGYldmeVFZazBpUEVTb0p1cGJzNXA1enNNRkJ1bwpncUZrVnQ0RUZhRDJweTVwM2tQbDJsZjhlZXVwWkZScGE0WmRQdVIrMjZ4eWYrNEJhdlZJeld3NFNPL1V4Q3crCnhqbTNEczRkQW9HQWREL0VOa1BjU004c1BCM3JSWW9MQ2twcUV2U0MzbVZSbjNJd3c1WFAwcDRRVndhRmR1ckMKYUhtSE1EekNrNEUvb0haQVhFdGZ2S2tRaUI4MXVYM2c1aVo4amdYUVhXUHRteTVIcVVhcWJYUTlENkxWc3B0egpKL3R4SWJLMXp5c1o2bk9IY1VoUUwyVVF6SlBBRThZNDdjYzVzTThEN3kwZjJ0QURTQUZNMmN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==",
- // Salt for identity (base64)
- "Salt":"4kk02v0NIcGtlobZ/xkxqWz8uH/ams/gjvQm14QT0dI=",
- // DH Private key
- "DHKeyPrivate":"eyJWYWx1ZSI6NDU2MDgzOTEzMjA0OTIyODA5Njg2MDI3MzQ0MzM3OTA0MzAyODYwMjM2NDk2NDM5NDI4NTcxMTMwNDMzOTQwMzgyMTIyMjY4OTQzNTMyMjIyMzc1MTkzNTEzMjU4MjA4MDA0NTczMDY4MjEwNzg2NDI5NjA1MjA0OTA3MjI2ODI5OTc3NTczMDkxODY0NTY3NDExMDExNjQxNCwiRmluZ2VycHJpbnQiOjE2ODAxNTQxNTExMjMzMDk4MzYzfQ=="
-}
+ * ReceptionIdentity struct.
+
+JSON example:
+ {
+  "ID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+  "RSAPrivatePem":"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBNU15dTdhYjBJOS9UL1BFUUxtd2x3ejZHV3FjMUNYemVIVXhoVEc4bmg1WWRWSXMxCmJ2THpBVjNOMDJxdXN6K2s4TVFEWjBtejMzdkswUmhPczZIY0NUSFdzTEpXRkE5WWpzWWlCRi9qTDd1bmd1ckIKL2tvK1JJSnNrWGFWaEZaazRGdERoRXhTNWY4RnR0Qmk1NmNLZmdJQlVKT3ozZi9qQllTMkxzMlJ6cWV5YXM3SApjV2RaME9TclBTT3BiYlViU1FPbS9LWnlweGZHU21yZ2oxRUZuU1dZZ2xGZTdUOTRPbHF5MG14QTV5clVXbHorCk9sK3hHbXpCNUp4WUFSMU9oMFQrQTk4RWMrTUZHNm43L1MraDdzRDgybGRnVnJmbStFTzRCdmFKeTRESGZGMWgKNnp6QnVnY25NUVFGc0dLeDFYWC9COTVMdUpPVjdyeXlDbzZGbHdJREFRQUJBb0lCQVFDaUh6OGNlcDZvQk9RTAphUzBVRitHeU5VMnlVcVRNTWtTWThoUkh1c09CMmFheXoybHZVb3RLUHBPbjZRSWRWVTJrcE4vY2dtY0lSb2x5CkhBMDRUOHJBWVNaRlVqaVlRajkzKzRFREpJYXd2Z0YyVEs1bFoyb3oxVTdreStncU82V0RMR2Z0Q0wvODVQWEIKa210aXhnUXpRV3g1RWcvemtHdm03eURBalQxeDloNytsRjJwNFlBam5kT2xTS0dmQjFZeTR1RXBQd0kwc1lWdgpKQWc0MEFxbllZUmt4emJPbmQxWGNjdEJFN2Z1VDdrWXhoeSs3WXYrUTJwVy9BYmh6NGlHOEY1MW9GMGZwV0czCmlISDhsVXZFTkp2SUZEVHZ0UEpESlFZalBRN3lUbGlGZUdrMXZUQkcyQkpQNExzVzhpbDZOeUFuRktaY1hOQ24KeHVCendiSlJBb0dCQVBUK0dGTVJGRHRHZVl6NmwzZmg3UjJ0MlhrMysvUmpvR3BDUWREWDhYNERqR1pVd1RGVQpOS2tQTTNjS29ia2RBYlBDb3FpL0tOOVBibk9QVlZ3R3JkSE9vSnNibFVHYmJGamFTUzJQMFZnNUVhTC9rT2dUCmxMMUdoVFpIUWk1VUlMM0p4M1Z3T0ZRQ3RQOU1UQlQ0UEQvcEFLbDg3VTJXN3JTY1dGV1ZGbFNkQW9HQkFPOFUKVmhHWkRpVGFKTWVtSGZIdVYrNmtzaUlsam9aUVVzeGpmTGNMZ2NjV2RmTHBqS0ZWTzJNN3NqcEJEZ0w4NmFnegorVk14ZkQzZ1l0SmNWN01aMVcwNlZ6TlNVTHh3a1dRY1hXUWdDaXc5elpyYlhCUmZRNUVjMFBlblVoWWVwVzF5CkpkTC8rSlpQeDJxSzVrQytiWU5EdmxlNWdpcjlDSGVzTlR5enVyckRBb0dCQUl0cTJnN1RaazhCSVFUUVNrZ24Kb3BkRUtzRW4wZExXcXlBdENtVTlyaWpHL2l2eHlXczMveXZDQWNpWm5VVEp0QUZISHVlbXVTeXplQ2g5QmRkegoyWkRPNUdqQVBxVHlQS3NudFlNZkY4UDczZ1NES1VSWWVFbHFDejdET0c5QzRzcitPK3FoN1B3cCtqUmFoK1ZiCkNuWllNMDlBVDQ3YStJYUJmbWRkaXpLbEFvR0JBSmo1dkRDNmJIQnNISWlhNUNJL1RZaG5YWXUzMkVCYytQM0sKMHF3VThzOCtzZTNpUHBla2Y4RjVHd3RuUU4zc2tsMk1GQWFGYldmeVFZazBpUEVTb0p1cGJzNXA1enNNRkJ1bwpncUZrVnQ0RUZhRDJweTVwM2tQbDJsZjhlZXVwWkZScGE0WmRQdVIrMjZ4eWYrNEJhdlZJeld3NFNPL1V4Q3crCnhqbTNEczRkQW9HQWREL0VOa1BjU004c1BCM3JSWW9MQ2twcUV2U0MzbVZSbjNJd3c1WFAwcDRRVndhRmR1ckMKYUhtSE1EekNrNEUvb0haQVhFdGZ2S2tRaUI4MXVYM2c1aVo4amdYUVhXUHRteTVIcVVhcWJYUTlENkxWc3B0egpKL3R4SWJLMXp5c1o2bk9IY1VoUUwyVVF6SlBBRThZNDdjYzVzTThEN3kwZjJ0QURTQUZNMmN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==",
+  "Salt":"4kk02v0NIcGtlobZ/xkxqWz8uH/ams/gjvQm14QT0dI=",
+  "DHKeyPrivate":"eyJWYWx1ZSI6NDU2MDgzOTEzMjA0OTIyODA5Njg2MDI3MzQ0MzM3OTA0MzAyODYwMjM2NDk2NDM5NDI4NTcxMTMwNDMzOTQwMzgyMTIyMjY4OTQzNTMyMjIyMzc1MTkzNTEzMjU4MjA4MDA0NTczMDY4MjEwNzg2NDI5NjA1MjA0OTA3MjI2ODI5OTc3NTczMDkxODY0NTY3NDExMDExNjQxNCwiRmluZ2VycHJpbnQiOjE2ODAxNTQxNTExMjMzMDk4MzYzfQ=="
+ }
  */
 @interface BindingsReceptionIdentity : NSObject <goSeqRefInterface> {
 }
@@ -808,14 +1038,17 @@ Example marshalled ReceptionIdentity:
 @end
 
 /**
- * RestlikeMessage is the bindings representation of a restlike.Message
-Example marshalled RestlikeMessage:
-{"Version":1,
-"Headers":"Y29udGVudHM6YXBwbGljYXRpb24vanNvbg==",
-"Content":"VGhpcyBpcyBhIHJlc3RsaWtlIG1lc3NhZ2U=",
-"Method":2,
-"URI":"xx://CmixRestlike/rest",
-"Error":""}
+ * RestlikeMessage is the bindings' representation of a restlike.Message
+
+JSON example:
+ {
+  "Version":1,
+  "Headers":"Y29udGVudHM6YXBwbGljYXRpb24vanNvbg==",
+  "Content":"VGhpcyBpcyBhIHJlc3RsaWtlIG1lc3NhZ2U=",
+  "Method":2,
+  "URI":"xx://CmixRestlike/rest",
+  "Error":""
+ }
  */
 @interface BindingsRestlikeMessage : NSObject <goSeqRefInterface> {
 }
@@ -833,8 +1066,10 @@ Example marshalled RestlikeMessage:
 @end
 
 /**
- * Example marshalled roundList object:
-[1001,1003,1006]
+ * RoundsList contains a list of round IDs.
+
+Example marshalled roundList object:
+ [1001,1003,1006]
  */
 @interface BindingsRoundsList : NSObject <goSeqRefInterface> {
 }
@@ -844,19 +1079,24 @@ Example marshalled RestlikeMessage:
 - (nonnull instancetype)init;
 // skipped field RoundsList.Rounds with unsupported type: []int
 
+/**
+ * Marshal JSON marshals the RoundsList.
+ */
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
- * SingleUseCallbackReport is the bindings struct used to represent single use messages
-received by a callback passed into single.Listen
+ * SingleUseCallbackReport is the bindings-layer struct used to represent
+single -use messages received by a callback passed into single.Listen.
 
-Example json marshalled struct:
-{"Rounds":[1,5,9],
- "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
- "Partner":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
- "EphID":{"EphId":[0,0,0,0,0,0,3,89],
- "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}}
+JSON example:
+ {
+  "Rounds":[1,5,9],
+  "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
+  "Partner":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+  "EphID":{"EphId":[0,0,0,0,0,0,3,89],
+  "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
+ }
  */
 @interface BindingsSingleUseCallbackReport : NSObject <goSeqRefInterface> {
 }
@@ -875,15 +1115,18 @@ Example json marshalled struct:
 @end
 
 /**
- * SingleUseResponseReport is the bindings struct used to represent information passed
-to the single.Response callback interface in response to single.TransmitRequest
+ * SingleUseResponseReport is the bindings-layer struct used to represent
+information passed to the single.Response callback interface in response to
+single.TransmitRequest.
 
-Example json marshalled struct:
-{"Rounds":[1,5,9],
- "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
- "ReceptionID":{"EphId":[0,0,0,0,0,0,3,89],
- "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"},
- "Err":null}
+JSON example:
+ {
+  "Rounds":[1,5,9],
+  "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
+  "ReceptionID":{"EphId":[0,0,0,0,0,0,3,89],
+  "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"},
+  "Err":null
+ }
  */
 @interface BindingsSingleUseResponseReport : NSObject <goSeqRefInterface> {
 }
@@ -901,12 +1144,15 @@ Example json marshalled struct:
 @end
 
 /**
- * SingleUseSendReport is the bindings struct used to represent information returned by single.TransmitRequest
+ * SingleUseSendReport is the bindings-layer struct used to represent
+information returned by single.TransmitRequest.
 
-Example json marshalled struct:
-{"Rounds":[1,5,9],
- "EphID":{"EphId":[0,0,0,0,0,0,3,89],
- "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}}
+JSON example:
+ {
+  "Rounds":[1,5,9],
+  "EphID":{"EphId":[0,0,0,0,0,0,3,89],
+  "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
+ }
  */
 @interface BindingsSingleUseSendReport : NSObject <goSeqRefInterface> {
 }
@@ -922,147 +1168,187 @@ Example json marshalled struct:
 @end
 
 /**
- * AsyncRequestRestLike sends an asynchronous restlike request to a given contact
-Accepts e2e client ID, marshalled contact object as recipient,
-marshalled RestlikeMessage, marshalled Params json, and a RestlikeCallback
+ * AsyncRequestRestLike sends an asynchronous restlike request to a given
+contact.
+
+Parameters:
+ - e2eID - ID of the e2e object in the tracker
+ - recipient - marshalled contact.Contact object
+ - request - JSON marshalled RestlikeMessage
+ - paramsJSON - JSON marshalled single.RequestParams
+ - cb - RestlikeCallback callback
+
 Returns an error, and the RestlikeCallback will be called with the results
-of json marshalling the response when received
+of JSON marshalling the response when received.
  */
 FOUNDATION_EXPORT BOOL BindingsAsyncRequestRestLike(long e2eID, NSData* _Nullable recipient, NSData* _Nullable request, NSData* _Nullable paramsJSON, id<BindingsRestlikeCallback> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
  * DownloadAndVerifySignedNdfWithUrl retrieves the NDF from a specified URL.
-The NDF is processed into a protobuf containing a signature which
-is verified using the cert string passed in. The NDF is returned as marshaled
-byte data which may be used to start a client.
+The NDF is processed into a protobuf containing a signature that is verified
+using the cert string passed in. The NDF is returned as marshaled byte data
+that may be used to start a client.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsDownloadAndVerifySignedNdfWithUrl(NSString* _Nullable url, NSString* _Nullable cert, NSError* _Nullable* _Nullable error);
 
 /**
- * EnableGrpcLogs sets GRPC trace logging
+ * EnableGrpcLogs sets GRPC trace logging.
  */
 FOUNDATION_EXPORT void BindingsEnableGrpcLogs(id<BindingsLogWriter> _Nullable writer);
 
 /**
- * GenerateSecret creates a secret password using a system-based
-pseudorandom number generator. It takes 1 parameter, `numBytes`,
-which should be set to 32, but can be set higher in certain cases.
+ * GenerateSecret creates a secret password using a system-based pseudorandom
+number generator.
+
+Parameters:
+ - numBytes - The size of secret. It should be set to 32, but can be set
+  higher in certain cases.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGenerateSecret(long numBytes);
 
 /**
- * GetDefaultCMixParams returns a JSON serialized object with all of the
-CMIX parameters and their default values. Call this function and modify
-the json to change CMIX settings.
+ * GetDefaultCMixParams returns a JSON serialized object with all of the cMix
+parameters and their default values. Call this function and modify the JSON
+to change cMix settings.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultCMixParams(void);
 
 /**
- * GetDefaultE2EParams returns a JSON serialized object with all of the
-E2E parameters and their default values. Call this function and modify
-the json to change E2E settings.
+ * GetDefaultE2EParams returns a JSON serialized object with all of the E2E
+parameters and their default values. Call this function and modify the JSON
+to change E2E settings.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultE2EParams(void);
 
 /**
+ * GetDefaultE2eFileTransferParams returns a JSON serialized object with all the
+e2e file transfer parameters and their default values. Call this function and modify
+the JSON to change single use settings.
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultE2eFileTransferParams(void);
+
+/**
  * GetDefaultFileTransferParams returns a JSON serialized object with all the
-File transfer parameters and their default values. Call this function and modify
-the json to change file transfer settings.
+file transfer parameters and their default values. Call this function and
+modify the JSON to change file transfer settings.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultFileTransferParams(void);
 
 /**
  * GetDefaultSingleUseParams returns a JSON serialized object with all the
-single use parameters and their default values. Call this function and modify
-the json to change single use settings.
+single-use parameters and their default values. Call this function and modify
+the JSON to change single use settings.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultSingleUseParams(void);
 
 /**
- * GetDependencies returns the api DEPENDENCIES
+ * GetDependencies returns the xxdk.DEPENDENCIES.
  */
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetDependencies(void);
 
 /**
- * GetFactsFromContact accepts a marshalled contact.Contact object, returning its marshalled list of Fact objects
+ * GetFactsFromContact accepts a marshalled contact.Contact object and returns
+its marshalled list of Fact objects.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetFactsFromContact(NSData* _Nullable marshaled, NSError* _Nullable* _Nullable error);
 
 /**
- * GetGitVersion rturns the api GITVERSION
+ * GetGitVersion returns the xxdk.GITVERSION.
  */
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetGitVersion(void);
 
 /**
- * GetIDFromContact accepts a marshalled contact.Contact object & returns a marshalled id.ID object
+ * GetIDFromContact accepts a marshalled contact.Contact object and returns a
+marshalled id.ID object.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetIDFromContact(NSData* _Nullable marshaled, NSError* _Nullable* _Nullable error);
 
 /**
- * GetPubkeyFromContact accepts a marshalled contact.Contact object & returns a json marshalled large.Int DhPubKey
+ * GetPubkeyFromContact accepts a marshalled contact.Contact object and returns
+a JSON marshalled large.Int DH public key.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetPubkeyFromContact(NSData* _Nullable marshaled, NSError* _Nullable* _Nullable error);
 
 /**
- * GetVersion returns the api SEMVER
+ * GetVersion returns the xxdk.SEMVER.
  */
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetVersion(void);
 
 /**
- * InitFileTransfer creates a bindings-level File Transfer manager
-Accepts e2e client ID and marshalled params JSON
+ * InitFileTransfer creates a bindings-level file transfer manager.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker
+ - paramsJSON - JSON marshalled fileTransfer.Params
  */
-FOUNDATION_EXPORT BindingsFileTransfer* _Nullable BindingsInitFileTransfer(long e2eID, NSData* _Nullable paramsJSON, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsFileTransfer* _Nullable BindingsInitFileTransfer(long e2eID, id<BindingsReceiveFileCallback> _Nullable receiveFileCallback, NSData* _Nullable e2eFileTransferParamsJson, NSData* _Nullable fileTransferParamsJson, NSError* _Nullable* _Nullable error);
 
 // skipped function Listen with unsupported parameter or return types
 
 
 /**
- * LoadCmix will load an existing client from the storageDir
-using the password. This will fail if the client doesn't exist or
-the password is incorrect.
-The password is passed as a byte array so that it can be cleared from
-memory and stored as securely as possible using the memguard library.
-LoadCmix does not block on network connection, and instead loads and
-starts subprocesses to perform network operations.
+ * LoadCmix will load an existing user storage from the storageDir using the password.
+This will fail if the user storage does not exist or the password is incorrect.
+
+The password is passed as a byte array so that it can be cleared from memory
+and stored as securely as possible using the MemGuard library.
+
+LoadCmix does not block on network connection and instead loads and starts
+subprocesses to perform network operations.
  */
 FOUNDATION_EXPORT BindingsCmix* _Nullable BindingsLoadCmix(NSString* _Nullable storageDir, NSData* _Nullable password, NSData* _Nullable cmixParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * LoadReceptionIdentity loads the given identity in Cmix storage with the given key
+ * LoadReceptionIdentity loads the given identity in Cmix storage with the given
+key.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsLoadReceptionIdentity(NSString* _Nullable key, long cmixId, NSError* _Nullable* _Nullable error);
 
 /**
- * sets level of logging. All logs the set level and above will be displayed
-options are:
-	TRACE		- 0
-	DEBUG		- 1
-	INFO 		- 2
-	WARN		- 3
-	ERROR		- 4
-	CRITICAL	- 5
-	FATAL		- 6
-The default state without updates is: INFO
+ * LogLevel sets level of logging. All logs at the set level and below will be
+displayed (e.g., when log level is ERROR, only ERROR, CRITICAL, and FATAL
+messages will be printed).
+
+Log level options:
+	TRACE    - 0
+	DEBUG    - 1
+	INFO     - 2
+	WARN     - 3
+	ERROR    - 4
+	CRITICAL - 5
+	FATAL    - 6
+
+The default log level without updates is INFO.
  */
 FOUNDATION_EXPORT BOOL BindingsLogLevel(long level, NSError* _Nullable* _Nullable error);
 
 /**
- * Login creates and returns a new E2e object and adds it to the e2eTrackerSingleton
-identity should be created via MakeReceptionIdentity() and passed in here
-If callbacks is left nil, a default auth.Callbacks will be used
+ * Login creates and returns a new E2e object and adds it to the
+e2eTrackerSingleton. identity should be created via
+Cmix.MakeReceptionIdentity and passed in here. If callbacks is left nil, a
+default auth.Callbacks will be used.
  */
 FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLogin(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * LoginEphemeral creates and returns a new ephemeral E2e object and adds it to the e2eTrackerSingleton
-identity should be created via MakeReceptionIdentity() or MakeLegacyReceptionIdentity() and passed in here
-If callbacks is left nil, a default auth.Callbacks will be used
+ * LoginEphemeral creates and returns a new ephemeral E2e object and adds it to
+the e2eTrackerSingleton. identity should be created via
+Cmix.MakeReceptionIdentity or Cmix.MakeLegacyReceptionIdentity and passed in
+here. If callbacks is left nil, a default auth.Callbacks will be used.
  */
 FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLoginEphemeral(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * NewCmix creates client storage, generates keys, connects, and registers
+ * NewBroadcastChannel creates a bindings-layer broadcast channel & starts listening for new messages
+
+Params
+ - cmixId - internal ID of cmix
+ - channelDefinition - JSON marshalled ChannelDef object
+ */
+FOUNDATION_EXPORT BindingsChannel* _Nullable BindingsNewBroadcastChannel(long cmixId, NSData* _Nullable channelDefinition, NSError* _Nullable* _Nullable error);
+
+/**
+ * NewCmix creates user storage, generates keys, connects, and registers
 with the network. Note that this does not register a username/identity, but
 merely creates a new cryptographic identity for adding such information
 at a later date.
@@ -1077,47 +1363,84 @@ FOUNDATION_EXPORT BOOL BindingsNewCmix(NSString* _Nullable ndfJSON, NSString* _N
 FOUNDATION_EXPORT void BindingsRegisterLogWriter(id<BindingsLogWriter> _Nullable writer);
 
 /**
- * RequestRestLike sends a restlike request to a given contact
-Accepts marshalled contact object as recipient, marshalled RestlikeMessage and params JSON
-Returns json marshalled restlike.Message & error
+ * RequestRestLike sends a restlike request to a given contact.
+
+Parameters:
+ - e2eID - ID of the e2e object in the tracker
+ - recipient - marshalled contact.Contact object
+ - request - JSON marshalled RestlikeMessage
+ - paramsJSON - JSON marshalled single.RequestParams
+
+Returns:
+ - []byte - JSON marshalled restlike.Message
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsRequestRestLike(long e2eID, NSData* _Nullable recipient, NSData* _Nullable request, NSData* _Nullable paramsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * RestlikeRequest performs a normal restlike request
-request - marshalled RestlikeMessage
-Returns marshalled result RestlikeMessage
+ * RestlikeRequest performs a normal restlike request.
+
+Parameters:
+ - cmixId - ID of the cMix object in the tracker
+ - connectionID - ID of the connection in the tracker
+ - request - JSON marshalled RestlikeMessage
+ - e2eParamsJSON - JSON marshalled xxdk.E2EParams
+
+Returns:
+ - []byte - JSON marshalled RestlikeMessage
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsRestlikeRequest(long clientID, long connectionID, NSData* _Nullable request, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsRestlikeRequest(long cmixId, long connectionID, NSData* _Nullable request, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * RestlikeRequestAuth performs an authenticated restlike request
-request - marshalled RestlikeMessage
-Returns marshalled result RestlikeMessage
+ * RestlikeRequestAuth performs an authenticated restlike request.
+
+Parameters:
+ - cmixId - ID of the cMix object in the tracker
+ - authConnectionID - ID of the authenticated connection in the tracker
+ - request - JSON marshalled RestlikeMessage
+ - e2eParamsJSON - JSON marshalled xxdk.E2EParams
+
+Returns:
+ - []byte - JSON marshalled RestlikeMessage
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsRestlikeRequestAuth(long clientID, long authConnectionID, NSData* _Nullable request, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsRestlikeRequestAuth(long cmixId, long authConnectionID, NSData* _Nullable request, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
  * SetFactsOnContact replaces the facts on the contact with the passed in facts
-pass in empty facts in order to clear the facts
-Accepts a marshalled contact.Contact object & a marshalled list of Fact objects
+pass in empty facts in order to clear the facts.
+
+Parameters:
+ - marshaled - JSON marshalled contact.Contact object
+ - facts - JSON marshalled Fact object.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSetFactsOnContact(NSData* _Nullable marshaled, NSData* _Nullable facts, NSError* _Nullable* _Nullable error);
 
 /**
- * StoreReceptionIdentity stores the given identity in Cmix storage with the given key
-This is the ideal way to securely store identities, as the caller of this function
-is only required to store the given key separately rather than the keying material
+ * StoreReceptionIdentity stores the given identity in Cmix storage with the
+given key.  This is the ideal way to securely store identities, as the caller
+of this function is only required to store the given key separately rather
+than the keying material.
  */
 FOUNDATION_EXPORT BOOL BindingsStoreReceptionIdentity(NSString* _Nullable key, NSData* _Nullable identity, long cmixId, NSError* _Nullable* _Nullable error);
 
 /**
- * TransmitSingleUse accepts a marshalled recipient contact object, tag, payload, params JSON, SingleUseResponse callback func & a
-Client.  Transmits payload to recipient via single use
+ * TransmitSingleUse transmits payload to recipient via single-use.
+
+Parameters:
+ - e2eID - ID of the e2e object in the tracker
+ - recipient - marshalled contact.Contact object
+ - tag - identifies the single-use message
+ - payload - message contents
+ - paramsJSON - JSON marshalled single.RequestParams
+ - responseCB - the callback that will be called when a response is received
+
+Returns:
+ - []byte - JSON marshalled SingleUseSendReport
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData* _Nullable recipient, NSString* _Nullable tag, NSData* _Nullable payload, NSData* _Nullable paramsJSON, id<BindingsSingleUseResponse> _Nullable responseCB, NSError* _Nullable* _Nullable error);
 
 @class BindingsAuthCallbacks;
+
+@class BindingsBroadcastListener;
 
 @class BindingsClientError;
 
@@ -1158,6 +1481,18 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData
 - (void)reset:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
 @end
 
+/**
+ * BroadcastListener is the public function type bindings can use to listen for broadcast messages.
+It accepts the result of calling json.Marshal on a BroadcastMessage object.
+ */
+@interface BindingsBroadcastListener : NSObject <goSeqRefInterface, BindingsBroadcastListener> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)callback:(NSData* _Nullable)p0 p1:(NSError* _Nullable)p1;
+@end
+
 @interface BindingsClientError : NSObject <goSeqRefInterface, BindingsClientError> {
 }
 @property(strong, readonly) _Nonnull id _ref;
@@ -1167,34 +1502,50 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData
 @end
 
 /**
- * FileTransferReceiveProgressCallback is a bindings-layer interface which is called with the progress of a received file
-Accepts the result of calling json.Marshal on a Progress struct & a FilePartTracker interface
+ * FileTransferReceiveProgressCallback is a bindings-layer interface that is
+called with the progress of a received file.
  */
 @interface BindingsFileTransferReceiveProgressCallback : NSObject <goSeqRefInterface, BindingsFileTransferReceiveProgressCallback> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * Callback is called when a file part is sent or an error occurs.
+
+Parameters:
+ - payload - the JSON marshalled bytes of a Progress object.
+ - t - tracker that allows the lookup of the status of any file part
+ - err - any errors that occurred during sending
+ */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
 @end
 
 /**
- * FileTransferSentProgressCallback is a bindings-layer interface which is called with the progress of a sending file
-Accepts the result of calling json.Marshal on a Progress struct & a FilePartTracker interface
+ * FileTransferSentProgressCallback is a bindings-layer interface that contains
+a callback that is called when the sent progress updates.
  */
 @interface BindingsFileTransferSentProgressCallback : NSObject <goSeqRefInterface, BindingsFileTransferSentProgressCallback> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * Callback is called when a file part is sent or an error occurs.
+
+Parameters:
+ - payload - the JSON marshalled bytes of a Progress object.
+ - t - tracker that allows the lookup of the status of any file part
+ - err - any errors that occurred during sending
+ */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
 @end
 
 /**
- * Listener provides a callback to hear a message
-An object implementing this interface can be called back when the client
-gets a message of the type that the registerer specified at registration
-time.
+ * Listener provides a callback to hear a message.
+
+An object implementing this interface can be called back when the client gets
+a message of the type that the registerer specified at registration time.
  */
 @interface BindingsListener : NSObject <goSeqRefInterface, BindingsListener> {
 }
@@ -1202,12 +1553,14 @@ time.
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 /**
- * Hear is called to receive a message in the UI
-Accepts a marshalled Message object
+ * Hear is called to receive a message in the UI.
+
+Parameters:
+ - item - JSON marshalled Message object
  */
 - (void)hear:(NSData* _Nullable)item;
 /**
- * Name returns a name, used for debugging
+ * Name returns a name; used for debugging.
  */
 - (NSString* _Nonnull)name;
 @end
@@ -1223,8 +1576,11 @@ Accepts a marshalled Message object
 /**
  * MessageDeliveryCallback gets called on the determination if all events
 related to a message send were successful.
+
 If delivered == true, timedOut == false && roundResults != nil
+
 If delivered == false, roundResults == nil
+
 If timedOut == true, delivered == false && roundResults == nil
  */
 @interface BindingsMessageDeliveryCallback : NSObject <goSeqRefInterface, BindingsMessageDeliveryCallback> {
@@ -1236,8 +1592,8 @@ If timedOut == true, delivered == false && roundResults == nil
 @end
 
 /**
- * A callback when which is used to receive notification if network health
-changes
+ * NetworkHealthCallback contains a callback that is used to receive
+notification if network health changes.
  */
 @interface BindingsNetworkHealthCallback : NSObject <goSeqRefInterface, BindingsNetworkHealthCallback> {
 }
@@ -1260,20 +1616,30 @@ changes
 @end
 
 /**
- * ReceiveFileCallback is a bindings-layer interface which is called when a file is received
-Accepts the result of calling json.Marshal on a ReceivedFile struct
+ * ReceiveFileCallback is a bindings-layer interface that contains a callback
+that is called when a file is received.
  */
 @interface BindingsReceiveFileCallback : NSObject <goSeqRefInterface, BindingsReceiveFileCallback> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * Callback is called when a new file transfer is received.
+
+Parameters:
+ - payload - the JSON marshalled bytes of a ReceivedFile object.
+ - err - any errors that occurred during reception
+ */
 - (void)callback:(NSData* _Nullable)payload err:(NSError* _Nullable)err;
 @end
 
 /**
- * ReporterFunc is a bindings-layer interface which receives info from the Event Manager
-Accepts result of json.Marshal on an EventReport object
+ * ReporterFunc is a bindings-layer interface that receives info from the Event
+Manager.
+
+Parameters:
+ - payload - JSON marshalled EventReport object
  */
 @interface BindingsReporterFunc : NSObject <goSeqRefInterface, BindingsReporterFunc> {
 }
@@ -1284,8 +1650,12 @@ Accepts result of json.Marshal on an EventReport object
 @end
 
 /**
- * RestlikeCallback is the public function type bindings can use to make an asynchronous restlike request
-It accepts a json marshalled restlike.Message and an error (the results of calling json.Marshal on the message)
+ * RestlikeCallback is the public function type bindings can use to make an
+asynchronous restlike request.
+
+Parameters:
+ - []byte - JSON marshalled restlike.Message
+ - error - an error (the results of calling json.Marshal on the message)
  */
 @interface BindingsRestlikeCallback : NSObject <goSeqRefInterface, BindingsRestlikeCallback> {
 }
@@ -1296,8 +1666,11 @@ It accepts a json marshalled restlike.Message and an error (the results of calli
 @end
 
 /**
- * SingleUseCallback func is passed into Listen and called when messages are received
-Accepts a SingleUseCallbackReport marshalled to json
+ * SingleUseCallback func is passed into Listen and called when messages are
+received.
+
+Parameters:
+ - callbackReport - JSON marshalled SingleUseCallbackReport
  */
 @interface BindingsSingleUseCallback : NSObject <goSeqRefInterface, BindingsSingleUseCallback> {
 }
@@ -1308,8 +1681,11 @@ Accepts a SingleUseCallbackReport marshalled to json
 @end
 
 /**
- * SingleUseResponse is the public facing callback func passed by bindings clients into TransmitSingleUse
-Accepts a SingleUseResponseReport marshalled to json
+ * SingleUseResponse is the public facing callback function passed by bindings
+clients into TransmitSingleUse.
+
+Parameters:
+ - callbackReport - JSON marshalled SingleUseResponseReport
  */
 @interface BindingsSingleUseResponse : NSObject <goSeqRefInterface, BindingsSingleUseResponse> {
 }
