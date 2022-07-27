@@ -16,19 +16,19 @@ final class ProgressTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let progress = try Progress.decode(jsonData)
+    let model = try Progress.decode(jsonData)
 
-    XCTAssertNoDifference(progress, Progress(
+    XCTAssertNoDifference(model, Progress(
       completed: completed,
       transmitted: transmitted,
       total: total,
       error: nil
     ))
 
-    let encodedProgress = try progress.encode()
-    let decodedProgress = try Progress.decode(encodedProgress)
+    let encodedModel = try model.encode()
+    let decodedModel = try Progress.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedProgress, progress)
+    XCTAssertNoDifference(decodedModel, model)
   }
 
   func testDecodingProgressWithError() throws {
@@ -45,9 +45,9 @@ final class ProgressTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let progress = try Progress.decode(jsonData)
+    let model = try Progress.decode(jsonData)
 
-    XCTAssertNoDifference(progress, Progress(
+    XCTAssertNoDifference(model, Progress(
       completed: completed,
       transmitted: transmitted,
       total: total,

@@ -20,9 +20,9 @@ final class SingleUseResponseReportTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let report = try SingleUseResponseReport.decode(jsonData)
+    let model = try SingleUseResponseReport.decode(jsonData)
 
-    XCTAssertNoDifference(report, SingleUseResponseReport(
+    XCTAssertNoDifference(model, SingleUseResponseReport(
       rounds: rounds,
       payload: Data(base64Encoded: payloadB64)!,
       receptionId: .init(
@@ -32,10 +32,10 @@ final class SingleUseResponseReportTests: XCTestCase {
       error: nil
     ))
 
-    let encodedReport = try report.encode()
-    let decodedReport = try SingleUseResponseReport.decode(encodedReport)
+    let encodedModel = try model.encode()
+    let decodedModel = try SingleUseResponseReport.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedReport, report)
+    XCTAssertNoDifference(decodedModel, model)
   }
 
   func testDecodingReportWithError() throws {
@@ -56,9 +56,9 @@ final class SingleUseResponseReportTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let report = try SingleUseResponseReport.decode(jsonData)
+    let model = try SingleUseResponseReport.decode(jsonData)
 
-    XCTAssertNoDifference(report, SingleUseResponseReport(
+    XCTAssertNoDifference(model, SingleUseResponseReport(
       rounds: rounds,
       payload: Data(base64Encoded: payloadB64)!,
       receptionId: .init(

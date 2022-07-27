@@ -17,18 +17,18 @@ final class EventReportTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let report = try EventReport.decode(jsonData)
+    let model = try EventReport.decode(jsonData)
 
-    XCTAssertNoDifference(report, EventReport(
+    XCTAssertNoDifference(model, EventReport(
       priority: priority,
       category: category,
       eventType: eventType,
       details: details
     ))
 
-    let encodedReport = try report.encode()
-    let decodedReport = try EventReport.decode(encodedReport)
+    let encodedModel = try model.encode()
+    let decodedModel = try EventReport.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedReport, report)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

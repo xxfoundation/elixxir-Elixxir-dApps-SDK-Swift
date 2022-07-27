@@ -17,18 +17,18 @@ final class FileSendTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let fileSend = try FileSend.decode(jsonData)
+    let model = try FileSend.decode(jsonData)
 
-    XCTAssertNoDifference(fileSend, FileSend(
+    XCTAssertNoDifference(model, FileSend(
       name: name,
       type: type,
       preview: Data(base64Encoded: previewB64)!,
       contents: Data(base64Encoded: contentsB64)!
     ))
 
-    let encodedFileSend = try fileSend.encode()
-    let decodedFileSend = try FileSend.decode(encodedFileSend)
+    let encodedModel = try model.encode()
+    let decodedModel = try FileSend.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedFileSend, fileSend)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

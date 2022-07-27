@@ -15,27 +15,26 @@ final class MessageSendReportTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let report = try MessageSendReport.decode(jsonData)
+    let model = try MessageSendReport.decode(jsonData)
 
-    XCTAssertNoDifference(report, MessageSendReport(
+    XCTAssertNoDifference(model, MessageSendReport(
       roundList: rounds,
       messageId: Data(base64Encoded: messageIdB64)!,
       timestamp: timestamp
     ))
 
-    let encodedReport = try report.encode()
-    let decodedReport = try MessageSendReport.decode(encodedReport)
+    let encodedModel = try model.encode()
+    let decodedModel = try MessageSendReport.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedReport, report)
+    XCTAssertNoDifference(decodedModel, model)
   }
 
   func testDecodeEmpty() throws {
     let jsonString = "{}"
     let jsonData = jsonString.data(using: .utf8)!
+    let model = try MessageSendReport.decode(jsonData)
 
-    let report = try MessageSendReport.decode(jsonData)
-
-    XCTAssertNoDifference(report, MessageSendReport(
+    XCTAssertNoDifference(model, MessageSendReport(
       roundList: nil,
       messageId: nil,
       timestamp: nil

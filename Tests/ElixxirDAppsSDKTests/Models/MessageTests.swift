@@ -27,9 +27,9 @@ final class MessageTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let message = try Message.decode(jsonData)
+    let model = try Message.decode(jsonData)
 
-    XCTAssertNoDifference(message, Message(
+    XCTAssertNoDifference(model, Message(
       messageType: 1,
       id: Data(base64Encoded: idB64)!,
       payload: Data(base64Encoded: payloadB64)!,
@@ -41,9 +41,9 @@ final class MessageTests: XCTestCase {
       roundId: roundId
     ))
 
-    let encodedMessage = try message.encode()
-    let decodedMessage = try Message.decode(encodedMessage)
+    let encodedModel = try model.encode()
+    let decodedModel = try Message.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedMessage, message)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

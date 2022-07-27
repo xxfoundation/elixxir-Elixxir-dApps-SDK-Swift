@@ -17,18 +17,18 @@ final class ReceptionIdentityTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let identity = try ReceptionIdentity.decode(jsonData)
+    let model = try ReceptionIdentity.decode(jsonData)
 
-    XCTAssertNoDifference(identity, ReceptionIdentity(
+    XCTAssertNoDifference(model, ReceptionIdentity(
       id: Data(base64Encoded: idB64)!,
       rsaPrivatePem: Data(base64Encoded: rsaPrivatePemB64)!,
       salt: Data(base64Encoded: saltB64)!,
       dhKeyPrivate: Data(base64Encoded: dhKeyPrivateB64)!
     ))
 
-    let encodedIdentity = try identity.encode()
-    let decodedIdentity = try ReceptionIdentity.decode(encodedIdentity)
+    let encodedModel = try model.encode()
+    let decodedModel = try ReceptionIdentity.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedIdentity, identity)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

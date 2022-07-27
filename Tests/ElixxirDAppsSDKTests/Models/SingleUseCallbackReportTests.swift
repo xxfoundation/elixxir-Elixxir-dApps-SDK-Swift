@@ -21,9 +21,9 @@ final class SingleUseCallbackReportTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let report = try SingleUseCallbackReport.decode(jsonData)
+    let model = try SingleUseCallbackReport.decode(jsonData)
 
-    XCTAssertNoDifference(report, SingleUseCallbackReport(
+    XCTAssertNoDifference(model, SingleUseCallbackReport(
       rounds: rounds,
       payload: Data(base64Encoded: payloadB64)!,
       partner: Data(base64Encoded: partnerB64)!,
@@ -33,9 +33,9 @@ final class SingleUseCallbackReportTests: XCTestCase {
       )
     ))
 
-    let encodedReport = try report.encode()
-    let decodedReport = try SingleUseCallbackReport.decode(encodedReport)
+    let encodedModel = try model.encode()
+    let decodedModel = try SingleUseCallbackReport.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedReport, report)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

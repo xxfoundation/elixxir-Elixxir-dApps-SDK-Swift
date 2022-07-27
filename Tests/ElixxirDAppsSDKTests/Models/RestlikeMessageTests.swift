@@ -21,9 +21,9 @@ final class RestlikeMessageTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let message = try RestlikeMessage.decode(jsonData)
+    let model = try RestlikeMessage.decode(jsonData)
 
-    XCTAssertNoDifference(message, RestlikeMessage(
+    XCTAssertNoDifference(model, RestlikeMessage(
       version: version,
       headers: Data(base64Encoded: headersB64)!,
       content: Data(base64Encoded: contentB64)!,
@@ -32,9 +32,9 @@ final class RestlikeMessageTests: XCTestCase {
       error: error
     ))
 
-    let encodedMessage = try message.encode()
-    let decodedMessage = try RestlikeMessage.decode(encodedMessage)
+    let encodedModel = try model.encode()
+    let decodedModel = try RestlikeMessage.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedMessage, message)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

@@ -21,9 +21,9 @@ final class ReceivedFileTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let receivedFile = try ReceivedFile.decode(jsonData)
+    let model = try ReceivedFile.decode(jsonData)
 
-    XCTAssertNoDifference(receivedFile, ReceivedFile(
+    XCTAssertNoDifference(model, ReceivedFile(
       transferId: Data(base64Encoded: transferIdB64)!,
       senderId: Data(base64Encoded: senderIdB64)!,
       preview: Data(base64Encoded: previewB64)!,
@@ -32,9 +32,9 @@ final class ReceivedFileTests: XCTestCase {
       size: size
     ))
 
-    let encodedReceivedFile = try receivedFile.encode()
-    let decodedReceivedFile = try ReceivedFile.decode(encodedReceivedFile)
+    let encodedModel = try model.encode()
+    let decodedModel = try ReceivedFile.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedReceivedFile, receivedFile)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

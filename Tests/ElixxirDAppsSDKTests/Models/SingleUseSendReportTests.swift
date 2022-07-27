@@ -17,9 +17,9 @@ final class SingleUseSendReportTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let report = try SingleUseSendReport.decode(jsonData)
+    let model = try SingleUseSendReport.decode(jsonData)
 
-    XCTAssertNoDifference(report, SingleUseSendReport(
+    XCTAssertNoDifference(model, SingleUseSendReport(
       rounds: rounds,
       ephId: .init(
         ephId: ephId,
@@ -27,9 +27,9 @@ final class SingleUseSendReportTests: XCTestCase {
       )
     ))
 
-    let encodedReport = try report.encode()
-    let decodedReport = try SingleUseSendReport.decode(encodedReport)
+    let encodedModel = try model.encode()
+    let decodedModel = try SingleUseSendReport.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedReport, report)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

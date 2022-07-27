@@ -15,17 +15,17 @@ final class BroadcastMessageTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let message = try BroadcastMessage.decode(jsonData)
+    let model = try BroadcastMessage.decode(jsonData)
 
-    XCTAssertNoDifference(message, BroadcastMessage(
+    XCTAssertNoDifference(model, BroadcastMessage(
       roundId: roundId,
       ephId: ephId,
       payload: Data(base64Encoded: payloadB64)!
     ))
 
-    let encodedMessage = try message.encode()
-    let decodedMessage = try BroadcastMessage.decode(encodedMessage)
+    let encodedModel = try model.encode()
+    let decodedModel = try BroadcastMessage.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedMessage, message)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }

@@ -13,16 +13,16 @@ final class FactTests: XCTestCase {
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
-    let fact = try Fact.decode(jsonData)
+    let model = try Fact.decode(jsonData)
 
-    XCTAssertNoDifference(fact, Fact(
+    XCTAssertNoDifference(model, Fact(
       fact: factValue,
       type: factType
     ))
 
-    let encodedFact = try fact.encode()
-    let decodedFact = try Fact.decode(encodedFact)
+    let encodedModel = try model.encode()
+    let decodedModel = try Fact.decode(encodedModel)
 
-    XCTAssertNoDifference(decodedFact, fact)
+    XCTAssertNoDifference(decodedModel, model)
   }
 }
