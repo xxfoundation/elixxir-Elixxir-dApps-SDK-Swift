@@ -12,6 +12,7 @@
 
 
 @class BindingsAuthenticatedConnection;
+@class BindingsBackup;
 @class BindingsBroadcastMessage;
 @class BindingsBroadcastReport;
 @class BindingsChannel;
@@ -35,6 +36,7 @@
 @class BindingsSingleUseCallbackReport;
 @class BindingsSingleUseResponseReport;
 @class BindingsSingleUseSendReport;
+@class BindingsUserDiscovery;
 @protocol BindingsAuthCallbacks;
 @class BindingsAuthCallbacks;
 @protocol BindingsBroadcastListener;
@@ -65,6 +67,10 @@
 @class BindingsSingleUseCallback;
 @protocol BindingsSingleUseResponse;
 @class BindingsSingleUseResponse;
+@protocol BindingsUdNetworkStatus;
+@class BindingsUdNetworkStatus;
+@protocol BindingsUpdateBackupFunc;
+@class BindingsUpdateBackupFunc;
 
 @protocol BindingsAuthCallbacks <NSObject>
 - (void)confirm:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
@@ -162,6 +168,18 @@ Parameters:
 - (void)callback:(NSData* _Nullable)responseReport err:(NSError* _Nullable)err;
 @end
 
+@protocol BindingsUdNetworkStatus <NSObject>
+/**
+ * UdNetworkStatus returns:
+- int - a xxdk.Status int
+ */
+- (long)udNetworkStatus;
+@end
+
+@protocol BindingsUpdateBackupFunc <NSObject>
+- (void)updateBackup:(NSData* _Nullable)encryptedBackup;
+@end
+
 @interface BindingsAuthenticatedConnection : NSObject <goSeqRefInterface> {
 }
 @property(strong, readonly) _Nonnull id _ref;
@@ -176,6 +194,35 @@ Parameters:
 - (BOOL)isAuthenticated;
 - (BOOL)registerListener:(long)messageType newListener:(id<BindingsListener> _Nullable)newListener error:(NSError* _Nullable* _Nullable)error;
 - (NSData* _Nullable)sendE2E:(long)mt payload:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
+ * Backup is a bindings-level struct encapsulating the backup.Backup
+client object.
+ */
+@interface BindingsBackup : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * AddJson stores the argument within the Backup structure.
+
+Params
+ - json - JSON string
+ */
+- (void)addJson:(NSString* _Nullable)json;
+/**
+ * IsBackupRunning returns true if the backup has been initialized and is
+running. Returns false if it has been stopped.
+ */
+- (BOOL)isBackupRunning;
+/**
+ * StopBackup stops the backup processes and deletes the user's password from
+storage. To enable backups again, call InitializeBackup.
+ */
+- (BOOL)stopBackup:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -1168,6 +1215,81 @@ JSON example:
 @end
 
 /**
+ * UserDiscovery is a bindings-layer struct that wraps an ud.Manager interface.
+ */
+@interface BindingsUserDiscovery : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * ConfirmFact confirms a fact first registered via AddFact. The confirmation ID
+comes from AddFact while the code will come over the associated
+communications system.
+ */
+- (BOOL)confirmFact:(NSString* _Nullable)confirmationID code:(NSString* _Nullable)code error:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetContact returns the marshalled bytes of the contact.Contact for UD as
+retrieved from the NDF.
+ */
+- (NSData* _Nullable)getContact:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetFacts returns a JSON marshalled list of fact.Fact objects that exist
+within the Store's registeredFacts map.
+ */
+- (NSData* _Nullable)getFacts;
+/**
+ * GetID returns the udTracker ID for the UserDiscovery object.
+ */
+- (long)getID;
+/**
+ * PermanentDeleteAccount removes the username associated with this user from
+the UD service. This will only take a username type fact, and the fact must
+be associated with this user.
+
+Parameters:
+ - factJson - a JSON marshalled fact.Fact
+ */
+- (BOOL)permanentDeleteAccount:(NSData* _Nullable)factJson error:(NSError* _Nullable* _Nullable)error;
+/**
+ * RemoveFact removes a previously confirmed fact. This will fail if the fact
+passed in is not UD service does not associate this fact with this user.
+
+Parameters:
+ - factJson - a JSON marshalled fact.Fact
+ */
+- (BOOL)removeFact:(NSData* _Nullable)factJson error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SendRegisterFact adds a fact for the user to user discovery. Will only
+succeed if the user is already registered and the system does not have the
+fact currently registered for any user.
+
+This does not complete the fact registration process, it returns a
+confirmation ID instead. Over the communications system the fact is
+associated with, a code will be sent. This confirmation ID needs to be called
+along with the code to finalize the fact.
+
+Parameters:
+ - factJson - a JSON marshalled fact.Fact
+ */
+- (NSString* _Nonnull)sendRegisterFact:(NSData* _Nullable)factJson error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SetAlternativeUserDiscovery sets the alternativeUd object within manager.
+Once set, any user discovery operation will go through the alternative
+user discovery service.
+
+To undo this operation, use UnsetAlternativeUserDiscovery.
+ */
+- (BOOL)setAlternativeUserDiscovery:(NSData* _Nullable)altCert altAddress:(NSData* _Nullable)altAddress contactFile:(NSData* _Nullable)contactFile error:(NSError* _Nullable* _Nullable)error;
+/**
+ * UnsetAlternativeUserDiscovery clears out the information from the Manager
+object.
+ */
+- (BOOL)unsetAlternativeUserDiscovery:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
  * AsyncRequestRestLike sends an asynchronous restlike request to a given
 contact.
 
@@ -1283,6 +1405,17 @@ Parameters:
  */
 FOUNDATION_EXPORT BindingsFileTransfer* _Nullable BindingsInitFileTransfer(long e2eID, id<BindingsReceiveFileCallback> _Nullable receiveFileCallback, NSData* _Nullable e2eFileTransferParamsJson, NSData* _Nullable fileTransferParamsJson, NSError* _Nullable* _Nullable error);
 
+/**
+ * InitializeBackup creates a bindings-layer Backup object.
+
+Params
+ - e2eID - ID of the E2e object in the e2e tracker.
+ - udID - ID of the UserDiscovery object in the ud tracker.
+ - password - password used in LoadCmix.
+ - cb - the callback to be called when a backup is triggered.
+ */
+FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsInitializeBackup(long e2eID, long udID, NSString* _Nullable password, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
+
 // skipped function Listen with unsupported parameter or return types
 
 
@@ -1297,6 +1430,15 @@ LoadCmix does not block on network connection and instead loads and starts
 subprocesses to perform network operations.
  */
 FOUNDATION_EXPORT BindingsCmix* _Nullable BindingsLoadCmix(NSString* _Nullable storageDir, NSData* _Nullable password, NSData* _Nullable cmixParamsJSON, NSError* _Nullable* _Nullable error);
+
+/**
+ * LoadOrNewUserDiscovery creates a bindings-level user discovery manager.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker
+ - follower - network follower func wrapped in UdNetworkStatus
+ */
+FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsLoadOrNewUserDiscovery(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSString* _Nullable username, NSData* _Nullable registrationValidationSignature, NSError* _Nullable* _Nullable error);
 
 /**
  * LoadReceptionIdentity loads the given identity in Cmix storage with the given
@@ -1358,6 +1500,19 @@ Users of this function should delete the storage directory on error.
 FOUNDATION_EXPORT BOOL BindingsNewCmix(NSString* _Nullable ndfJSON, NSString* _Nullable storageDir, NSData* _Nullable password, NSString* _Nullable registrationCode, NSError* _Nullable* _Nullable error);
 
 /**
+ * NewUdManagerFromBackup builds a new user discover manager from a backup. It
+will construct a manager that is already registered and restore already
+registered facts into store.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker
+ - follower - network follower func wrapped in UdNetworkStatus
+ - emailFactJson - a JSON marshalled email fact.Fact
+ - phoneFactJson - a JSON marshalled phone fact.Fact
+ */
+FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable emailFactJson, NSData* _Nullable phoneFactJson, NSError* _Nullable* _Nullable error);
+
+/**
  * RegisterLogWriter registers a callback on which logs are written.
  */
 FOUNDATION_EXPORT void BindingsRegisterLogWriter(id<BindingsLogWriter> _Nullable writer);
@@ -1403,6 +1558,21 @@ Returns:
  - []byte - JSON marshalled RestlikeMessage
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsRestlikeRequestAuth(long cmixId, long authConnectionID, NSData* _Nullable request, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
+
+/**
+ * ResumeBackup resumes the backup processes with a new callback.
+Call this function only when resuming a backup that has already been
+initialized or to replace the callback.
+To start the backup for the first time or to use a new password, use
+InitializeBackup.
+
+Params
+ - e2eID - ID of the E2e object in the e2e tracker.
+ - udID - ID of the UserDiscovery object in the ud tracker.
+ - cb - the callback to be called when a backup is triggered.
+   This will replace any callback that has been passed into InitializeBackup.
+ */
+FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsResumeBackup(long e2eID, long udID, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
  * SetFactsOnContact replaces the facts on the contact with the passed in facts
@@ -1467,6 +1637,10 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData
 @class BindingsSingleUseCallback;
 
 @class BindingsSingleUseResponse;
+
+@class BindingsUdNetworkStatus;
+
+@class BindingsUpdateBackupFunc;
 
 /**
  * AuthCallbacks is the bindings-specific interface for auth.Callbacks methods.
@@ -1693,6 +1867,33 @@ Parameters:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (void)callback:(NSData* _Nullable)responseReport err:(NSError* _Nullable)err;
+@end
+
+/**
+ * UdNetworkStatus contains the UdNetworkStatus, which is a bindings-level
+interface for ud.udNetworkStatus.
+ */
+@interface BindingsUdNetworkStatus : NSObject <goSeqRefInterface, BindingsUdNetworkStatus> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * UdNetworkStatus returns:
+- int - a xxdk.Status int
+ */
+- (long)udNetworkStatus;
+@end
+
+/**
+ * UpdateBackupFunc contains a function callback that returns new backups.
+ */
+@interface BindingsUpdateBackupFunc : NSObject <goSeqRefInterface, BindingsUpdateBackupFunc> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)updateBackup:(NSData* _Nullable)encryptedBackup;
 @end
 
 #endif
