@@ -2,13 +2,13 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct Login {
-  public var run: (Bool, Int, AuthCallbacks?, Data, Data) throws -> E2E
+  public var run: (Bool, Int, AuthCallbacks?, ReceptionIdentity, Data) throws -> E2E
 
   public func callAsFunction(
     ephemeral: Bool,
     cmixId: Int,
     authCallbacks: AuthCallbacks? = nil,
-    identity: Data,
+    identity: ReceptionIdentity,
     e2eParamsJSON: Data
   ) throws -> E2E {
     try run(ephemeral, cmixId, authCallbacks, identity, e2eParamsJSON)
@@ -23,7 +23,7 @@ extension Login {
       bindingsE2E = BindingsLogin(
         cmixId,
         authCallbacks?.makeBindingsAuthCallbacks(),
-        identity,
+        try identity.encode(),
         e2eParamsJSON,
         &error
       )
@@ -31,7 +31,7 @@ extension Login {
       bindingsE2E = BindingsLoginEphemeral(
         cmixId,
         authCallbacks?.makeBindingsAuthCallbacks(),
-        identity,
+        try identity.encode(),
         e2eParamsJSON,
         &error
       )
