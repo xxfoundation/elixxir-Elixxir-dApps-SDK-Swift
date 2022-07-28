@@ -67,6 +67,8 @@
 @class BindingsSingleUseCallback;
 @protocol BindingsSingleUseResponse;
 @class BindingsSingleUseResponse;
+@protocol BindingsStopper;
+@class BindingsStopper;
 @protocol BindingsUdNetworkStatus;
 @class BindingsUdNetworkStatus;
 @protocol BindingsUpdateBackupFunc;
@@ -168,6 +170,10 @@ Parameters:
 - (void)callback:(NSData* _Nullable)responseReport err:(NSError* _Nullable)err;
 @end
 
+@protocol BindingsStopper <NSObject>
+- (void)stop;
+@end
+
 @protocol BindingsUdNetworkStatus <NSObject>
 /**
  * UdNetworkStatus returns:
@@ -267,7 +273,7 @@ Example JSON:
 /**
  * Channel is a bindings-level struct encapsulating the broadcast.Channel client object.
  */
-@interface BindingsChannel : NSObject <goSeqRefInterface> {
+@interface BindingsChannel : NSObject <goSeqRefInterface, BindingsStopper> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
@@ -1416,8 +1422,19 @@ Params
  */
 FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsInitializeBackup(long e2eID, long udID, NSString* _Nullable password, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
 
-// skipped function Listen with unsupported parameter or return types
+/**
+ * Listen starts a single-use listener on a given tag using the passed in e2e object
+and SingleUseCallback func.
 
+Parameters:
+ - e2eID - ID of the e2e object in the tracker
+ - tag - identifies the single-use message
+ - cb - the callback that will be called when a response is received
+
+Returns:
+ - Stopper - an interface containing a function used to stop the listener
+ */
+FOUNDATION_EXPORT id<BindingsStopper> _Nullable BindingsListen(long e2eID, NSString* _Nullable tag, id<BindingsSingleUseCallback> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
  * LoadCmix will load an existing user storage from the storageDir using the password.
@@ -1637,6 +1654,8 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData
 @class BindingsSingleUseCallback;
 
 @class BindingsSingleUseResponse;
+
+@class BindingsStopper;
 
 @class BindingsUdNetworkStatus;
 
@@ -1867,6 +1886,17 @@ Parameters:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (void)callback:(NSData* _Nullable)responseReport err:(NSError* _Nullable)err;
+@end
+
+/**
+ * Stopper is a public interface returned by Listen, allowing users to stop the registered listener.
+ */
+@interface BindingsStopper : NSObject <goSeqRefInterface, BindingsStopper> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)stop;
 @end
 
 /**
