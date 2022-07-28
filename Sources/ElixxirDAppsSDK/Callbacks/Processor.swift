@@ -1,7 +1,7 @@
 import Bindings
 import XCTestDynamicOverlay
 
-public struct ServiceProcessor {
+public struct Processor {
   public struct Callback: Equatable {
     public init(message: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64) {
       self.message = message
@@ -25,21 +25,21 @@ public struct ServiceProcessor {
   public var process: (Callback) -> Void
 }
 
-extension ServiceProcessor {
-  public static let unimplemented = ServiceProcessor(
+extension Processor {
+  public static let unimplemented = Processor(
     serviceTag: "unimplemented",
     process: XCTUnimplemented("\(Self.self).process")
   )
 }
 
-extension ServiceProcessor {
+extension Processor {
   func makeBindingsProcessor() -> BindingsProcessorProtocol {
-    class Processor: NSObject, BindingsProcessorProtocol {
-      init(_ serviceProcessor: ServiceProcessor) {
-        self.serviceProcessor = serviceProcessor
+    class CallbackObject: NSObject, BindingsProcessorProtocol {
+      init(_ processor: Processor) {
+        self.processor = processor
       }
 
-      let serviceProcessor: ServiceProcessor
+      let processor: Processor
 
       func process(_ message: Data?, receptionId: Data?, ephemeralId: Int64, roundId: Int64) {
         guard let message = message else {
@@ -48,7 +48,7 @@ extension ServiceProcessor {
         guard let receptionId = receptionId else {
           fatalError("BindingsProcessor.process received `nil` receptionId")
         }
-        serviceProcessor.process(Callback(
+        processor.process(Callback(
           message: message,
           receptionId: receptionId,
           ephemeralId: ephemeralId,
@@ -57,10 +57,10 @@ extension ServiceProcessor {
       }
 
       func string() -> String {
-        serviceProcessor.serviceTag
+        processor.serviceTag
       }
     }
 
-    return Processor(self)
+    return CallbackObject(self)
   }
 }

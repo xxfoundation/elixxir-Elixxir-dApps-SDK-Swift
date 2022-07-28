@@ -2,10 +2,10 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct E2EAddService {
-  public var run: (ServiceProcessor) throws -> Void
+  public var run: (Processor) throws -> Void
 
   public func callAsFunction(
-    processor: ServiceProcessor
+    processor: Processor
   ) throws {
     try run(processor)
   }
