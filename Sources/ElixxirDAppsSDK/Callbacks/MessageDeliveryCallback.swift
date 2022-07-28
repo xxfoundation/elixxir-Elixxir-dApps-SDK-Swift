@@ -22,7 +22,7 @@ extension MessageDeliveryCallback {
 
 extension MessageDeliveryCallback {
   func makeBindingsMessageDeliveryCallback() -> BindingsMessageDeliveryCallbackProtocol {
-    class Callback: NSObject, BindingsMessageDeliveryCallbackProtocol {
+    class CallbackObject: NSObject, BindingsMessageDeliveryCallbackProtocol {
       init(_ callback: MessageDeliveryCallback) {
         self.callback = callback
       }
@@ -53,6 +53,6 @@ extension MessageDeliveryCallback {
       }
     }
 
-    return Callback(self)
+    return CallbackObject(self)
   }
 }

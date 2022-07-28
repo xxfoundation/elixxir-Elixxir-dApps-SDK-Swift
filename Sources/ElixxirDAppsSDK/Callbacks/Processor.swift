@@ -35,11 +35,11 @@ extension Processor {
 extension Processor {
   func makeBindingsProcessor() -> BindingsProcessorProtocol {
     class CallbackObject: NSObject, BindingsProcessorProtocol {
-      init(_ processor: Processor) {
-        self.processor = processor
+      init(_ callback: Processor) {
+        self.callback = callback
       }
 
-      let processor: Processor
+      let callback: Processor
 
       func process(_ message: Data?, receptionId: Data?, ephemeralId: Int64, roundId: Int64) {
         guard let message = message else {
@@ -48,7 +48,7 @@ extension Processor {
         guard let receptionId = receptionId else {
           fatalError("BindingsProcessor.process received `nil` receptionId")
         }
-        processor.process(Callback(
+        callback.process(Callback(
           message: message,
           receptionId: receptionId,
           ephemeralId: ephemeralId,
@@ -57,7 +57,7 @@ extension Processor {
       }
 
       func string() -> String {
-        processor.serviceTag
+        callback.serviceTag
       }
     }
 

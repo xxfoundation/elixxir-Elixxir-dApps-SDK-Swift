@@ -17,21 +17,21 @@ extension LogWriter {
 
 extension LogWriter {
   func makeBindingsLogWriter() -> BindingsLogWriterProtocol {
-    class Writer: NSObject, BindingsLogWriterProtocol {
-      init(_ writer: LogWriter) {
-        self.writer = writer
+    class CallbackObject: NSObject, BindingsLogWriterProtocol {
+      init(_ callback: LogWriter) {
+        self.callback = callback
       }
 
-      let writer: LogWriter
+      let callback: LogWriter
 
       func log(_ p0: String?) {
         guard let p0 = p0 else {
           fatalError("BindingsLogWriter.log received `nil`")
         }
-        writer.handle(p0)
+        callback.handle(p0)
       }
     }
 
-    return Writer(self)
+    return CallbackObject(self)
   }
 }

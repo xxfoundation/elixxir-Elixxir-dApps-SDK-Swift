@@ -23,29 +23,29 @@ extension Listener {
 
 extension Listener {
   func makeBindingsListener() -> BindingsListenerProtocol {
-    class Callback: NSObject, BindingsListenerProtocol {
-      init(_ listener: Listener) {
-        self.listener = listener
+    class CallbackObject: NSObject, BindingsListenerProtocol {
+      init(_ callback: Listener) {
+        self.callback = callback
       }
 
-      let listener: Listener
+      let callback: Listener
 
       func hear(_ item: Data?) {
         guard let item = item else {
           fatalError("BindingsListener.hear received `nil`")
         }
         do {
-          listener.handle(try Message.decode(item))
+          callback.handle(try Message.decode(item))
         } catch {
           fatalError("BindingsListener.hear message decoding failed with error: \(error)")
         }
       }
 
       func name() -> String {
-        listener.name
+        callback.name
       }
     }
 
-    return Callback(self)
+    return CallbackObject(self)
   }
 }

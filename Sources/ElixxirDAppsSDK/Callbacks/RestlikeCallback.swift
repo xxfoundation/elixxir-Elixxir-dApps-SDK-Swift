@@ -17,7 +17,7 @@ extension RestlikeCallback {
 
 extension RestlikeCallback {
   func makeBindingsRestlikeCallback() -> BindingsRestlikeCallbackProtocol {
-    class Callback: NSObject, BindingsRestlikeCallbackProtocol {
+    class CallbackObject: NSObject, BindingsRestlikeCallbackProtocol {
       init(_ callback: RestlikeCallback) {
         self.callback = callback
       }
@@ -39,6 +39,6 @@ extension RestlikeCallback {
       }
     }
 
-    return Callback(self)
+    return CallbackObject(self)
   }
 }

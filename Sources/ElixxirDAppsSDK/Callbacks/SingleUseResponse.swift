@@ -17,7 +17,7 @@ extension SingleUseResponse {
 
 extension SingleUseResponse {
   func makeBindingsSingleUseResponse() -> BindingsSingleUseResponseProtocol {
-    class Response: NSObject, BindingsSingleUseResponseProtocol {
+    class CallbackObject: NSObject, BindingsSingleUseResponseProtocol {
       init(_ callback: SingleUseResponse) {
         self.callback = callback
       }
@@ -39,6 +39,6 @@ extension SingleUseResponse {
       }
     }
 
-    return Response(self)
+    return CallbackObject(self)
   }
 }

@@ -17,18 +17,18 @@ extension HealthCallback {
 
 extension HealthCallback {
   func makeBindingsHealthCallback() -> BindingsNetworkHealthCallbackProtocol {
-    class Callback: NSObject, BindingsNetworkHealthCallbackProtocol {
-      init(_ healthCallback: HealthCallback) {
-        self.healthCallback = healthCallback
+    class CallbackObject: NSObject, BindingsNetworkHealthCallbackProtocol {
+      init(_ callback: HealthCallback) {
+        self.callback = callback
       }
 
-      let healthCallback: HealthCallback
+      let callback: HealthCallback
 
       func callback(_ p0: Bool) {
-        healthCallback.handle(p0)
+        callback.handle(p0)
       }
     }
 
-    return Callback(self)
+    return CallbackObject(self)
   }
 }

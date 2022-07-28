@@ -23,12 +23,12 @@ extension AuthCallbacks {
 
 extension AuthCallbacks {
   func makeBindingsAuthCallbacks() -> BindingsAuthCallbacksProtocol {
-    class Handler: NSObject, BindingsAuthCallbacksProtocol {
-      init(_ callbacks: AuthCallbacks) {
-        self.callbacks = callbacks
+    class CallbackObject: NSObject, BindingsAuthCallbacksProtocol {
+      init(_ callback: AuthCallbacks) {
+        self.callback = callback
       }
 
-      let callbacks: AuthCallbacks
+      let callback: AuthCallbacks
 
       func confirm(_ contact: Data?, receptionId: Data?, ephemeralId: Int64, roundId: Int64) {
         guard let contact = contact else {
@@ -37,7 +37,7 @@ extension AuthCallbacks {
         guard let receptionId = receptionId else {
           fatalError("BindingsAuthCallbacks.confirm received `nil` receptionId")
         }
-        callbacks.handle(.confirm(
+        callback.handle(.confirm(
           contact: contact,
           receptionId: receptionId,
           ephemeralId: ephemeralId,
@@ -52,7 +52,7 @@ extension AuthCallbacks {
         guard let receptionId = receptionId else {
           fatalError("BindingsAuthCallbacks.request received `nil` receptionId")
         }
-        callbacks.handle(.request(
+        callback.handle(.request(
           contact: contact,
           receptionId: receptionId,
           ephemeralId: ephemeralId,
@@ -67,7 +67,7 @@ extension AuthCallbacks {
         guard let receptionId = receptionId else {
           fatalError("BindingsAuthCallbacks.reset received `nil` receptionId")
         }
-        callbacks.handle(.reset(
+        callback.handle(.reset(
           contact: contact,
           receptionId: receptionId,
           ephemeralId: ephemeralId,
@@ -76,6 +76,6 @@ extension AuthCallbacks {
       }
     }
 
-    return Handler(self)
+    return CallbackObject(self)
   }
 }

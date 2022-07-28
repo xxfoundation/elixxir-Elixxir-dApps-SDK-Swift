@@ -17,7 +17,7 @@ extension ClientErrorCallback {
 
 extension ClientErrorCallback {
   func makeBindingsClientError() -> BindingsClientErrorProtocol {
-    class Reporter: NSObject, BindingsClientErrorProtocol {
+    class CallbackObject: NSObject, BindingsClientErrorProtocol {
       init(_ callback: ClientErrorCallback) {
         self.callback = callback
       }
@@ -42,6 +42,6 @@ extension ClientErrorCallback {
       }
     }
 
-    return Reporter(self)
+    return CallbackObject(self)
   }
 }
