@@ -2,11 +2,11 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct ConnectionRegisterListener {
-  public var run: (Int, MessageListener) throws -> Void
+  public var run: (Int, Listener) throws -> Void
 
   public func callAsFunction(
     messageType: Int,
-    listener: MessageListener
+    listener: Listener
   ) throws {
     try run(messageType, listener)
   }
