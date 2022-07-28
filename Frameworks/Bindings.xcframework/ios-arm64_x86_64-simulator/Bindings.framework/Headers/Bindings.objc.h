@@ -13,6 +13,7 @@
 
 @class BindingsAuthenticatedConnection;
 @class BindingsBackup;
+@class BindingsBackupReport;
 @class BindingsBroadcastMessage;
 @class BindingsBroadcastReport;
 @class BindingsChannel;
@@ -229,6 +230,29 @@ running. Returns false if it has been stopped.
 storage. To enable backups again, call InitializeBackup.
  */
 - (BOOL)stopBackup:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
+ * BackupReport is the bindings' representation of the return values of
+NewCmixFromBackup.
+
+Example BackupReport:
+{"BackupIdListJson":"WyJPRHRRTTA4ZERpV3lXaE0wWUhjanRHWnZQcHRSa1JOZ1pHR2FkTG10dE9BRCJd","BackupParams":""}
+ */
+@interface BindingsBackupReport : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * The JSON encoded list of E2E partner IDs
+ */
+@property (nonatomic) NSData* _Nullable backupIdListJson;
+/**
+ * The backup parameters found within the backup file
+ */
+@property (nonatomic) NSData* _Nullable backupParams;
 @end
 
 /**
@@ -1515,6 +1539,23 @@ at a later date.
 Users of this function should delete the storage directory on error.
  */
 FOUNDATION_EXPORT BOOL BindingsNewCmix(NSString* _Nullable ndfJSON, NSString* _Nullable storageDir, NSData* _Nullable password, NSString* _Nullable registrationCode, NSError* _Nullable* _Nullable error);
+
+/**
+ * NewCmixFromBackup initializes a new e2e storage from an encrypted
+backup. Users of this function should delete the storage directory on error.
+Users of this function should call LoadCmix as normal once this call succeeds.
+
+Params
+ - ndfJSON - JSON of the NDF.
+ - storageDir - directory for the storage files.
+ - sessionPassword - password to decrypt the data in the storageDir.
+ - backupPassphrase - backup passphrase provided by the user. Used to decrypt backup.
+ - backupFileContents - the file contents of the backup.
+
+Returns:
+ - []byte - the JSON marshalled bytes of the BackupReport object.
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsNewCmixFromBackup(NSString* _Nullable ndfJSON, NSString* _Nullable storageDir, NSData* _Nullable sessionPassword, NSData* _Nullable backupPassphrase, NSData* _Nullable backupFileContents, NSError* _Nullable* _Nullable error);
 
 /**
  * NewUdManagerFromBackup builds a new user discover manager from a backup. It
