@@ -1,4 +1,4 @@
-import Bindings
+import Foundation
 import XCTestDynamicOverlay
 
 public struct CmixManagerHasStorage {
