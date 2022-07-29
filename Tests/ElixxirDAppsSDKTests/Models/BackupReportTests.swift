@@ -4,7 +4,12 @@ import XCTest
 
 final class BackupReportTests: XCTestCase {
   func testCoding() throws {
-    let idsB64 = "WyJPRHRRTTA4ZERpV3lXaE0wWUhjanRHWnZQcHRSa1JOZ1pHR2FkTG10dE9BRCJd"
+    let ids: [Data] = [
+      "id1".data(using: .utf8)!,
+      "id2".data(using: .utf8)!,
+      "id3".data(using: .utf8)!,
+    ]
+    let idsB64 = try JSONEncoder().encode(ids).base64EncodedString()
     let paramsB64 = "cGFyYW1z"
     let jsonString = """
     {
@@ -16,7 +21,7 @@ final class BackupReportTests: XCTestCase {
     let model = try BackupReport.decode(jsonData)
 
     XCTAssertNoDifference(model, BackupReport(
-      ids: Data(base64Encoded: idsB64)!,
+      ids: ids,
       params: Data(base64Encoded: paramsB64)!
     ))
 
