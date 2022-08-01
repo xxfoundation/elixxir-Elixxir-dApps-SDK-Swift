@@ -70,8 +70,12 @@
 @class BindingsSingleUseResponse;
 @protocol BindingsStopper;
 @class BindingsStopper;
+@protocol BindingsUdLookupCallback;
+@class BindingsUdLookupCallback;
 @protocol BindingsUdNetworkStatus;
 @class BindingsUdNetworkStatus;
+@protocol BindingsUdSearchCallback;
+@class BindingsUdSearchCallback;
 @protocol BindingsUpdateBackupFunc;
 @class BindingsUpdateBackupFunc;
 
@@ -175,12 +179,20 @@ Parameters:
 - (void)stop;
 @end
 
+@protocol BindingsUdLookupCallback <NSObject>
+- (void)callback:(NSData* _Nullable)contactBytes err:(NSError* _Nullable)err;
+@end
+
 @protocol BindingsUdNetworkStatus <NSObject>
 /**
  * UdNetworkStatus returns:
 - int - a xxdk.Status int
  */
 - (long)udNetworkStatus;
+@end
+
+@protocol BindingsUdSearchCallback <NSObject>
+- (void)callback:(NSData* _Nullable)contactListJSON err:(NSError* _Nullable)err;
 @end
 
 @protocol BindingsUpdateBackupFunc <NSObject>
@@ -237,7 +249,7 @@ storage. To enable backups again, call InitializeBackup.
 NewCmixFromBackup.
 
 Example BackupReport:
-{"BackupIdListJson":"WyJPRHRRTTA4ZERpV3lXaE0wWUhjanRHWnZQcHRSa1JOZ1pHR2FkTG10dE9BRCJd","BackupParams":""}
+{"RestoredContacts":["0AeVYBe87SV45A2UI4AtIe6H4AIyZSLPBPrT6eTBLycD"],"Params":""}
  */
 @interface BindingsBackupReport : NSObject <goSeqRefInterface> {
 }
@@ -245,14 +257,12 @@ Example BackupReport:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-/**
- * The JSON encoded list of E2E partner IDs
- */
-@property (nonatomic) NSData* _Nullable backupIdListJson;
+// skipped field BackupReport.RestoredContacts with unsupported type: gitlab.com/elixxir/client/bindings.IdList
+
 /**
  * The backup parameters found within the backup file
  */
-@property (nonatomic) NSData* _Nullable backupParams;
+@property (nonatomic) NSString* _Nonnull params;
 @end
 
 /**
@@ -1441,10 +1451,10 @@ FOUNDATION_EXPORT BindingsFileTransfer* _Nullable BindingsInitFileTransfer(long 
 Params
  - e2eID - ID of the E2e object in the e2e tracker.
  - udID - ID of the UserDiscovery object in the ud tracker.
- - password - password used in LoadCmix.
+ - backupPassPhrase - backup passphrase provided by the user. Used to decrypt backup.
  - cb - the callback to be called when a backup is triggered.
  */
-FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsInitializeBackup(long e2eID, long udID, NSString* _Nullable password, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsInitializeBackup(long e2eID, long udID, NSString* _Nullable backupPassPhrase, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
  * Listen starts a single-use listener on a given tag using the passed in e2e object
@@ -1522,6 +1532,22 @@ here. If callbacks is left nil, a default auth.Callbacks will be used.
 FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLoginEphemeral(long cmixId, id<BindingsAuthCallbacks> _Nullable callbacks, NSData* _Nullable identity, NSData* _Nullable e2eParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
+ * LookupUD returns the public key of the passed ID as known by the user
+discovery system or returns by the timeout.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker
+ - udContact - the marshalled bytes of the contact.Contact object
+ - udIdBytes - the marshalled bytes of the id.ID object for the user
+   discovery server
+ - singleRequestParams - the JSON marshalled bytes of single.RequestParams
+
+Returns:
+ - []byte - the JSON marshalled bytes of SingleUseSendReport
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsLookupUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdLookupCallback> _Nullable cb, NSData* _Nullable udIdBytes, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
+
+/**
  * NewBroadcastChannel creates a bindings-layer broadcast channel & starts listening for new messages
 
 Params
@@ -1555,7 +1581,7 @@ Params
 Returns:
  - []byte - the JSON marshalled bytes of the BackupReport object.
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsNewCmixFromBackup(NSString* _Nullable ndfJSON, NSString* _Nullable storageDir, NSData* _Nullable sessionPassword, NSData* _Nullable backupPassphrase, NSData* _Nullable backupFileContents, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsNewCmixFromBackup(NSString* _Nullable ndfJSON, NSString* _Nullable storageDir, NSString* _Nullable backupPassphrase, NSData* _Nullable sessionPassword, NSData* _Nullable backupFileContents, NSError* _Nullable* _Nullable error);
 
 /**
  * NewUdManagerFromBackup builds a new user discover manager from a backup. It
@@ -1633,6 +1659,25 @@ Params
 FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsResumeBackup(long e2eID, long udID, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
+ * SearchUD searches user discovery for the passed Facts. The searchCallback
+will return a list of contacts, each having the facts it hit against. This is
+NOT intended to be used to search for multiple users at once; that can have a
+privacy reduction. Instead, it is intended to be used to search for a user
+where multiple pieces of information is known.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker
+ - udContact - the marshalled bytes of the contact.Contact for the user
+   discovery server
+ - factListJSON - the JSON marshalled bytes of fact.FactList
+ - singleRequestParams - the JSON marshalled bytes of single.RequestParams
+
+Returns:
+ - []byte - the JSON marshalled bytes of SingleUseSendReport
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdSearchCallback> _Nullable cb, NSData* _Nullable factListJSON, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
+
+/**
  * SetFactsOnContact replaces the facts on the contact with the passed in facts
 pass in empty facts in order to clear the facts.
 
@@ -1698,7 +1743,11 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData
 
 @class BindingsStopper;
 
+@class BindingsUdLookupCallback;
+
 @class BindingsUdNetworkStatus;
+
+@class BindingsUdSearchCallback;
 
 @class BindingsUpdateBackupFunc;
 
@@ -1941,6 +1990,23 @@ Parameters:
 @end
 
 /**
+ * UdLookupCallback contains the callback called by LookupUD that returns the
+contact that matches the passed in ID.
+
+Parameters:
+ - contactBytes - the marshalled bytes of contact.Contact returned from the
+   lookup, or nil if an error occurs
+ - err - any errors that occurred in the lookup
+ */
+@interface BindingsUdLookupCallback : NSObject <goSeqRefInterface, BindingsUdLookupCallback> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)callback:(NSData* _Nullable)contactBytes err:(NSError* _Nullable)err;
+@end
+
+/**
  * UdNetworkStatus contains the UdNetworkStatus, which is a bindings-level
 interface for ud.udNetworkStatus.
  */
@@ -1954,6 +2020,24 @@ interface for ud.udNetworkStatus.
 - int - a xxdk.Status int
  */
 - (long)udNetworkStatus;
+@end
+
+/**
+ * UdSearchCallback contains the callback called by SearchUD that returns a list
+of contact.Contact objects  that match the list of facts passed into
+SearchUD.
+
+Parameters:
+ - contactListJSON - the JSON marshalled bytes of []contact.Contact, or nil
+   if an error occurs
+ - err - any errors that occurred in the search
+ */
+@interface BindingsUdSearchCallback : NSObject <goSeqRefInterface, BindingsUdSearchCallback> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)callback:(NSData* _Nullable)contactListJSON err:(NSError* _Nullable)err;
 @end
 
 /**
