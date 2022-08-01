@@ -2,21 +2,21 @@ import Foundation
 
 public struct BackupReport: Equatable {
   public init(
-    ids: [Data],
+    restoredContacts: [Data],
     params: Data
   ) {
-    self.ids = ids
+    self.restoredContacts = restoredContacts
     self.params = params
   }
 
-  public var ids: [Data]
+  public var restoredContacts: [Data]
   public var params: Data
 }
 
 extension BackupReport: Codable {
   enum CodingKeys: String, CodingKey {
-    case ids = "BackupIdListJson"
-    case params = "BackupParams"
+    case restoredContacts = "RestoredContacts"
+    case params = "Params"
   }
 
   public static func decode(_ data: Data) throws -> Self {
@@ -25,19 +25,5 @@ extension BackupReport: Codable {
 
   public func encode() throws -> Data {
     try JSONEncoder().encode(self)
-  }
-
-  public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    let idsData = try container.decode(Data.self, forKey: .ids)
-    ids = try JSONDecoder().decode([Data].self, from: idsData)
-    params = try container.decode(Data.self, forKey: .params)
-  }
-
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    let idsData = try JSONEncoder().encode(ids)
-    try container.encode(idsData, forKey: .ids)
-    try container.encode(params, forKey: .params)
   }
 }

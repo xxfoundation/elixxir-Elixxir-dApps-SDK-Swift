@@ -4,24 +4,23 @@ import XCTest
 
 final class BackupReportTests: XCTestCase {
   func testCoding() throws {
-    let ids: [Data] = [
+    let restoredContacts: [Data] = [
       "id1".data(using: .utf8)!,
       "id2".data(using: .utf8)!,
       "id3".data(using: .utf8)!,
     ]
-    let idsB64 = try JSONEncoder().encode(ids).base64EncodedString()
     let paramsB64 = "cGFyYW1z"
     let jsonString = """
     {
-      "BackupIdListJson": "\(idsB64)",
-      "BackupParams": "\(paramsB64)"
+      "RestoredContacts": [\(restoredContacts.map { "\"\($0.base64EncodedString())\"" }.joined(separator: ", "))],
+      "Params": "\(paramsB64)"
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
     let model = try BackupReport.decode(jsonData)
 
     XCTAssertNoDifference(model, BackupReport(
-      ids: ids,
+      restoredContacts: restoredContacts,
       params: Data(base64Encoded: paramsB64)!
     ))
 
