@@ -2,29 +2,29 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct NewCmixFromBackup {
-  public var run: (String, String, Data, Data, Data) throws -> BackupReport
+  public var run: (String, String, String, Data, Data) throws -> BackupReport
 
   public func callAsFunction(
     ndfJSON: String,
     storageDir: String,
+    backupPassphrase: String,
     sessionPassword: Data,
-    backupPassphrase: Data,
     backupFileContents: Data
   ) throws -> BackupReport {
-    try run(ndfJSON, storageDir, sessionPassword, backupPassphrase, backupFileContents)
+    try run(ndfJSON, storageDir, backupPassphrase, sessionPassword, backupFileContents)
   }
 }
 
 extension NewCmixFromBackup {
   public static let live = NewCmixFromBackup {
-    ndfJSON, storageDir, sessionPassword, backupPassphrase, backupFileContents in
+    ndfJSON, storageDir, backupPassphrase, sessionPassword, backupFileContents in
 
     var error: NSError?
     let reportData = BindingsNewCmixFromBackup(
       ndfJSON,
       storageDir,
-      sessionPassword,
       backupPassphrase,
+      sessionPassword,
       backupFileContents,
       &error
     )
