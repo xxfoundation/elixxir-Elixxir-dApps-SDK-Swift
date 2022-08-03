@@ -5,7 +5,7 @@ public struct Login {
   public var run: (Bool, Int, AuthCallbacks?, ReceptionIdentity, Data) throws -> E2E
 
   public func callAsFunction(
-    ephemeral: Bool,
+    ephemeral: Bool = false,
     cmixId: Int,
     authCallbacks: AuthCallbacks? = nil,
     identity: ReceptionIdentity,
