@@ -1,226 +1,180 @@
 // swift-tools-version: 5.6
-
 import PackageDescription
 
-let swiftSettings: [SwiftSetting] = [
-  .unsafeFlags(
-    [
-      "-Xfrontend",
-      "-debug-time-function-bodies",
-      "-Xfrontend",
-      "-debug-time-expression-type-checking",
-    ],
-    .when(configuration: .debug)
-  ),
-]
+// MARK: - Helpers
+
+struct Feature {
+  var product: Product
+  var targets: [Target]
+  var targetDependency: Target.Dependency
+
+  static func library(
+    name: String,
+    dependencies: [Target.Dependency] = [],
+    testDependencies: [Target.Dependency] = [],
+    swiftSettings: [SwiftSetting] = [
+      .unsafeFlags(
+        [
+          "-Xfrontend",
+          "-debug-time-function-bodies",
+          "-Xfrontend",
+          "-debug-time-expression-type-checking",
+        ],
+        .when(configuration: .debug)
+      ),
+    ]
+  ) -> Feature {
+    .init(
+      product: .library(name: name, targets: [name]),
+      targets: [
+        .target(
+          name: name,
+          dependencies: dependencies,
+          swiftSettings: swiftSettings
+        ),
+        .testTarget(
+          name: "\(name)Tests",
+          dependencies: [.target(name: name)] + testDependencies,
+          swiftSettings: swiftSettings
+        ),
+      ],
+      targetDependency: .target(name: name)
+    )
+  }
+}
+
+struct Dependency {
+  var packageDependency: Package.Dependency
+  var targetDependency: Target.Dependency
+
+  static func local(
+    path: String,
+    name: String,
+    package: String
+  ) -> Dependency {
+    .init(
+      packageDependency: .package(path: path),
+      targetDependency: .product(name: name, package: package)
+    )
+  }
+
+  static func external(
+    url: String,
+    version: Range<Version>,
+    name: String,
+    package: String
+  ) -> Dependency {
+    .init(
+      packageDependency: .package(url: url, version),
+      targetDependency: .product(name: name, package: package)
+    )
+  }
+}
+
+// MARK: - Manifest
+
+extension Dependency {
+  static let all: [Dependency] = [
+    .composableArchitecture,
+    .composablePresentation,
+    .elixxirDAppsSDK,
+    .keychainAccess,
+    .xcTestDynamicOverlay,
+  ]
+
+  static let composableArchitecture = Dependency.external(
+    url: "https://github.com/pointfreeco/swift-composable-architecture.git",
+    version: .upToNextMajor(from: "0.38.3"),
+    name: "ComposableArchitecture",
+    package: "swift-composable-architecture"
+  )
+
+  static let composablePresentation = Dependency.external(
+    url: "https://github.com/darrarski/swift-composable-presentation.git",
+    version: .upToNextMajor(from: "0.5.2"),
+    name: "ComposablePresentation",
+    package: "swift-composable-presentation"
+  )
+
+  static let elixxirDAppsSDK = Dependency.local(
+    path: "../../",
+    name: "ElixxirDAppsSDK",
+    package: "elixxir-dapps-sdk-swift"
+  )
+
+  static let keychainAccess = Dependency.external(
+    url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
+    version: .upToNextMajor(from: "4.2.2"),
+    name: "KeychainAccess",
+    package: "KeychainAccess"
+  )
+
+  static let xcTestDynamicOverlay = Dependency.external(
+    url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
+    version: .upToNextMajor(from: "0.3.3"),
+    name: "XCTestDynamicOverlay",
+    package: "xctest-dynamic-overlay"
+  )
+}
+
+extension Feature {
+  static let all: [Feature] = [
+    .app,
+    .error,
+    .landing,
+    .session,
+  ]
+
+  static let app = Feature.library(
+    name: "AppFeature",
+    dependencies: [
+      Feature.error.targetDependency,
+      Feature.landing.targetDependency,
+      Feature.session.targetDependency,
+      Dependency.composableArchitecture.targetDependency,
+      Dependency.composablePresentation.targetDependency,
+      Dependency.elixxirDAppsSDK.targetDependency,
+      Dependency.keychainAccess.targetDependency,
+      Dependency.xcTestDynamicOverlay.targetDependency,
+    ]
+  )
+
+  static let error = Feature.library(
+    name: "ErrorFeature",
+    dependencies: [
+      Dependency.composableArchitecture.targetDependency,
+      Dependency.elixxirDAppsSDK.targetDependency,
+      Dependency.xcTestDynamicOverlay.targetDependency,
+    ]
+  )
+
+  static let landing = Feature.library(
+    name: "LandingFeature",
+    dependencies: [
+      Feature.error.targetDependency,
+      Dependency.composableArchitecture.targetDependency,
+      Dependency.composablePresentation.targetDependency,
+      Dependency.elixxirDAppsSDK.targetDependency,
+      Dependency.xcTestDynamicOverlay.targetDependency,
+    ]
+  )
+
+  static let session = Feature.library(
+    name: "SessionFeature",
+    dependencies: [
+      Feature.error.targetDependency,
+      Dependency.composableArchitecture.targetDependency,
+      Dependency.composablePresentation.targetDependency,
+      Dependency.elixxirDAppsSDK.targetDependency,
+      Dependency.xcTestDynamicOverlay.targetDependency,
+    ]
+  )
+}
 
 let package = Package(
   name: "example-app",
-  platforms: [
-    .iOS(.v15),
-  ],
-  products: [
-    .library(
-      name: "AppFeature",
-      targets: ["AppFeature"]
-    ),
-    .library(
-      name: "ErrorFeature",
-      targets: ["ErrorFeature"]
-    ),
-    .library(
-      name: "LandingFeature",
-      targets: ["LandingFeature"]
-    ),
-    .library(
-      name: "MyContactFeature",
-      targets: ["MyContactFeature"]
-    ),
-    .library(
-      name: "MyIdentityFeature",
-      targets: ["MyIdentityFeature"]
-    ),
-    .library(
-      name: "SessionFeature",
-      targets: ["SessionFeature"]
-    ),
-  ],
-  dependencies: [
-    .package(path: "../../"), // elixxir-dapps-sdk-swift
-    .package(
-      url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-      .upToNextMajor(from: "0.35.0")
-    ),
-    .package(
-      url: "https://github.com/darrarski/swift-composable-presentation.git",
-      .upToNextMajor(from: "0.5.2")
-    ),
-    .package(
-      url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
-      .upToNextMajor(from: "4.2.2")
-    ),
-  ],
-  targets: [
-    .target(
-      name: "AppFeature",
-      dependencies: [
-        .target(name: "ErrorFeature"),
-        .target(name: "LandingFeature"),
-        .target(name: "MyContactFeature"),
-        .target(name: "MyIdentityFeature"),
-        .target(name: "SessionFeature"),
-        .product(
-          name: "ElixxirDAppsSDK",
-          package: "elixxir-dapps-sdk-swift"
-        ),
-        .product(
-          name: "ComposableArchitecture",
-          package: "swift-composable-architecture"
-        ),
-        .product(
-          name: "ComposablePresentation",
-          package: "swift-composable-presentation"
-        ),
-        .product(
-          name: "KeychainAccess",
-          package: "KeychainAccess"
-        ),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .testTarget(
-      name: "AppFeatureTests",
-      dependencies: [
-        .target(name: "AppFeature"),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .target(
-      name: "ErrorFeature",
-      dependencies: [
-        .product(
-          name: "ComposableArchitecture",
-          package: "swift-composable-architecture"
-        ),
-        .product(
-          name: "ElixxirDAppsSDK",
-          package: "elixxir-dapps-sdk-swift"
-        ),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .testTarget(
-      name: "ErrorFeatureTests",
-      dependencies: [
-        .target(name: "ErrorFeature"),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .target(
-      name: "LandingFeature",
-      dependencies: [
-        .target(name: "ErrorFeature"),
-        .product(
-          name: "ComposableArchitecture",
-          package: "swift-composable-architecture"
-        ),
-        .product(
-          name: "ComposablePresentation",
-          package: "swift-composable-presentation"
-        ),
-        .product(
-          name: "ElixxirDAppsSDK",
-          package: "elixxir-dapps-sdk-swift"
-        ),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .testTarget(
-      name: "LandingFeatureTests",
-      dependencies: [
-        .target(name: "LandingFeature"),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .target(
-      name: "MyContactFeature",
-      dependencies: [
-        .target(name: "ErrorFeature"),
-        .product(
-          name: "ComposableArchitecture",
-          package: "swift-composable-architecture"
-        ),
-        .product(
-          name: "ComposablePresentation",
-          package: "swift-composable-presentation"
-        ),
-        .product(
-          name: "ElixxirDAppsSDK",
-          package: "elixxir-dapps-sdk-swift"
-        ),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .testTarget(
-      name: "MyContactFeatureTests",
-      dependencies: [
-        .target(name: "MyContactFeature"),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .target(
-      name: "MyIdentityFeature",
-      dependencies: [
-        .target(name: "ErrorFeature"),
-        .product(
-          name: "ComposableArchitecture",
-          package: "swift-composable-architecture"
-        ),
-        .product(
-          name: "ComposablePresentation",
-          package: "swift-composable-presentation"
-        ),
-        .product(
-          name: "ElixxirDAppsSDK",
-          package: "elixxir-dapps-sdk-swift"
-        ),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .testTarget(
-      name: "MyIdentityFeatureTests",
-      dependencies: [
-        .target(name: "MyIdentityFeature"),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .target(
-      name: "SessionFeature",
-      dependencies: [
-        .target(name: "ErrorFeature"),
-        .target(name: "MyContactFeature"),
-        .target(name: "MyIdentityFeature"),
-        .product(
-          name: "ComposableArchitecture",
-          package: "swift-composable-architecture"
-        ),
-        .product(
-          name: "ComposablePresentation",
-          package: "swift-composable-presentation"
-        ),
-        .product(
-          name: "ElixxirDAppsSDK",
-          package: "elixxir-dapps-sdk-swift"
-        ),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .testTarget(
-      name: "SessionFeatureTests",
-      dependencies: [
-        .target(name: "SessionFeature"),
-      ],
-      swiftSettings: swiftSettings
-    ),
-  ]
+  platforms: [.iOS(.v15)],
+  products: Feature.all.map(\.product),
+  dependencies: Dependency.all.map(\.packageDependency),
+  targets: Feature.all.flatMap(\.targets)
 )

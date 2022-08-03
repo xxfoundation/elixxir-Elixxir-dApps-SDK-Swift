@@ -2,58 +2,59 @@ import Combine
 import ComposableArchitecture
 import ElixxirDAppsSDK
 import ErrorFeature
+import XCTestDynamicOverlay
 
 public struct LandingState: Equatable {
   public init(
     id: UUID,
-    hasStoredClient: Bool = false,
-    isMakingClient: Bool = false,
-    isRemovingClient: Bool = false,
+    hasStoredCmix: Bool = false,
+    isMakingCmix: Bool = false,
+    isRemovingCmix: Bool = false,
     error: ErrorState? = nil
   ) {
     self.id = id
-    self.hasStoredClient = hasStoredClient
-    self.isMakingClient = isMakingClient
-    self.isRemovingClient = isRemovingClient
+    self.hasStoredCmix = hasStoredCmix
+    self.isMakingCmix = isMakingCmix
+    self.isRemovingCmix = isRemovingCmix
     self.error = error
   }
 
   var id: UUID
-  var hasStoredClient: Bool
-  var isMakingClient: Bool
-  var isRemovingClient: Bool
+  var hasStoredCmix: Bool
+  var isMakingCmix: Bool
+  var isRemovingCmix: Bool
   var error: ErrorState?
 }
 
 public enum LandingAction: Equatable {
   case viewDidLoad
-  case makeClient
-  case didMakeClient
-  case didFailMakingClient(NSError)
-  case removeStoredClient
-  case didRemoveStoredClient
-  case didFailRemovingStoredClient(NSError)
+  case makeCmix
+  case didMakeCmix
+  case didFailMakingCmix(NSError)
+  case removeStoredCmix
+  case didRemoveStoredCmix
+  case didFailRemovingStoredCmix(NSError)
   case didDismissError
   case error(ErrorAction)
 }
 
 public struct LandingEnvironment {
   public init(
-    clientStorage: ClientStorage,
-    setClient: @escaping (Client) -> Void,
+    cmixManager: CmixManager,
+    setCmix: @escaping (Cmix) -> Void,
     bgScheduler: AnySchedulerOf<DispatchQueue>,
     mainScheduler: AnySchedulerOf<DispatchQueue>,
     error: ErrorEnvironment
   ) {
-    self.clientStorage = clientStorage
-    self.setClient = setClient
+    self.cmixManager = cmixManager
+    self.setCmix = setCmix
     self.bgScheduler = bgScheduler
     self.mainScheduler = mainScheduler
     self.error = error
   }
 
-  public var clientStorage: ClientStorage
-  public var setClient: (Client) -> Void
+  public var cmixManager: CmixManager
+  public var setCmix: (Cmix) -> Void
   public var bgScheduler: AnySchedulerOf<DispatchQueue>
   public var mainScheduler: AnySchedulerOf<DispatchQueue>
   public var error: ErrorEnvironment
@@ -63,60 +64,60 @@ public let landingReducer = Reducer<LandingState, LandingAction, LandingEnvironm
 { state, action, env in
   switch action {
   case .viewDidLoad:
-    state.hasStoredClient = env.clientStorage.hasStoredClient()
+    state.hasStoredCmix = env.cmixManager.hasStorage()
     return .none
 
-  case .makeClient:
-    state.isMakingClient = true
+  case .makeCmix:
+    state.isMakingCmix = true
     return Effect.future { fulfill in
       do {
-        if env.clientStorage.hasStoredClient() {
-          env.setClient(try env.clientStorage.loadClient())
+        if env.cmixManager.hasStorage() {
+          env.setCmix(try env.cmixManager.load())
         } else {
-          env.setClient(try env.clientStorage.createClient())
+          env.setCmix(try env.cmixManager.create())
         }
-        fulfill(.success(.didMakeClient))
+        fulfill(.success(.didMakeCmix))
       } catch {
-        fulfill(.success(.didFailMakingClient(error as NSError)))
+        fulfill(.success(.didFailMakingCmix(error as NSError)))
       }
     }
     .subscribe(on: env.bgScheduler)
     .receive(on: env.mainScheduler)
     .eraseToEffect()
 
-  case .didMakeClient:
-    state.isMakingClient = false
-    state.hasStoredClient = env.clientStorage.hasStoredClient()
+  case .didMakeCmix:
+    state.isMakingCmix = false
+    state.hasStoredCmix = env.cmixManager.hasStorage()
     return .none
 
-  case .didFailMakingClient(let error):
-    state.isMakingClient = false
-    state.hasStoredClient = env.clientStorage.hasStoredClient()
+  case .didFailMakingCmix(let error):
+    state.isMakingCmix = false
+    state.hasStoredCmix = env.cmixManager.hasStorage()
     state.error = ErrorState(error: error)
     return .none
 
-  case .removeStoredClient:
-    state.isRemovingClient = true
+  case .removeStoredCmix:
+    state.isRemovingCmix = true
     return Effect.future { fulfill in
       do {
-        try env.clientStorage.removeClient()
-        fulfill(.success(.didRemoveStoredClient))
+        try env.cmixManager.remove()
+        fulfill(.success(.didRemoveStoredCmix))
       } catch {
-        fulfill(.success(.didFailRemovingStoredClient(error as NSError)))
+        fulfill(.success(.didFailRemovingStoredCmix(error as NSError)))
       }
     }
     .subscribe(on: env.bgScheduler)
     .receive(on: env.mainScheduler)
     .eraseToEffect()
 
-  case .didRemoveStoredClient:
-    state.isRemovingClient = false
-    state.hasStoredClient = env.clientStorage.hasStoredClient()
+  case .didRemoveStoredCmix:
+    state.isRemovingCmix = false
+    state.hasStoredCmix = env.cmixManager.hasStorage()
     return .none
 
-  case .didFailRemovingStoredClient(let error):
-    state.isRemovingClient = false
-    state.hasStoredClient = env.clientStorage.hasStoredClient()
+  case .didFailRemovingStoredCmix(let error):
+    state.isRemovingCmix = false
+    state.hasStoredCmix = env.cmixManager.hasStorage()
     state.error = ErrorState(error: error)
     return .none
 
@@ -133,14 +134,12 @@ public let landingReducer = Reducer<LandingState, LandingAction, LandingEnvironm
   environment: \.error
 )
 
-#if DEBUG
 extension LandingEnvironment {
-  public static let failing = LandingEnvironment(
-    clientStorage: .failing,
-    setClient: { _ in fatalError() },
-    bgScheduler: .failing,
-    mainScheduler: .failing,
-    error: .failing
+  public static let unimplemented = LandingEnvironment(
+    cmixManager: .unimplemented,
+    setCmix: XCTUnimplemented("\(Self.self).setCmix"),
+    bgScheduler: .unimplemented,
+    mainScheduler: .unimplemented,
+    error: .unimplemented
   )
 }
-#endif

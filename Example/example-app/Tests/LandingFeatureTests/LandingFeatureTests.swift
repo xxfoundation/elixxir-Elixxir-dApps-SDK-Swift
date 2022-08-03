@@ -5,183 +5,177 @@ import XCTest
 
 final class LandingFeatureTests: XCTestCase {
   func testViewDidLoad() throws {
-    var env = LandingEnvironment.failing
-    env.clientStorage.hasStoredClient = { true }
-
     let store = TestStore(
       initialState: LandingState(id: UUID()),
       reducer: landingReducer,
-      environment: env
+      environment: .unimplemented
     )
+
+    store.environment.cmixManager.hasStorage.run = { true }
 
     store.send(.viewDidLoad) {
-      $0.hasStoredClient = true
+      $0.hasStoredCmix = true
     }
   }
 
-  func testCreateClient() {
-    var hasStoredClient = false
-    var didSetClient = false
+  func testCreateCmix() {
+    var hasStoredCmix = false
+    var didSetCmix = false
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
-
-    var env = LandingEnvironment.failing
-    env.clientStorage.hasStoredClient = { hasStoredClient }
-    env.clientStorage.createClient = { .failing }
-    env.setClient = { _ in didSetClient = true }
-    env.bgScheduler = bgScheduler.eraseToAnyScheduler()
-    env.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     let store = TestStore(
       initialState: LandingState(id: UUID()),
       reducer: landingReducer,
-      environment: env
+      environment: .unimplemented
     )
 
-    store.send(.makeClient) {
-      $0.isMakingClient = true
+    store.environment.cmixManager.hasStorage.run = { hasStoredCmix }
+    store.environment.cmixManager.create.run = { .unimplemented }
+    store.environment.setCmix = { _ in didSetCmix = true }
+    store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
+    store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
+
+    store.send(.makeCmix) {
+      $0.isMakingCmix = true
     }
 
     bgScheduler.advance()
 
-    XCTAssertTrue(didSetClient)
+    XCTAssertTrue(didSetCmix)
 
-    hasStoredClient = true
+    hasStoredCmix = true
     mainScheduler.advance()
 
-    store.receive(.didMakeClient) {
-      $0.isMakingClient = false
-      $0.hasStoredClient = true
+    store.receive(.didMakeCmix) {
+      $0.isMakingCmix = false
+      $0.hasStoredCmix = true
     }
   }
 
-  func testLoadStoredClient() {
-    var didSetClient = false
+  func testLoadStoredCmix() {
+    var didSetCmix = false
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
-
-    var env = LandingEnvironment.failing
-    env.clientStorage.hasStoredClient = { true }
-    env.clientStorage.loadClient = { .failing }
-    env.setClient = { _ in didSetClient = true }
-    env.bgScheduler = bgScheduler.eraseToAnyScheduler()
-    env.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     let store = TestStore(
       initialState: LandingState(id: UUID()),
       reducer: landingReducer,
-      environment: env
+      environment: .unimplemented
     )
 
-    store.send(.makeClient) {
-      $0.isMakingClient = true
+    store.environment.cmixManager.hasStorage.run = { true }
+    store.environment.cmixManager.load.run = { .unimplemented }
+    store.environment.setCmix = { _ in didSetCmix = true }
+    store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
+    store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
+
+    store.send(.makeCmix) {
+      $0.isMakingCmix = true
     }
 
     bgScheduler.advance()
 
-    XCTAssertTrue(didSetClient)
+    XCTAssertTrue(didSetCmix)
 
     mainScheduler.advance()
 
-    store.receive(.didMakeClient) {
-      $0.isMakingClient = false
-      $0.hasStoredClient = true
+    store.receive(.didMakeCmix) {
+      $0.isMakingCmix = false
+      $0.hasStoredCmix = true
     }
   }
 
-  func testMakeClientFailure() {
+  func testMakeCmixFailure() {
     let error = NSError(domain: "test", code: 1234)
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
 
-    var env = LandingEnvironment.failing
-    env.clientStorage.hasStoredClient = { false }
-    env.clientStorage.createClient = { throw error }
-    env.bgScheduler = bgScheduler.eraseToAnyScheduler()
-    env.mainScheduler = mainScheduler.eraseToAnyScheduler()
-
     let store = TestStore(
       initialState: LandingState(id: UUID()),
       reducer: landingReducer,
-      environment: env
+      environment: .unimplemented
     )
 
-    store.send(.makeClient) {
-      $0.isMakingClient = true
+    store.environment.cmixManager.hasStorage.run = { false }
+    store.environment.cmixManager.create.run = { throw error }
+    store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
+    store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
+
+    store.send(.makeCmix) {
+      $0.isMakingCmix = true
     }
 
     bgScheduler.advance()
     mainScheduler.advance()
 
-    store.receive(.didFailMakingClient(error)) {
-      $0.isMakingClient = false
-      $0.hasStoredClient = false
+    store.receive(.didFailMakingCmix(error)) {
+      $0.isMakingCmix = false
+      $0.hasStoredCmix = false
       $0.error = ErrorState(error: error)
     }
   }
 
-  func testRemoveStoredClient() {
-    var hasStoredClient = true
-    var didRemoveClient = false
+  func testRemoveStoredCmix() {
+    var hasStoredCmix = true
+    var didRemoveCmix = false
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
-
-    var env = LandingEnvironment.failing
-    env.clientStorage.hasStoredClient = { hasStoredClient }
-    env.clientStorage.removeClient = { didRemoveClient = true }
-    env.bgScheduler = bgScheduler.eraseToAnyScheduler()
-    env.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     let store = TestStore(
       initialState: LandingState(id: UUID()),
       reducer: landingReducer,
-      environment: env
+      environment: .unimplemented
     )
 
-    store.send(.removeStoredClient) {
-      $0.isRemovingClient = true
+    store.environment.cmixManager.hasStorage.run = { hasStoredCmix }
+    store.environment.cmixManager.remove.run = { didRemoveCmix = true }
+    store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
+    store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
+
+    store.send(.removeStoredCmix) {
+      $0.isRemovingCmix = true
     }
 
     bgScheduler.advance()
 
-    XCTAssertTrue(didRemoveClient)
+    XCTAssertTrue(didRemoveCmix)
 
-    hasStoredClient = false
+    hasStoredCmix = false
     mainScheduler.advance()
 
-    store.receive(.didRemoveStoredClient) {
-      $0.isRemovingClient = false
-      $0.hasStoredClient = false
+    store.receive(.didRemoveStoredCmix) {
+      $0.isRemovingCmix = false
+      $0.hasStoredCmix = false
     }
   }
 
-  func testRemoveStoredClientFailure() {
+  func testRemoveStoredCmixFailure() {
     let error = NSError(domain: "test", code: 1234)
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
 
-    var env = LandingEnvironment.failing
-    env.clientStorage.hasStoredClient = { true }
-    env.clientStorage.removeClient = { throw error }
-    env.bgScheduler = bgScheduler.eraseToAnyScheduler()
-    env.mainScheduler = mainScheduler.eraseToAnyScheduler()
-
     let store = TestStore(
       initialState: LandingState(id: UUID()),
       reducer: landingReducer,
-      environment: env
+      environment: .unimplemented
     )
 
-    store.send(.removeStoredClient) {
-      $0.isRemovingClient = true
+    store.environment.cmixManager.hasStorage.run = { true }
+    store.environment.cmixManager.remove.run = { throw error }
+    store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
+    store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
+
+    store.send(.removeStoredCmix) {
+      $0.isRemovingCmix = true
     }
 
     bgScheduler.advance()
     mainScheduler.advance()
 
-    store.receive(.didFailRemovingStoredClient(error)) {
-      $0.isRemovingClient = false
-      $0.hasStoredClient = true
+    store.receive(.didFailRemovingStoredCmix(error)) {
+      $0.isRemovingCmix = false
+      $0.hasStoredCmix = true
       $0.error = ErrorState(error: error)
     }
   }

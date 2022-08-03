@@ -1,8 +1,6 @@
 import ComposableArchitecture
 import ElixxirDAppsSDK
 import ErrorFeature
-import MyContactFeature
-import MyIdentityFeature
 import XCTest
 @testable import SessionFeature
 
@@ -11,31 +9,30 @@ final class SessionFeatureTests: XCTestCase {
     var networkFollowerStatus: NetworkFollowerStatus!
     var didStartMonitoringNetworkHealth = 0
     var didStopMonitoringNetworkHealth = 0
-    var networkHealthCallback: ((Bool) -> Void)!
+    var networkHealthCallback: HealthCallback!
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
 
-    var env = SessionEnvironment.failing
-    env.getClient = {
-      var client = Client.failing
-      client.networkFollower.status.status = { networkFollowerStatus }
-      client.monitorNetworkHealth.listen = { callback in
+    let store = TestStore(
+      initialState: SessionState(id: UUID()),
+      reducer: sessionReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.getCmix = {
+      var cmix = Cmix.unimplemented
+      cmix.networkFollowerStatus.run = { networkFollowerStatus }
+      cmix.addHealthCallback.run = { callback in
         networkHealthCallback = callback
         didStartMonitoringNetworkHealth += 1
         return Cancellable {
           didStopMonitoringNetworkHealth += 1
         }
       }
-      return client
+      return cmix
     }
-    env.bgScheduler = bgScheduler.eraseToAnyScheduler()
-    env.mainScheduler = mainScheduler.eraseToAnyScheduler()
-
-    let store = TestStore(
-      initialState: SessionState(id: UUID()),
-      reducer: sessionReducer,
-      environment: env
-    )
+    store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
+    store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     store.send(.viewDidLoad)
 
@@ -53,7 +50,7 @@ final class SessionFeatureTests: XCTestCase {
     XCTAssertEqual(didStartMonitoringNetworkHealth, 1)
     XCTAssertEqual(didStopMonitoringNetworkHealth, 0)
 
-    networkHealthCallback(true)
+    networkHealthCallback.handle(true)
     bgScheduler.advance()
     mainScheduler.advance()
 
@@ -77,35 +74,30 @@ final class SessionFeatureTests: XCTestCase {
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
 
-    var env = SessionEnvironment.failing
-    env.getClient = {
-      var client = Client.failing
-      client.networkFollower.status.status = {
-        networkFollowerStatus
-      }
-      client.networkFollower.start.start = {
+    let store = TestStore(
+      initialState: SessionState(id: UUID()),
+      reducer: sessionReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.getCmix = {
+      var cmix = Cmix.unimplemented
+      cmix.networkFollowerStatus.run = { networkFollowerStatus }
+      cmix.startNetworkFollower.run = {
         didStartNetworkFollowerWithTimeout.append($0)
         if let error = networkFollowerStartError {
           throw error
         }
       }
-      client.networkFollower.stop.stop = {
+      cmix.stopNetworkFollower.run = {
         didStopNetworkFollower += 1
       }
-      return client
+      return cmix
     }
-    env.bgScheduler = bgScheduler.eraseToAnyScheduler()
-    env.mainScheduler = mainScheduler.eraseToAnyScheduler()
+    store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
+    store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
-    let store = TestStore(
-      initialState: SessionState(id: UUID()),
-      reducer: sessionReducer,
-      environment: env
-    )
-
-    store.send(.runNetworkFollower(true)) {
-      $0.networkFollowerStatus = .starting
-    }
+    store.send(.runNetworkFollower(true))
 
     networkFollowerStatus = .running
     bgScheduler.advance()
@@ -118,9 +110,7 @@ final class SessionFeatureTests: XCTestCase {
       $0.networkFollowerStatus = .running
     }
 
-    store.send(.runNetworkFollower(false)) {
-      $0.networkFollowerStatus = .stopping
-    }
+    store.send(.runNetworkFollower(false))
 
     networkFollowerStatus = .stopped
     bgScheduler.advance()
@@ -133,9 +123,7 @@ final class SessionFeatureTests: XCTestCase {
       $0.networkFollowerStatus = .stopped
     }
 
-    store.send(.runNetworkFollower(true)) {
-      $0.networkFollowerStatus = .starting
-    }
+    store.send(.runNetworkFollower(true))
 
     networkFollowerStartError = NSError(domain: "test", code: 1234)
     networkFollowerStatus = .stopped
@@ -149,54 +137,10 @@ final class SessionFeatureTests: XCTestCase {
       $0.error = ErrorState(error: networkFollowerStartError!)
     }
 
-    store.receive(.didUpdateNetworkFollowerStatus(.stopped)) {
-      $0.networkFollowerStatus = .stopped
-    }
+    store.receive(.didUpdateNetworkFollowerStatus(.stopped))
 
     store.send(.didDismissError) {
       $0.error = nil
-    }
-  }
-
-  func testPresentingMyIdentity() {
-    let newId = UUID()
-
-    var env = SessionEnvironment.failing
-    env.makeId = { newId }
-
-    let store = TestStore(
-      initialState: SessionState(id: UUID()),
-      reducer: sessionReducer,
-      environment: env
-    )
-
-    store.send(.presentMyIdentity) {
-      $0.myIdentity = MyIdentityState(id: newId)
-    }
-
-    store.send(.didDismissMyIdentity) {
-      $0.myIdentity = nil
-    }
-  }
-
-  func testPresentingMyContact() {
-    let newId = UUID()
-
-    var env = SessionEnvironment.failing
-    env.makeId = { newId }
-
-    let store = TestStore(
-      initialState: SessionState(id: UUID()),
-      reducer: sessionReducer,
-      environment: env
-    )
-
-    store.send(.presentMyContact) {
-      $0.myContact = MyContactState(id: newId)
-    }
-
-    store.send(.didDismissMyContact) {
-      $0.myContact = nil
     }
   }
 }

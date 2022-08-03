@@ -9,9 +9,6 @@ struct NetworkFollowerStatusView: View {
     case .stopped:
       Label("Stopped", systemImage: "stop.fill")
 
-    case .starting:
-      Label("Starting...", systemImage: "play")
-
     case .running:
       Label("Running", systemImage: "play.fill")
 
@@ -32,7 +29,6 @@ struct NetworkFollowerStatusView_Previews: PreviewProvider {
   static var previews: some View {
     Group {
       NetworkFollowerStatusView(status: .stopped)
-      NetworkFollowerStatusView(status: .starting)
       NetworkFollowerStatusView(status: .running)
       NetworkFollowerStatusView(status: .stopping)
       NetworkFollowerStatusView(status: .unknown(code: -1))

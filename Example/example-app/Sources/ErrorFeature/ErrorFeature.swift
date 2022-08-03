@@ -1,5 +1,5 @@
 import ComposableArchitecture
-import SwiftUI
+import XCTestDynamicOverlay
 
 public struct ErrorState: Equatable {
   public init(error: NSError) {
@@ -17,8 +17,6 @@ public struct ErrorEnvironment {
 
 public let errorReducer = Reducer<ErrorState, ErrorAction, ErrorEnvironment>.empty
 
-#if DEBUG
 extension ErrorEnvironment {
-  public static let failing = ErrorEnvironment()
+  public static let unimplemented = ErrorEnvironment()
 }
-#endif

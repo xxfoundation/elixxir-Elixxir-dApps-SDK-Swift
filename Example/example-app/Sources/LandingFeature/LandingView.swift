@@ -11,19 +11,19 @@ public struct LandingView: View {
   let store: Store<LandingState, LandingAction>
 
   struct ViewState: Equatable {
-    let hasStoredClient: Bool
-    let isMakingClient: Bool
-    let isRemovingClient: Bool
+    let hasStoredCmix: Bool
+    let isMakingCmix: Bool
+    let isRemovingCmix: Bool
 
     init(state: LandingState) {
-      hasStoredClient = state.hasStoredClient
-      isMakingClient = state.isMakingClient
-      isRemovingClient = state.isRemovingClient
+      hasStoredCmix = state.hasStoredCmix
+      isMakingCmix = state.isMakingCmix
+      isRemovingCmix = state.isRemovingCmix
     }
 
     var isLoading: Bool {
-      isMakingClient ||
-      isRemovingClient
+      isMakingCmix ||
+      isRemovingCmix
     }
   }
 
@@ -31,25 +31,25 @@ public struct LandingView: View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       Form {
         Button {
-          viewStore.send(.makeClient)
+          viewStore.send(.makeCmix)
         } label: {
           HStack {
-            Text(viewStore.hasStoredClient ? "Load stored client" : "Create new client")
+            Text(viewStore.hasStoredCmix ? "Load stored cMix" : "Create new cMix")
             Spacer()
-            if viewStore.isMakingClient {
+            if viewStore.isMakingCmix {
               ProgressView()
             }
           }
         }
 
-        if viewStore.hasStoredClient {
+        if viewStore.hasStoredCmix {
           Button(role: .destructive) {
-            viewStore.send(.removeStoredClient)
+            viewStore.send(.removeStoredCmix)
           } label: {
             HStack {
-              Text("Remove stored client")
+              Text("Remove stored cMix")
               Spacer()
-              if viewStore.isRemovingClient {
+              if viewStore.isRemovingCmix {
                 ProgressView()
               }
             }

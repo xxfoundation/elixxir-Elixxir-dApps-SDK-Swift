@@ -3,6 +3,7 @@ import ComposableArchitecture
 import ComposablePresentation
 import LandingFeature
 import SessionFeature
+import XCTestDynamicOverlay
 
 struct AppState: Equatable {
   enum Scene: Equatable {
@@ -40,14 +41,14 @@ extension AppState.Scene {
 
 enum AppAction: Equatable {
   case viewDidLoad
-  case clientDidChange(hasClient: Bool)
+  case cmixDidChange(hasCmix: Bool)
   case landing(LandingAction)
   case session(SessionAction)
 }
 
 struct AppEnvironment {
   var makeId: () -> UUID
-  var hasClient: AnyPublisher<Bool, Never>
+  var hasCmix: () -> AnyPublisher<Bool, Never>
   var mainScheduler: AnySchedulerOf<DispatchQueue>
   var landing: LandingEnvironment
   var session: SessionEnvironment
@@ -55,19 +56,18 @@ struct AppEnvironment {
 
 let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 { state, action, env in
+  enum HasCmixEffectId {}
+
   switch action {
   case .viewDidLoad:
-    struct HasClientEffectId: Hashable {
-      var id: UUID
-    }
-    return env.hasClient
+    return env.hasCmix()
       .removeDuplicates()
-      .map(AppAction.clientDidChange(hasClient:))
+      .map(AppAction.cmixDidChange(hasCmix:))
       .receive(on: env.mainScheduler)
       .eraseToEffect()
-      .cancellable(id: HasClientEffectId(id: state.id), cancelInFlight: true)
+      .cancellable(id: HasCmixEffectId.self, cancelInFlight: true)
 
-  case .clientDidChange(let hasClient):
+  case .cmixDidChange(let hasClient):
     if hasClient {
       let sessionState = state.scene.asSession ?? SessionState(id: env.makeId())
       state.scene = .session(sessionState)
@@ -96,14 +96,12 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
   environment: \.session
 )
 
-#if DEBUG
 extension AppEnvironment {
-  static let failing = AppEnvironment(
-    makeId: { fatalError() },
-    hasClient: Empty().eraseToAnyPublisher(),
-    mainScheduler: .failing,
-    landing: .failing,
-    session: .failing
+  static let unimplemented = AppEnvironment(
+    makeId: XCTUnimplemented("\(Self.self).makeId"),
+    hasCmix: XCTUnimplemented("\(Self.self).hasCmix"),
+    mainScheduler: .unimplemented,
+    landing: .unimplemented,
+    session: .unimplemented
   )
 }
-#endif
