@@ -7,24 +7,24 @@ public struct LookupUD {
   public func callAsFunction(
     e2eId: Int,
     udContact: Data,
-    udId: Data,
+    lookupId: Data,
     singleRequestParamsJSON: Data = GetSingleUseParams.liveDefault(),
     callback: UdLookupCallback
   ) throws -> SingleUseSendReport {
-    try run(e2eId, udContact, udId, singleRequestParamsJSON, callback)
+    try run(e2eId, udContact, lookupId, singleRequestParamsJSON, callback)
   }
 }
 
 extension LookupUD {
   public static let live = LookupUD {
-    e2eId, udContact, udId, singleRequestParamsJSON, callback in
+    e2eId, udContact, lookupId, singleRequestParamsJSON, callback in
 
     var error: NSError?
     let reportData = BindingsLookupUD(
       e2eId,
       udContact,
       callback.makeBindingsUdLookupCallback(),
-      udId,
+      lookupId,
       singleRequestParamsJSON,
       &error
     )
