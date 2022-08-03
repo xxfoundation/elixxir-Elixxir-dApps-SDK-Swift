@@ -13,54 +13,31 @@ Also you can checkout included example iOS application.
 
 You can find full documentation with step by step guide [here](https://xxdk-dev.xx.network/mobile%20docs/ios-sdk)
 
-
 ## 🚀 Quick Start
 
 Add `ElixxirDAppsSDK` library as a dependency to your project using Swift Package Manager.
 
+### ▶️ Instantiating cMix
 
-### ▶️ Instantiating client
-
-Create a new client and store it on disk:
-
-```swift
-let downloadNDF: NDFDownloader = .live
-let createClient: ClientCreator = .live
-try createClient(
-  directoryURL: ...,
-  ndf: try downloadNDF(.mainnet),
-  password: ...
-)
-```
-
-Load existing client from disk:
+You can use a convenient `CMixManager` wrapper to manage cMix stored on disk:
 
 ```swift
-let loadClient: ClientLoader = .live
-let client = try loadClient(
-  directoryURL: ..., 
-  password: ...
-)
-```
-
-You can also use a convenient `ClientStorage` wrapper to manage a client stored on disk:
-
-```swift
-let storage: ClientStorage = .live(
+let cMixManager: CMixManager = .live(
   passwordStorage: .init(
     save: { password in
-      // securely save provided client's password
+      // securely save provided password
     },
     load: {
-      // load securely stored client's password
+      // load securely stored password
     }
   )
 )
-let client: Client
-if storage.hasStoredClient() {
-  client = try storage.loadClient()
+
+let cMix: CMix
+if cMixManager.hasStorage() {
+  cMix = try cMixManager.load()
 } else {
-  client = try storage.createClient()
+  cMix = try cMixManager.create()
 }
 ```
 
@@ -71,30 +48,34 @@ Check out included example iOS application for the `PasswordStorage` implementat
 Start network follower:
 
 ```
-let client: Client = ...
-try client.networkFollower.start(timeoutMS: 10_000)
+let cMix: CMix = ...
+try cMix.startNetworkFollower(timeoutMS: 10_000)
 ```
 
 Wait until connected:
 
 ```
-let client: Client = ...
-let isNetworkHealthy = client.waitForNetwork(timeoutMS: 30_000)
+let cMix: CMix = ...
+let isNetworkHealthy = try cMix.waitForNetwork(timeoutMS: 30_000)
 ```
 
-### ▶️ Making a new identity
+### ▶️ Making a new reception identity
 
-Use the client to make a new identity:
+Use the cMix to make a new reception identity:
 
 ```swift
-let client: Client = ...
-let myIdentity = try client.makeIdentity()
+let cMix: CMix = ...
+let myIdentity = try cMix.makeReceptionIdentity()
 ```
-### ▶️ Create new E2E client
+
+### ▶️ Create new E2E
 
 ```swift
-let client: Client = ...
-let clientE2E = try ClientE2ELogin.live(with: client)
+let login: Login = .live
+let e2e = try login(
+  cMixId: cMix.getId(),
+  identity: myIdentity
+)
 ```
 
 ### ▶️ Connecting to remote
@@ -102,12 +83,10 @@ let clientE2E = try ClientE2ELogin.live(with: client)
 Perform auth key negotiation with the given recipient to get the `Connection`:
 
 ```swift
-let client: Client = ...
-let clientE2E: ClientE2E = ...
-let connection = try client.connect(
+let connection = try cMix.connect(
   withAuthentication: false,
-  recipientContact: ..., 
-  e2eId: clientE2E.getId()
+  e2eId: e2e.getId(),
+  recipientContact: ...
 )
 ```
 
@@ -118,9 +97,8 @@ Pass `true` for the `withAuthentication` parameter if you want to prove id owner
 Send a message to the connection's partner:
 
 ```swift
-let connection: Connection = ...
-let report = try connection.send(
-  messageType: 1, 
+let sendReport = try connection.send(
+  messageType: 1,
   payload: ...
 )
 ```
@@ -128,15 +106,18 @@ let report = try connection.send(
 Check if the round succeeded:
 
 ```swift
-let client: Client = ...
-try client.waitForDelivery(roundList: ..., timeoutMS: 30_000) { result in
-  switch result {
+try cMix.waitForMessageDelivery(
+  report: sendReport,
+  timeoutMS: 30_000,
+  callback: .init { result in
+    switch result {
     case .delivered(let roundResults):
       ...
     case .notDelivered(let timedOut):
       ...
+    }
   }
-}
+)
 ```
 
 ### ▶️ Receiving messages
@@ -144,28 +125,13 @@ try client.waitForDelivery(roundList: ..., timeoutMS: 30_000) { result in
 Use connection's message listener to receive messages from partner:
 
 ```swift
-let connection: Connection = ...
-connection.listen(messageType: 1) { message in
-  ...
-}
-```
-
-### ▶️ Using rest-like API
-
-Use `RestlikeRequestSender` to perform rest-like requests:
-
-```swift
-let client: Client = ...
-let connection: Connection = ...
-let sendRestlike: RestlikeRequestSender = .live(authenticated: false)
-let response = try sendRestlike(
-  clientId: client.getId(),
-  connectionId: connection.getId(),
-  request: ...
+try connection.registerListener(
+  messageType: 1,
+  listener: .init { message in
+    ...
+  }
 )
 ```
-
-Pass `true` for the `authenticated` parameter if you want to perform authenticated requests.
 
 ## 🛠 Development
 
