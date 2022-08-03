@@ -140,6 +140,10 @@ let package = Package(
           name: "ElixxirDAppsSDK",
           package: "elixxir-dapps-sdk-swift"
         ),
+        .product(
+          name: "XCTestDynamicOverlay",
+          package: "xctest-dynamic-overlay"
+        ),
       ],
       swiftSettings: swiftSettings
     ),
