@@ -2,10 +2,10 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct E2ERegisterListener {
-  public var run: (Data, Int, Listener) throws -> Void
+  public var run: (Data?, Int, Listener) throws -> Void
 
   public func callAsFunction(
-    senderId: Data,
+    senderId: Data?,
     messageType: Int,
     callback: Listener
   ) throws {
@@ -17,7 +17,7 @@ extension E2ERegisterListener {
   public static func live(_ bindingsE2E: BindingsE2e) -> E2ERegisterListener {
     E2ERegisterListener { senderId, messageType, callback in
       try bindingsE2E.registerListener(
-        senderId,
+        senderId ?? Data([UInt8](repeating: 0, count: 32)),
         messageType: messageType,
         newListener: callback.makeBindingsListener()
       )
