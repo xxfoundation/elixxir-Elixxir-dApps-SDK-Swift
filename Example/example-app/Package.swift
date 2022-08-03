@@ -70,13 +70,7 @@ let package = Package(
       dependencies: [
         .target(name: "ErrorFeature"),
         .target(name: "LandingFeature"),
-        .target(name: "MyContactFeature"),
-        .target(name: "MyIdentityFeature"),
         .target(name: "SessionFeature"),
-        .product(
-          name: "ElixxirDAppsSDK",
-          package: "elixxir-dapps-sdk-swift"
-        ),
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
@@ -86,8 +80,16 @@ let package = Package(
           package: "swift-composable-presentation"
         ),
         .product(
+          name: "ElixxirDAppsSDK",
+          package: "elixxir-dapps-sdk-swift"
+        ),
+        .product(
           name: "KeychainAccess",
           package: "KeychainAccess"
+        ),
+        .product(
+          name: "XCTestDynamicOverlay",
+          package: "xctest-dynamic-overlay"
         ),
       ],
       swiftSettings: swiftSettings
