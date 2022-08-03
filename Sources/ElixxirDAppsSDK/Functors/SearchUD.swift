@@ -8,7 +8,7 @@ public struct SearchUD {
     e2eId: Int,
     udContact: Data,
     facts: [Fact],
-    singleRequestParamsJSON: Data,
+    singleRequestParamsJSON: Data = GetSingleUseParams.liveDefault(),
     callback: UdSearchCallback
   ) throws -> SingleUseSendReport {
     try run(e2eId, udContact, facts, singleRequestParamsJSON, callback)

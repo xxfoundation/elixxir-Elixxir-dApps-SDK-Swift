@@ -6,8 +6,8 @@ public struct InitFileTransfer {
 
   public func callAsFunction(
     e2eId: Int,
-    e2eFileTransferParamsJSON: Data,
-    fileTransferParamsJSON: Data,
+    e2eFileTransferParamsJSON: Data = GetE2EFileTransferParams.liveDefault(),
+    fileTransferParamsJSON: Data = GetFileTransferParams.liveDefault(),
     callback: ReceiveFileCallback
   ) throws -> FileTransfer {
     try run(e2eId, e2eFileTransferParamsJSON, fileTransferParamsJSON, callback)

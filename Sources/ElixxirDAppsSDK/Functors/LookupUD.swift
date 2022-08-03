@@ -8,7 +8,7 @@ public struct LookupUD {
     e2eId: Int,
     udContact: Data,
     udId: Data,
-    singleRequestParamsJSON: Data,
+    singleRequestParamsJSON: Data = GetSingleUseParams.liveDefault(),
     callback: UdLookupCallback
   ) throws -> SingleUseSendReport {
     try run(e2eId, udContact, udId, singleRequestParamsJSON, callback)

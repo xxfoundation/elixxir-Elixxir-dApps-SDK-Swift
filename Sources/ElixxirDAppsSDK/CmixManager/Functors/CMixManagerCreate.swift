@@ -18,7 +18,7 @@ extension CMixManagerCreate {
     directoryPath: String,
     fileManager: FileManager,
     newCMix: NewCMix,
-    getCMixParams: GetCMixParams,
+    getCMixParams: GetCMixParams = .liveDefault,
     loadCMix: LoadCMix
   ) -> CMixManagerCreate {
     CMixManagerCreate {

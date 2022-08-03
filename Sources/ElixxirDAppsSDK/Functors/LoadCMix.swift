@@ -7,7 +7,7 @@ public struct LoadCMix {
   public func callAsFunction(
     storageDir: String,
     password: Data,
-    cMixParamsJSON: Data
+    cMixParamsJSON: Data = GetCMixParams.liveDefault()
   ) throws -> CMix {
     try run(storageDir, password, cMixParamsJSON)
   }

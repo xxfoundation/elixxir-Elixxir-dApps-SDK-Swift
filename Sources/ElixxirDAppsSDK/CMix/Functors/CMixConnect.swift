@@ -8,7 +8,7 @@ public struct CMixConnect {
     withAuthentication: Bool,
     e2eId: Int,
     recipientContact: Data,
-    e2eParamsJSON: Data
+    e2eParamsJSON: Data = GetE2EParams.liveDefault()
   ) throws -> Connection {
     try run(withAuthentication, e2eId, recipientContact, e2eParamsJSON)
   }

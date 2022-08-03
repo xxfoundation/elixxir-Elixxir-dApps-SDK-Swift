@@ -9,7 +9,7 @@ public struct Login {
     cMixId: Int,
     authCallbacks: AuthCallbacks? = nil,
     identity: ReceptionIdentity,
-    e2eParamsJSON: Data
+    e2eParamsJSON: Data = GetE2EParams.liveDefault()
   ) throws -> E2E {
     try run(ephemeral, cMixId, authCallbacks, identity, e2eParamsJSON)
   }
