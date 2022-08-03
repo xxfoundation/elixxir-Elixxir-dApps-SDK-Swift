@@ -2,13 +2,13 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct LoadOrNewUserDiscovery {
-  public var run: (Int, UdNetworkStatus, String, Data) throws -> UserDiscovery
+  public var run: (Int, UdNetworkStatus, String?, Data?) throws -> UserDiscovery
 
   public func callAsFunction(
     e2eId: Int,
     follower: UdNetworkStatus,
-    username: String,
-    registrationValidationSignature: Data
+    username: String?,
+    registrationValidationSignature: Data?
   ) throws -> UserDiscovery {
     try run(e2eId, follower, username, registrationValidationSignature)
   }
