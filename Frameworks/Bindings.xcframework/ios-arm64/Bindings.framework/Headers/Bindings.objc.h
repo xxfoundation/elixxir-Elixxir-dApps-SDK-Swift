@@ -1584,14 +1584,14 @@ discovery system or returns by the timeout.
 Parameters:
  - e2eID - e2e object ID in the tracker
  - udContact - the marshalled bytes of the contact.Contact object
- - udIdBytes - the marshalled bytes of the id.ID object for the user
-   discovery server
+ - lookupId - the marshalled bytes of the id.ID object for the user
+   that LookupUD will look up.
  - singleRequestParams - the JSON marshalled bytes of single.RequestParams
 
 Returns:
  - []byte - the JSON marshalled bytes of SingleUseSendReport
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsLookupUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdLookupCallback> _Nullable cb, NSData* _Nullable udIdBytes, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsLookupUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdLookupCallback> _Nullable cb, NSData* _Nullable lookupId, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
  * NewBroadcastChannel creates a bindings-layer broadcast channel & starts listening for new messages
