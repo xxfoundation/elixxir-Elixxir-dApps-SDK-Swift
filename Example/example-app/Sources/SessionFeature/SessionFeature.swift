@@ -2,32 +2,25 @@ import Combine
 import ComposableArchitecture
 import ElixxirDAppsSDK
 import ErrorFeature
-import MyContactFeature
-import MyIdentityFeature
+import XCTestDynamicOverlay
 
 public struct SessionState: Equatable {
   public init(
     id: UUID,
     networkFollowerStatus: NetworkFollowerStatus? = nil,
     isNetworkHealthy: Bool? = nil,
-    error: ErrorState? = nil,
-    myIdentity: MyIdentityState? = nil,
-    myContact: MyContactState? = nil
+    error: ErrorState? = nil
   ) {
     self.id = id
     self.networkFollowerStatus = networkFollowerStatus
     self.isNetworkHealthy = isNetworkHealthy
     self.error = error
-    self.myIdentity = myIdentity
-    self.myContact = myContact
   }
 
   public var id: UUID
   public var networkFollowerStatus: NetworkFollowerStatus?
   public var isNetworkHealthy: Bool?
   public var error: ErrorState?
-  public var myIdentity: MyIdentityState?
-  public var myContact: MyContactState?
 }
 
 public enum SessionAction: Equatable {
@@ -39,41 +32,26 @@ public enum SessionAction: Equatable {
   case monitorNetworkHealth(Bool)
   case didUpdateNetworkHealth(Bool?)
   case didDismissError
-  case presentMyIdentity
-  case didDismissMyIdentity
-  case presentMyContact
-  case didDismissMyContact
   case error(ErrorAction)
-  case myIdentity(MyIdentityAction)
-  case myContact(MyContactAction)
 }
 
 public struct SessionEnvironment {
   public init(
-    getClient: @escaping () -> Client?,
+    getCmix: @escaping () -> Cmix?,
     bgScheduler: AnySchedulerOf<DispatchQueue>,
     mainScheduler: AnySchedulerOf<DispatchQueue>,
-    makeId: @escaping () -> UUID,
-    error: ErrorEnvironment,
-    myIdentity: MyIdentityEnvironment,
-    myContact: MyContactEnvironment
+    error: ErrorEnvironment
   ) {
-    self.getClient = getClient
+    self.getCmix = getCmix
     self.bgScheduler = bgScheduler
     self.mainScheduler = mainScheduler
-    self.makeId = makeId
     self.error = error
-    self.myIdentity = myIdentity
-    self.myContact = myContact
   }
 
-  public var getClient: () -> Client?
+  public var getCmix: () -> Cmix?
   public var bgScheduler: AnySchedulerOf<DispatchQueue>
   public var mainScheduler: AnySchedulerOf<DispatchQueue>
-  public var makeId: () -> UUID
   public var error: ErrorEnvironment
-  public var myIdentity: MyIdentityEnvironment
-  public var myContact: MyContactEnvironment
 }
 
 public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironment>
@@ -87,7 +65,7 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
 
   case .updateNetworkFollowerStatus:
     return Effect.future { fulfill in
-      let status = env.getClient()?.networkFollower.status()
+      let status = env.getCmix()?.networkFollowerStatus()
       fulfill(.success(.didUpdateNetworkFollowerStatus(status)))
     }
     .subscribe(on: env.bgScheduler)
@@ -99,18 +77,17 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
     return .none
 
   case .runNetworkFollower(let start):
-    state.networkFollowerStatus = start ? .starting : .stopping
     return Effect.run { subscriber in
       do {
         if start {
-          try env.getClient()?.networkFollower.start(timeoutMS: 30_000)
+          try env.getCmix()?.startNetworkFollower(timeoutMS: 30_000)
         } else {
-          try env.getClient()?.networkFollower.stop()
+          try env.getCmix()?.stopNetworkFollower()
         }
       } catch {
         subscriber.send(.networkFollowerDidFail(error as NSError))
       }
-      let status = env.getClient()?.networkFollower.status()
+      let status = env.getCmix()?.networkFollowerStatus()
       subscriber.send(.didUpdateNetworkFollowerStatus(status))
       subscriber.send(completion: .finished)
       return AnyCancellable {}
@@ -130,9 +107,10 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
     let effectId = MonitorEffectId(id: state.id)
     if start {
       return Effect.run { subscriber in
-        var cancellable = env.getClient()?.monitorNetworkHealth { isHealthy in
+        let callback = HealthCallback { isHealthy in
           subscriber.send(.didUpdateNetworkHealth(isHealthy))
         }
+        let cancellable = env.getCmix()?.addHealthCallback(callback)
         return AnyCancellable {
           cancellable?.cancel()
         }
@@ -155,27 +133,7 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
     state.error = nil
     return .none
 
-  case .presentMyIdentity:
-    if state.myIdentity == nil {
-      state.myIdentity = MyIdentityState(id: env.makeId())
-    }
-    return .none
-
-  case .didDismissMyIdentity:
-    state.myIdentity = nil
-    return .none
-
-  case .presentMyContact:
-    if state.myContact == nil {
-      state.myContact = MyContactState(id: env.makeId())
-    }
-    return .none
-
-  case .didDismissMyContact:
-    state.myContact = nil
-    return .none
-
-  case .error(_), .myIdentity(_), .myContact(_):
+  case .error(_):
     return .none
   }
 }
@@ -186,31 +144,12 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
   action: /SessionAction.error,
   environment: \.error
 )
-.presenting(
-  myIdentityReducer,
-  state: .keyPath(\.myIdentity),
-  id: .keyPath(\.?.id),
-  action: /SessionAction.myIdentity,
-  environment: \.myIdentity
-)
-.presenting(
-  myContactReducer,
-  state: .keyPath(\.myContact),
-  id: .keyPath(\.?.id),
-  action: /SessionAction.myContact,
-  environment: \.myContact
-)
 
-#if DEBUG
 extension SessionEnvironment {
-  public static let failing = SessionEnvironment(
-    getClient: { .failing },
-    bgScheduler: .failing,
-    mainScheduler: .failing,
-    makeId: { fatalError() },
-    error: .failing,
-    myIdentity: .failing,
-    myContact: .failing
+  public static let unimplemented = SessionEnvironment(
+    getCmix: XCTUnimplemented("\(Self.self).getCmix"),
+    bgScheduler: .unimplemented,
+    mainScheduler: .unimplemented,
+    error: .unimplemented
   )
 }
-#endif

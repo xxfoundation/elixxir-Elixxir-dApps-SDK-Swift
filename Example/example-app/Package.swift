@@ -210,8 +210,6 @@ let package = Package(
       name: "SessionFeature",
       dependencies: [
         .target(name: "ErrorFeature"),
-        .target(name: "MyContactFeature"),
-        .target(name: "MyIdentityFeature"),
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
@@ -223,6 +221,10 @@ let package = Package(
         .product(
           name: "ElixxirDAppsSDK",
           package: "elixxir-dapps-sdk-swift"
+        ),
+        .product(
+          name: "XCTestDynamicOverlay",
+          package: "xctest-dynamic-overlay"
         ),
       ],
       swiftSettings: swiftSettings
