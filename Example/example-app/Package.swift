@@ -59,6 +59,10 @@ let package = Package(
       url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
       .upToNextMajor(from: "4.2.2")
     ),
+    .package(
+      url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
+      .upToNextMajor(from: "0.3.3")
+    ),
   ],
   targets: [
     .target(
@@ -105,6 +109,10 @@ let package = Package(
         .product(
           name: "ElixxirDAppsSDK",
           package: "elixxir-dapps-sdk-swift"
+        ),
+        .product(
+          name: "XCTestDynamicOverlay",
+          package: "xctest-dynamic-overlay"
         ),
       ],
       swiftSettings: swiftSettings
