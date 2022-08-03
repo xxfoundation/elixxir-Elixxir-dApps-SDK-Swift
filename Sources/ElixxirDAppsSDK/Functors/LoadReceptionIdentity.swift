@@ -6,16 +6,16 @@ public struct LoadReceptionIdentity {
 
   public func callAsFunction(
     key: String,
-    cmixId: Int
+    cMixId: Int
   ) throws -> ReceptionIdentity {
-    try run(key, cmixId)
+    try run(key, cMixId)
   }
 }
 
 extension LoadReceptionIdentity {
-  public static let live = LoadReceptionIdentity { key, cmixId in
+  public static let live = LoadReceptionIdentity { key, cMixId in
     var error: NSError?
-    let data = BindingsLoadReceptionIdentity(key, cmixId, &error)
+    let data = BindingsLoadReceptionIdentity(key, cMixId, &error)
     if let error = error {
       throw error
     }

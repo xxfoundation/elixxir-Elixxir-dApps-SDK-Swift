@@ -5,18 +5,18 @@ public struct NewBroadcastChannel {
   public var run: (Int, ChannelDef) throws -> Channel
 
   public func callAsFunction(
-    cmixId: Int,
+    cMixId: Int,
     channelDef: ChannelDef
   ) throws -> Channel {
-    try run(cmixId, channelDef)
+    try run(cMixId, channelDef)
   }
 }
 
 extension NewBroadcastChannel {
-  public static let live = NewBroadcastChannel { cmixId, channelDef in
+  public static let live = NewBroadcastChannel { cMixId, channelDef in
     var error: NSError?
     let bindingsChannel = BindingsNewBroadcastChannel(
-      cmixId,
+      cMixId,
       try channelDef.encode(),
       &error
     )

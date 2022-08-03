@@ -1,7 +1,7 @@
 import Bindings
 import XCTestDynamicOverlay
 
-public struct CmixConnect {
+public struct CMixConnect {
   public var run: (Bool, Int, Data, Data) throws -> Connection
 
   public func callAsFunction(
@@ -14,17 +14,17 @@ public struct CmixConnect {
   }
 }
 
-extension CmixConnect {
-  public static func live(_ bindingsCmix: BindingsCmix) -> CmixConnect {
-    CmixConnect { withAuthentication, e2eId, recipientContact, e2eParamsJSON in
+extension CMixConnect {
+  public static func live(_ bindingsCMix: BindingsCmix) -> CMixConnect {
+    CMixConnect { withAuthentication, e2eId, recipientContact, e2eParamsJSON in
       if withAuthentication {
-        return .live(try bindingsCmix.connect(
+        return .live(try bindingsCMix.connect(
           withAuthentication: e2eId,
           recipientContact: recipientContact,
           e2eParamsJSON: e2eParamsJSON
         ))
       } else {
-        return .live(try bindingsCmix.connect(
+        return .live(try bindingsCMix.connect(
           e2eId,
           recipientContact: recipientContact,
           e2eParamsJSON: e2eParamsJSON
@@ -34,8 +34,8 @@ extension CmixConnect {
   }
 }
 
-extension CmixConnect {
-  public static let unimplemented = CmixConnect(
+extension CMixConnect {
+  public static let unimplemented = CMixConnect(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

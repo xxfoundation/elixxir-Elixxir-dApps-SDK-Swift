@@ -1,13 +1,13 @@
 import Bindings
 
-public struct CmixManager {
-  public var hasStorage: CmixManagerHasStorage
-  public var create: CmixManagerCreate
-  public var load: CmixManagerLoad
-  public var remove: CmixManagerRemove
+public struct CMixManager {
+  public var hasStorage: CMixManagerHasStorage
+  public var create: CMixManagerCreate
+  public var load: CMixManagerLoad
+  public var remove: CMixManagerRemove
 }
 
-extension CmixManager {
+extension CMixManager {
   public static func live(
     directoryPath: String = FileManager.default
       .urls(for: .applicationSupportDirectory, in: .userDomainMask)
@@ -19,11 +19,11 @@ extension CmixManager {
     downloadNDF: DownloadAndVerifySignedNdf = .live,
     generateSecret: GenerateSecret = .live,
     passwordStorage: PasswordStorage,
-    newCmix: NewCmix = .live,
-    getCmixParams: GetCmixParams = .liveDefault,
-    loadCmix: LoadCmix = .live
-  ) -> CmixManager {
-    CmixManager(
+    newCMix: NewCMix = .live,
+    getCMixParams: GetCMixParams = .liveDefault,
+    loadCMix: LoadCMix = .live
+  ) -> CMixManager {
+    CMixManager(
       hasStorage: .live(
         directoryPath: directoryPath,
         fileManager: fileManager
@@ -35,15 +35,15 @@ extension CmixManager {
         passwordStorage: passwordStorage,
         directoryPath: directoryPath,
         fileManager: fileManager,
-        newCmix: newCmix,
-        getCmixParams: getCmixParams,
-        loadCmix: loadCmix
+        newCMix: newCMix,
+        getCMixParams: getCMixParams,
+        loadCMix: loadCMix
       ),
       load: .live(
         directoryPath: directoryPath,
         passwordStorage: passwordStorage,
-        getCmixParams: getCmixParams,
-        loadCmix: loadCmix
+        getCMixParams: getCMixParams,
+        loadCMix: loadCMix
       ),
       remove: .live(
         directoryPath: directoryPath,
@@ -53,8 +53,8 @@ extension CmixManager {
   }
 }
 
-extension CmixManager {
-  public static let unimplemented = CmixManager(
+extension CMixManager {
+  public static let unimplemented = CMixManager(
     hasStorage: .unimplemented,
     create: .unimplemented,
     load: .unimplemented,

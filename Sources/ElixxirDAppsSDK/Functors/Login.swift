@@ -6,22 +6,22 @@ public struct Login {
 
   public func callAsFunction(
     ephemeral: Bool = false,
-    cmixId: Int,
+    cMixId: Int,
     authCallbacks: AuthCallbacks? = nil,
     identity: ReceptionIdentity,
     e2eParamsJSON: Data
   ) throws -> E2E {
-    try run(ephemeral, cmixId, authCallbacks, identity, e2eParamsJSON)
+    try run(ephemeral, cMixId, authCallbacks, identity, e2eParamsJSON)
   }
 }
 
 extension Login {
-  public static let live = Login { ephemeral, cmixId, authCallbacks, identity, e2eParamsJSON in
+  public static let live = Login { ephemeral, cMixId, authCallbacks, identity, e2eParamsJSON in
     var error: NSError?
     let bindingsE2E: BindingsE2e?
     if ephemeral {
       bindingsE2E = BindingsLogin(
-        cmixId,
+        cMixId,
         authCallbacks?.makeBindingsAuthCallbacks(),
         try identity.encode(),
         e2eParamsJSON,
@@ -29,7 +29,7 @@ extension Login {
       )
     } else {
       bindingsE2E = BindingsLoginEphemeral(
-        cmixId,
+        cMixId,
         authCallbacks?.makeBindingsAuthCallbacks(),
         try identity.encode(),
         e2eParamsJSON,

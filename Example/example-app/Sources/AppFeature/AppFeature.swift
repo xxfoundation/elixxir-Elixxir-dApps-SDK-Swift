@@ -41,14 +41,14 @@ extension AppState.Scene {
 
 enum AppAction: Equatable {
   case viewDidLoad
-  case cmixDidChange(hasCmix: Bool)
+  case cMixDidChange(hasCMix: Bool)
   case landing(LandingAction)
   case session(SessionAction)
 }
 
 struct AppEnvironment {
   var makeId: () -> UUID
-  var hasCmix: () -> AnyPublisher<Bool, Never>
+  var hasCMix: () -> AnyPublisher<Bool, Never>
   var mainScheduler: AnySchedulerOf<DispatchQueue>
   var landing: LandingEnvironment
   var session: SessionEnvironment
@@ -56,18 +56,18 @@ struct AppEnvironment {
 
 let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 { state, action, env in
-  enum HasCmixEffectId {}
+  enum HasCMixEffectId {}
 
   switch action {
   case .viewDidLoad:
-    return env.hasCmix()
+    return env.hasCMix()
       .removeDuplicates()
-      .map(AppAction.cmixDidChange(hasCmix:))
+      .map(AppAction.cMixDidChange(hasCMix:))
       .receive(on: env.mainScheduler)
       .eraseToEffect()
-      .cancellable(id: HasCmixEffectId.self, cancelInFlight: true)
+      .cancellable(id: HasCMixEffectId.self, cancelInFlight: true)
 
-  case .cmixDidChange(let hasClient):
+  case .cMixDidChange(let hasClient):
     if hasClient {
       let sessionState = state.scene.asSession ?? SessionState(id: env.makeId())
       state.scene = .session(sessionState)
@@ -99,7 +99,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 extension AppEnvironment {
   static let unimplemented = AppEnvironment(
     makeId: XCTUnimplemented("\(Self.self).makeId"),
-    hasCmix: XCTUnimplemented("\(Self.self).hasCmix"),
+    hasCMix: XCTUnimplemented("\(Self.self).hasCMix"),
     mainScheduler: .unimplemented,
     landing: .unimplemented,
     session: .unimplemented

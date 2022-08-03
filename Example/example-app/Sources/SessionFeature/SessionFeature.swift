@@ -37,18 +37,18 @@ public enum SessionAction: Equatable {
 
 public struct SessionEnvironment {
   public init(
-    getCmix: @escaping () -> Cmix?,
+    getCMix: @escaping () -> CMix?,
     bgScheduler: AnySchedulerOf<DispatchQueue>,
     mainScheduler: AnySchedulerOf<DispatchQueue>,
     error: ErrorEnvironment
   ) {
-    self.getCmix = getCmix
+    self.getCMix = getCMix
     self.bgScheduler = bgScheduler
     self.mainScheduler = mainScheduler
     self.error = error
   }
 
-  public var getCmix: () -> Cmix?
+  public var getCMix: () -> CMix?
   public var bgScheduler: AnySchedulerOf<DispatchQueue>
   public var mainScheduler: AnySchedulerOf<DispatchQueue>
   public var error: ErrorEnvironment
@@ -65,7 +65,7 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
 
   case .updateNetworkFollowerStatus:
     return Effect.future { fulfill in
-      let status = env.getCmix()?.networkFollowerStatus()
+      let status = env.getCMix()?.networkFollowerStatus()
       fulfill(.success(.didUpdateNetworkFollowerStatus(status)))
     }
     .subscribe(on: env.bgScheduler)
@@ -80,14 +80,14 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
     return Effect.run { subscriber in
       do {
         if start {
-          try env.getCmix()?.startNetworkFollower(timeoutMS: 30_000)
+          try env.getCMix()?.startNetworkFollower(timeoutMS: 30_000)
         } else {
-          try env.getCmix()?.stopNetworkFollower()
+          try env.getCMix()?.stopNetworkFollower()
         }
       } catch {
         subscriber.send(.networkFollowerDidFail(error as NSError))
       }
-      let status = env.getCmix()?.networkFollowerStatus()
+      let status = env.getCMix()?.networkFollowerStatus()
       subscriber.send(.didUpdateNetworkFollowerStatus(status))
       subscriber.send(completion: .finished)
       return AnyCancellable {}
@@ -110,7 +110,7 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
         let callback = HealthCallback { isHealthy in
           subscriber.send(.didUpdateNetworkHealth(isHealthy))
         }
-        let cancellable = env.getCmix()?.addHealthCallback(callback)
+        let cancellable = env.getCMix()?.addHealthCallback(callback)
         return AnyCancellable {
           cancellable?.cancel()
         }
@@ -147,7 +147,7 @@ public let sessionReducer = Reducer<SessionState, SessionAction, SessionEnvironm
 
 extension SessionEnvironment {
   public static let unimplemented = SessionEnvironment(
-    getCmix: XCTUnimplemented("\(Self.self).getCmix"),
+    getCMix: XCTUnimplemented("\(Self.self).getCMix"),
     bgScheduler: .unimplemented,
     mainScheduler: .unimplemented,
     error: .unimplemented

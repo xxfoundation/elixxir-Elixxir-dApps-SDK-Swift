@@ -19,17 +19,17 @@ final class SessionFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.environment.getCmix = {
-      var cmix = Cmix.unimplemented
-      cmix.networkFollowerStatus.run = { networkFollowerStatus }
-      cmix.addHealthCallback.run = { callback in
+    store.environment.getCMix = {
+      var cMix = CMix.unimplemented
+      cMix.networkFollowerStatus.run = { networkFollowerStatus }
+      cMix.addHealthCallback.run = { callback in
         networkHealthCallback = callback
         didStartMonitoringNetworkHealth += 1
         return Cancellable {
           didStopMonitoringNetworkHealth += 1
         }
       }
-      return cmix
+      return cMix
     }
     store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
     store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
@@ -80,19 +80,19 @@ final class SessionFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.environment.getCmix = {
-      var cmix = Cmix.unimplemented
-      cmix.networkFollowerStatus.run = { networkFollowerStatus }
-      cmix.startNetworkFollower.run = {
+    store.environment.getCMix = {
+      var cMix = CMix.unimplemented
+      cMix.networkFollowerStatus.run = { networkFollowerStatus }
+      cMix.startNetworkFollower.run = {
         didStartNetworkFollowerWithTimeout.append($0)
         if let error = networkFollowerStartError {
           throw error
         }
       }
-      cmix.stopNetworkFollower.run = {
+      cMix.stopNetworkFollower.run = {
         didStopNetworkFollower += 1
       }
-      return cmix
+      return cMix
     }
     store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
     store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()

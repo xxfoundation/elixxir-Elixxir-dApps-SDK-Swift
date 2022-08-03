@@ -1,7 +1,7 @@
 import Foundation
 import XCTestDynamicOverlay
 
-public struct CmixManagerHasStorage {
+public struct CMixManagerHasStorage {
   public var run: () -> Bool
 
   public func callAsFunction() -> Bool {
@@ -9,20 +9,20 @@ public struct CmixManagerHasStorage {
   }
 }
 
-extension CmixManagerHasStorage {
+extension CMixManagerHasStorage {
   public static func live(
     directoryPath: String,
     fileManager: FileManager
-  ) -> CmixManagerHasStorage {
-    CmixManagerHasStorage {
+  ) -> CMixManagerHasStorage {
+    CMixManagerHasStorage {
       let contents = try? fileManager.contentsOfDirectory(atPath: directoryPath)
       return contents.map { $0.isEmpty == false } ?? false
     }
   }
 }
 
-extension CmixManagerHasStorage {
-  public static let unimplemented = CmixManagerHasStorage(
+extension CMixManagerHasStorage {
+  public static let unimplemented = CMixManagerHasStorage(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

@@ -1,7 +1,7 @@
 import Bindings
 import XCTestDynamicOverlay
 
-public struct NewCmixFromBackup {
+public struct NewCMixFromBackup {
   public var run: (String, String, String, Data, Data) throws -> BackupReport
 
   public func callAsFunction(
@@ -15,8 +15,8 @@ public struct NewCmixFromBackup {
   }
 }
 
-extension NewCmixFromBackup {
-  public static let live = NewCmixFromBackup {
+extension NewCMixFromBackup {
+  public static let live = NewCMixFromBackup {
     ndfJSON, storageDir, backupPassphrase, sessionPassword, backupFileContents in
 
     var error: NSError?
@@ -32,14 +32,14 @@ extension NewCmixFromBackup {
       throw error
     }
     guard let reportData = reportData else {
-      fatalError("BindingsNewCmixFromBackup returned `nil` without providing error")
+      fatalError("BindingsNewCMixFromBackup returned `nil` without providing error")
     }
     return try BackupReport.decode(reportData)
   }
 }
 
-extension NewCmixFromBackup {
-  public static let unimplemented = NewCmixFromBackup(
+extension NewCMixFromBackup {
+  public static let unimplemented = NewCMixFromBackup(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

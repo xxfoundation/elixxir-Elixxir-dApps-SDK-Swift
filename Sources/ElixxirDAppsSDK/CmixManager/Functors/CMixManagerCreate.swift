@@ -1,15 +1,15 @@
 import Foundation
 import XCTestDynamicOverlay
 
-public struct CmixManagerCreate {
-  public var run: () throws -> Cmix
+public struct CMixManagerCreate {
+  public var run: () throws -> CMix
 
-  public func callAsFunction() throws -> Cmix {
+  public func callAsFunction() throws -> CMix {
     try run()
   }
 }
 
-extension CmixManagerCreate {
+extension CMixManagerCreate {
   public static func live(
     environment: Environment,
     downloadNDF: DownloadAndVerifySignedNdf,
@@ -17,33 +17,33 @@ extension CmixManagerCreate {
     passwordStorage: PasswordStorage,
     directoryPath: String,
     fileManager: FileManager,
-    newCmix: NewCmix,
-    getCmixParams: GetCmixParams,
-    loadCmix: LoadCmix
-  ) -> CmixManagerCreate {
-    CmixManagerCreate {
+    newCMix: NewCMix,
+    getCMixParams: GetCMixParams,
+    loadCMix: LoadCMix
+  ) -> CMixManagerCreate {
+    CMixManagerCreate {
       let ndfData = try downloadNDF(environment)
       let password = generateSecret()
       try passwordStorage.save(password)
       try? fileManager.removeItem(atPath: directoryPath)
       try? fileManager.createDirectory(atPath: directoryPath, withIntermediateDirectories: true)
-      try newCmix(
+      try newCMix(
         ndfJSON: String(data: ndfData, encoding: .utf8)!,
         storageDir: directoryPath,
         password: password,
         registrationCode: nil
       )
-      return try loadCmix(
+      return try loadCMix(
         storageDir: directoryPath,
         password: password,
-        cmixParamsJSON: getCmixParams()
+        cMixParamsJSON: getCMixParams()
       )
     }
   }
 }
 
-extension CmixManagerCreate {
-  public static let unimplemented = CmixManagerCreate(
+extension CMixManagerCreate {
+  public static let unimplemented = CMixManagerCreate(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

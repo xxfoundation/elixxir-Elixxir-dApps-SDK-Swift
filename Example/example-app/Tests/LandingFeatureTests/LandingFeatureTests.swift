@@ -11,16 +11,16 @@ final class LandingFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.environment.cmixManager.hasStorage.run = { true }
+    store.environment.cMixManager.hasStorage.run = { true }
 
     store.send(.viewDidLoad) {
-      $0.hasStoredCmix = true
+      $0.hasStoredCMix = true
     }
   }
 
-  func testCreateCmix() {
-    var hasStoredCmix = false
-    var didSetCmix = false
+  func testCreateCMix() {
+    var hasStoredCMix = false
+    var didSetCMix = false
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
 
@@ -30,31 +30,31 @@ final class LandingFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.environment.cmixManager.hasStorage.run = { hasStoredCmix }
-    store.environment.cmixManager.create.run = { .unimplemented }
-    store.environment.setCmix = { _ in didSetCmix = true }
+    store.environment.cMixManager.hasStorage.run = { hasStoredCMix }
+    store.environment.cMixManager.create.run = { .unimplemented }
+    store.environment.setCMix = { _ in didSetCMix = true }
     store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
     store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
-    store.send(.makeCmix) {
-      $0.isMakingCmix = true
+    store.send(.makeCMix) {
+      $0.isMakingCMix = true
     }
 
     bgScheduler.advance()
 
-    XCTAssertTrue(didSetCmix)
+    XCTAssertTrue(didSetCMix)
 
-    hasStoredCmix = true
+    hasStoredCMix = true
     mainScheduler.advance()
 
-    store.receive(.didMakeCmix) {
-      $0.isMakingCmix = false
-      $0.hasStoredCmix = true
+    store.receive(.didMakeCMix) {
+      $0.isMakingCMix = false
+      $0.hasStoredCMix = true
     }
   }
 
-  func testLoadStoredCmix() {
-    var didSetCmix = false
+  func testLoadStoredCMix() {
+    var didSetCMix = false
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
 
@@ -64,29 +64,29 @@ final class LandingFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.environment.cmixManager.hasStorage.run = { true }
-    store.environment.cmixManager.load.run = { .unimplemented }
-    store.environment.setCmix = { _ in didSetCmix = true }
+    store.environment.cMixManager.hasStorage.run = { true }
+    store.environment.cMixManager.load.run = { .unimplemented }
+    store.environment.setCMix = { _ in didSetCMix = true }
     store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
     store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
-    store.send(.makeCmix) {
-      $0.isMakingCmix = true
+    store.send(.makeCMix) {
+      $0.isMakingCMix = true
     }
 
     bgScheduler.advance()
 
-    XCTAssertTrue(didSetCmix)
+    XCTAssertTrue(didSetCMix)
 
     mainScheduler.advance()
 
-    store.receive(.didMakeCmix) {
-      $0.isMakingCmix = false
-      $0.hasStoredCmix = true
+    store.receive(.didMakeCMix) {
+      $0.isMakingCMix = false
+      $0.hasStoredCMix = true
     }
   }
 
-  func testMakeCmixFailure() {
+  func testMakeCMixFailure() {
     let error = NSError(domain: "test", code: 1234)
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
@@ -97,28 +97,28 @@ final class LandingFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.environment.cmixManager.hasStorage.run = { false }
-    store.environment.cmixManager.create.run = { throw error }
+    store.environment.cMixManager.hasStorage.run = { false }
+    store.environment.cMixManager.create.run = { throw error }
     store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
     store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
-    store.send(.makeCmix) {
-      $0.isMakingCmix = true
+    store.send(.makeCMix) {
+      $0.isMakingCMix = true
     }
 
     bgScheduler.advance()
     mainScheduler.advance()
 
-    store.receive(.didFailMakingCmix(error)) {
-      $0.isMakingCmix = false
-      $0.hasStoredCmix = false
+    store.receive(.didFailMakingCMix(error)) {
+      $0.isMakingCMix = false
+      $0.hasStoredCMix = false
       $0.error = ErrorState(error: error)
     }
   }
 
-  func testRemoveStoredCmix() {
-    var hasStoredCmix = true
-    var didRemoveCmix = false
+  func testRemoveStoredCMix() {
+    var hasStoredCMix = true
+    var didRemoveCMix = false
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
 
@@ -128,29 +128,29 @@ final class LandingFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.environment.cmixManager.hasStorage.run = { hasStoredCmix }
-    store.environment.cmixManager.remove.run = { didRemoveCmix = true }
+    store.environment.cMixManager.hasStorage.run = { hasStoredCMix }
+    store.environment.cMixManager.remove.run = { didRemoveCMix = true }
     store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
     store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
-    store.send(.removeStoredCmix) {
-      $0.isRemovingCmix = true
+    store.send(.removeStoredCMix) {
+      $0.isRemovingCMix = true
     }
 
     bgScheduler.advance()
 
-    XCTAssertTrue(didRemoveCmix)
+    XCTAssertTrue(didRemoveCMix)
 
-    hasStoredCmix = false
+    hasStoredCMix = false
     mainScheduler.advance()
 
-    store.receive(.didRemoveStoredCmix) {
-      $0.isRemovingCmix = false
-      $0.hasStoredCmix = false
+    store.receive(.didRemoveStoredCMix) {
+      $0.isRemovingCMix = false
+      $0.hasStoredCMix = false
     }
   }
 
-  func testRemoveStoredCmixFailure() {
+  func testRemoveStoredCMixFailure() {
     let error = NSError(domain: "test", code: 1234)
     let bgScheduler = DispatchQueue.test
     let mainScheduler = DispatchQueue.test
@@ -161,21 +161,21 @@ final class LandingFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.environment.cmixManager.hasStorage.run = { true }
-    store.environment.cmixManager.remove.run = { throw error }
+    store.environment.cMixManager.hasStorage.run = { true }
+    store.environment.cMixManager.remove.run = { throw error }
     store.environment.bgScheduler = bgScheduler.eraseToAnyScheduler()
     store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
-    store.send(.removeStoredCmix) {
-      $0.isRemovingCmix = true
+    store.send(.removeStoredCMix) {
+      $0.isRemovingCMix = true
     }
 
     bgScheduler.advance()
     mainScheduler.advance()
 
-    store.receive(.didFailRemovingStoredCmix(error)) {
-      $0.isRemovingCmix = false
-      $0.hasStoredCmix = true
+    store.receive(.didFailRemovingStoredCMix(error)) {
+      $0.isRemovingCMix = false
+      $0.hasStoredCMix = true
       $0.error = ErrorState(error: error)
     }
   }

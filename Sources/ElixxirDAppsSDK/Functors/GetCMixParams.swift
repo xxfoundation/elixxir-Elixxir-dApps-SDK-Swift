@@ -1,7 +1,7 @@
 import Bindings
 import XCTestDynamicOverlay
 
-public struct GetCmixParams {
+public struct GetCMixParams {
   public var run: () -> Data
 
   public func callAsFunction() -> Data {
@@ -9,8 +9,8 @@ public struct GetCmixParams {
   }
 }
 
-extension GetCmixParams {
-  public static let liveDefault = GetCmixParams {
+extension GetCMixParams {
+  public static let liveDefault = GetCMixParams {
     guard let data = BindingsGetDefaultCMixParams() else {
       fatalError("BindingsGetDefaultCMixParams returned `nil`")
     }
@@ -18,8 +18,8 @@ extension GetCmixParams {
   }
 }
 
-extension GetCmixParams {
-  public static let unimplemented = GetCmixParams(
+extension GetCMixParams {
+  public static let unimplemented = GetCMixParams(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

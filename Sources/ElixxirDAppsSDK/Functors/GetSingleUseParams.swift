@@ -19,7 +19,7 @@ extension GetSingleUseParams {
 }
 
 extension GetSingleUseParams {
-  public static let unimplemented = GetCmixParams(
+  public static let unimplemented = GetCMixParams(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

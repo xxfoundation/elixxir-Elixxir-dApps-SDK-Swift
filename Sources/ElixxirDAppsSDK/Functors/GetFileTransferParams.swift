@@ -19,7 +19,7 @@ extension GetFileTransferParams {
 }
 
 extension GetFileTransferParams {
-  public static let unimplemented = GetCmixParams(
+  public static let unimplemented = GetCMixParams(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

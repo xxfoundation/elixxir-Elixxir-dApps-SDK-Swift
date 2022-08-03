@@ -7,17 +7,17 @@ public struct StoreReceptionIdentity {
   public func callAsFunction(
     key: String,
     identity: ReceptionIdentity,
-    cmixId: Int
+    cMixId: Int
   ) throws -> Bool {
-    try run(key, identity, cmixId)
+    try run(key, identity, cMixId)
   }
 }
 
 extension StoreReceptionIdentity {
-  public static let live = StoreReceptionIdentity { key, identity, cmixId in
+  public static let live = StoreReceptionIdentity { key, identity, cMixId in
     var error: NSError?
     let identityData = try identity.encode()
-    let result = BindingsStoreReceptionIdentity(key, identityData, cmixId, &error)
+    let result = BindingsStoreReceptionIdentity(key, identityData, cMixId, &error)
     if let error = error {
       throw error
     }

@@ -21,7 +21,7 @@ struct App: SwiftUI.App {
 
 extension AppEnvironment {
   static func live() -> AppEnvironment {
-    let cmixSubject = CurrentValueSubject<Cmix?, Never>(nil)
+    let cMixSubject = CurrentValueSubject<CMix?, Never>(nil)
     let mainScheduler = DispatchQueue.main.eraseToAnyScheduler()
     let bgScheduler = DispatchQueue(
       label: "xx.network.dApps.ExampleApp.bg",
@@ -30,19 +30,19 @@ extension AppEnvironment {
 
     return AppEnvironment(
       makeId: UUID.init,
-      hasCmix: { cmixSubject.map { $0 != nil }.eraseToAnyPublisher() },
+      hasCMix: { cMixSubject.map { $0 != nil }.eraseToAnyPublisher() },
       mainScheduler: mainScheduler,
       landing: LandingEnvironment(
-        cmixManager: .live(
+        cMixManager: .live(
           passwordStorage: .keychain
         ),
-        setCmix: { cmixSubject.value = $0 },
+        setCMix: { cMixSubject.value = $0 },
         bgScheduler: bgScheduler,
         mainScheduler: mainScheduler,
         error: ErrorEnvironment()
       ),
       session: SessionEnvironment(
-        getCmix: { cmixSubject.value },
+        getCMix: { cMixSubject.value },
         bgScheduler: bgScheduler,
         mainScheduler: mainScheduler,
         error: ErrorEnvironment()

@@ -8,7 +8,7 @@ import XCTest
 final class AppFeatureTests: XCTestCase {
   func testViewDidLoad() throws {
     let newId = UUID()
-    let hasCmix = PassthroughSubject<Bool, Never>()
+    let hasCMix = PassthroughSubject<Bool, Never>()
     let mainScheduler = DispatchQueue.test
 
     let store = TestStore(
@@ -18,34 +18,34 @@ final class AppFeatureTests: XCTestCase {
     )
 
     store.environment.makeId = { newId }
-    store.environment.hasCmix = { hasCmix.eraseToAnyPublisher() }
+    store.environment.hasCMix = { hasCMix.eraseToAnyPublisher() }
     store.environment.mainScheduler = mainScheduler.eraseToAnyScheduler()
 
     store.send(.viewDidLoad)
 
-    hasCmix.send(false)
+    hasCMix.send(false)
     mainScheduler.advance()
 
-    store.receive(.cmixDidChange(hasCmix: false))
+    store.receive(.cMixDidChange(hasCMix: false))
 
-    hasCmix.send(true)
+    hasCMix.send(true)
     mainScheduler.advance()
 
-    store.receive(.cmixDidChange(hasCmix: true)) {
+    store.receive(.cMixDidChange(hasCMix: true)) {
       $0.scene = .session(SessionState(id: newId))
     }
 
-    hasCmix.send(true)
+    hasCMix.send(true)
     mainScheduler.advance()
 
-    hasCmix.send(false)
+    hasCMix.send(false)
     mainScheduler.advance()
 
-    store.receive(.cmixDidChange(hasCmix: false)) {
+    store.receive(.cMixDidChange(hasCMix: false)) {
       $0.scene = .landing(LandingState(id: newId))
     }
 
-    hasCmix.send(completion: .finished)
+    hasCMix.send(completion: .finished)
     mainScheduler.advance()
   }
 }
