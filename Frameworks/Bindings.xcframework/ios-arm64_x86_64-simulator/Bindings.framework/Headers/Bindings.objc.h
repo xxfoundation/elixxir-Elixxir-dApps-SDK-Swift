@@ -405,6 +405,11 @@ Parameters:
  */
 - (long)getID;
 /**
+ * GetReceptionRegistrationValidationSignature returns the signature provided by
+the xx network.
+ */
+- (NSData* _Nullable)getReceptionRegistrationValidationSignature;
+/**
  * HasRunningProcessies checks if any background threads are running and returns
 true if one or more are.
 
@@ -724,6 +729,17 @@ The first payload is index 0.
  * PayloadSize returns the max payload size for a partitionable E2E message.
  */
 - (long)payloadSize;
+/**
+ * RegisterListener registers a new listener.
+
+Parameters:
+ - senderId - the user ID who sends messages to this user that
+   this function will register a listener for.
+ - messageType - message type from the sender you want to listen for.
+ - newListener: A provider for a callback to hear a message.
+   Do not pass nil to this.
+ */
+- (BOOL)registerListener:(NSData* _Nullable)senderID messageType:(long)messageType newListener:(id<BindingsListener> _Nullable)newListener error:(NSError* _Nullable* _Nullable)error;
 /**
  * RemoveService removes all services for the given tag.
  */
@@ -1330,6 +1346,15 @@ object.
 @end
 
 /**
+ * Error codes
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const BindingsUnrecognizedCode;
+/**
+ * Error codes
+ */
+FOUNDATION_EXPORT NSString* _Nonnull const BindingsUnrecognizedMessage;
+
+/**
  * AsyncRequestRestLike sends an asynchronous restlike request to a given
 contact.
 
@@ -1344,6 +1369,23 @@ Returns an error, and the RestlikeCallback will be called with the results
 of JSON marshalling the response when received.
  */
 FOUNDATION_EXPORT BOOL BindingsAsyncRequestRestLike(long e2eID, NSData* _Nullable recipient, NSData* _Nullable request, NSData* _Nullable paramsJSON, id<BindingsRestlikeCallback> _Nullable cb, NSError* _Nullable* _Nullable error);
+
+/**
+ * CreateUserFriendlyErrorMessage will convert the passed in error string
+to an error string that is user-friendly if a substring match is
+found to a common error. Common errors is a map which can be updated
+using UpdateCommonErrors. If the error is not common, some simple parsing
+is done on the error message to make it more user-accessible, removing
+backend specific jargon.
+
+Parameters
+  - errStr - an error returned from the backend.
+
+Returns
+ - A user-friendly error message. This should be devoid of technical speak
+   but still be meaningful for front-end or back-end teams.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull BindingsCreateUserFriendlyErrorMessage(NSString* _Nullable errStr);
 
 /**
  * DownloadAndVerifySignedNdfWithUrl retrieves the NDF from a specified URL.
@@ -1488,6 +1530,10 @@ FOUNDATION_EXPORT BindingsCmix* _Nullable BindingsLoadCmix(NSString* _Nullable s
 Parameters:
  - e2eID - e2e object ID in the tracker
  - follower - network follower func wrapped in UdNetworkStatus
+ - username - the username the user wants to register with UD.
+   If the user is already registered, this field may be blank
+ - registrationValidationSignature - the signature provided by the xx network.
+   This signature is optional for other consumers who deploy their own UD.
  */
 FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsLoadOrNewUserDiscovery(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSString* _Nullable username, NSData* _Nullable registrationValidationSignature, NSError* _Nullable* _Nullable error);
 
@@ -1710,6 +1756,21 @@ Returns:
  - []byte - JSON marshalled SingleUseSendReport
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData* _Nullable recipient, NSString* _Nullable tag, NSData* _Nullable payload, NSData* _Nullable paramsJSON, id<BindingsSingleUseResponse> _Nullable responseCB, NSError* _Nullable* _Nullable error);
+
+/**
+ * UpdateCommonErrors updates the internal error mapping DB. This internal database
+maps errors returned from the backend to user-friendly error messages.
+
+Parameters
+ - jsonFile - contents of a JSON file whose format conforms to the example below.
+Example Input:
+  {
+ 	"Failed to Unmarshal Conversation": "Could not retrieve conversation",
+ 	"Failed to unmarshal SentRequestMap": "Failed to pull up friend requests",
+ 	"cannot create username when network is not health": "Cannot create username, unable to connect to network",
+ }
+ */
+FOUNDATION_EXPORT BOOL BindingsUpdateCommonErrors(NSString* _Nullable jsonFile, NSError* _Nullable* _Nullable error);
 
 @class BindingsAuthCallbacks;
 
