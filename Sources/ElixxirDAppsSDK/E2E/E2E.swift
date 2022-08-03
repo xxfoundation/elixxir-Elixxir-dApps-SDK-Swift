@@ -22,6 +22,7 @@ public struct E2E {
   public var confirmReceivedRequest: E2EConfirmReceivedRequest
   public var replayConfirmReceivedRequest: E2EReplayConfirmReceivedRequest
   public var send: E2ESend
+  public var registerListener: E2ERegisterListener
 }
 
 extension E2E {
@@ -47,7 +48,8 @@ extension E2E {
       verifyOwnership: .live(bindingsE2E),
       confirmReceivedRequest: .live(bindingsE2E),
       replayConfirmReceivedRequest: .live(bindingsE2E),
-      send: .live(bindingsE2E)
+      send: .live(bindingsE2E),
+      registerListener: .live(bindingsE2E)
     )
   }
 }
@@ -74,6 +76,7 @@ extension E2E {
     verifyOwnership: .unimplemented,
     confirmReceivedRequest: .unimplemented,
     replayConfirmReceivedRequest: .unimplemented,
-    send: .unimplemented
+    send: .unimplemented,
+    registerListener: .unimplemented
   )
 }

@@ -2,6 +2,7 @@ import Bindings
 
 public struct Cmix {
   public var getId: CmixGetId
+  public var getReceptionRegistrationValidationSignature: CmixGetReceptionRegistrationValidationSignature
   public var makeReceptionIdentity: CmixMakeReceptionIdentity
   public var makeLegacyReceptionIdentity: CmixMakeLegacyReceptionIdentity
   public var isHealthy: CmixIsHealthy
@@ -20,6 +21,7 @@ extension Cmix {
   public static func live(_ bindingsCmix: BindingsCmix) -> Cmix {
     Cmix(
       getId: .live(bindingsCmix),
+      getReceptionRegistrationValidationSignature: .live(bindingsCmix),
       makeReceptionIdentity: .live(bindingsCmix),
       makeLegacyReceptionIdentity: .live(bindingsCmix),
       isHealthy: .live(bindingsCmix),
@@ -39,6 +41,7 @@ extension Cmix {
 extension Cmix {
   public static let unimplemented = Cmix(
     getId: .unimplemented,
+    getReceptionRegistrationValidationSignature: .unimplemented,
     makeReceptionIdentity: .unimplemented,
     makeLegacyReceptionIdentity: .unimplemented,
     isHealthy: .unimplemented,
