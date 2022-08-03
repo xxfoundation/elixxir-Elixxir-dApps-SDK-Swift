@@ -2,6 +2,10 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct ReceiveFileCallback {
+  public init(handle: @escaping (Result<ReceivedFile, NSError>) -> Void) {
+    self.handle = handle
+  }
+
   public var handle: (Result<ReceivedFile, NSError>) -> Void
 }
 
