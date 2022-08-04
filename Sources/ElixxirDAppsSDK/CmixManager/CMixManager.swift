@@ -3,6 +3,7 @@ import Bindings
 public struct CMixManager {
   public var hasStorage: CMixManagerHasStorage
   public var create: CMixManagerCreate
+  public var restore: CMixManagerRestore
   public var load: CMixManagerLoad
   public var remove: CMixManagerRemove
 }
@@ -21,7 +22,8 @@ extension CMixManager {
     passwordStorage: PasswordStorage,
     newCMix: NewCMix = .live,
     getCMixParams: GetCMixParams = .liveDefault,
-    loadCMix: LoadCMix = .live
+    loadCMix: LoadCMix = .live,
+    newCMixFromBackup: NewCMixFromBackup = .live
   ) -> CMixManager {
     CMixManager(
       hasStorage: .live(
@@ -38,6 +40,15 @@ extension CMixManager {
         newCMix: newCMix,
         getCMixParams: getCMixParams,
         loadCMix: loadCMix
+      ),
+      restore: .live(
+        environment: environment,
+        downloadNDF: downloadNDF,
+        generateSecret: generateSecret,
+        passwordStorage: passwordStorage,
+        directoryPath: directoryPath,
+        fileManager: fileManager,
+        newCMixFromBackup: newCMixFromBackup
       ),
       load: .live(
         directoryPath: directoryPath,
@@ -57,6 +68,7 @@ extension CMixManager {
   public static let unimplemented = CMixManager(
     hasStorage: .unimplemented,
     create: .unimplemented,
+    restore: .unimplemented,
     load: .unimplemented,
     remove: .unimplemented
   )
