@@ -15,7 +15,9 @@ let swiftSettings: [SwiftSetting] = [
 
 let package = Package(
   name: "example-app",
-  platforms: [.iOS(.v15)],
+  platforms: [
+    .iOS(.v15),
+  ],
   products: [
     .library(name: "AppFeature", targets: ["AppFeature"]),
     .library(name: "ErrorFeature", targets: ["ErrorFeature"]),
@@ -31,9 +33,10 @@ let package = Package(
       url: "https://github.com/darrarski/swift-composable-presentation.git",
       .upToNextMajor(from: "0.5.2")
     ),
-    .package( // ElixxirDAppsSDK
+    .package(
+      // ElixxirDAppsSDK
       path: "../../"
-            ),
+    ),
     .package(
       url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
       .upToNextMajor(from: "4.2.2")
