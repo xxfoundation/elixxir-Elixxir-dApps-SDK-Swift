@@ -404,6 +404,8 @@ Parameters:
  * GetID returns the ID for this Cmix in the cmixTracker.
  */
 - (long)getID;
+// skipped method Cmix.GetNodeRegistrationStatus with unsupported parameter or return types
+
 /**
  * GetReceptionRegistrationValidationSignature returns the signature provided by
 the xx network.
@@ -436,9 +438,11 @@ messages.
 /**
  * NetworkFollowerStatus gets the state of the network follower. It returns a
 status with the following values:
- Stopped  - 0
- Running  - 2000
- Stopping - 3000
+
+Status:
+ - Stopped  - 0
+ - Running  - 2000
+ - Stopping - 3000
  */
 - (long)networkFollowerStatus;
 /**
@@ -1637,8 +1641,8 @@ registered facts into store.
 Parameters:
  - e2eID - e2e object ID in the tracker
  - follower - network follower func wrapped in UdNetworkStatus
- - emailFactJson - a JSON marshalled email fact.Fact
- - phoneFactJson - a JSON marshalled phone fact.Fact
+ - emailFactJson - nullable JSON marshalled email fact.Fact
+ - phoneFactJson - nullable JSON marshalled phone fact.Fact
  */
 FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable emailFactJson, NSData* _Nullable phoneFactJson, NSError* _Nullable* _Nullable error);
 

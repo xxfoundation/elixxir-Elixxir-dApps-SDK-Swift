@@ -47,15 +47,13 @@ Check out included example iOS application for the `PasswordStorage` implementat
 
 Start network follower:
 
-```
-let cMix: CMix = ...
+```swift
 try cMix.startNetworkFollower(timeoutMS: 10_000)
 ```
 
 Wait until connected:
 
-```
-let cMix: CMix = ...
+```swift
 let isNetworkHealthy = try cMix.waitForNetwork(timeoutMS: 30_000)
 ```
 
@@ -64,7 +62,6 @@ let isNetworkHealthy = try cMix.waitForNetwork(timeoutMS: 30_000)
 Use the cMix to make a new reception identity:
 
 ```swift
-let cMix: CMix = ...
 let myIdentity = try cMix.makeReceptionIdentity()
 ```
 
