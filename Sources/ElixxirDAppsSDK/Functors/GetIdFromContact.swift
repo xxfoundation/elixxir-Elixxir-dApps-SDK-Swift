@@ -4,7 +4,7 @@ import XCTestDynamicOverlay
 public struct GetIdFromContact {
   public var run: (Data) throws -> Data
 
-  public func callAsFunction(contact: Data) throws -> Data {
+  public func callAsFunction(_ contact: Data) throws -> Data {
     try run(contact)
   }
 }
