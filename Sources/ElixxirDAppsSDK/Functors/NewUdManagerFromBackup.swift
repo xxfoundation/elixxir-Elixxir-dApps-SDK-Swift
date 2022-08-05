@@ -2,13 +2,13 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct NewUdManagerFromBackup {
-  public var run: (Int, UdNetworkStatus, Fact, Fact) throws -> UserDiscovery
+  public var run: (Int, UdNetworkStatus, Fact?, Fact?) throws -> UserDiscovery
 
   public func callAsFunction(
     e2eId: Int,
     follower: UdNetworkStatus,
-    email: Fact,
-    phone: Fact
+    email: Fact?,
+    phone: Fact?
   ) throws -> UserDiscovery {
     try run(e2eId, follower, email, phone)
   }
@@ -22,8 +22,8 @@ extension NewUdManagerFromBackup {
     let bindingsUD = BindingsNewUdManagerFromBackup(
       e2eId,
       follower.makeBindingsUdNetworkStatus(),
-      try email.encode(),
-      try phone.encode(),
+      try email?.encode(),
+      try phone?.encode(),
       &error
     )
     if let error = error {
