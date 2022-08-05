@@ -6,6 +6,7 @@ public struct CMix {
   public var makeReceptionIdentity: CMixMakeReceptionIdentity
   public var makeLegacyReceptionIdentity: CMixMakeLegacyReceptionIdentity
   public var isHealthy: CMixIsHealthy
+  public var getNodeRegistrationStatus: CMixGetNodeRegistrationStatus
   public var hasRunningProcesses: CMixHasRunningProcesses
   public var networkFollowerStatus: CMixNetworkFollowerStatus
   public var startNetworkFollower: CMixStartNetworkFollower
@@ -25,6 +26,7 @@ extension CMix {
       makeReceptionIdentity: .live(bindingsCMix),
       makeLegacyReceptionIdentity: .live(bindingsCMix),
       isHealthy: .live(bindingsCMix),
+      getNodeRegistrationStatus: .live(bindingsCMix),
       hasRunningProcesses: .live(bindingsCMix),
       networkFollowerStatus: .live(bindingsCMix),
       startNetworkFollower: .live(bindingsCMix),
@@ -45,6 +47,7 @@ extension CMix {
     makeReceptionIdentity: .unimplemented,
     makeLegacyReceptionIdentity: .unimplemented,
     isHealthy: .unimplemented,
+    getNodeRegistrationStatus: .unimplemented,
     hasRunningProcesses: .unimplemented,
     networkFollowerStatus: .unimplemented,
     startNetworkFollower: .unimplemented,

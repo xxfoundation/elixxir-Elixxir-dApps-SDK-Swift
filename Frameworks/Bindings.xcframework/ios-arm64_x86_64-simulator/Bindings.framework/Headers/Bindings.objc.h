@@ -29,6 +29,7 @@
 @class BindingsFileTransfer;
 @class BindingsIdList;
 @class BindingsMessage;
+@class BindingsNodeRegistrationReport;
 @class BindingsProgress;
 @class BindingsReceivedFile;
 @class BindingsReceptionIdentity;
@@ -404,8 +405,16 @@ Parameters:
  * GetID returns the ID for this Cmix in the cmixTracker.
  */
 - (long)getID;
-// skipped method Cmix.GetNodeRegistrationStatus with unsupported parameter or return types
+/**
+ * GetNodeRegistrationStatus returns the current state of node registration.
 
+Returns:
+ - []bye - A marshalled NodeRegistrationReport containing the number of
+   nodes the user is registered with and the number of nodes present in the NDF.
+ - An error if it cannot get the node registration status. The most likely cause
+   is that the network is unhealthy.
+ */
+- (NSData* _Nullable)getNodeRegistrationStatus:(NSError* _Nullable* _Nullable)error;
 /**
  * GetReceptionRegistrationValidationSignature returns the signature provided by
 the xx network.
@@ -1067,6 +1076,20 @@ JSON example:
 @property (nonatomic) int64_t timestamp;
 @property (nonatomic) BOOL encrypted;
 @property (nonatomic) long roundId;
+@end
+
+/**
+ * NodeRegistrationReport is the report structure which
+Cmix.GetNodeRegistrationStatus returns JSON marshalled.
+ */
+@interface BindingsNodeRegistrationReport : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) long numberOfNodesRegistered;
+@property (nonatomic) long numberOfNodes;
 @end
 
 /**
