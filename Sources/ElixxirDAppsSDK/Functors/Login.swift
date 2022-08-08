@@ -20,7 +20,7 @@ extension Login {
     var error: NSError?
     let bindingsE2E: BindingsE2e?
     if ephemeral {
-      bindingsE2E = BindingsLogin(
+      bindingsE2E = BindingsLoginEphemeral(
         cMixId,
         authCallbacks?.makeBindingsAuthCallbacks(),
         try identity.encode(),
@@ -28,7 +28,7 @@ extension Login {
         &error
       )
     } else {
-      bindingsE2E = BindingsLoginEphemeral(
+      bindingsE2E = BindingsLogin(
         cMixId,
         authCallbacks?.makeBindingsAuthCallbacks(),
         try identity.encode(),
