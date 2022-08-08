@@ -27,7 +27,7 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-      .upToNextMajor(from: "0.38.3")
+      .upToNextMajor(from: "0.39.0")
     ),
     .package(
       url: "https://github.com/darrarski/swift-composable-presentation.git",
@@ -43,7 +43,7 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
-      .upToNextMajor(from: "0.3.3")
+      .upToNextMajor(from: "0.4.0")
     ),
   ],
   targets: [

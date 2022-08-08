@@ -33,7 +33,7 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
-      .upToNextMajor(from: "0.3.3")
+      .upToNextMajor(from: "0.4.0")
     ),
   ],
   targets: [
