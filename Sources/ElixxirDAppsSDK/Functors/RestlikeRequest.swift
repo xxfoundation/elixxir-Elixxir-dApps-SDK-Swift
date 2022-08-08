@@ -23,7 +23,7 @@ extension RestlikeRequest {
     var error: NSError?
     let responseData: Data?
     if authenticated {
-      responseData = BindingsRestlikeRequest(
+      responseData = BindingsRestlikeRequestAuth(
         clientId,
         connectionId,
         requestData,
@@ -31,7 +31,7 @@ extension RestlikeRequest {
         &error
       )
     } else {
-      responseData = BindingsRestlikeRequestAuth(
+      responseData = BindingsRestlikeRequest(
         clientId,
         connectionId,
         requestData,
