@@ -21,10 +21,7 @@ let package = Package(
     .iOS(.v14),
   ],
   products: [
-    .library(
-      name: "ElixxirDAppsSDK",
-      targets: ["ElixxirDAppsSDK"]
-    ),
+    .library(name: "ElixxirDAppsSDK", targets: ["ElixxirDAppsSDK"]),
   ],
   dependencies: [
     .package(
@@ -40,26 +37,16 @@ let package = Package(
     .target(
       name: "ElixxirDAppsSDK",
       dependencies: [
-        .target(
-          name: "Bindings"
-        ),
-        .product(
-          name: "XCTestDynamicOverlay",
-          package: "xctest-dynamic-overlay"
-        ),
+        .target(name: "Bindings"),
+        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ],
       swiftSettings: swiftSettings
     ),
     .testTarget(
       name: "ElixxirDAppsSDKTests",
       dependencies: [
-        .target(
-          name: "ElixxirDAppsSDK"
-        ),
-        .product(
-          name: "CustomDump",
-          package: "swift-custom-dump"
-        ),
+        .target(name: "ElixxirDAppsSDK"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
