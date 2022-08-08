@@ -27,6 +27,10 @@
 @class BindingsFilePartTracker;
 @class BindingsFileSend;
 @class BindingsFileTransfer;
+@class BindingsGroup;
+@class BindingsGroupChat;
+@class BindingsGroupReport;
+@class BindingsGroupSendReport;
 @class BindingsIdList;
 @class BindingsMessage;
 @class BindingsNodeRegistrationReport;
@@ -49,6 +53,10 @@
 @class BindingsFileTransferReceiveProgressCallback;
 @protocol BindingsFileTransferSentProgressCallback;
 @class BindingsFileTransferSentProgressCallback;
+@protocol BindingsGroupChatProcessor;
+@class BindingsGroupChatProcessor;
+@protocol BindingsGroupRequest;
+@class BindingsGroupRequest;
 @protocol BindingsListener;
 @class BindingsListener;
 @protocol BindingsLogWriter;
@@ -116,6 +124,15 @@ Parameters:
  - err - any errors that occurred during sending
  */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
+@end
+
+@protocol BindingsGroupChatProcessor <NSObject>
+- (void)process:(NSData* _Nullable)decryptedMessage msg:(NSData* _Nullable)msg receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId err:(NSError* _Nullable)err;
+- (NSString* _Nonnull)string;
+@end
+
+@protocol BindingsGroupRequest <NSObject>
+- (void)callback:(BindingsGroup* _Nullable)g;
 @end
 
 @protocol BindingsListener <NSObject>
@@ -1034,6 +1051,175 @@ Returns:
 @end
 
 /**
+ * Group structure contains the identifying and membership information of a
+group chat.
+ */
+@interface BindingsGroup : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * GetCreatedMS returns the time the group was created in milliseconds. This is
+also the time the group requests were sent.
+ */
+- (int64_t)getCreatedMS;
+/**
+ * GetCreatedNano returns the time the group was created in nanoseconds. This is
+also the time the group requests were sent.
+ */
+- (int64_t)getCreatedNano;
+/**
+ * GetID return the 33-byte unique group ID. This represents the id.ID object
+ */
+- (NSData* _Nullable)getID;
+/**
+ * GetInitMessage returns initial message sent with the group request.
+ */
+- (NSData* _Nullable)getInitMessage;
+/**
+ * GetMembership retrieves a list of group members. The list is in order;
+the first contact is the leader/creator of the group.
+All subsequent members are ordered by their ID.
+
+Returns:
+ - []byte - a JSON marshalled version of the member list.
+ */
+- (NSData* _Nullable)getMembership:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetName returns the name set by the user for the group.
+ */
+- (NSData* _Nullable)getName;
+/**
+ * GetTrackedID returns the tracked ID of the Group object. This is used by the backend tracker.
+ */
+- (long)getTrackedID;
+/**
+ * Serialize serializes the Group.
+ */
+- (NSData* _Nullable)serialize;
+@end
+
+/**
+ * GroupChat is a binding-layer group chat manager.
+ */
+@interface BindingsGroupChat : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * NewGroupChat creates a bindings-layer group chat manager.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker.
+ - requestFunc - a callback to handle group chat requests.
+ - processor - the group chat message processor.
+ */
+- (nullable instancetype)init:(long)e2eID requestFunc:(id<BindingsGroupRequest> _Nullable)requestFunc processor:(id<BindingsGroupChatProcessor> _Nullable)processor;
+/**
+ * GetGroup returns the group with the group ID. If no group exists, then the
+error "failed to find group" is returned.
+
+Parameters:
+ - groupId - The byte data representing a group ID (a byte marshalled id.ID).
+             This can be pulled from a marshalled GroupReport.
+Returns:
+ - Group - The bindings-layer representation of a group.
+ */
+- (BindingsGroup* _Nullable)getGroup:(NSData* _Nullable)groupId error:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetGroups returns an IdList containing a list of group IDs that the user is a member of.
+
+Returns:
+ - []byte - a JSON marshalled IdList representing all group ID's.
+ */
+- (NSData* _Nullable)getGroups:(NSError* _Nullable* _Nullable)error;
+/**
+ * JoinGroup allows a user to join a group when a request is received.
+If an error is returned, handle it properly first; you may then retry later
+with the same trackedGroupId.
+
+Parameters:
+ - trackedGroupId - the ID to retrieve the Group object within the backend's
+                    tracking system. This is received by GroupRequest.Callback.
+ */
+- (BOOL)joinGroup:(long)trackedGroupId error:(NSError* _Nullable* _Nullable)error;
+/**
+ * LeaveGroup deletes a group so a user no longer has access.
+
+Parameters:
+ - groupId - the byte data representing a group ID.
+   This can be pulled from a marshalled GroupReport.
+ */
+- (BOOL)leaveGroup:(NSData* _Nullable)groupId error:(NSError* _Nullable* _Nullable)error;
+// skipped method GroupChat.MakeGroup with unsupported parameter or return types
+
+/**
+ * NumGroups returns the number of groups the user is a part of.
+ */
+- (long)numGroups;
+/**
+ * ResendRequest resends a group request to all members in the group.
+
+Parameters:
+ - groupId - a byte representation of a group's ID.
+   This can be found in the report returned by GroupChat.MakeGroup.
+
+Returns:
+ - []byte - a JSON-marshalled GroupReport.
+ */
+- (NSData* _Nullable)resendRequest:(NSData* _Nullable)groupId error:(NSError* _Nullable* _Nullable)error;
+/**
+ * Send is the bindings-level function for sending to a group.
+
+Parameters:
+ - groupId - the byte data representing a group ID.
+   This can be pulled from a marshalled GroupReport.
+ - message - the message that the user wishes to send to the group.
+ - tag - the tag associated with the message. This tag may be empty.
+
+Returns:
+ - []byte - a JSON marshalled GroupSendReport.
+ */
+- (NSData* _Nullable)send:(NSData* _Nullable)groupId message:(NSData* _Nullable)message tag:(NSString* _Nullable)tag error:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
+ * GroupReport is returned when creating a new group and contains the ID of
+the group, a list of rounds that the group requests were sent on, and the
+status of the send operation.
+ */
+@interface BindingsGroupReport : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) NSData* _Nullable id_;
+// skipped field GroupReport.Rounds with unsupported type: []int
+
+@property (nonatomic) long status;
+@end
+
+/**
+ * GroupSendReport is returned when sending a group message. It contains the
+round ID sent on and the timestamp of the send operation.
+ */
+@interface BindingsGroupSendReport : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+// skipped field GroupSendReport.RoundID with unsupported type: uint64
+
+@property (nonatomic) int64_t timestamp;
+@property (nonatomic) NSData* _Nullable messageID;
+@end
+
+/**
  * IdList is a wrapper for a list of marshalled id.ID objects.
  */
 @interface BindingsIdList : NSObject <goSeqRefInterface> {
@@ -1657,6 +1843,16 @@ Returns:
 FOUNDATION_EXPORT NSData* _Nullable BindingsNewCmixFromBackup(NSString* _Nullable ndfJSON, NSString* _Nullable storageDir, NSString* _Nullable backupPassphrase, NSData* _Nullable sessionPassword, NSData* _Nullable backupFileContents, NSError* _Nullable* _Nullable error);
 
 /**
+ * NewGroupChat creates a bindings-layer group chat manager.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker.
+ - requestFunc - a callback to handle group chat requests.
+ - processor - the group chat message processor.
+ */
+FOUNDATION_EXPORT BindingsGroupChat* _Nullable BindingsNewGroupChat(long e2eID, id<BindingsGroupRequest> _Nullable requestFunc, id<BindingsGroupChatProcessor> _Nullable processor, NSError* _Nullable* _Nullable error);
+
+/**
  * NewUdManagerFromBackup builds a new user discover manager from a backup. It
 will construct a manager that is already registered and restore already
 registered facts into store.
@@ -1809,6 +2005,10 @@ FOUNDATION_EXPORT BOOL BindingsUpdateCommonErrors(NSString* _Nullable jsonFile, 
 
 @class BindingsFileTransferSentProgressCallback;
 
+@class BindingsGroupChatProcessor;
+
+@class BindingsGroupRequest;
+
 @class BindingsListener;
 
 @class BindingsLogWriter;
@@ -1910,6 +2110,32 @@ Parameters:
  - err - any errors that occurred during sending
  */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
+@end
+
+/**
+ * GroupChatProcessor manages the handling of received group chat messages.
+ */
+@interface BindingsGroupChatProcessor : NSObject <goSeqRefInterface, BindingsGroupChatProcessor> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)process:(NSData* _Nullable)decryptedMessage msg:(NSData* _Nullable)msg receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId err:(NSError* _Nullable)err;
+- (NSString* _Nonnull)string;
+@end
+
+/**
+ * GroupRequest is a bindings-layer interface that handles a group reception.
+
+Parameters:
+ - trackedGroupId - a bindings layer Group object.
+ */
+@interface BindingsGroupRequest : NSObject <goSeqRefInterface, BindingsGroupRequest> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)callback:(BindingsGroup* _Nullable)g;
 @end
 
 /**
