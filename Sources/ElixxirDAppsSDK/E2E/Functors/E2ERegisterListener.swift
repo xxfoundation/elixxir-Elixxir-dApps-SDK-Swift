@@ -17,7 +17,7 @@ extension E2ERegisterListener {
   public static func live(_ bindingsE2E: BindingsE2e) -> E2ERegisterListener {
     E2ERegisterListener { senderId, messageType, callback in
       try bindingsE2E.registerListener(
-        senderId ?? Data([UInt8](repeating: 0, count: 32)),
+        senderId ?? Data([UInt8](repeating: 0, count: 33)),
         messageType: messageType,
         newListener: callback.makeBindingsListener()
       )
