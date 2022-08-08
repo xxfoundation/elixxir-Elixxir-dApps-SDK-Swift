@@ -1,5 +1,4 @@
 import Bindings
-import XCTestDynamicOverlay
 
 public struct Group {
   public var getCreatedMS: GroupGetCreatedMS
