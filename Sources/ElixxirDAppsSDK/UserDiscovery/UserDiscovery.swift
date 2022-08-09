@@ -1,7 +1,6 @@
 import Bindings
 
 public struct UserDiscovery {
-  public var setAlternative: UserDiscoverySetAlternative
   public var getId: UserDiscoveryGetId
   public var getContact: UserDiscoveryGetContact
   public var getFacts: UserDiscoveryGetFacts
@@ -14,7 +13,6 @@ public struct UserDiscovery {
 extension UserDiscovery {
   public static func live(_ bindingsUD: BindingsUserDiscovery) -> UserDiscovery {
     UserDiscovery(
-      setAlternative: .live(bindingsUD),
       getId: .live(bindingsUD),
       getContact: .live(bindingsUD),
       getFacts: .live(bindingsUD),
@@ -28,7 +26,6 @@ extension UserDiscovery {
 
 extension UserDiscovery {
   public static let unimplemented = UserDiscovery(
-    setAlternative: .unimplemented,
     getId: .unimplemented,
     getContact: .unimplemented,
     getFacts: .unimplemented,
