@@ -2,16 +2,19 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct ChannelBroadcast {
-  public var run: (Data) throws -> Data
+  public var run: (Data) throws -> BroadcastReport
 
-  public func callAsFunction(_ payload: Data) throws -> Data {
+  public func callAsFunction(_ payload: Data) throws -> BroadcastReport {
     try run(payload)
   }
 }
 
 extension ChannelBroadcast {
   public static func live(_ bindingsChannel: BindingsChannel) -> ChannelBroadcast {
-    ChannelBroadcast(run: bindingsChannel.broadcast)
+    ChannelBroadcast { payload in
+      let reportData = try bindingsChannel.broadcast(payload)
+      return try BroadcastReport.decode(reportData)
+    }
   }
 }
 
