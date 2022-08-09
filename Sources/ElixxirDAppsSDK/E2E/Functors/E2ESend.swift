@@ -8,7 +8,7 @@ public struct E2ESend {
     messageType: Int,
     recipientId: Data,
     payload: Data,
-    e2eParams: Data
+    e2eParams: Data = GetE2EParams.liveDefault()
   ) throws -> E2ESendReport {
     try run(messageType, recipientId, payload, e2eParams)
   }
