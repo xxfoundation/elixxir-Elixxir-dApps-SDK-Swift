@@ -7,6 +7,7 @@ public struct E2E {
   public var getHistoricalDHPublicKey: E2EGetHistoricalDHPublicKey
   public var getContact: E2EGetContact
   public var getAllPartnerIds: E2EGetAllPartnerIds
+  public var getUdAddressFromNdf: E2EGetUdAddressFromNdf
   public var payloadSize: E2EPayloadSize
   public var partitionSize: E2EPartitionSize
   public var addPartnerCallback: E2EAddPartnerCallback
@@ -34,6 +35,7 @@ extension E2E {
       getHistoricalDHPublicKey: .live(bindingsE2E),
       getContact: .live(bindingsE2E),
       getAllPartnerIds: .live(bindingsE2E),
+      getUdAddressFromNdf: .live(bindingsE2E),
       payloadSize: .live(bindingsE2E),
       partitionSize: .live(bindingsE2E),
       addPartnerCallback: .live(bindingsE2E),
@@ -62,6 +64,7 @@ extension E2E {
     getHistoricalDHPublicKey: .unimplemented,
     getContact: .unimplemented,
     getAllPartnerIds: .unimplemented,
+    getUdAddressFromNdf: .unimplemented,
     payloadSize: .unimplemented,
     partitionSize: .unimplemented,
     addPartnerCallback: .unimplemented,
