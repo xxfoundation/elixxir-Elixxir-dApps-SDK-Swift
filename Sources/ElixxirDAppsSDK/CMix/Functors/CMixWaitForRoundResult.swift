@@ -1,7 +1,7 @@
 import Bindings
 import XCTestDynamicOverlay
 
-public struct CMixWaitForMessageDelivery {
+public struct CMixWaitForRoundResult {
   public var run: (E2ESendReport, Int, MessageDeliveryCallback) throws -> Void
 
   public func callAsFunction(
@@ -13,11 +13,11 @@ public struct CMixWaitForMessageDelivery {
   }
 }
 
-extension CMixWaitForMessageDelivery {
-  public static func live(_ bindingsCMix: BindingsCmix) -> CMixWaitForMessageDelivery {
-    CMixWaitForMessageDelivery { report, timeoutMS, callback in
+extension CMixWaitForRoundResult {
+  public static func live(_ bindingsCMix: BindingsCmix) -> CMixWaitForRoundResult {
+    CMixWaitForRoundResult { report, timeoutMS, callback in
       try bindingsCMix.wait(
-        forMessageDelivery: try report.encode(),
+        forRoundResult: try report.encode(),
         mdc: callback.makeBindingsMessageDeliveryCallback(),
         timeoutMS: timeoutMS
       )
@@ -25,8 +25,8 @@ extension CMixWaitForMessageDelivery {
   }
 }
 
-extension CMixWaitForMessageDelivery {
-  public static let unimplemented = CMixWaitForMessageDelivery(
+extension CMixWaitForRoundResult {
+  public static let unimplemented = CMixWaitForRoundResult(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

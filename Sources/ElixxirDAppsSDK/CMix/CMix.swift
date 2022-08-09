@@ -14,7 +14,7 @@ public struct CMix {
   public var waitForNetwork: CMixWaitForNetwork
   public var registerClientErrorCallback: CMixRegisterClientErrorCallback
   public var addHealthCallback: CMixAddHealthCallback
-  public var waitForMessageDelivery: CMixWaitForMessageDelivery
+  public var waitForRoundResult: CMixWaitForRoundResult
   public var connect: CMixConnect
 }
 
@@ -34,7 +34,7 @@ extension CMix {
       waitForNetwork: .live(bindingsCMix),
       registerClientErrorCallback: .live(bindingsCMix),
       addHealthCallback: .live(bindingsCMix),
-      waitForMessageDelivery: .live(bindingsCMix),
+      waitForRoundResult: .live(bindingsCMix),
       connect: .live(bindingsCMix)
     )
   }
@@ -55,7 +55,7 @@ extension CMix {
     waitForNetwork: .unimplemented,
     registerClientErrorCallback: .unimplemented,
     addHealthCallback: .unimplemented,
-    waitForMessageDelivery: .unimplemented,
+    waitForRoundResult: .unimplemented,
     connect: .unimplemented
   )
 }
