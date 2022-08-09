@@ -768,6 +768,22 @@ Returns:
  */
 - (NSData* _Nullable)getReceptionID;
 /**
+ * GetUdAddressFromNdf retrieve the User Discovery's network address fom the NDF.
+ */
+- (NSString* _Nonnull)getUdAddressFromNdf;
+/**
+ * GetUdCertFromNdf retrieves the User Discovery's TLS certificate from the NDF.
+ */
+- (NSData* _Nullable)getUdCertFromNdf;
+/**
+ * GetUdContactFromNdf assembles the User Discovery's contact file from the data
+within the NDF.
+
+Returns
+ - []byte - A byte marshalled contact.Contact.
+ */
+- (NSData* _Nullable)getUdContactFromNdf:(NSError* _Nullable* _Nullable)error;
+/**
  * HasAuthenticatedChannel returns true if an authenticated channel with the
 partner exists, otherwise returns false.
 
@@ -1579,19 +1595,6 @@ Parameters:
  - factJson - a JSON marshalled fact.Fact
  */
 - (NSString* _Nonnull)sendRegisterFact:(NSData* _Nullable)factJson error:(NSError* _Nullable* _Nullable)error;
-/**
- * SetAlternativeUserDiscovery sets the alternativeUd object within manager.
-Once set, any user discovery operation will go through the alternative
-user discovery service.
-
-To undo this operation, use UnsetAlternativeUserDiscovery.
- */
-- (BOOL)setAlternativeUserDiscovery:(NSData* _Nullable)altCert altAddress:(NSData* _Nullable)altAddress contactFile:(NSData* _Nullable)contactFile error:(NSError* _Nullable* _Nullable)error;
-/**
- * UnsetAlternativeUserDiscovery clears out the information from the Manager
-object.
- */
-- (BOOL)unsetAlternativeUserDiscovery:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -1774,19 +1777,6 @@ subprocesses to perform network operations.
 FOUNDATION_EXPORT BindingsCmix* _Nullable BindingsLoadCmix(NSString* _Nullable storageDir, NSData* _Nullable password, NSData* _Nullable cmixParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * LoadOrNewUserDiscovery creates a bindings-level user discovery manager.
-
-Parameters:
- - e2eID - e2e object ID in the tracker
- - follower - network follower func wrapped in UdNetworkStatus
- - username - the username the user wants to register with UD.
-   If the user is already registered, this field may be blank
- - registrationValidationSignature - the signature provided by the xx network.
-   This signature is optional for other consumers who deploy their own UD.
- */
-FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsLoadOrNewUserDiscovery(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSString* _Nullable username, NSData* _Nullable registrationValidationSignature, NSError* _Nullable* _Nullable error);
-
-/**
  * LoadReceptionIdentity loads the given identity in Cmix storage with the given
 key.
  */
@@ -1890,6 +1880,35 @@ Parameters:
 FOUNDATION_EXPORT BindingsGroupChat* _Nullable BindingsNewGroupChat(long e2eID, id<BindingsGroupRequest> _Nullable requestFunc, id<BindingsGroupChatProcessor> _Nullable processor, NSError* _Nullable* _Nullable error);
 
 /**
+ * NewOrLoadUd loads an existing Manager from storage or creates a
+new one if there is no extant storage information. Parameters need be provided
+to specify how to connect to the User Discovery service. These parameters may be used
+to contact either the UD server hosted by the xx network team or a custom
+third-party operated server. For the former, all the information may be pulled from the
+NDF using the bindings.
+
+Params
+ - e2eID - e2e object ID in the tracker
+ - follower - network follower func wrapped in UdNetworkStatus
+ - username - the username the user wants to register with UD.
+   If the user is already registered, this field may be blank
+ - networkValidationSig is a signature provided by the network (i.e. the client registrar).
+   This may be nil, however UD may return an error in some cases (e.g. in a production level
+   environment).
+ - cert is the TLS certificate for the UD server this call will connect with.
+   You may use the UD server run by the xx network team by using E2e.GetUdCertFromNdf.
+ - contactFile is the data within a marshalled contact.Contact. This represents the
+   contact file of the server this call will connect with.
+   You may use the UD server run by the xx network team by using E2e.GetUdContactFromNdf.
+ - address is the IP address of the UD server this call will connect with.
+   You may use the UD server run by the xx network team by using E2e.GetUdAddressFromNdf.
+
+Returns
+ - A Manager object which is registered to the specified UD service.
+ */
+FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewOrLoadUd(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSString* _Nullable username, NSData* _Nullable registrationValidationSignature, NSData* _Nullable cert, NSData* _Nullable contactFile, NSString* _Nullable address, NSError* _Nullable* _Nullable error);
+
+/**
  * NewUdManagerFromBackup builds a new user discover manager from a backup. It
 will construct a manager that is already registered and restore already
 registered facts into store.
@@ -1899,8 +1918,15 @@ Parameters:
  - follower - network follower func wrapped in UdNetworkStatus
  - emailFactJson - nullable JSON marshalled email fact.Fact
  - phoneFactJson - nullable JSON marshalled phone fact.Fact
+ - cert is the TLS certificate for the UD server this call will connect with.
+   You may use the UD server run by the xx network team by using E2e.GetUdCertFromNdf.
+ - contactFile is the data within a marshalled contact.Contact. This represents the
+   contact file of the server this call will connect with.
+   You may use the UD server run by the xx network team by using E2e.GetUdContactFromNdf.
+ - address is the IP address of the UD server this call will connect with.
+   You may use the UD server run by the xx network team by using E2e.GetUdAddressFromNdf.
  */
-FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable emailFactJson, NSData* _Nullable phoneFactJson, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable emailFactJson, NSData* _Nullable phoneFactJson, NSData* _Nullable cert, NSData* _Nullable contactFile, NSString* _Nullable address, NSError* _Nullable* _Nullable error);
 
 /**
  * RegisterLogWriter registers a callback on which logs are written.
