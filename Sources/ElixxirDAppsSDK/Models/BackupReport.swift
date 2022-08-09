@@ -3,14 +3,14 @@ import Foundation
 public struct BackupReport: Equatable {
   public init(
     restoredContacts: [Data],
-    params: Data
+    params: String
   ) {
     self.restoredContacts = restoredContacts
     self.params = params
   }
 
   public var restoredContacts: [Data]
-  public var params: Data
+  public var params: String
 }
 
 extension BackupReport: Codable {
