@@ -103,8 +103,8 @@ let sendReport = try connection.send(
 Check if the round succeeded:
 
 ```swift
-try cMix.waitForMessageDelivery(
-  report: sendReport,
+try cMix.waitForRoundResult(
+  roundList: try sendReport.encode(),
   timeoutMS: 30_000,
   callback: .init { result in
     switch result {
