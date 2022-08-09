@@ -8,6 +8,7 @@ public struct E2E {
   public var getContact: E2EGetContact
   public var getAllPartnerIds: E2EGetAllPartnerIds
   public var getUdAddressFromNdf: E2EGetUdAddressFromNdf
+  public var getUdCertFromNdf: E2EGetUdCertFromNdf
   public var payloadSize: E2EPayloadSize
   public var partitionSize: E2EPartitionSize
   public var addPartnerCallback: E2EAddPartnerCallback
@@ -36,6 +37,7 @@ extension E2E {
       getContact: .live(bindingsE2E),
       getAllPartnerIds: .live(bindingsE2E),
       getUdAddressFromNdf: .live(bindingsE2E),
+      getUdCertFromNdf: .live(bindingsE2E),
       payloadSize: .live(bindingsE2E),
       partitionSize: .live(bindingsE2E),
       addPartnerCallback: .live(bindingsE2E),
@@ -65,6 +67,7 @@ extension E2E {
     getContact: .unimplemented,
     getAllPartnerIds: .unimplemented,
     getUdAddressFromNdf: .unimplemented,
+    getUdCertFromNdf: .unimplemented,
     payloadSize: .unimplemented,
     partitionSize: .unimplemented,
     addPartnerCallback: .unimplemented,
