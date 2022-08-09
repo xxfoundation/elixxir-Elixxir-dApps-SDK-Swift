@@ -31,7 +31,6 @@
 @class BindingsGroupChat;
 @class BindingsGroupReport;
 @class BindingsGroupSendReport;
-@class BindingsIdList;
 @class BindingsMessage;
 @class BindingsNodeRegistrationReport;
 @class BindingsProgress;
@@ -267,7 +266,13 @@ storage. To enable backups again, call InitializeBackup.
 NewCmixFromBackup.
 
 Example BackupReport:
-{"RestoredContacts":["0AeVYBe87SV45A2UI4AtIe6H4AIyZSLPBPrT6eTBLycD"],"Params":""}
+ {
+   "RestoredContacts": [
+     "U4x/lrFkvxuXu59LtHLon1sUhPJSCcnZND6SugndnVID",
+     "15tNdkKbYXoMn58NO6VbDMDWFEyIhTWEGsvgcJsHWAgD"
+   ],
+   "Params": ""
+ }
  */
 @interface BindingsBackupReport : NSObject <goSeqRefInterface> {
 }
@@ -275,7 +280,7 @@ Example BackupReport:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-// skipped field BackupReport.RestoredContacts with unsupported type: gitlab.com/elixxir/client/bindings.IdList
+// skipped field BackupReport.RestoredContacts with unsupported type: []*gitlab.com/xx_network/primitives/id.ID
 
 /**
  * The backup parameters found within the backup file
@@ -301,6 +306,7 @@ Example JSON:
 // skipped field BroadcastMessage.BroadcastReport with unsupported type: gitlab.com/elixxir/client/bindings.BroadcastReport
 
 @property (nonatomic) NSData* _Nullable payload;
+- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -317,9 +323,11 @@ Example JSON:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-@property (nonatomic) long roundID;
+// skipped field BroadcastReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
+
 // skipped field BroadcastReport.EphID with unsupported type: gitlab.com/xx_network/primitives/id/ephemeral.Id
 
+- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -332,12 +340,21 @@ Example JSON:
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
 /**
- * Broadcast sends a given payload over the broadcast channel using symmetric broadcast.
+ * Broadcast sends a given payload over the broadcast channel using symmetric
+broadcast.
+
+Returns:
+ - []byte - the JSON marshalled bytes of the BroadcastReport object, which
+   can be passed into WaitForRoundResult to see if the broadcast succeeded.
  */
 - (NSData* _Nullable)broadcast:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
 /**
- * BroadcastAsymmetric sends a given payload over the broadcast channel using asymmetric broadcast.
-This mode of encryption requires a private key.
+ * BroadcastAsymmetric sends a given payload over the broadcast channel using
+asymmetric broadcast. This mode of encryption requires a private key.
+
+Returns:
+ - []byte - the JSON marshalled bytes of the BroadcastReport object, which
+   can be passed into WaitForRoundResult to see if the broadcast succeeded.
  */
 - (NSData* _Nullable)broadcastAsymmetric:(NSData* _Nullable)payload pk:(NSData* _Nullable)pk error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -348,9 +365,10 @@ This mode of encryption requires a private key.
  * Listen registers a BroadcastListener for a given method.
 This allows users to handle incoming broadcast messages.
 
-Params:
+Parameters:
  - l - BroadcastListener object
- - method - int corresponding to broadcast.Method constant, 0 for symmetric or 1 for asymmetric
+ - method - int corresponding to broadcast.Method constant, 0 for symmetric
+   or 1 for asymmetric
  */
 - (BOOL)listen:(id<BindingsBroadcastListener> _Nullable)l method:(long)method error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -527,7 +545,12 @@ most likely be in an unrecoverable state and need to be trashed.
  */
 - (BOOL)stopNetworkFollower:(NSError* _Nullable* _Nullable)error;
 /**
- * WaitForMessageDelivery allows the caller to get notified if the rounds a
+ * WaitForNetwork will block until either the network is healthy or the passed
+timeout is reached. It will return true if the network is healthy.
+ */
+- (BOOL)waitForNetwork:(long)timeoutMS;
+/**
+ * WaitForRoundResult allows the caller to get notified if the rounds a
 message was sent in successfully completed. Under the hood, this uses an API
 that uses the internal round data, network historical round lookup, and
 waiting on network events to determine what has (or will) occur.
@@ -537,13 +560,11 @@ The callbacks will return at timeoutMS if no state update occurs.
 This function takes the marshaled send report to ensure a memory leak does
 not occur as a result of both sides of the bindings holding a reference to
 the same pointer.
+
+roundList is a JSON marshalled RoundsList or any JSON marshalled send report
+that inherits a RoundsList object.
  */
-- (BOOL)waitForMessageDelivery:(NSData* _Nullable)roundList mdc:(id<BindingsMessageDeliveryCallback> _Nullable)mdc timeoutMS:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
-/**
- * WaitForNetwork will block until either the network is healthy or the passed
-timeout is reached. It will return true if the network is healthy.
- */
-- (BOOL)waitForNetwork:(long)timeoutMS;
+- (BOOL)waitForRoundResult:(NSData* _Nullable)roundList mdc:(id<BindingsMessageDeliveryCallback> _Nullable)mdc timeoutMS:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -575,7 +596,11 @@ from the partner.Manager.
 - (BOOL)registerListener:(long)messageType newListener:(id<BindingsListener> _Nullable)newListener error:(NSError* _Nullable* _Nullable)error;
 /**
  * SendE2E is a wrapper for sending specifically to the Connection's
-partner.Manager. Returns a marshalled E2ESendReport.
+partner.Manager.
+
+Returns:
+ - []byte - the JSON marshalled bytes of the E2ESendReport object, which can
+   be passed into WaitForRoundResult to see if the send succeeded.
  */
 - (NSData* _Nullable)sendE2E:(long)mt payload:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -694,11 +719,11 @@ payload.
  */
 - (long)firstPartitionSize;
 /**
- * GetAllPartnerIDs returns a marshalled list of all partner IDs that the user
-has an E2E relationship with.
+ * GetAllPartnerIDs returns a list of all partner IDs that the user has an E2E
+relationship with.
 
 Returns:
- - []byte - the marshalled bytes of the IdList object.
+ - []byte - the marshalled bytes of []*id.ID.
  */
 - (NSData* _Nullable)getAllPartnerIDs:(NSError* _Nullable* _Nullable)error;
 /**
@@ -853,7 +878,8 @@ Parameters:
  - e2eParams - the marshalled bytes of the e2e.Params object.
 
 Returns:
- - []byte - the marshalled bytes of the E2ESendReport object.
+ - []byte - the JSON marshalled bytes of the E2ESendReport object, which can
+   be passed into WaitForRoundResult to see if the send succeeded.
  */
 - (NSData* _Nullable)sendE2E:(long)messageType recipientId:(NSData* _Nullable)recipientId payload:(NSData* _Nullable)payload e2eParams:(NSData* _Nullable)e2eParams error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1130,10 +1156,10 @@ Returns:
  */
 - (BindingsGroup* _Nullable)getGroup:(NSData* _Nullable)groupId error:(NSError* _Nullable* _Nullable)error;
 /**
- * GetGroups returns an IdList containing a list of group IDs that the user is a member of.
+ * GetGroups returns a list of group IDs that the user is a member of.
 
 Returns:
- - []byte - a JSON marshalled IdList representing all group ID's.
+ - []byte - a JSON marshalled []*id.ID representing all group ID's.
  */
 - (NSData* _Nullable)getGroups:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1143,7 +1169,7 @@ with the same trackedGroupId.
 
 Parameters:
  - trackedGroupId - the ID to retrieve the Group object within the backend's
-                    tracking system. This is received by GroupRequest.Callback.
+   tracking system. This is received by GroupRequest.Callback.
  */
 - (BOOL)joinGroup:(long)trackedGroupId error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1154,8 +1180,25 @@ Parameters:
    This can be pulled from a marshalled GroupReport.
  */
 - (BOOL)leaveGroup:(NSData* _Nullable)groupId error:(NSError* _Nullable* _Nullable)error;
-// skipped method GroupChat.MakeGroup with unsupported parameter or return types
+/**
+ * MakeGroup creates a new Group and sends a group request to all members in the
+group.
 
+Parameters:
+ - membershipBytes - the JSON marshalled list of []*id.ID; it contains the
+   IDs of members the user wants to add to the group.
+ - message - the initial message sent to all members in the group. This is an
+   optional parameter and may be nil.
+ - tag - the name of the group decided by the creator. This is an optional
+   parameter and may be nil. If nil the group will be assigned the default
+   name.
+
+Returns:
+ - []byte - the JSON marshalled bytes of the GroupReport object, which can be
+   passed into WaitForRoundResult to see if the group request message send
+   succeeded.
+ */
+- (NSData* _Nullable)makeGroup:(NSData* _Nullable)membershipBytes message:(NSData* _Nullable)message name:(NSData* _Nullable)name error:(NSError* _Nullable* _Nullable)error;
 /**
  * NumGroups returns the number of groups the user is a part of.
  */
@@ -1168,7 +1211,9 @@ Parameters:
    This can be found in the report returned by GroupChat.MakeGroup.
 
 Returns:
- - []byte - a JSON-marshalled GroupReport.
+ - []byte - the JSON marshalled bytes of the GroupReport object, which can be
+   passed into WaitForRoundResult to see if the group request message send
+   succeeded.
  */
 - (NSData* _Nullable)resendRequest:(NSData* _Nullable)groupId error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1181,7 +1226,9 @@ Parameters:
  - tag - the tag associated with the message. This tag may be empty.
 
 Returns:
- - []byte - a JSON marshalled GroupSendReport.
+ - []byte - the JSON marshalled bytes of the GroupSendReport object, which
+   can be passed into WaitForRoundResult to see if the group message send
+   succeeded.
  */
 - (NSData* _Nullable)send:(NSData* _Nullable)groupId message:(NSData* _Nullable)message tag:(NSString* _Nullable)tag error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -1198,9 +1245,10 @@ status of the send operation.
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
 @property (nonatomic) NSData* _Nullable id_;
-// skipped field GroupReport.Rounds with unsupported type: []int
+// skipped field GroupReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
 @property (nonatomic) long status;
+- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -1213,23 +1261,11 @@ round ID sent on and the timestamp of the send operation.
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-// skipped field GroupSendReport.RoundID with unsupported type: uint64
+// skipped field GroupSendReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
 @property (nonatomic) int64_t timestamp;
 @property (nonatomic) NSData* _Nullable messageID;
-@end
-
-/**
- * IdList is a wrapper for a list of marshalled id.ID objects.
- */
-@interface BindingsIdList : NSObject <goSeqRefInterface> {
-}
-@property(strong, readonly) _Nonnull id _ref;
-
-- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (nonnull instancetype)init;
-// skipped field IdList.Ids with unsupported type: [][]byte
-
+- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -1393,7 +1429,7 @@ Example marshalled roundList object:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-// skipped field RoundsList.Rounds with unsupported type: []int
+// skipped field RoundsList.Rounds with unsupported type: []uint64
 
 /**
  * Marshal JSON marshals the RoundsList.
@@ -1802,14 +1838,15 @@ Parameters:
  - singleRequestParams - the JSON marshalled bytes of single.RequestParams
 
 Returns:
- - []byte - the JSON marshalled bytes of SingleUseSendReport
+ - []byte - the JSON marshalled bytes of the SingleUseSendReport object,
+   which can be passed into WaitForRoundResult to see if the send succeeded.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsLookupUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdLookupCallback> _Nullable cb, NSData* _Nullable lookupId, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
  * NewBroadcastChannel creates a bindings-layer broadcast channel & starts listening for new messages
 
-Params
+Parameters:
  - cmixId - internal ID of cmix
  - channelDefinition - JSON marshalled ChannelDef object
  */
@@ -1942,7 +1979,8 @@ Parameters:
  - singleRequestParams - the JSON marshalled bytes of single.RequestParams
 
 Returns:
- - []byte - the JSON marshalled bytes of SingleUseSendReport
+ - []byte - the JSON marshalled bytes of the SingleUseSendReport object,
+   which can be passed into WaitForRoundResult to see if the send succeeded.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdSearchCallback> _Nullable cb, NSData* _Nullable factListJSON, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
@@ -1976,7 +2014,8 @@ Parameters:
  - responseCB - the callback that will be called when a response is received
 
 Returns:
- - []byte - JSON marshalled SingleUseSendReport
+ - []byte - the JSON marshalled bytes of the SingleUseSendReport object,
+   which can be passed into WaitForRoundResult to see if the send succeeded.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData* _Nullable recipient, NSString* _Nullable tag, NSData* _Nullable payload, NSData* _Nullable paramsJSON, id<BindingsSingleUseResponse> _Nullable responseCB, NSError* _Nullable* _Nullable error);
 
@@ -2053,8 +2092,12 @@ FOUNDATION_EXPORT BOOL BindingsUpdateCommonErrors(NSString* _Nullable jsonFile, 
 @end
 
 /**
- * BroadcastListener is the public function type bindings can use to listen for broadcast messages.
-It accepts the result of calling json.Marshal on a BroadcastMessage object.
+ * BroadcastListener is the public function type bindings can use to listen for
+broadcast messages.
+
+Parameters:
+ - []byte - the JSON marshalled bytes of the BroadcastMessage object, which
+   can be passed into WaitForRoundResult to see if the broadcast succeeded.
  */
 @interface BindingsBroadcastListener : NSObject <goSeqRefInterface, BindingsBroadcastListener> {
 }
@@ -2267,7 +2310,9 @@ Parameters:
 received.
 
 Parameters:
- - callbackReport - JSON marshalled SingleUseCallbackReport
+ - callbackReport - the JSON marshalled bytes of the SingleUseCallbackReport
+   object, which can be passed into WaitForRoundResult to see if the send
+   succeeded.
  */
 @interface BindingsSingleUseCallback : NSObject <goSeqRefInterface, BindingsSingleUseCallback> {
 }
@@ -2282,7 +2327,9 @@ Parameters:
 clients into TransmitSingleUse.
 
 Parameters:
- - callbackReport - JSON marshalled SingleUseResponseReport
+ - callbackReport - the JSON marshalled bytes of the SingleUseResponseReport
+   object, which can be passed into WaitForRoundResult to see if the send
+   succeeded.
  */
 @interface BindingsSingleUseResponse : NSObject <goSeqRefInterface, BindingsSingleUseResponse> {
 }
