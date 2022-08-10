@@ -1502,8 +1502,8 @@ JSON example:
   "Rounds":[1,5,9],
   "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
   "Partner":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
-  "EphID":{"EphId":[0,0,0,0,0,0,3,89],
-  "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
+  "EphID":1655533,
+  "ReceptionID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
  }
  */
 @interface BindingsSingleUseCallbackReport : NSObject <goSeqRefInterface> {
@@ -1518,7 +1518,8 @@ JSON example:
 // skipped field SingleUseCallbackReport.Partner with unsupported type: *gitlab.com/xx_network/primitives/id.ID
 
 @property (nonatomic) int64_t ephID;
-@property (nonatomic) NSData* _Nullable receptionID;
+// skipped field SingleUseCallbackReport.ReceptionID with unsupported type: *gitlab.com/xx_network/primitives/id.ID
+
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
 
@@ -1531,9 +1532,9 @@ JSON example:
  {
   "Rounds":[1,5,9],
   "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
-  "ReceptionID":{"EphId":[0,0,0,0,0,0,3,89],
-  "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"},
-  "Err":null
+  "EphID":1655533,
+  "ReceptionID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"},
+  "Err":"",
  }
  */
 @interface BindingsSingleUseResponseReport : NSObject <goSeqRefInterface> {
@@ -1545,7 +1546,8 @@ JSON example:
 // skipped field SingleUseResponseReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
 @property (nonatomic) NSData* _Nullable payload;
-@property (nonatomic) NSData* _Nullable receptionID;
+// skipped field SingleUseResponseReport.ReceptionID with unsupported type: *gitlab.com/xx_network/primitives/id.ID
+
 @property (nonatomic) int64_t ephID;
 @property (nonatomic) NSError* _Nullable err;
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
@@ -1558,8 +1560,8 @@ information returned by single.TransmitRequest.
 JSON example:
  {
   "Rounds":[1,5,9],
-  "EphID":{"EphId":[0,0,0,0,0,0,3,89],
-  "Source":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
+  "EphID":1655533,
+  "ReceptionID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
  }
  */
 @interface BindingsSingleUseSendReport : NSObject <goSeqRefInterface> {
@@ -1570,7 +1572,8 @@ JSON example:
 - (nonnull instancetype)init;
 // skipped field SingleUseSendReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
-@property (nonatomic) NSData* _Nullable receptionID;
+// skipped field SingleUseSendReport.ReceptionID with unsupported type: *gitlab.com/xx_network/primitives/id.ID
+
 @property (nonatomic) int64_t ephID;
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
