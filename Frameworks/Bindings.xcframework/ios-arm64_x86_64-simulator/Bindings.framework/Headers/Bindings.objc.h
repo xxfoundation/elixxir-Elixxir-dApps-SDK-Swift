@@ -24,7 +24,6 @@
 @class BindingsE2ESendReport;
 @class BindingsE2e;
 @class BindingsEventReport;
-@class BindingsFact;
 @class BindingsFilePartTracker;
 @class BindingsFileSend;
 @class BindingsFileTransfer;
@@ -912,7 +911,7 @@ will be auto resent by the cMix client.
 
 Parameters:
  - partnerContact - the marshalled bytes of the contact.Contact object.
- - myFacts - stringified list of fact.FactList.
+ - factsListJson - the JSON marshalled bytes of [fact.FactList].
 
 Returns:
  - int64 - ID of the round (convert to uint64)
@@ -991,25 +990,6 @@ Example JSON:
 @property (nonatomic) NSString* _Nonnull category;
 @property (nonatomic) NSString* _Nonnull eventType;
 @property (nonatomic) NSString* _Nonnull details;
-@end
-
-/**
- * Fact is an internal fact type for use in the bindings layer.
-
-JSON example:
- {
-  "Fact": "Zezima",
-  "Type": 0
- }
- */
-@interface BindingsFact : NSObject <goSeqRefInterface> {
-}
-@property(strong, readonly) _Nonnull id _ref;
-
-- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (nonnull instancetype)init;
-@property (nonatomic) NSString* _Nonnull fact;
-@property (nonatomic) long type;
 @end
 
 /**
@@ -1616,7 +1596,7 @@ retrieved from the NDF.
  */
 - (NSData* _Nullable)getContact:(NSError* _Nullable* _Nullable)error;
 /**
- * GetFacts returns a JSON marshalled list of fact.Fact objects that exist
+ * GetFacts returns a JSON marshalled list of [fact.Fact] objects that exist
 within the Store's registeredFacts map.
  */
 - (NSData* _Nullable)getFacts;
@@ -1630,7 +1610,7 @@ the UD service. This will only take a username type fact, and the fact must
 be associated with this user.
 
 Parameters:
- - factJson - a JSON marshalled fact.Fact
+ - factJson - a JSON marshalled [fact.Fact]
  */
 - (BOOL)permanentDeleteAccount:(NSData* _Nullable)factJson error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1638,7 +1618,7 @@ Parameters:
 passed in is not UD service does not associate this fact with this user.
 
 Parameters:
- - factJson - a JSON marshalled fact.Fact
+ - factJson - a JSON marshalled [fact.Fact]
  */
 - (BOOL)removeFact:(NSData* _Nullable)factJson error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1652,7 +1632,7 @@ associated with, a code will be sent. This confirmation ID needs to be called
 along with the code to finalize the fact.
 
 Parameters:
- - factJson - a JSON marshalled fact.Fact
+ - factJson - a JSON marshalled [fact.Fact]
  */
 - (NSString* _Nonnull)sendRegisterFact:(NSData* _Nullable)factJson error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -1763,10 +1743,15 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultSingleUseParams(void);
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetDependencies(void);
 
 /**
- * GetFactsFromContact accepts a marshalled contact.Contact object and returns
-its marshalled list of Fact objects.
+ * GetFactsFromContact returns the fact list in the contact.Contact object.
+
+Parameters:
+ - marshaledContact - the JSON marshalled bytes by of contact.Contact object.
+
+Returns:
+ - []byte - the JSON marshalled bytes of [fact.FactList].
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsGetFactsFromContact(NSData* _Nullable marshaled, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetFactsFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
 /**
  * GetGitVersion returns the xxdk.GITVERSION.
@@ -1777,13 +1762,13 @@ FOUNDATION_EXPORT NSString* _Nonnull BindingsGetGitVersion(void);
  * GetIDFromContact accepts a marshalled contact.Contact object and returns a
 marshalled id.ID object.
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsGetIDFromContact(NSData* _Nullable marshaled, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetIDFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
 /**
  * GetPubkeyFromContact accepts a marshalled contact.Contact object and returns
 a JSON marshalled large.Int DH public key.
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsGetPubkeyFromContact(NSData* _Nullable marshaled, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetPubkeyFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
 /**
  * GetVersion returns the xxdk.SEMVER.
@@ -1996,8 +1981,8 @@ registered facts into store.
 Parameters:
  - e2eID - e2e object ID in the tracker
  - follower - network follower func wrapped in UdNetworkStatus
- - emailFactJson - nullable JSON marshalled email fact.Fact
- - phoneFactJson - nullable JSON marshalled phone fact.Fact
+ - emailFactJson - nullable JSON marshalled email [fact.Fact]
+ - phoneFactJson - nullable JSON marshalled phone [fact.Fact]
  - cert is the TLS certificate for the UD server this call will connect with.
    You may use the UD server run by the xx network team by using E2e.GetUdCertFromNdf.
  - contactFile is the data within a marshalled contact.Contact. This represents the
@@ -2081,7 +2066,7 @@ Parameters:
  - e2eID - e2e object ID in the tracker
  - udContact - the marshalled bytes of the contact.Contact for the user
    discovery server
- - factListJSON - the JSON marshalled bytes of fact.FactList
+ - factListJSON - the JSON marshalled bytes of [fact.FactList]
  - singleRequestParams - the JSON marshalled bytes of single.RequestParams
 
 Returns:
@@ -2095,10 +2080,10 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullab
 pass in empty facts in order to clear the facts.
 
 Parameters:
- - marshaled - JSON marshalled contact.Contact object
- - facts - JSON marshalled Fact object.
+ - marshaledContact - the JSON marshalled bytes of contact.Contact object.
+ - factListJSON - the JSON marshalled bytes of [fact.FactList].
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsSetFactsOnContact(NSData* _Nullable marshaled, NSData* _Nullable facts, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsSetFactsOnContact(NSData* _Nullable marshaledContact, NSData* _Nullable factListJSON, NSError* _Nullable* _Nullable error);
 
 /**
  * StoreReceptionIdentity stores the given identity in Cmix storage with the
