@@ -9,7 +9,7 @@ final class FactTests: XCTestCase {
     let jsonString = """
     {
       "Fact": "\(factValue)",
-      "Type": \(factType)
+      "T": \(factType)
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
