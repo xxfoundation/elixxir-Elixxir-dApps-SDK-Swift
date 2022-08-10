@@ -5,33 +5,21 @@ public struct SingleUseCallbackReport: Equatable {
     rounds: [Int],
     payload: Data,
     partner: Data,
-    ephId: EphId
+    ephId: Int64,
+    receptionId: Data
   ) {
     self.rounds = rounds
     self.payload = payload
     self.partner = partner
     self.ephId = ephId
+    self.receptionId = receptionId
   }
 
   public var rounds: [Int]
   public var payload: Data
   public var partner: Data
-  public var ephId: EphId
-}
-
-extension SingleUseCallbackReport {
-  public struct EphId: Equatable {
-    public init(
-      ephId: [Int],
-      source: Data
-    ) {
-      self.ephId = ephId
-      self.source = source
-    }
-
-    public var ephId: [Int]
-    public var source: Data
-  }
+  public var ephId: Int64
+  public var receptionId: Data
 }
 
 extension SingleUseCallbackReport: Codable {
@@ -40,6 +28,7 @@ extension SingleUseCallbackReport: Codable {
     case payload = "Payload"
     case partner = "Partner"
     case ephId = "EphID"
+    case receptionId = "ReceptionID"
   }
 
   public static func decode(_ data: Data) throws -> Self {
@@ -48,12 +37,5 @@ extension SingleUseCallbackReport: Codable {
 
   public func encode() throws -> Data {
     try JSONEncoder().encode(self)
-  }
-}
-
-extension SingleUseCallbackReport.EphId: Codable {
-  enum CodingKeys: String, CodingKey {
-    case ephId = "EphId"
-    case source = "Source"
   }
 }
