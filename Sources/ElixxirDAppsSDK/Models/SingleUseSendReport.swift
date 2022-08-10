@@ -3,35 +3,24 @@ import Foundation
 public struct SingleUseSendReport: Equatable {
   public init(
     rounds: [Int],
-    ephId: EphId
+    ephId: Int64,
+    receptionId: Data
   ) {
     self.rounds = rounds
     self.ephId = ephId
+    self.receptionId = receptionId
   }
 
   public var rounds: [Int]
-  public var ephId: EphId
-}
-
-extension SingleUseSendReport {
-  public struct EphId: Equatable {
-    public init(
-      ephId: [Int],
-      source: Data
-    ) {
-      self.ephId = ephId
-      self.source = source
-    }
-
-    public var ephId: [Int]
-    public var source: Data
-  }
+  public var ephId: Int64
+  public var receptionId: Data
 }
 
 extension SingleUseSendReport: Codable {
   enum CodingKeys: String, CodingKey {
     case rounds = "Rounds"
     case ephId = "EphID"
+    case receptionId = "ReceptionID"
   }
 
   public static func decode(_ data: Data) throws -> Self {
@@ -40,12 +29,5 @@ extension SingleUseSendReport: Codable {
 
   public func encode() throws -> Data {
     try JSONEncoder().encode(self)
-  }
-}
-
-extension SingleUseSendReport.EphId: Codable {
-  enum CodingKeys: String, CodingKey {
-    case ephId = "EphId"
-    case source = "Source"
   }
 }

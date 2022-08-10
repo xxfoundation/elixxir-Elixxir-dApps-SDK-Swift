@@ -6,16 +6,14 @@ final class SingleUseResponseReportTests: XCTestCase {
   func testCoding() throws {
     let rounds: [Int] = [1, 5, 9]
     let payloadB64 = "rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw=="
-    let receptionIdEphId: [Int] = [0, 0, 0, 0, 0, 0, 3, 89]
-    let receptionIdSourceB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
+    let ephId: Int64 = 1_655_533
+    let receptionIdB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
     let jsonString = """
     {
       "Rounds": [\(rounds.map { "\($0)" }.joined(separator: ", "))],
       "Payload": "\(payloadB64)",
-      "ReceptionID": {
-        "EphId": [\(receptionIdEphId.map { "\($0)" }.joined(separator: ", "))],
-        "Source": "\(receptionIdSourceB64)"
-      },
+      "EphID": \(ephId),
+      "ReceptionID": "\(receptionIdB64)",
       "Err": null
     }
     """
@@ -25,10 +23,8 @@ final class SingleUseResponseReportTests: XCTestCase {
     XCTAssertNoDifference(model, SingleUseResponseReport(
       rounds: rounds,
       payload: Data(base64Encoded: payloadB64)!,
-      receptionId: .init(
-        ephId: receptionIdEphId,
-        source: Data(base64Encoded: receptionIdSourceB64)!
-      ),
+      ephId: ephId,
+      receptionId: Data(base64Encoded: receptionIdB64)!,
       error: nil
     ))
 
@@ -41,17 +37,15 @@ final class SingleUseResponseReportTests: XCTestCase {
   func testDecodingReportWithError() throws {
     let rounds: [Int] = [1, 5, 9]
     let payloadB64 = "rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw=="
-    let receptionIdEphId: [Int] = [0, 0, 0, 0, 0, 0, 3, 89]
-    let receptionIdSourceB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
+    let ephId: Int64 = 1_655_533
+    let receptionIdB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
     let error = "something went wrong"
     let jsonString = """
     {
       "Rounds": [\(rounds.map { "\($0)" }.joined(separator: ", "))],
       "Payload": "\(payloadB64)",
-      "ReceptionID": {
-        "EphId": [\(receptionIdEphId.map { "\($0)" }.joined(separator: ", "))],
-        "Source": "\(receptionIdSourceB64)"
-      },
+      "EphID": \(ephId),
+      "ReceptionID": "\(receptionIdB64)",
       "Err": "\(error)"
     }
     """
@@ -61,10 +55,8 @@ final class SingleUseResponseReportTests: XCTestCase {
     XCTAssertNoDifference(model, SingleUseResponseReport(
       rounds: rounds,
       payload: Data(base64Encoded: payloadB64)!,
-      receptionId: .init(
-        ephId: receptionIdEphId,
-        source: Data(base64Encoded: receptionIdSourceB64)!
-      ),
+      ephId: ephId,
+      receptionId: Data(base64Encoded: receptionIdB64)!,
       error: error
     ))
   }
