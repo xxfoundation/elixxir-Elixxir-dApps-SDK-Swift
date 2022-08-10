@@ -16,7 +16,7 @@ public struct Fact: Equatable {
 extension Fact: Codable {
   enum CodingKeys: String, CodingKey {
     case fact = "Fact"
-    case type = "Type"
+    case type = "T"
   }
 
   public static func decode(_ data: Data) throws -> Self {
