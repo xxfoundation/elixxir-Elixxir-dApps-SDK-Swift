@@ -20,6 +20,7 @@
 @class BindingsChannelDef;
 @class BindingsCmix;
 @class BindingsConnection;
+@class BindingsDummyTraffic;
 @class BindingsE2ESendReport;
 @class BindingsE2e;
 @class BindingsEventReport;
@@ -603,6 +604,65 @@ Returns:
    be passed into WaitForRoundResult to see if the send succeeded.
  */
 - (NSData* _Nullable)sendE2E:(long)mt payload:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
+ * DummyTraffic is the bindings-layer dummy (or "cover") traffic manager. T
+The manager can be used to set and get the status of the thread responsible for
+sending dummy messages.
+ */
+@interface BindingsDummyTraffic : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * NewDummyTrafficManager creates a DummyTraffic manager and initialises the
+dummy traffic sending thread. Note that the manager does not start sending dummy
+traffic until `True` is passed into DummyTraffic.SetStatus. The time duration
+between each sending operation and the amount of messages sent each interval
+are randomly generated values with bounds defined by the
+given parameters below.
+
+Params:
+ - cmixId - a Cmix object ID in the tracker.
+ - maxNumMessages - the upper bound of the random number of messages sent
+   each sending cycle.
+ - avgSendDeltaMS - the average duration, in milliseconds, to wait
+   between sends.
+ - randomRangeMS - the upper bound of the interval between sending cycles,
+   in milliseconds. Sends occur every avgSendDeltaMS +/- a random duration
+   with an upper bound of randomRangeMS.
+ */
+- (nullable instancetype)initManager:(long)cmixId maxNumMessages:(long)maxNumMessages avgSendDeltaMS:(long)avgSendDeltaMS randomRangeMS:(long)randomRangeMS;
+/**
+ * GetStatus returns the current state of the dummy traffic sending thread.
+Note that this function does not return the status set by the most recent call to
+SetStatus directly. Instead, this call returns the current status of the sending thread.
+This is due to the small delay that may occur between calling SetStatus and the
+sending thread taking into effect that status change.
+
+Returns:
+  - boolean - True: Sending thread is sending dummy messages.
+ 		   - False: Sending thread is paused/stopped and is not sending dummy messages.
+ */
+- (BOOL)getStatus;
+/**
+ * SetStatus sets the state of the dummy traffic send thread by passing in
+a boolean parameter. There may be a small delay in between this call
+and the status of the sending thread to change accordingly. For example,
+passing False into this call while the sending thread is currently sending messages
+will not cancel nor halt the sending operation, but will pause the thread once that
+operation has completed.
+
+Params:
+ - boolean - True: Sending thread is sending dummy messages.
+ 			False: Sending thread is paused/stopped and is not sending dummy messages.
+Returns:
+ - error - if the DummyTraffic.SetStatus is called too frequently, causing the
+   internal status channel to fill.
+ */
+- (BOOL)setStatus:(BOOL)status error:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -1868,6 +1928,26 @@ Returns:
  - []byte - the JSON marshalled bytes of the BackupReport object.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsNewCmixFromBackup(NSString* _Nullable ndfJSON, NSString* _Nullable storageDir, NSString* _Nullable backupPassphrase, NSData* _Nullable sessionPassword, NSData* _Nullable backupFileContents, NSError* _Nullable* _Nullable error);
+
+/**
+ * NewDummyTrafficManager creates a DummyTraffic manager and initialises the
+dummy traffic sending thread. Note that the manager does not start sending dummy
+traffic until `True` is passed into DummyTraffic.SetStatus. The time duration
+between each sending operation and the amount of messages sent each interval
+are randomly generated values with bounds defined by the
+given parameters below.
+
+Params:
+ - cmixId - a Cmix object ID in the tracker.
+ - maxNumMessages - the upper bound of the random number of messages sent
+   each sending cycle.
+ - avgSendDeltaMS - the average duration, in milliseconds, to wait
+   between sends.
+ - randomRangeMS - the upper bound of the interval between sending cycles,
+   in milliseconds. Sends occur every avgSendDeltaMS +/- a random duration
+   with an upper bound of randomRangeMS.
+ */
+FOUNDATION_EXPORT BindingsDummyTraffic* _Nullable BindingsNewDummyTrafficManager(long cmixId, long maxNumMessages, long avgSendDeltaMS, long randomRangeMS, NSError* _Nullable* _Nullable error);
 
 /**
  * NewGroupChat creates a bindings-layer group chat manager.
