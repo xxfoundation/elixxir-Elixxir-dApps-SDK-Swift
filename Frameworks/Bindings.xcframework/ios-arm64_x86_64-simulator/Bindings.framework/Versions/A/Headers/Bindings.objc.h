@@ -635,19 +635,20 @@ Params:
  */
 - (nullable instancetype)initManager:(long)cmixId maxNumMessages:(long)maxNumMessages avgSendDeltaMS:(long)avgSendDeltaMS randomRangeMS:(long)randomRangeMS;
 /**
- * GetStatus returns the current state of the dummy traffic sending thread.
+ * GetStatus returns the current state of the DummyTraffic manager's sending thread.
 Note that this function does not return the status set by the most recent call to
-SetStatus directly. Instead, this call returns the current status of the sending thread.
+SetStatus. Instead, this call returns the current status of the sending thread.
 This is due to the small delay that may occur between calling SetStatus and the
 sending thread taking into effect that status change.
 
 Returns:
-  - boolean - True: Sending thread is sending dummy messages.
- 		   - False: Sending thread is paused/stopped and is not sending dummy messages.
+  - boolean - Returns true if sending thread is sending dummy messages.
+ 	         Returns false if sending thread is paused/stopped and is
+	             not sending dummy messages.
  */
 - (BOOL)getStatus;
 /**
- * SetStatus sets the state of the dummy traffic send thread by passing in
+ * SetStatus sets the state of the DummyTraffic manager's send thread by passing in
 a boolean parameter. There may be a small delay in between this call
 and the status of the sending thread to change accordingly. For example,
 passing False into this call while the sending thread is currently sending messages
@@ -655,8 +656,8 @@ will not cancel nor halt the sending operation, but will pause the thread once t
 operation has completed.
 
 Params:
- - boolean - True: Sending thread is sending dummy messages.
- 			False: Sending thread is paused/stopped and is not sending dummy messages.
+ - boolean - Input should be true if you want to send dummy messages.
+ 			Input should be false if you want to pause dummy messages.
 Returns:
  - error - if the DummyTraffic.SetStatus is called too frequently, causing the
    internal status channel to fill.
@@ -687,8 +688,8 @@ Example E2ESendReport:
 @end
 
 /**
- * E2e wraps the xxdk.E2e, implementing additional functions
-to support the bindings E2e interface.
+ * E2e wraps the xxdk.E2e, implementing additional functions to support the
+bindings E2e interface.
  */
 @interface BindingsE2e : NSObject <goSeqRefInterface> {
 }
@@ -806,7 +807,7 @@ Returns:
  */
 - (NSData* _Nullable)getHistoricalDHPubkey:(NSError* _Nullable* _Nullable)error;
 /**
- * GetID returns the e2eTracker ID for the E2e object.
+ * GetID returns the ID for this E2e in the e2eTracker.
  */
 - (long)getID;
 /**
@@ -827,11 +828,13 @@ Returns:
  */
 - (NSData* _Nullable)getReceptionID;
 /**
- * GetUdAddressFromNdf retrieve the User Discovery's network address fom the NDF.
+ * GetUdAddressFromNdf retrieve the User Discovery's network address fom the
+NDF.
  */
 - (NSString* _Nonnull)getUdAddressFromNdf;
 /**
- * GetUdCertFromNdf retrieves the User Discovery's TLS certificate from the NDF.
+ * GetUdCertFromNdf retrieves the User Discovery's TLS certificate (in PEM
+format) from the NDF.
  */
 - (NSData* _Nullable)getUdCertFromNdf;
 /**
@@ -1746,13 +1749,13 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultSingleUseParams(void);
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetDependencies(void);
 
 /**
- * GetFactsFromContact returns the fact list in the contact.Contact object.
+ * GetFactsFromContact returns the fact list in the [contact.Contact] object.
 
 Parameters:
- - marshaledContact - the JSON marshalled bytes by of contact.Contact object.
+ - marshaledContact - the JSON marshalled bytes of [contact.Contact]
 
 Returns:
- - []byte - the JSON marshalled bytes of [fact.FactList].
+ - []byte - the JSON marshalled bytes of [fact.FactList]
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetFactsFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
@@ -1762,14 +1765,25 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsGetFactsFromContact(NSData* _Nullabl
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetGitVersion(void);
 
 /**
- * GetIDFromContact accepts a marshalled contact.Contact object and returns a
-marshalled id.ID object.
+ * GetIDFromContact returns the ID in the [contact.Contact] object.
+
+Parameters:
+ - marshaledContact - JSON marshalled bytes of [contact.Contact]
+
+Returns:
+ - []byte - bytes of the [id.ID] object
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetIDFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
 /**
- * GetPubkeyFromContact accepts a marshalled contact.Contact object and returns
-a JSON marshalled large.Int DH public key.
+ * GetPubkeyFromContact returns the DH public key in the [contact.Contact]
+object.
+
+Parameters:
+ - marshaledContact - JSON marshalled bytes of [contact.Contact]
+
+Returns:
+ - []byte - JSON marshalled bytes of the [cyclic.Int] object
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetPubkeyFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
@@ -1813,8 +1827,9 @@ Returns:
 FOUNDATION_EXPORT id<BindingsStopper> _Nullable BindingsListen(long e2eID, NSString* _Nullable tag, id<BindingsSingleUseCallback> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
- * LoadCmix will load an existing user storage from the storageDir using the password.
-This will fail if the user storage does not exist or the password is incorrect.
+ * LoadCmix will load an existing user storage from the storageDir using the
+password. This will fail if the user storage does not exist or the password
+is incorrect.
 
 The password is passed as a byte array so that it can be cleared from memory
 and stored as securely as possible using the MemGuard library.
@@ -1850,7 +1865,7 @@ FOUNDATION_EXPORT BOOL BindingsLogLevel(long level, NSError* _Nullable* _Nullabl
 
 /**
  * Login creates and returns a new E2e object and adds it to the
-e2eTrackerSingleton. identity should be created via
+e2eTrackerSingleton. Identity should be created via
 Cmix.MakeReceptionIdentity and passed in here. If callbacks is left nil, a
 default auth.Callbacks will be used.
  */
@@ -1858,7 +1873,7 @@ FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLogin(long cmixId, id<BindingsA
 
 /**
  * LoginEphemeral creates and returns a new ephemeral E2e object and adds it to
-the e2eTrackerSingleton. identity should be created via
+the e2eTrackerSingleton. Identity should be created via
 Cmix.MakeReceptionIdentity or Cmix.MakeLegacyReceptionIdentity and passed in
 here. If callbacks is left nil, a default auth.Callbacks will be used.
  */
@@ -1891,10 +1906,10 @@ Parameters:
 FOUNDATION_EXPORT BindingsChannel* _Nullable BindingsNewBroadcastChannel(long cmixId, NSData* _Nullable channelDefinition, NSError* _Nullable* _Nullable error);
 
 /**
- * NewCmix creates user storage, generates keys, connects, and registers
-with the network. Note that this does not register a username/identity, but
-merely creates a new cryptographic identity for adding such information
-at a later date.
+ * NewCmix creates user storage, generates keys, connects, and registers with
+the network. Note that this does not register a username/identity, but merely
+creates a new cryptographic identity for adding such information at a later
+date.
 
 Users of this function should delete the storage directory on error.
  */
@@ -2083,14 +2098,17 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullab
 pass in empty facts in order to clear the facts.
 
 Parameters:
- - marshaledContact - the JSON marshalled bytes of contact.Contact object.
- - factListJSON - the JSON marshalled bytes of [fact.FactList].
+ - marshaledContact - the JSON marshalled bytes of [contact.Contact]
+ - factListJSON - the JSON marshalled bytes of [fact.FactList]
+
+Returns:
+ - []byte - marshalled bytes of the modified [contact.Contact]
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSetFactsOnContact(NSData* _Nullable marshaledContact, NSData* _Nullable factListJSON, NSError* _Nullable* _Nullable error);
 
 /**
  * StoreReceptionIdentity stores the given identity in Cmix storage with the
-given key.  This is the ideal way to securely store identities, as the caller
+given key. This is the ideal way to securely store identities, as the caller
 of this function is only required to store the given key separately rather
 than the keying material.
  */
