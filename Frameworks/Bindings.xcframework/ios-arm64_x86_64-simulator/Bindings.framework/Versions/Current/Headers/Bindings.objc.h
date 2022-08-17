@@ -1434,7 +1434,8 @@ JSON example:
   "RSAPrivatePem":"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBNU15dTdhYjBJOS9UL1BFUUxtd2x3ejZHV3FjMUNYemVIVXhoVEc4bmg1WWRWSXMxCmJ2THpBVjNOMDJxdXN6K2s4TVFEWjBtejMzdkswUmhPczZIY0NUSFdzTEpXRkE5WWpzWWlCRi9qTDd1bmd1ckIKL2tvK1JJSnNrWGFWaEZaazRGdERoRXhTNWY4RnR0Qmk1NmNLZmdJQlVKT3ozZi9qQllTMkxzMlJ6cWV5YXM3SApjV2RaME9TclBTT3BiYlViU1FPbS9LWnlweGZHU21yZ2oxRUZuU1dZZ2xGZTdUOTRPbHF5MG14QTV5clVXbHorCk9sK3hHbXpCNUp4WUFSMU9oMFQrQTk4RWMrTUZHNm43L1MraDdzRDgybGRnVnJmbStFTzRCdmFKeTRESGZGMWgKNnp6QnVnY25NUVFGc0dLeDFYWC9COTVMdUpPVjdyeXlDbzZGbHdJREFRQUJBb0lCQVFDaUh6OGNlcDZvQk9RTAphUzBVRitHeU5VMnlVcVRNTWtTWThoUkh1c09CMmFheXoybHZVb3RLUHBPbjZRSWRWVTJrcE4vY2dtY0lSb2x5CkhBMDRUOHJBWVNaRlVqaVlRajkzKzRFREpJYXd2Z0YyVEs1bFoyb3oxVTdreStncU82V0RMR2Z0Q0wvODVQWEIKa210aXhnUXpRV3g1RWcvemtHdm03eURBalQxeDloNytsRjJwNFlBam5kT2xTS0dmQjFZeTR1RXBQd0kwc1lWdgpKQWc0MEFxbllZUmt4emJPbmQxWGNjdEJFN2Z1VDdrWXhoeSs3WXYrUTJwVy9BYmh6NGlHOEY1MW9GMGZwV0czCmlISDhsVXZFTkp2SUZEVHZ0UEpESlFZalBRN3lUbGlGZUdrMXZUQkcyQkpQNExzVzhpbDZOeUFuRktaY1hOQ24KeHVCendiSlJBb0dCQVBUK0dGTVJGRHRHZVl6NmwzZmg3UjJ0MlhrMysvUmpvR3BDUWREWDhYNERqR1pVd1RGVQpOS2tQTTNjS29ia2RBYlBDb3FpL0tOOVBibk9QVlZ3R3JkSE9vSnNibFVHYmJGamFTUzJQMFZnNUVhTC9rT2dUCmxMMUdoVFpIUWk1VUlMM0p4M1Z3T0ZRQ3RQOU1UQlQ0UEQvcEFLbDg3VTJXN3JTY1dGV1ZGbFNkQW9HQkFPOFUKVmhHWkRpVGFKTWVtSGZIdVYrNmtzaUlsam9aUVVzeGpmTGNMZ2NjV2RmTHBqS0ZWTzJNN3NqcEJEZ0w4NmFnegorVk14ZkQzZ1l0SmNWN01aMVcwNlZ6TlNVTHh3a1dRY1hXUWdDaXc5elpyYlhCUmZRNUVjMFBlblVoWWVwVzF5CkpkTC8rSlpQeDJxSzVrQytiWU5EdmxlNWdpcjlDSGVzTlR5enVyckRBb0dCQUl0cTJnN1RaazhCSVFUUVNrZ24Kb3BkRUtzRW4wZExXcXlBdENtVTlyaWpHL2l2eHlXczMveXZDQWNpWm5VVEp0QUZISHVlbXVTeXplQ2g5QmRkegoyWkRPNUdqQVBxVHlQS3NudFlNZkY4UDczZ1NES1VSWWVFbHFDejdET0c5QzRzcitPK3FoN1B3cCtqUmFoK1ZiCkNuWllNMDlBVDQ3YStJYUJmbWRkaXpLbEFvR0JBSmo1dkRDNmJIQnNISWlhNUNJL1RZaG5YWXUzMkVCYytQM0sKMHF3VThzOCtzZTNpUHBla2Y4RjVHd3RuUU4zc2tsMk1GQWFGYldmeVFZazBpUEVTb0p1cGJzNXA1enNNRkJ1bwpncUZrVnQ0RUZhRDJweTVwM2tQbDJsZjhlZXVwWkZScGE0WmRQdVIrMjZ4eWYrNEJhdlZJeld3NFNPL1V4Q3crCnhqbTNEczRkQW9HQWREL0VOa1BjU004c1BCM3JSWW9MQ2twcUV2U0MzbVZSbjNJd3c1WFAwcDRRVndhRmR1ckMKYUhtSE1EekNrNEUvb0haQVhFdGZ2S2tRaUI4MXVYM2c1aVo4amdYUVhXUHRteTVIcVVhcWJYUTlENkxWc3B0egpKL3R4SWJLMXp5c1o2bk9IY1VoUUwyVVF6SlBBRThZNDdjYzVzTThEN3kwZjJ0QURTQUZNMmN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==",
   "Salt":"4kk02v0NIcGtlobZ/xkxqWz8uH/ams/gjvQm14QT0dI=",
   "DHKeyPrivate":"eyJWYWx1ZSI6NDU2MDgzOTEzMjA0OTIyODA5Njg2MDI3MzQ0MzM3OTA0MzAyODYwMjM2NDk2NDM5NDI4NTcxMTMwNDMzOTQwMzgyMTIyMjY4OTQzNTMyMjIyMzc1MTkzNTEzMjU4MjA4MDA0NTczMDY4MjEwNzg2NDI5NjA1MjA0OTA3MjI2ODI5OTc3NTczMDkxODY0NTY3NDExMDExNjQxNCwiRmluZ2VycHJpbnQiOjE2ODAxNTQxNTExMjMzMDk4MzYzfQ=="
- }
+  "E2eGrp": "eyJnZW4iOiIyIiwicHJpbWUiOiJlMmVlOTgzZDAzMWRjMWRiNmYxYTdhNjdkZjBlOWE4ZTU1NjFkYjhlOGQ0OTQxMzM5NGMwNDliN2E4YWNjZWRjMjk4NzA4ZjEyMTk1MWQ5Y2Y5MjBlYzVkMTQ2NzI3YWE0YWU1MzViMDkyMmM2ODhiNTViM2RkMmFlZGY2YzAxYzk0NzY0ZGFiOTM3OTM1YWE4M2JlMzZlNjc3NjA3MTNhYjQ0YTYzMzdjMjBlNzg2MTU3NWU3NDVkMzFmOGI5ZTlhZDg0MTIxMThjNjJhM2UyZTI5ZGY0NmIwODY0ZDBjOTUxYzM5NGE1Y2JiZGM2YWRjNzE4ZGQyYTNlMDQxMDIzZGJiNWFiMjNlYmI0NzQyZGU5YzE2ODdiNWIzNGZhNDhjMzUyMTYzMmM0YTUzMGU4ZmZiMWJjNTFkYWRkZjQ1M2IwYjI3MTdjMmJjNjY2OWVkNzZiNGJkZDVjOWZmNTU4ZTg4ZjI2ZTU3ODUzMDJiZWRiY2EyM2VhYzVhY2U5MjA5NmVlOGE2MDY0MmZiNjFlOGYzZDI0OTkwYjhjYjEyZWU0NDhlZWY3OGUxODRjNzI0MmRkMTYxYzc3MzhmMzJiZjI5YTg0MTY5ODk3ODgyNWI0MTExYjRiYzNlMWUxOTg0NTUwOTU5NTgzMzNkNzc2ZDhiMmJlZWVkM2ExYTFhMjIxYTZlMzdlNjY0YTY0YjgzOTgxYzQ2ZmZkZGMxYTQ1ZTNkNTIxMWFhZjhiZmJjMDcyNzY4YzRmNTBkN2Q3ODAzZDJkNGYyNzhkZTgwMTRhNDczMjM2MzFkN2UwNjRkZTgxYzBjNmJmYTQzZWYwZTY5OTg4NjBmMTM5MGI1ZDNmZWFjYWYxNjk2MDE1Y2I3OWMzZjljMmQ5M2Q5NjExMjBjZDBlNWYxMmNiYjY4N2VhYjA0NTI0MWY5Njc4OWMzOGU4OWQ3OTYxMzhlNjMxOWJlNjJlMzVkODdiMTA0OGNhMjhiZTM4OWI1NzVlOTk0ZGNhNzU1NDcxNTg0YTA5ZWM3MjM3NDJkYzM1ODczODQ3YWVmNDlmNjZlNDM4NzMifQ=="
+}
  */
 @interface BindingsReceptionIdentity : NSObject <goSeqRefInterface> {
 }
@@ -1446,6 +1447,7 @@ JSON example:
 @property (nonatomic) NSData* _Nullable rsaPrivatePem;
 @property (nonatomic) NSData* _Nullable salt;
 @property (nonatomic) NSData* _Nullable dhKeyPrivate;
+@property (nonatomic) NSData* _Nullable e2eGrp;
 @end
 
 /**
@@ -1963,28 +1965,49 @@ Parameters:
 FOUNDATION_EXPORT BindingsGroupChat* _Nullable BindingsNewGroupChat(long e2eID, id<BindingsGroupRequest> _Nullable requestFunc, id<BindingsGroupChatProcessor> _Nullable processor, NSError* _Nullable* _Nullable error);
 
 /**
- * NewOrLoadUd loads an existing Manager from storage or creates a
-new one if there is no extant storage information. Parameters need be provided
-to specify how to connect to the User Discovery service. These parameters may be used
-to contact either the UD server hosted by the xx network team or a custom
-third-party operated server. For the former, all the information may be pulled from the
-NDF using the bindings.
+ * NewOrLoadUd loads an existing UserDiscovery from storage or creates a new
+UserDiscovery if there is no storage data. Regardless of storage state,
+the UserDiscovery object returned will be registered with the
+User Discovery service. If the user is not already registered, a call
+to register will occur internally. If the user is already registered,
+this call will simply load state and return to you a UserDiscovery object.
+Some parameters are required for registering with the service, but are not required
+if the user is already registered. These will be noted in the parameters section as
+"SEMI-REQUIRED".
+
+Certain parameters are required every call to this function. These parameters are listed below
+as "REQUIRED". For example, parameters need be provided to specify how to connect to the
+User Discovery service. These parameters may be used to contact either the UD server hosted
+by the xx network team or a custom third-party operated server. For the former,
+all the information may be fetched from the NDF using the bindings. These fetch
+methods are detailed in the parameters section.
 
 Params
- - e2eID - e2e object ID in the tracker
- - follower - network follower func wrapped in UdNetworkStatus
- - username - the username the user wants to register with UD.
-   If the user is already registered, this field may be blank
- - networkValidationSig is a signature provided by the network (i.e. the client registrar).
-   This may be nil, however UD may return an error in some cases (e.g. in a production level
-   environment).
- - cert is the TLS certificate for the UD server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdCertFromNdf.
- - contactFile is the data within a marshalled contact.Contact. This represents the
+ - e2eID -  REQUIRED. The tracked e2e object ID. This is returned by [E2e.GetID].
+ - follower - REQUIRED. Network follower function. This will check if the network
+   follower is running.
+ - username - SEMI-REQUIRED. The username the user wants to register with UD.
+   If the user is already registered, this field may be blank. If the user is not
+   already registered, these field must be populated with a username that meets the
+   requirements of the UD service. For example, in the xx network's UD service,
+   the username must not be registered by another user.
+ - networkValidationSig - SEMI-REQUIRED. A signature provided by the xx network
+   (i.e. the client registrar). If the user is not already registered, this field is required
+   in order to register with the xx network. This may be nil if the user is already registered
+   or connecting to a third-party UD service unassociated with the xx network.
+ - cert - REQUIRED. The TLS certificate for the UD server this call will connect with.
+   If this is nil, you may not contact the UD server hosted by the xx network.
+   Third-party services may vary.
+   You may use the UD server run by the xx network team by using [E2e.GetUdCertFromNdf].
+ - contactFile - REQUIRED. The data within a marshalled [contact.Contact]. This represents the
    contact file of the server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdContactFromNdf.
- - address is the IP address of the UD server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdAddressFromNdf.
+   If this is nil, you may not contact the UD server hosted by the xx network.
+   Third-party services may vary.
+   You may use the UD server run by the xx network team by using [E2e.GetUdContactFromNdf].
+ - address - REQUIRED. The IP address of the UD server this call will connect with.
+   You may use the UD server run by the xx network team by using [E2e.GetUdAddressFromNdf].
+   If this is nil, you may not contact the UD server hosted by the xx network.
+   Third-party services may vary.
 
 Returns
  - A Manager object which is registered to the specified UD service.
