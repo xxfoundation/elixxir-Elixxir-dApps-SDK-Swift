@@ -1815,6 +1815,22 @@ Params
 FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsInitializeBackup(long e2eID, long udID, NSString* _Nullable backupPassPhrase, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
+ * IsRegisteredWithUD is a function which checks the internal state
+files to determine if a user has registered with UD in the past.
+
+Parameters:
+ - e2eID -  REQUIRED. The tracked e2e object ID. This can be retrieved using [E2e.GetID].
+
+Returns:
+  - bool - A boolean representing true if the user has been registered with UD already
+           or false if it has not been registered already.
+ - error - An error should only be returned if the internal tracker failed to retrieve an
+           E2e object given the e2eId. If an error was returned, the registration state check
+           was not performed properly, and the boolean returned should be ignored.
+ */
+FOUNDATION_EXPORT BOOL BindingsIsRegisteredWithUD(long e2eId, BOOL* _Nullable ret0_, NSError* _Nullable* _Nullable error);
+
+/**
  * Listen starts a single-use listener on a given tag using the passed in e2e object
 and SingleUseCallback func.
 
