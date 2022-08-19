@@ -1,6 +1,6 @@
 import CustomDump
 import XCTest
-@testable import ElixxirDAppsSDK
+@testable import XXClient
 
 final class EventReportTests: XCTestCase {
   func testCoding() throws {

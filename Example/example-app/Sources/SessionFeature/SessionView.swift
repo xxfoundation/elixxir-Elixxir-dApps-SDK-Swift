@@ -1,8 +1,8 @@
 import ComposableArchitecture
 import ComposablePresentation
-import ElixxirDAppsSDK
 import ErrorFeature
 import SwiftUI
+import XXClient
 
 public struct SessionView: View {
   public init(store: Store<SessionState, SessionAction>) {
