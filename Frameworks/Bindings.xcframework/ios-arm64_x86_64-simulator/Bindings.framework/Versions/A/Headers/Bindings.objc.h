@@ -310,7 +310,8 @@ Example JSON:
 @end
 
 /**
- * BroadcastReport is the bindings representation of the info on how a broadcast message was sent
+ * BroadcastReport is the bindings representation of the info on how a broadcast
+message was sent
 
 Example JSON:
  {"RoundID":42,
@@ -331,7 +332,8 @@ Example JSON:
 @end
 
 /**
- * Channel is a bindings-level struct encapsulating the broadcast.Channel client object.
+ * Channel is a bindings-level struct encapsulating the broadcast.Channel client
+object.
  */
 @interface BindingsChannel : NSObject <goSeqRefInterface, BindingsStopper> {
 }
@@ -345,7 +347,8 @@ broadcast.
 
 Returns:
  - []byte - the JSON marshalled bytes of the BroadcastReport object, which
-   can be passed into WaitForRoundResult to see if the broadcast succeeded.
+   can be passed into Cmix.WaitForRoundResult to see if the broadcast
+   succeeded.
  */
 - (NSData* _Nullable)broadcast:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -358,12 +361,13 @@ Returns:
  */
 - (NSData* _Nullable)broadcastAsymmetric:(NSData* _Nullable)payload pk:(NSData* _Nullable)pk error:(NSError* _Nullable* _Nullable)error;
 /**
- * Get returns the result of calling json.Marshal on a ChannelDef based on the underlying crypto broadcast.Channel.
+ * Get returns the result of calling json.Marshal on a ChannelDef based on the
+underlying crypto broadcast.Channel.
  */
 - (NSData* _Nullable)get:(NSError* _Nullable* _Nullable)error;
 /**
- * Listen registers a BroadcastListener for a given method.
-This allows users to handle incoming broadcast messages.
+ * Listen registers a BroadcastListener for a given method. This allows users to
+handle incoming broadcast messages.
 
 Parameters:
  - l - BroadcastListener object
@@ -372,11 +376,13 @@ Parameters:
  */
 - (BOOL)listen:(id<BindingsBroadcastListener> _Nullable)l method:(long)method error:(NSError* _Nullable* _Nullable)error;
 /**
- * MaxAsymmetricPayloadSize returns the maximum possible payload size which can be broadcast.
+ * MaxAsymmetricPayloadSize returns the maximum possible payload size which can
+be broadcast.
  */
 - (long)maxAsymmetricPayloadSize;
 /**
- * MaxPayloadSize returns the maximum possible payload size which can be broadcast.
+ * MaxPayloadSize returns the maximum possible payload size which can be
+broadcast.
  */
 - (long)maxPayloadSize;
 /**
@@ -386,13 +392,15 @@ Parameters:
 @end
 
 /**
- * ChannelDef is the bindings representation of an elixxir/crypto broadcast.Channel object.
+ * ChannelDef is the bindings representation of an elixxir/crypto
+broadcast.Channel object.
 
 Example JSON:
- {"Name": "My broadcast channel",
-  "Description":"A broadcast channel for me to test things",
-  "Salt":"gpUqW7N22sffMXsvPLE7BA==",
-  "PubKey":"LS0tLS1CRUdJTiBSU0EgUFVCTElDIEtFWS0tLS0tCk1DZ0NJUUN2YkZVckJKRFpqT3Y0Y0MvUHZZdXNvQkFtUTFkb3Znb044aHRuUjA2T3F3SURBUUFCCi0tLS0tRU5EIFJTQSBQVUJMSUMgS0VZLS0tLS0="
+ {
+   "Name": "My broadcast channel",
+   "Description": "A broadcast channel for me to test things",
+   "Salt": "gpUqW7N22sffMXsvPLE7BA==",
+   "PubKey": "LS0tLS1CRUdJTiBSU0EgUFVCTElDIEtFWS0tLS0tCk1DZ0NJUUN2YkZVckJKRFpqT3Y0Y0MvUHZZdXNvQkFtUTFkb3Znb044aHRuUjA2T3F3SURBUUFCCi0tLS0tRU5EIFJTQSBQVUJMSUMgS0VZLS0tLS0="
  }
  */
 @interface BindingsChannelDef : NSObject <goSeqRefInterface> {
@@ -432,7 +440,7 @@ partner.Manager is confirmed.
 Parameters:
  - e2eId - ID of the E2E object in the e2e tracker
  - recipientContact - marshalled contact.Contact object
- - myIdentity - marshalled ReceptionIdentity object
+ - e2eParamsJSON - JSON marshalled byte of xxdk.E2EParams object
  */
 - (BindingsConnection* _Nullable)connect:(long)e2eId recipientContact:(NSData* _Nullable)recipientContact e2eParamsJSON:(NSData* _Nullable)e2eParamsJSON error:(NSError* _Nullable* _Nullable)error;
 - (BindingsAuthenticatedConnection* _Nullable)connectWithAuthentication:(long)e2eId recipientContact:(NSData* _Nullable)recipientContact e2eParamsJSON:(NSData* _Nullable)e2eParamsJSON error:(NSError* _Nullable* _Nullable)error;
@@ -444,10 +452,11 @@ Parameters:
  * GetNodeRegistrationStatus returns the current state of node registration.
 
 Returns:
- - []bye - A marshalled NodeRegistrationReport containing the number of
-   nodes the user is registered with and the number of nodes present in the NDF.
- - An error if it cannot get the node registration status. The most likely cause
-   is that the network is unhealthy.
+ - []byte - A marshalled NodeRegistrationReport containing the number of
+   nodes the user is registered with and the number of nodes present in the
+   NDF.
+ - An error if it cannot get the node registration status. The most likely
+   cause is that the network is unhealthy.
  */
 - (NSData* _Nullable)getNodeRegistrationStatus:(NSError* _Nullable* _Nullable)error;
 /**
@@ -471,7 +480,8 @@ messages can be sent.
 - (BOOL)isHealthy;
 /**
  * MakeLegacyReceptionIdentity generates the legacy identity for receiving
-messages.
+messages. As with all legacy calls, this should primarily be used
+for the xx messenger team.
  */
 - (NSData* _Nullable)makeLegacyReceptionIdentity:(NSError* _Nullable* _Nullable)error;
 /**
@@ -482,11 +492,9 @@ messages.
 /**
  * NetworkFollowerStatus gets the state of the network follower. It returns a
 status with the following values:
-
-Status:
- - Stopped  - 0
- - Running  - 2000
- - Stopping - 3000
+ Stopped  - 0
+ Running  - 2000
+ Stopping - 3000
  */
 - (long)networkFollowerStatus;
 /**
@@ -511,28 +519,28 @@ they are stopped if there is no internet access.
 
 Threads Started:
   - Network Follower (/network/follow.go)
-  	tracks the network events and hands them off to workers for handling.
+    tracks the network events and hands them off to workers for handling.
   - Historical Round Retrieval (/network/rounds/historical.go)
-		retrieves data about rounds that are too old to be stored by the client.
+    retrieves data about rounds that are too old to be stored by the client.
 	 - Message Retrieval Worker Group (/network/rounds/retrieve.go)
-		requests all messages in a given round from the gateway of the last
-		nodes.
+	   requests all messages in a given round from the gateway of the last
+	   nodes.
 	 - Message Handling Worker Group (/network/message/handle.go)
-		decrypts and partitions messages when signals via the Switchboard.
+	   decrypts and partitions messages when signals via the Switchboard.
 	 - Health Tracker (/network/health),
-		via the network instance, tracks the state of the network.
+	   via the network instance, tracks the state of the network.
 	 - Garbled Messages (/network/message/garbled.go)
-		can be signaled to check all recent messages that could be decoded. It
-		uses a message store on disk for persistence.
+	   can be signaled to check all recent messages that could be decoded. It
+	   uses a message store on disk for persistence.
 	 - Critical Messages (/network/message/critical.go)
-		ensures all protocol layer mandatory messages are sent. It uses a
-		message store on disk for persistence.
+	   ensures all protocol layer mandatory messages are sent. It uses a message
+	   store on disk for persistence.
 	 - KeyExchange Trigger (/keyExchange/trigger.go)
-		responds to sent rekeys and executes them.
+	   responds to sent rekeys and executes them.
   - KeyExchange Confirm (/keyExchange/confirm.go)
-		responds to confirmations of successful rekey operations.
+	   responds to confirmations of successful rekey operations.
   - Auth Callback (/auth/callback.go)
-     handles both auth confirm and requests.
+    handles both auth confirm and requests.
  */
 - (BOOL)startNetworkFollower:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -540,7 +548,7 @@ Threads Started:
 an error if the follower is in the wrong state to stop or if it fails to stop
 it.
 
-if the network follower is running and this fails, the Cmix object will
+If the network follower is running and this fails, the Cmix object will
 most likely be in an unrecoverable state and need to be trashed.
  */
 - (BOOL)stopNetworkFollower:(NSError* _Nullable* _Nullable)error;
@@ -550,19 +558,21 @@ timeout is reached. It will return true if the network is healthy.
  */
 - (BOOL)waitForNetwork:(long)timeoutMS;
 /**
- * WaitForRoundResult allows the caller to get notified if the rounds a
-message was sent in successfully completed. Under the hood, this uses an API
-that uses the internal round data, network historical round lookup, and
-waiting on network events to determine what has (or will) occur.
-
-The callbacks will return at timeoutMS if no state update occurs.
+ * WaitForRoundResult allows the caller to get notified if the rounds a message
+was sent in successfully completed. Under the hood, this uses an API that
+uses the internal round data, network historical round lookup, and waiting on
+network events to determine what has (or will) occur.
 
 This function takes the marshaled send report to ensure a memory leak does
 not occur as a result of both sides of the bindings holding a reference to
 the same pointer.
 
-roundList is a JSON marshalled RoundsList or any JSON marshalled send report
-that inherits a RoundsList object.
+Parameters:
+ - roundList - JSON marshalled bytes of RoundsList or JSON of any send report
+   that inherits a [bindings.RoundsList] object
+ - mdc - callback that adheres to the MessageDeliveryCallback interface
+ - timeoutMS - timeout when the callback will return if no state update
+   occurs, in milliseconds
  */
 - (BOOL)waitForRoundResult:(NSData* _Nullable)roundList mdc:(id<BindingsMessageDeliveryCallback> _Nullable)mdc timeoutMS:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -600,7 +610,7 @@ partner.Manager.
 
 Returns:
  - []byte - the JSON marshalled bytes of the E2ESendReport object, which can
-   be passed into WaitForRoundResult to see if the send succeeded.
+   be passed into Cmix.WaitForRoundResult to see if the send succeeded.
  */
 - (NSData* _Nullable)sendE2E:(long)mt payload:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -617,49 +627,51 @@ sending dummy messages.
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 /**
  * NewDummyTrafficManager creates a DummyTraffic manager and initialises the
-dummy traffic sending thread. Note that the manager does not start sending dummy
-traffic until `True` is passed into DummyTraffic.SetStatus. The time duration
-between each sending operation and the amount of messages sent each interval
-are randomly generated values with bounds defined by the
-given parameters below.
+dummy traffic sending thread. Note that the manager does not start sending
+dummy traffic until true is passed into DummyTraffic.SetStatus. The time
+duration between each sending operation and the amount of messages sent each
+interval are randomly generated values with bounds defined by the given
+parameters below.
 
-Params:
+Parameters:
  - cmixId - a Cmix object ID in the tracker.
  - maxNumMessages - the upper bound of the random number of messages sent
    each sending cycle.
- - avgSendDeltaMS - the average duration, in milliseconds, to wait
-   between sends.
- - randomRangeMS - the upper bound of the interval between sending cycles,
-   in milliseconds. Sends occur every avgSendDeltaMS +/- a random duration
-   with an upper bound of randomRangeMS.
+ - avgSendDeltaMS - the average duration, in milliseconds, to wait between
+   sends.
+ - randomRangeMS - the upper bound of the interval between sending cycles, in
+   milliseconds. Sends occur every avgSendDeltaMS +/- a random duration with
+   an upper bound of randomRangeMS.
  */
 - (nullable instancetype)initManager:(long)cmixId maxNumMessages:(long)maxNumMessages avgSendDeltaMS:(long)avgSendDeltaMS randomRangeMS:(long)randomRangeMS;
 /**
- * GetStatus returns the current state of the dummy traffic sending thread.
-Note that this function does not return the status set by the most recent call to
-SetStatus directly. Instead, this call returns the current status of the sending thread.
-This is due to the small delay that may occur between calling SetStatus and the
-sending thread taking into effect that status change.
+ * GetStatus returns the current state of the DummyTraffic manager's sending
+thread. Note that this function does not return the status set by the most
+recent call to SetStatus. Instead, this call returns the current status of
+the sending thread. This is due to the small delay that may occur between
+calling SetStatus and the sending thread taking into effect that status
+change.
 
 Returns:
-  - boolean - True: Sending thread is sending dummy messages.
- 		   - False: Sending thread is paused/stopped and is not sending dummy messages.
+  - bool - Returns true if sending thread is sending dummy messages and false
+    if sending thread is paused/stopped and is not sending dummy messages.
  */
 - (BOOL)getStatus;
 /**
- * SetStatus sets the state of the dummy traffic send thread by passing in
-a boolean parameter. There may be a small delay in between this call
-and the status of the sending thread to change accordingly. For example,
-passing False into this call while the sending thread is currently sending messages
-will not cancel nor halt the sending operation, but will pause the thread once that
-operation has completed.
+ * SetStatus sets the state of the DummyTraffic manager's send thread by passing
+in a boolean parameter. There may be a small delay in between this call and
+the status of the sending thread to change accordingly. For example, passing
+false into this call while the sending thread is currently sending messages
+will not cancel nor halt the sending operation, but will pause the thread
+once that operation has completed.
 
-Params:
- - boolean - True: Sending thread is sending dummy messages.
- 			False: Sending thread is paused/stopped and is not sending dummy messages.
+Parameters:
+ - status - Input should be true if you want to send dummy messages and false
+   if you want to pause dummy messages.
+
 Returns:
- - error - if the DummyTraffic.SetStatus is called too frequently, causing the
-   internal status channel to fill.
+ - error - if the DummyTraffic.SetStatus is called too frequently, causing
+   the internal status channel to fill.
  */
 - (BOOL)setStatus:(BOOL)status error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -669,9 +681,11 @@ Returns:
 SendE2E.
 
 Example E2ESendReport:
- {"Rounds":[1,5,9],
+ {
+  "Rounds":[1,5,9],
   "MessageID":"51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=",
-  "Timestamp":1653582683183384000}
+  "Timestamp":1653582683183384000
+ }
  */
 @interface BindingsE2ESendReport : NSObject <goSeqRefInterface> {
 }
@@ -687,8 +701,8 @@ Example E2ESendReport:
 @end
 
 /**
- * E2e wraps the xxdk.E2e, implementing additional functions
-to support the bindings E2e interface.
+ * E2e wraps the xxdk.E2e, implementing additional functions to support the
+bindings E2e interface.
  */
 @interface BindingsE2e : NSObject <goSeqRefInterface> {
 }
@@ -757,8 +771,7 @@ Parameters:
  */
 - (BOOL)deletePartnerCallback:(NSData* _Nullable)partnerID error:(NSError* _Nullable* _Nullable)error;
 /**
- * DeleteReceiveRequests clears all received requests from auth
-storage.
+ * DeleteReceiveRequests clears all received requests from auth storage.
  */
 - (BOOL)deleteReceiveRequests:(NSError* _Nullable* _Nullable)error;
 /**
@@ -806,7 +819,7 @@ Returns:
  */
 - (NSData* _Nullable)getHistoricalDHPubkey:(NSError* _Nullable* _Nullable)error;
 /**
- * GetID returns the e2eTracker ID for the E2e object.
+ * GetID returns the ID for this E2e in the e2eTracker.
  */
 - (long)getID;
 /**
@@ -827,11 +840,13 @@ Returns:
  */
 - (NSData* _Nullable)getReceptionID;
 /**
- * GetUdAddressFromNdf retrieve the User Discovery's network address fom the NDF.
+ * GetUdAddressFromNdf retrieve the User Discovery's network address fom the
+NDF.
  */
 - (NSString* _Nonnull)getUdAddressFromNdf;
 /**
- * GetUdCertFromNdf retrieves the User Discovery's TLS certificate from the NDF.
+ * GetUdCertFromNdf retrieves the User Discovery's TLS certificate (in PEM
+format) from the NDF.
  */
 - (NSData* _Nullable)getUdCertFromNdf;
 /**
@@ -954,7 +969,7 @@ Parameters:
 
 Returns:
  - []byte - the JSON marshalled bytes of the E2ESendReport object, which can
-   be passed into WaitForRoundResult to see if the send succeeded.
+   be passed into Cmix.WaitForRoundResult to see if the send succeeded.
  */
 - (NSData* _Nullable)sendE2E:(long)messageType recipientId:(NSData* _Nullable)recipientId payload:(NSData* _Nullable)payload e2eParams:(NSData* _Nullable)e2eParams error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1121,7 +1136,6 @@ Parameters:
 Parameters:
  - payload - JSON marshalled FileSend
  - recipientID - marshalled recipient id.ID
- - paramsJSON - JSON marshalled e2e.Params
  - retry - number of retries allowed
  - callback - callback that reports file sending progress
  - period - duration to wait between progress callbacks triggering
@@ -1153,7 +1167,7 @@ also the time the group requests were sent.
  */
 - (int64_t)getCreatedNano;
 /**
- * GetID return the 33-byte unique group ID. This represents the id.ID object
+ * GetID return the 33-byte unique group ID. This represents the id.ID object.
  */
 - (NSData* _Nullable)getID;
 /**
@@ -1174,7 +1188,8 @@ Returns:
  */
 - (NSData* _Nullable)getName;
 /**
- * GetTrackedID returns the tracked ID of the Group object. This is used by the backend tracker.
+ * GetTrackedID returns the tracked ID of the Group object. This is used by the
+backend tracker.
  */
 - (long)getTrackedID;
 /**
@@ -1206,7 +1221,7 @@ error "failed to find group" is returned.
 
 Parameters:
  - groupId - The byte data representing a group ID (a byte marshalled id.ID).
-             This can be pulled from a marshalled GroupReport.
+   This can be pulled from a marshalled GroupReport.
 Returns:
  - Group - The bindings-layer representation of a group.
  */
@@ -1245,14 +1260,14 @@ Parameters:
    IDs of members the user wants to add to the group.
  - message - the initial message sent to all members in the group. This is an
    optional parameter and may be nil.
- - tag - the name of the group decided by the creator. This is an optional
+ - name - the name of the group decided by the creator. This is an optional
    parameter and may be nil. If nil the group will be assigned the default
    name.
 
 Returns:
  - []byte - the JSON marshalled bytes of the GroupReport object, which can be
-   passed into WaitForRoundResult to see if the group request message send
-   succeeded.
+   passed into Cmix.WaitForRoundResult to see if the group request message
+   send succeeded.
  */
 - (NSData* _Nullable)makeGroup:(NSData* _Nullable)membershipBytes message:(NSData* _Nullable)message name:(NSData* _Nullable)name error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1276,15 +1291,15 @@ Returns:
  * Send is the bindings-level function for sending to a group.
 
 Parameters:
- - groupId - the byte data representing a group ID.
-   This can be pulled from a marshalled GroupReport.
+ - groupId - the byte data representing a group ID. This can be pulled from
+   marshalled GroupReport.
  - message - the message that the user wishes to send to the group.
  - tag - the tag associated with the message. This tag may be empty.
 
 Returns:
  - []byte - the JSON marshalled bytes of the GroupSendReport object, which
-   can be passed into WaitForRoundResult to see if the group message send
-   succeeded.
+   can be passed into Cmix.WaitForRoundResult to see if the group message
+   send succeeded.
  */
 - (NSData* _Nullable)send:(NSData* _Nullable)groupId message:(NSData* _Nullable)message tag:(NSString* _Nullable)tag error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -1431,7 +1446,8 @@ JSON example:
   "RSAPrivatePem":"LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFcFFJQkFBS0NBUUVBNU15dTdhYjBJOS9UL1BFUUxtd2x3ejZHV3FjMUNYemVIVXhoVEc4bmg1WWRWSXMxCmJ2THpBVjNOMDJxdXN6K2s4TVFEWjBtejMzdkswUmhPczZIY0NUSFdzTEpXRkE5WWpzWWlCRi9qTDd1bmd1ckIKL2tvK1JJSnNrWGFWaEZaazRGdERoRXhTNWY4RnR0Qmk1NmNLZmdJQlVKT3ozZi9qQllTMkxzMlJ6cWV5YXM3SApjV2RaME9TclBTT3BiYlViU1FPbS9LWnlweGZHU21yZ2oxRUZuU1dZZ2xGZTdUOTRPbHF5MG14QTV5clVXbHorCk9sK3hHbXpCNUp4WUFSMU9oMFQrQTk4RWMrTUZHNm43L1MraDdzRDgybGRnVnJmbStFTzRCdmFKeTRESGZGMWgKNnp6QnVnY25NUVFGc0dLeDFYWC9COTVMdUpPVjdyeXlDbzZGbHdJREFRQUJBb0lCQVFDaUh6OGNlcDZvQk9RTAphUzBVRitHeU5VMnlVcVRNTWtTWThoUkh1c09CMmFheXoybHZVb3RLUHBPbjZRSWRWVTJrcE4vY2dtY0lSb2x5CkhBMDRUOHJBWVNaRlVqaVlRajkzKzRFREpJYXd2Z0YyVEs1bFoyb3oxVTdreStncU82V0RMR2Z0Q0wvODVQWEIKa210aXhnUXpRV3g1RWcvemtHdm03eURBalQxeDloNytsRjJwNFlBam5kT2xTS0dmQjFZeTR1RXBQd0kwc1lWdgpKQWc0MEFxbllZUmt4emJPbmQxWGNjdEJFN2Z1VDdrWXhoeSs3WXYrUTJwVy9BYmh6NGlHOEY1MW9GMGZwV0czCmlISDhsVXZFTkp2SUZEVHZ0UEpESlFZalBRN3lUbGlGZUdrMXZUQkcyQkpQNExzVzhpbDZOeUFuRktaY1hOQ24KeHVCendiSlJBb0dCQVBUK0dGTVJGRHRHZVl6NmwzZmg3UjJ0MlhrMysvUmpvR3BDUWREWDhYNERqR1pVd1RGVQpOS2tQTTNjS29ia2RBYlBDb3FpL0tOOVBibk9QVlZ3R3JkSE9vSnNibFVHYmJGamFTUzJQMFZnNUVhTC9rT2dUCmxMMUdoVFpIUWk1VUlMM0p4M1Z3T0ZRQ3RQOU1UQlQ0UEQvcEFLbDg3VTJXN3JTY1dGV1ZGbFNkQW9HQkFPOFUKVmhHWkRpVGFKTWVtSGZIdVYrNmtzaUlsam9aUVVzeGpmTGNMZ2NjV2RmTHBqS0ZWTzJNN3NqcEJEZ0w4NmFnegorVk14ZkQzZ1l0SmNWN01aMVcwNlZ6TlNVTHh3a1dRY1hXUWdDaXc5elpyYlhCUmZRNUVjMFBlblVoWWVwVzF5CkpkTC8rSlpQeDJxSzVrQytiWU5EdmxlNWdpcjlDSGVzTlR5enVyckRBb0dCQUl0cTJnN1RaazhCSVFUUVNrZ24Kb3BkRUtzRW4wZExXcXlBdENtVTlyaWpHL2l2eHlXczMveXZDQWNpWm5VVEp0QUZISHVlbXVTeXplQ2g5QmRkegoyWkRPNUdqQVBxVHlQS3NudFlNZkY4UDczZ1NES1VSWWVFbHFDejdET0c5QzRzcitPK3FoN1B3cCtqUmFoK1ZiCkNuWllNMDlBVDQ3YStJYUJmbWRkaXpLbEFvR0JBSmo1dkRDNmJIQnNISWlhNUNJL1RZaG5YWXUzMkVCYytQM0sKMHF3VThzOCtzZTNpUHBla2Y4RjVHd3RuUU4zc2tsMk1GQWFGYldmeVFZazBpUEVTb0p1cGJzNXA1enNNRkJ1bwpncUZrVnQ0RUZhRDJweTVwM2tQbDJsZjhlZXVwWkZScGE0WmRQdVIrMjZ4eWYrNEJhdlZJeld3NFNPL1V4Q3crCnhqbTNEczRkQW9HQWREL0VOa1BjU004c1BCM3JSWW9MQ2twcUV2U0MzbVZSbjNJd3c1WFAwcDRRVndhRmR1ckMKYUhtSE1EekNrNEUvb0haQVhFdGZ2S2tRaUI4MXVYM2c1aVo4amdYUVhXUHRteTVIcVVhcWJYUTlENkxWc3B0egpKL3R4SWJLMXp5c1o2bk9IY1VoUUwyVVF6SlBBRThZNDdjYzVzTThEN3kwZjJ0QURTQUZNMmN3PQotLS0tLUVORCBSU0EgUFJJVkFURSBLRVktLS0tLQ==",
   "Salt":"4kk02v0NIcGtlobZ/xkxqWz8uH/ams/gjvQm14QT0dI=",
   "DHKeyPrivate":"eyJWYWx1ZSI6NDU2MDgzOTEzMjA0OTIyODA5Njg2MDI3MzQ0MzM3OTA0MzAyODYwMjM2NDk2NDM5NDI4NTcxMTMwNDMzOTQwMzgyMTIyMjY4OTQzNTMyMjIyMzc1MTkzNTEzMjU4MjA4MDA0NTczMDY4MjEwNzg2NDI5NjA1MjA0OTA3MjI2ODI5OTc3NTczMDkxODY0NTY3NDExMDExNjQxNCwiRmluZ2VycHJpbnQiOjE2ODAxNTQxNTExMjMzMDk4MzYzfQ=="
- }
+  "E2eGrp": "eyJnZW4iOiIyIiwicHJpbWUiOiJlMmVlOTgzZDAzMWRjMWRiNmYxYTdhNjdkZjBlOWE4ZTU1NjFkYjhlOGQ0OTQxMzM5NGMwNDliN2E4YWNjZWRjMjk4NzA4ZjEyMTk1MWQ5Y2Y5MjBlYzVkMTQ2NzI3YWE0YWU1MzViMDkyMmM2ODhiNTViM2RkMmFlZGY2YzAxYzk0NzY0ZGFiOTM3OTM1YWE4M2JlMzZlNjc3NjA3MTNhYjQ0YTYzMzdjMjBlNzg2MTU3NWU3NDVkMzFmOGI5ZTlhZDg0MTIxMThjNjJhM2UyZTI5ZGY0NmIwODY0ZDBjOTUxYzM5NGE1Y2JiZGM2YWRjNzE4ZGQyYTNlMDQxMDIzZGJiNWFiMjNlYmI0NzQyZGU5YzE2ODdiNWIzNGZhNDhjMzUyMTYzMmM0YTUzMGU4ZmZiMWJjNTFkYWRkZjQ1M2IwYjI3MTdjMmJjNjY2OWVkNzZiNGJkZDVjOWZmNTU4ZTg4ZjI2ZTU3ODUzMDJiZWRiY2EyM2VhYzVhY2U5MjA5NmVlOGE2MDY0MmZiNjFlOGYzZDI0OTkwYjhjYjEyZWU0NDhlZWY3OGUxODRjNzI0MmRkMTYxYzc3MzhmMzJiZjI5YTg0MTY5ODk3ODgyNWI0MTExYjRiYzNlMWUxOTg0NTUwOTU5NTgzMzNkNzc2ZDhiMmJlZWVkM2ExYTFhMjIxYTZlMzdlNjY0YTY0YjgzOTgxYzQ2ZmZkZGMxYTQ1ZTNkNTIxMWFhZjhiZmJjMDcyNzY4YzRmNTBkN2Q3ODAzZDJkNGYyNzhkZTgwMTRhNDczMjM2MzFkN2UwNjRkZTgxYzBjNmJmYTQzZWYwZTY5OTg4NjBmMTM5MGI1ZDNmZWFjYWYxNjk2MDE1Y2I3OWMzZjljMmQ5M2Q5NjExMjBjZDBlNWYxMmNiYjY4N2VhYjA0NTI0MWY5Njc4OWMzOGU4OWQ3OTYxMzhlNjMxOWJlNjJlMzVkODdiMTA0OGNhMjhiZTM4OWI1NzVlOTk0ZGNhNzU1NDcxNTg0YTA5ZWM3MjM3NDJkYzM1ODczODQ3YWVmNDlmNjZlNDM4NzMifQ=="
+}
  */
 @interface BindingsReceptionIdentity : NSObject <goSeqRefInterface> {
 }
@@ -1443,6 +1459,7 @@ JSON example:
 @property (nonatomic) NSData* _Nullable rsaPrivatePem;
 @property (nonatomic) NSData* _Nullable salt;
 @property (nonatomic) NSData* _Nullable dhKeyPrivate;
+@property (nonatomic) NSData* _Nullable e2eGrp;
 @end
 
 /**
@@ -1588,9 +1605,9 @@ JSON example:
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
 /**
- * ConfirmFact confirms a fact first registered via AddFact. The confirmation ID
-comes from AddFact while the code will come over the associated
-communications system.
+ * ConfirmFact confirms a fact first registered via SendRegisterFact. The
+confirmation ID comes from SendRegisterFact while the code will come over the
+associated communications system.
  */
 - (BOOL)confirmFact:(NSString* _Nullable)confirmationID code:(NSString* _Nullable)code error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1666,14 +1683,14 @@ of JSON marshalling the response when received.
 FOUNDATION_EXPORT BOOL BindingsAsyncRequestRestLike(long e2eID, NSData* _Nullable recipient, NSData* _Nullable request, NSData* _Nullable paramsJSON, id<BindingsRestlikeCallback> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
- * CreateUserFriendlyErrorMessage will convert the passed in error string
-to an error string that is user-friendly if a substring match is
-found to a common error. Common errors is a map which can be updated
-using UpdateCommonErrors. If the error is not common, some simple parsing
-is done on the error message to make it more user-accessible, removing
-backend specific jargon.
+ * CreateUserFriendlyErrorMessage will convert the passed in error string to an
+error string that is user-friendly if a substring match is found to a
+common error. Common errors is a map that can be updated using
+UpdateCommonErrors. If the error is not common, some simple parsing is done
+on the error message to make it more user-accessible, removing backend
+specific jargon.
 
-Parameters
+Parameters:
   - errStr - an error returned from the backend.
 
 Returns
@@ -1721,8 +1738,8 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultE2EParams(void);
 
 /**
  * GetDefaultE2eFileTransferParams returns a JSON serialized object with all the
-e2e file transfer parameters and their default values. Call this function and modify
-the JSON to change single use settings.
+E2E file transfer parameters and their default values. Call this function and
+modify the JSON to change single use settings.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultE2eFileTransferParams(void);
 
@@ -1746,13 +1763,13 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsGetDefaultSingleUseParams(void);
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetDependencies(void);
 
 /**
- * GetFactsFromContact returns the fact list in the contact.Contact object.
+ * GetFactsFromContact returns the fact list in the [contact.Contact] object.
 
 Parameters:
- - marshaledContact - the JSON marshalled bytes by of contact.Contact object.
+ - marshaledContact - the JSON marshalled bytes of [contact.Contact]
 
 Returns:
- - []byte - the JSON marshalled bytes of [fact.FactList].
+ - []byte - the JSON marshalled bytes of [fact.FactList]
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetFactsFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
@@ -1762,14 +1779,25 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsGetFactsFromContact(NSData* _Nullabl
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetGitVersion(void);
 
 /**
- * GetIDFromContact accepts a marshalled contact.Contact object and returns a
-marshalled id.ID object.
+ * GetIDFromContact returns the ID in the [contact.Contact] object.
+
+Parameters:
+ - marshaledContact - JSON marshalled bytes of [contact.Contact]
+
+Returns:
+ - []byte - bytes of the [id.ID] object
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetIDFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
 /**
- * GetPubkeyFromContact accepts a marshalled contact.Contact object and returns
-a JSON marshalled large.Int DH public key.
+ * GetPubkeyFromContact returns the DH public key in the [contact.Contact]
+object.
+
+Parameters:
+ - marshaledContact - JSON marshalled bytes of [contact.Contact]
+
+Returns:
+ - []byte - JSON marshalled bytes of the [cyclic.Int] object
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetPubkeyFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
@@ -1790,17 +1818,34 @@ FOUNDATION_EXPORT BindingsFileTransfer* _Nullable BindingsInitFileTransfer(long 
 /**
  * InitializeBackup creates a bindings-layer Backup object.
 
-Params
+Parameters:
  - e2eID - ID of the E2e object in the e2e tracker.
  - udID - ID of the UserDiscovery object in the ud tracker.
- - backupPassPhrase - backup passphrase provided by the user. Used to decrypt backup.
+ - backupPassPhrase - backup passphrase provided by the user. Used to decrypt
+   backup.
  - cb - the callback to be called when a backup is triggered.
  */
 FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsInitializeBackup(long e2eID, long udID, NSString* _Nullable backupPassPhrase, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
- * Listen starts a single-use listener on a given tag using the passed in e2e object
-and SingleUseCallback func.
+ * IsRegisteredWithUD is a function which checks the internal state
+files to determine if a user has registered with UD in the past.
+
+Parameters:
+ - e2eID -  REQUIRED. The tracked e2e object ID. This can be retrieved using [E2e.GetID].
+
+Returns:
+  - bool - A boolean representing true if the user has been registered with UD already
+           or false if it has not been registered already.
+ - error - An error should only be returned if the internal tracker failed to retrieve an
+           E2e object given the e2eId. If an error was returned, the registration state check
+           was not performed properly, and the boolean returned should be ignored.
+ */
+FOUNDATION_EXPORT BOOL BindingsIsRegisteredWithUD(long e2eId, BOOL* _Nullable ret0_, NSError* _Nullable* _Nullable error);
+
+/**
+ * Listen starts a single-use listener on a given tag using the passed in E2e
+object and SingleUseCallback func.
 
 Parameters:
  - e2eID - ID of the e2e object in the tracker
@@ -1813,8 +1858,9 @@ Returns:
 FOUNDATION_EXPORT id<BindingsStopper> _Nullable BindingsListen(long e2eID, NSString* _Nullable tag, id<BindingsSingleUseCallback> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
- * LoadCmix will load an existing user storage from the storageDir using the password.
-This will fail if the user storage does not exist or the password is incorrect.
+ * LoadCmix will load an existing user storage from the storageDir using the
+password. This will fail if the user storage does not exist or the password
+is incorrect.
 
 The password is passed as a byte array so that it can be cleared from memory
 and stored as securely as possible using the MemGuard library.
@@ -1850,7 +1896,7 @@ FOUNDATION_EXPORT BOOL BindingsLogLevel(long level, NSError* _Nullable* _Nullabl
 
 /**
  * Login creates and returns a new E2e object and adds it to the
-e2eTrackerSingleton. identity should be created via
+e2eTrackerSingleton. Identity should be created via
 Cmix.MakeReceptionIdentity and passed in here. If callbacks is left nil, a
 default auth.Callbacks will be used.
  */
@@ -1858,7 +1904,7 @@ FOUNDATION_EXPORT BindingsE2e* _Nullable BindingsLogin(long cmixId, id<BindingsA
 
 /**
  * LoginEphemeral creates and returns a new ephemeral E2e object and adds it to
-the e2eTrackerSingleton. identity should be created via
+the e2eTrackerSingleton. Identity should be created via
 Cmix.MakeReceptionIdentity or Cmix.MakeLegacyReceptionIdentity and passed in
 here. If callbacks is left nil, a default auth.Callbacks will be used.
  */
@@ -1871,18 +1917,20 @@ discovery system or returns by the timeout.
 Parameters:
  - e2eID - e2e object ID in the tracker
  - udContact - the marshalled bytes of the contact.Contact object
- - lookupId - the marshalled bytes of the id.ID object for the user
-   that LookupUD will look up.
+ - lookupId - the marshalled bytes of the id.ID object for the user that
+   LookupUD will look up.
  - singleRequestParams - the JSON marshalled bytes of single.RequestParams
 
 Returns:
  - []byte - the JSON marshalled bytes of the SingleUseSendReport object,
-   which can be passed into WaitForRoundResult to see if the send succeeded.
+   which can be passed into Cmix.WaitForRoundResult to see if the send
+   succeeded.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsLookupUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdLookupCallback> _Nullable cb, NSData* _Nullable lookupId, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * NewBroadcastChannel creates a bindings-layer broadcast channel & starts listening for new messages
+ * NewBroadcastChannel creates a bindings-layer broadcast channel and starts
+listening for new messages.
 
 Parameters:
  - cmixId - internal ID of cmix
@@ -1891,10 +1939,10 @@ Parameters:
 FOUNDATION_EXPORT BindingsChannel* _Nullable BindingsNewBroadcastChannel(long cmixId, NSData* _Nullable channelDefinition, NSError* _Nullable* _Nullable error);
 
 /**
- * NewCmix creates user storage, generates keys, connects, and registers
-with the network. Note that this does not register a username/identity, but
-merely creates a new cryptographic identity for adding such information
-at a later date.
+ * NewCmix creates user storage, generates keys, connects, and registers with
+the network. Note that this does not register a username/identity, but merely
+creates a new cryptographic identity for adding such information at a later
+date.
 
 Users of this function should delete the storage directory on error.
  */
@@ -1905,7 +1953,7 @@ FOUNDATION_EXPORT BOOL BindingsNewCmix(NSString* _Nullable ndfJSON, NSString* _N
 backup. Users of this function should delete the storage directory on error.
 Users of this function should call LoadCmix as normal once this call succeeds.
 
-Params
+Parameters:
  - ndfJSON - JSON of the NDF.
  - storageDir - directory for the storage files.
  - sessionPassword - password to decrypt the data in the storageDir.
@@ -1919,21 +1967,21 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsNewCmixFromBackup(NSString* _Nullabl
 
 /**
  * NewDummyTrafficManager creates a DummyTraffic manager and initialises the
-dummy traffic sending thread. Note that the manager does not start sending dummy
-traffic until `True` is passed into DummyTraffic.SetStatus. The time duration
-between each sending operation and the amount of messages sent each interval
-are randomly generated values with bounds defined by the
-given parameters below.
+dummy traffic sending thread. Note that the manager does not start sending
+dummy traffic until true is passed into DummyTraffic.SetStatus. The time
+duration between each sending operation and the amount of messages sent each
+interval are randomly generated values with bounds defined by the given
+parameters below.
 
-Params:
+Parameters:
  - cmixId - a Cmix object ID in the tracker.
  - maxNumMessages - the upper bound of the random number of messages sent
    each sending cycle.
- - avgSendDeltaMS - the average duration, in milliseconds, to wait
-   between sends.
- - randomRangeMS - the upper bound of the interval between sending cycles,
-   in milliseconds. Sends occur every avgSendDeltaMS +/- a random duration
-   with an upper bound of randomRangeMS.
+ - avgSendDeltaMS - the average duration, in milliseconds, to wait between
+   sends.
+ - randomRangeMS - the upper bound of the interval between sending cycles, in
+   milliseconds. Sends occur every avgSendDeltaMS +/- a random duration with
+   an upper bound of randomRangeMS.
  */
 FOUNDATION_EXPORT BindingsDummyTraffic* _Nullable BindingsNewDummyTrafficManager(long cmixId, long maxNumMessages, long avgSendDeltaMS, long randomRangeMS, NSError* _Nullable* _Nullable error);
 
@@ -1948,28 +1996,49 @@ Parameters:
 FOUNDATION_EXPORT BindingsGroupChat* _Nullable BindingsNewGroupChat(long e2eID, id<BindingsGroupRequest> _Nullable requestFunc, id<BindingsGroupChatProcessor> _Nullable processor, NSError* _Nullable* _Nullable error);
 
 /**
- * NewOrLoadUd loads an existing Manager from storage or creates a
-new one if there is no extant storage information. Parameters need be provided
-to specify how to connect to the User Discovery service. These parameters may be used
-to contact either the UD server hosted by the xx network team or a custom
-third-party operated server. For the former, all the information may be pulled from the
-NDF using the bindings.
+ * NewOrLoadUd loads an existing UserDiscovery from storage or creates a new
+UserDiscovery if there is no storage data. Regardless of storage state,
+the UserDiscovery object returned will be registered with the
+User Discovery service. If the user is not already registered, a call
+to register will occur internally. If the user is already registered,
+this call will simply load state and return to you a UserDiscovery object.
+Some parameters are required for registering with the service, but are not required
+if the user is already registered. These will be noted in the parameters section as
+"SEMI-REQUIRED".
+
+Certain parameters are required every call to this function. These parameters are listed below
+as "REQUIRED". For example, parameters need be provided to specify how to connect to the
+User Discovery service. These parameters specifically may be used to contact either the UD
+server hosted by the xx network team or a custom third-party operated server. For the former,
+all the information may be fetched from the NDF using the bindings. These fetch
+methods are detailed in the parameters section.
 
 Params
- - e2eID - e2e object ID in the tracker
- - follower - network follower func wrapped in UdNetworkStatus
- - username - the username the user wants to register with UD.
-   If the user is already registered, this field may be blank
- - networkValidationSig is a signature provided by the network (i.e. the client registrar).
-   This may be nil, however UD may return an error in some cases (e.g. in a production level
-   environment).
- - cert is the TLS certificate for the UD server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdCertFromNdf.
- - contactFile is the data within a marshalled contact.Contact. This represents the
+ - e2eID -  REQUIRED. The tracked e2e object ID. This is returned by [E2e.GetID].
+ - follower - REQUIRED. Network follower function. This will check if the network
+   follower is running.
+ - username - SEMI-REQUIRED. The username the user wants to register with UD.
+   If the user is already registered, this field may be blank. If the user is not
+   already registered, these field must be populated with a username that meets the
+   requirements of the UD service. For example, in the xx network's UD service,
+   the username must not be registered by another user.
+ - registrationValidationSignature - SEMI-REQUIRED. A signature provided by the xx network
+   (i.e. the client registrar). If the user is not already registered, this field is required
+   in order to register with the xx network. This may be nil if the user is already registered
+   or connecting to a third-party UD service unassociated with the xx network.
+ - cert - REQUIRED. The TLS certificate for the UD server this call will connect with.
+   If this is nil, you may not contact the UD server hosted by the xx network.
+   Third-party services may vary.
+   You may use the UD server run by the xx network team by using [E2e.GetUdCertFromNdf].
+ - contactFile - REQUIRED. The data within a marshalled [contact.Contact]. This represents the
    contact file of the server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdContactFromNdf.
- - address is the IP address of the UD server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdAddressFromNdf.
+   If this is nil, you may not contact the UD server hosted by the xx network.
+   Third-party services may vary.
+   You may use the UD server run by the xx network team by using [E2e.GetUdContactFromNdf].
+ - address - REQUIRED. The IP address of the UD server this call will connect with.
+   You may use the UD server run by the xx network team by using [E2e.GetUdAddressFromNdf].
+   If this is nil, you may not contact the UD server hosted by the xx network.
+   Third-party services may vary.
 
 Returns
  - A Manager object which is registered to the specified UD service.
@@ -1986,15 +2055,27 @@ Parameters:
  - follower - network follower func wrapped in UdNetworkStatus
  - emailFactJson - nullable JSON marshalled email [fact.Fact]
  - phoneFactJson - nullable JSON marshalled phone [fact.Fact]
- - cert is the TLS certificate for the UD server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdCertFromNdf.
- - contactFile is the data within a marshalled contact.Contact. This represents the
-   contact file of the server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdContactFromNdf.
- - address is the IP address of the UD server this call will connect with.
-   You may use the UD server run by the xx network team by using E2e.GetUdAddressFromNdf.
+ - cert - the TLS certificate for the UD server this call will connect with.
+   You may use the UD server run by the xx network team by using
+   E2e.GetUdCertFromNdf.
+ - contactFile - the data within a marshalled contact.Contact. This
+   represents the contact file of the server this call will connect with. You
+   may use the UD server run by the xx network team by using
+   E2e.GetUdContactFromNdf.
+ - address - the IP address of the UD server this call will connect with. You
+   may use the UD server run by the xx network team by using
+   E2e.GetUdAddressFromNdf.
  */
 FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable emailFactJson, NSData* _Nullable phoneFactJson, NSData* _Nullable cert, NSData* _Nullable contactFile, NSString* _Nullable address, NSError* _Nullable* _Nullable error);
+
+/**
+ * RegisterForNotifications allows a client to register for push notifications.
+The token is a firebase messaging token.
+
+Parameters:
+ - e2eId - ID of the E2E object in the E2E tracker
+ */
+FOUNDATION_EXPORT BOOL BindingsRegisterForNotifications(long e2eId, NSString* _Nullable token, NSError* _Nullable* _Nullable error);
 
 /**
  * RegisterLogWriter registers a callback on which logs are written.
@@ -2050,7 +2131,7 @@ initialized or to replace the callback.
 To start the backup for the first time or to use a new password, use
 InitializeBackup.
 
-Params
+Parameters:
  - e2eID - ID of the E2e object in the e2e tracker.
  - udID - ID of the UserDiscovery object in the ud tracker.
  - cb - the callback to be called when a backup is triggered.
@@ -2074,7 +2155,8 @@ Parameters:
 
 Returns:
  - []byte - the JSON marshalled bytes of the SingleUseSendReport object,
-   which can be passed into WaitForRoundResult to see if the send succeeded.
+   which can be passed into Cmix.WaitForRoundResult to see if the send
+   succeeded.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdSearchCallback> _Nullable cb, NSData* _Nullable factListJSON, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
@@ -2083,14 +2165,17 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullab
 pass in empty facts in order to clear the facts.
 
 Parameters:
- - marshaledContact - the JSON marshalled bytes of contact.Contact object.
- - factListJSON - the JSON marshalled bytes of [fact.FactList].
+ - marshaledContact - the JSON marshalled bytes of [contact.Contact]
+ - factListJSON - the JSON marshalled bytes of [fact.FactList]
+
+Returns:
+ - []byte - marshalled bytes of the modified [contact.Contact]
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSetFactsOnContact(NSData* _Nullable marshaledContact, NSData* _Nullable factListJSON, NSError* _Nullable* _Nullable error);
 
 /**
  * StoreReceptionIdentity stores the given identity in Cmix storage with the
-given key.  This is the ideal way to securely store identities, as the caller
+given key. This is the ideal way to securely store identities, as the caller
 of this function is only required to store the given key separately rather
 than the keying material.
  */
@@ -2114,16 +2199,26 @@ Returns:
 FOUNDATION_EXPORT NSData* _Nullable BindingsTransmitSingleUse(long e2eID, NSData* _Nullable recipient, NSString* _Nullable tag, NSData* _Nullable payload, NSData* _Nullable paramsJSON, id<BindingsSingleUseResponse> _Nullable responseCB, NSError* _Nullable* _Nullable error);
 
 /**
- * UpdateCommonErrors updates the internal error mapping DB. This internal database
-maps errors returned from the backend to user-friendly error messages.
+ * UnregisterForNotifications turns off notifications for this client.
 
-Parameters
+Parameters:
+ - e2eId - ID of the E2E object in the E2E tracker
+ */
+FOUNDATION_EXPORT BOOL BindingsUnregisterForNotifications(long e2eId, NSError* _Nullable* _Nullable error);
+
+/**
+ * UpdateCommonErrors updates the internal error mapping database. This internal
+database maps errors returned from the backend to user-friendly error
+messages.
+
+Parameters:
  - jsonFile - contents of a JSON file whose format conforms to the example below.
+
 Example Input:
-  {
- 	"Failed to Unmarshal Conversation": "Could not retrieve conversation",
- 	"Failed to unmarshal SentRequestMap": "Failed to pull up friend requests",
- 	"cannot create username when network is not health": "Cannot create username, unable to connect to network",
+ {
+   "Failed to Unmarshal Conversation": "Could not retrieve conversation",
+   "Failed to unmarshal SentRequestMap": "Failed to pull up friend requests",
+   "cannot create username when network is not health": "Cannot create username, unable to connect to network",
  }
  */
 FOUNDATION_EXPORT BOOL BindingsUpdateCommonErrors(NSString* _Nullable jsonFile, NSError* _Nullable* _Nullable error);
@@ -2405,8 +2500,8 @@ received.
 
 Parameters:
  - callbackReport - the JSON marshalled bytes of the SingleUseCallbackReport
-   object, which can be passed into WaitForRoundResult to see if the send
-   succeeded.
+   object, which can be passed into Cmix.WaitForRoundResult to see if the
+   send succeeded.
  */
 @interface BindingsSingleUseCallback : NSObject <goSeqRefInterface, BindingsSingleUseCallback> {
 }
@@ -2422,8 +2517,8 @@ clients into TransmitSingleUse.
 
 Parameters:
  - callbackReport - the JSON marshalled bytes of the SingleUseResponseReport
-   object, which can be passed into WaitForRoundResult to see if the send
-   succeeded.
+   object, which can be passed into Cmix.WaitForRoundResult to see if the
+   send succeeded.
  */
 @interface BindingsSingleUseResponse : NSObject <goSeqRefInterface, BindingsSingleUseResponse> {
 }
@@ -2434,7 +2529,8 @@ Parameters:
 @end
 
 /**
- * Stopper is a public interface returned by Listen, allowing users to stop the registered listener.
+ * Stopper is a public interface returned by Listen, allowing users to stop the
+registered listener.
  */
 @interface BindingsStopper : NSObject <goSeqRefInterface, BindingsStopper> {
 }
