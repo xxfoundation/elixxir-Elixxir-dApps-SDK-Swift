@@ -1,6 +1,6 @@
 import CustomDump
 import XCTest
-@testable import ElixxirDAppsSDK
+@testable import XXClient
 
 final class FileSendTests: XCTestCase {
   func testCoding() throws {

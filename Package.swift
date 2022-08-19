@@ -5,10 +5,8 @@ import PackageDescription
 let swiftSettings: [SwiftSetting] = [
   .unsafeFlags(
     [
-      "-Xfrontend",
-      "-debug-time-function-bodies",
-      "-Xfrontend",
-      "-debug-time-expression-type-checking",
+      "-Xfrontend", "-debug-time-function-bodies",
+      "-Xfrontend", "-debug-time-expression-type-checking",
     ],
     .when(configuration: .debug)
   ),
@@ -21,7 +19,7 @@ let package = Package(
     .iOS(.v14),
   ],
   products: [
-    .library(name: "ElixxirDAppsSDK", targets: ["ElixxirDAppsSDK"]),
+    .library(name: "XXClient", targets: ["XXClient"]),
   ],
   dependencies: [
     .package(
@@ -35,7 +33,7 @@ let package = Package(
   ],
   targets: [
     .target(
-      name: "ElixxirDAppsSDK",
+      name: "XXClient",
       dependencies: [
         .target(name: "Bindings"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
@@ -43,9 +41,9 @@ let package = Package(
       swiftSettings: swiftSettings
     ),
     .testTarget(
-      name: "ElixxirDAppsSDKTests",
+      name: "XXClientTests",
       dependencies: [
-        .target(name: "ElixxirDAppsSDK"),
+        .target(name: "XXClient"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings

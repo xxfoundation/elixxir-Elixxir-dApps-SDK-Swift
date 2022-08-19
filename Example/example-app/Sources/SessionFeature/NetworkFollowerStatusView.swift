@@ -1,5 +1,5 @@
-import ElixxirDAppsSDK
 import SwiftUI
+import XXClient
 
 struct NetworkFollowerStatusView: View {
   var status: NetworkFollowerStatus?

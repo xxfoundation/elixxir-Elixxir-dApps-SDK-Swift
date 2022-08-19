@@ -15,7 +15,7 @@ You can find full documentation with step by step guide [here](https://xxdk-dev.
 
 ## 🚀 Quick Start
 
-Add `ElixxirDAppsSDK` library as a dependency to your project using Swift Package Manager.
+Add `XXClient` library as a dependency to your project using Swift Package Manager.
 
 ### ▶️ Instantiating cMix
 
@@ -139,7 +139,7 @@ Open `ElixxirDAppsSDK.xcworkspace` in Xcode (≥13.4).
 ```
 ElixxirDAppsSDK [Xcode Workspace]
  ├─ elixxir-dapps-sdk-swift [Swift Package]
- |   └─ ElixxirDAppsSDK [Library]
+ |   └─ XXClient [Library]
  └─ Example [Xcode Project]
      ├─ ExampleApp (iOS) [iOS App Target]
      ├─ example-app [Swift Package]
@@ -152,7 +152,7 @@ ElixxirDAppsSDK [Xcode Workspace]
 
 ### Build schemes
 
-- Use `exlixxir-dapps-sdk-swift` scheme to build and test the package with `ElixxirDAppsSDK` library.
+- Use `exlixxir-dapps-sdk-swift` scheme to build and test the package.
 - Use `ExampleApp (iOS)` to build and run the example app.
 - Use `example-app` scheme to build and test the example app package with all contained libraries.
 - Use `ExampleAppIcon` scheme with macOS target to build and preview the example app icon.

@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/combine-schedulers",
       "state" : {
-        "revision" : "f7c8277f05f27a5bfb2f6ecccb0bad126ffcf472",
-        "version" : "0.7.0"
+        "revision" : "8fee20f993e64bbbf22bc3e3f444758ac2d05692",
+        "version" : "0.7.2"
       }
     },
     {

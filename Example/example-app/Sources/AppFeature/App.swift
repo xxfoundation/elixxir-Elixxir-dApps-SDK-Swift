@@ -1,10 +1,10 @@
 import Combine
 import ComposableArchitecture
-import ElixxirDAppsSDK
 import ErrorFeature
 import LandingFeature
 import SessionFeature
 import SwiftUI
+import XXClient
 
 @main
 struct App: SwiftUI.App {

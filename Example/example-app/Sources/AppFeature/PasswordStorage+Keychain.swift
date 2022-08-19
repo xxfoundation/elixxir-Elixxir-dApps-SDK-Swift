@@ -1,5 +1,5 @@
-import ElixxirDAppsSDK
 import KeychainAccess
+import XXClient
 
 extension PasswordStorage {
   static let keychain: PasswordStorage = {

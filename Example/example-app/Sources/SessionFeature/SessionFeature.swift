@@ -1,8 +1,8 @@
 import Combine
 import ComposableArchitecture
-import ElixxirDAppsSDK
 import ErrorFeature
 import XCTestDynamicOverlay
+import XXClient
 
 public struct SessionState: Equatable {
   public init(

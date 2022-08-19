@@ -1,7 +1,7 @@
 import ComposableArchitecture
-import ElixxirDAppsSDK
 import ErrorFeature
 import XCTest
+import XXClient
 @testable import SessionFeature
 
 final class SessionFeatureTests: XCTestCase {

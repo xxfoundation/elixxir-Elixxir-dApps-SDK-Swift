@@ -4,10 +4,8 @@ import PackageDescription
 let swiftSettings: [SwiftSetting] = [
   .unsafeFlags(
     [
-      "-Xfrontend",
-      "-debug-time-function-bodies",
-      "-Xfrontend",
-      "-debug-time-expression-type-checking",
+      "-Xfrontend", "-debug-time-function-bodies",
+      "-Xfrontend", "-debug-time-expression-type-checking",
     ],
     .when(configuration: .debug)
   ),
@@ -26,16 +24,15 @@ let package = Package(
   ],
   dependencies: [
     .package(
+      path: "../../"
+    ),
+    .package(
       url: "https://github.com/pointfreeco/swift-composable-architecture.git",
       .upToNextMajor(from: "0.39.0")
     ),
     .package(
       url: "https://github.com/darrarski/swift-composable-presentation.git",
       .upToNextMajor(from: "0.5.2")
-    ),
-    .package(
-      // ElixxirDAppsSDK
-      path: "../../"
     ),
     .package(
       url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
@@ -55,9 +52,9 @@ let package = Package(
         .target(name: "SessionFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
-        .product(name: "ElixxirDAppsSDK", package: "elixxir-dapps-sdk-swift"),
         .product(name: "KeychainAccess", package: "KeychainAccess"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -72,8 +69,8 @@ let package = Package(
       name: "ErrorFeature",
       dependencies: [
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-        .product(name: "ElixxirDAppsSDK", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -90,8 +87,8 @@ let package = Package(
         .target(name: "ErrorFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
-        .product(name: "ElixxirDAppsSDK", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -108,8 +105,8 @@ let package = Package(
         .target(name: "ErrorFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
-        .product(name: "ElixxirDAppsSDK", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
       ],
       swiftSettings: swiftSettings
     ),
