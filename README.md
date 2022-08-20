@@ -139,7 +139,8 @@ Open `ElixxirDAppsSDK.xcworkspace` in Xcode (≥13.4).
 ```
 ElixxirDAppsSDK [Xcode Workspace]
  ├─ elixxir-dapps-sdk-swift [Swift Package]
- |   └─ XXClient [Library]
+ |   ├─ XXClient [Library]
+ |   └─ XXMessengerClient [Library]
  └─ Example [Xcode Project]
      ├─ ExampleApp (iOS) [iOS App Target]
      ├─ example-app [Swift Package]
@@ -157,7 +158,7 @@ ElixxirDAppsSDK [Xcode Workspace]
 - Use `example-app` scheme to build and test the example app package with all contained libraries.
 - Use `ExampleAppIcon` scheme with macOS target to build and preview the example app icon.
 - Use `example-app-icon-export` scheme with macOS target to build and update the example app icon.
-- Use other schemes, like `AppFeature`, for building and testing individual libraries in isolation.
+- Use other schemes, like `XXClient`, for building and testing individual libraries in isolation.
 
 ## 📄 License
 
