@@ -2,9 +2,9 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct DownloadAndVerifySignedNdf {
-  public var run: (Environment) throws -> Data
+  public var run: (NDFEnvironment) throws -> Data
 
-  public func callAsFunction(_ env: Environment) throws -> Data {
+  public func callAsFunction(_ env: NDFEnvironment) throws -> Data {
     try run(env)
   }
 }

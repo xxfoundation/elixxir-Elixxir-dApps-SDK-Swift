@@ -16,7 +16,7 @@ extension CMixManager {
       .appendingPathComponent("xx.network.client")
       .path,
     fileManager: FileManager = .default,
-    environment: Environment = .mainnet,
+    ndfEnvironment: NDFEnvironment = .mainnet,
     downloadNDF: DownloadAndVerifySignedNdf = .live,
     generateSecret: GenerateSecret = .live,
     passwordStorage: PasswordStorage,
@@ -31,7 +31,7 @@ extension CMixManager {
         fileManager: fileManager
       ),
       create: .live(
-        environment: environment,
+        ndfEnvironment: ndfEnvironment,
         downloadNDF: downloadNDF,
         generateSecret: generateSecret,
         passwordStorage: passwordStorage,
@@ -42,7 +42,7 @@ extension CMixManager {
         loadCMix: loadCMix
       ),
       restore: .live(
-        environment: environment,
+        ndfEnvironment: ndfEnvironment,
         downloadNDF: downloadNDF,
         generateSecret: generateSecret,
         passwordStorage: passwordStorage,
