@@ -5,7 +5,7 @@
 
 ## 📱 Demo
 
-Refer to this [demo](https://git.xx.network/elixxir/shielded-help-demo/elixxir-dapp-demo) to see an example of how to build an app with the SDK to send `E2E` messages and send `RestLike` messsage.
+Refer to this [demo](https://git.xx.network/elixxir/shielded-help-demo/elixxir-dapp-demo) to see an example of how to build an app with the SDK to send `E2E` messages and send `RestLike` message.
 
 Also you can checkout included example iOS application.
 
