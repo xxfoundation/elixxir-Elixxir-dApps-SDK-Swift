@@ -39,6 +39,9 @@ func start(messenger: Messenger) throws {
     try messenger.load()
   }
 
+  // start messenger's network follower:
+  try messenger.start()
+
   // check if messenger is connected:
   if messenger.isConnected() == false {
     // start end-to-end connection:
