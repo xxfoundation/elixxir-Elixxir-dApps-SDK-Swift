@@ -8,7 +8,7 @@ Example:
 
 ```swift
 // setup environment:
-var environment: Environment = .live()
+var environment: MessengerEnvironment = .live()
 
 // change cMix NDF environment if needed:
 environment.ndfEnvironment = ...
