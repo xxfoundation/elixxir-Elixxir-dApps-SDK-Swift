@@ -1,6 +1,9 @@
 import XXClient
 
 public struct Messenger {
+  public var cMix: MessengerCMix
+  public var e2e: MessengerE2E
+  public var ud: MessengerUD
   public var isCreated: MessengerIsCreated
   public var create: MessengerCreate
   public var isLoaded: MessengerIsLoaded
@@ -16,6 +19,9 @@ public struct Messenger {
 extension Messenger {
   public static func live(_ env: MessengerEnvironment) -> Messenger {
     Messenger(
+      cMix: .live(env),
+      e2e: .live(env),
+      ud: .live(env),
       isCreated: .live(env),
       create: .live(env),
       isLoaded: .live(env),
@@ -32,6 +38,9 @@ extension Messenger {
 
 extension Messenger {
   public static let unimplemented = Messenger(
+    cMix: .unimplemented,
+    e2e: .unimplemented,
+    ud: .unimplemented,
     isCreated: .unimplemented,
     create: .unimplemented,
     isLoaded: .unimplemented,
