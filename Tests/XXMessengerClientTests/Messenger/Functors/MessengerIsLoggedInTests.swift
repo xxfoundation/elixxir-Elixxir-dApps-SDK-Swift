@@ -3,16 +3,16 @@ import XCTest
 
 final class MessengerIsLoggedInTests: XCTestCase {
   func testWithUD() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.ud = .unimplemented
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getUD = { .unimplemented }
     let isLoggedIn: MessengerIsLoggedIn = .live(env)
 
     XCTAssertTrue(isLoggedIn())
   }
 
   func testWithoutUD() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.ud = nil
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getUD = { nil }
     let isLoggedIn: MessengerIsLoggedIn = .live(env)
 
     XCTAssertFalse(isLoggedIn())

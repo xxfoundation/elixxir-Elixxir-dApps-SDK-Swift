@@ -29,30 +29,32 @@ extension MessengerEnvironment {
     .appendingPathComponent("xx.network.client")
     .path
 
-  public static let live = MessengerEnvironment(
-    ctx: .init(),
-    downloadNDF: .live,
-    fileManager: .live(),
-    generateSecret: .live,
-    getCMixParams: .liveDefault,
-    getE2EParams: .liveDefault,
-    isRegisteredWithUD: .live,
-    loadCMix: .live,
-    login: .live,
-    ndfEnvironment: .mainnet,
-    newCMix: .live,
-    newOrLoadUd: .live,
-    passwordStorage: .keychain,
-    storageDir: MessengerEnvironment.defaultStorageDir,
-    udAddress: nil,
-    udCert: nil,
-    udContact: nil
-  )
+  public static func live() -> MessengerEnvironment {
+    MessengerEnvironment(
+      ctx: .live(),
+      downloadNDF: .live,
+      fileManager: .live(),
+      generateSecret: .live,
+      getCMixParams: .liveDefault,
+      getE2EParams: .liveDefault,
+      isRegisteredWithUD: .live,
+      loadCMix: .live,
+      login: .live,
+      ndfEnvironment: .mainnet,
+      newCMix: .live,
+      newOrLoadUd: .live,
+      passwordStorage: .keychain,
+      storageDir: MessengerEnvironment.defaultStorageDir,
+      udAddress: nil,
+      udCert: nil,
+      udContact: nil
+    )
+  }
 }
 
 extension MessengerEnvironment {
   public static let unimplemented = MessengerEnvironment(
-    ctx: .init(),
+    ctx: .unimplemented,
     downloadNDF: .unimplemented,
     fileManager: .unimplemented,
     generateSecret: .unimplemented,

@@ -17,16 +17,16 @@ public struct MessengerLogIn {
 extension MessengerLogIn {
   public static func live(_ env: MessengerEnvironment) -> MessengerLogIn {
     MessengerLogIn {
-      guard let cMix = env.ctx.cMix else {
+      guard let cMix = env.ctx.getCMix() else {
         throw Error.notLoaded
       }
-      guard let e2e = env.ctx.e2e else {
+      guard let e2e = env.ctx.getE2E() else {
         throw Error.notConnected
       }
       if cMix.networkFollowerStatus() != .running {
         try cMix.startNetworkFollower(timeoutMS: 30_000)
       }
-      env.ctx.ud = try env.newOrLoadUd(
+      env.ctx.setUD(try env.newOrLoadUd(
         params: .init(
           e2eId: e2e.getId(),
           username: nil,
@@ -38,7 +38,7 @@ extension MessengerLogIn {
         follower: .init {
           cMix.networkFollowerStatus().rawValue
         }
-      )
+      ))
     }
   }
 }

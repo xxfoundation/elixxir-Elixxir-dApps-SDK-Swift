@@ -3,16 +3,16 @@ import XCTest
 
 final class MessengerIsConnectedTests: XCTestCase {
   func testWithE2E() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.e2e = .unimplemented
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getE2E = { .unimplemented }
     let isConnected: MessengerIsConnected = .live(env)
 
     XCTAssertTrue(isConnected())
   }
 
   func testWithoutE2E() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.e2e = nil
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getE2E = { nil }
     let isConnected: MessengerIsConnected = .live(env)
 
     XCTAssertFalse(isConnected())

@@ -1,4 +1,5 @@
 import XCTest
+import XXClient
 @testable import XXMessengerClient
 
 final class MessengerIsRegisteredTests: XCTestCase {
@@ -6,8 +7,11 @@ final class MessengerIsRegisteredTests: XCTestCase {
     var didIsRegisteredWithUD: [Int] = []
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.e2e = .unimplemented
-    env.ctx.e2e!.getId.run = { 1234 }
+    env.ctx.getE2E = {
+      var e2e: E2E = .unimplemented
+      e2e.getId.run = { 1234 }
+      return e2e
+    }
     env.isRegisteredWithUD.run = { e2eId in
       didIsRegisteredWithUD.append(e2eId)
       return true
@@ -20,8 +24,11 @@ final class MessengerIsRegisteredTests: XCTestCase {
 
   func testNotRegistered() throws {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.e2e = .unimplemented
-    env.ctx.e2e!.getId.run = { 1234 }
+    env.ctx.getE2E = {
+      var e2e: E2E = .unimplemented
+      e2e.getId.run = { 1234 }
+      return e2e
+    }
     env.isRegisteredWithUD.run = { _ in false }
     let isRegistered: MessengerIsRegistered = .live(env)
 
@@ -29,8 +36,8 @@ final class MessengerIsRegisteredTests: XCTestCase {
   }
 
   func testWithoutE2E() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.e2e = nil
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getE2E = { nil }
     let isRegistered: MessengerIsRegistered = .live(env)
 
     XCTAssertThrowsError(try isRegistered()) { err in
@@ -46,8 +53,11 @@ final class MessengerIsRegisteredTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.e2e = .unimplemented
-    env.ctx.e2e!.getId.run = { 1234 }
+    env.ctx.getE2E = {
+      var e2e: E2E = .unimplemented
+      e2e.getId.run = { 1234 }
+      return e2e
+    }
     env.isRegisteredWithUD.run = { _ in throw error }
     let isRegistered: MessengerIsRegistered = .live(env)
 

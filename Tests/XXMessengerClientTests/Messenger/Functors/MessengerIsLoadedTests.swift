@@ -3,16 +3,16 @@ import XCTest
 
 final class MessengerIsLoadedTests: XCTestCase {
   func testWithCMix() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getCMix = { .unimplemented }
     let isLoaded: MessengerIsLoaded = .live(env)
 
     XCTAssertTrue(isLoaded())
   }
 
   func testWithoutCMix() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = nil
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getCMix = { nil }
     let isLoaded: MessengerIsLoaded = .live(env)
 
     XCTAssertFalse(isLoaded())

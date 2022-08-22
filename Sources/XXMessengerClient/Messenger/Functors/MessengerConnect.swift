@@ -16,14 +16,14 @@ public struct MessengerConnect {
 extension MessengerConnect {
   public static func live(_ env: MessengerEnvironment) -> MessengerConnect {
     MessengerConnect {
-      guard let cMix = env.ctx.cMix else {
+      guard let cMix = env.ctx.getCMix() else {
         throw Error.notLoaded
       }
-      env.ctx.e2e = try env.login(
+      env.ctx.setE2E(try env.login(
         cMixId: cMix.getId(),
         identity: try cMix.makeLegacyReceptionIdentity(),
         e2eParamsJSON: env.getE2EParams()
-      )
+      ))
     }
   }
 }

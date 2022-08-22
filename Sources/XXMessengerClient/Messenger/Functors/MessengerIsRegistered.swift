@@ -16,7 +16,7 @@ public struct MessengerIsRegistered {
 extension MessengerIsRegistered {
   public static func live(_ env: MessengerEnvironment) -> MessengerIsRegistered {
     MessengerIsRegistered {
-      guard let e2e = env.ctx.e2e else {
+      guard let e2e = env.ctx.getE2E() else {
         throw Error.notConnected
       }
       return try env.isRegisteredWithUD(e2eId: e2e.getId())

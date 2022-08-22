@@ -8,6 +8,7 @@ final class MessengerRegisterTests: XCTestCase {
     var didStartNetworkFollower: [Int] = []
     var didNewOrLoadUDWithParams: [NewOrLoadUd.Params] = []
     var didNewOrLoadUDWithFollower: [UdNetworkStatus] = []
+    var didSetUD: [UserDiscovery?] = []
 
     let e2eId = 1234
     let networkFollowerStatus: NetworkFollowerStatus = .stopped
@@ -18,22 +19,29 @@ final class MessengerRegisterTests: XCTestCase {
     let username = "new-user-name"
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.cMix!.networkFollowerStatus.run = { networkFollowerStatus }
-    env.ctx.cMix!.startNetworkFollower.run = { timeout in
-      didStartNetworkFollower.append(timeout)
+    env.ctx.getCMix = {
+      var cMix: CMix = .unimplemented
+      cMix.networkFollowerStatus.run = { networkFollowerStatus }
+      cMix.startNetworkFollower.run = { timeout in
+        didStartNetworkFollower.append(timeout)
+      }
+      cMix.getReceptionRegistrationValidationSignature.run = {
+        registrationSignature
+      }
+      return cMix
     }
-    env.ctx.cMix!.getReceptionRegistrationValidationSignature.run = {
-      registrationSignature
+    env.ctx.getE2E = {
+      var e2e: E2E = .unimplemented
+      e2e.getId.run = { e2eId }
+      e2e.getUdCertFromNdf.run = { udCertFromNDF }
+      e2e.getUdContactFromNdf.run = { udContactFromNDF }
+      e2e.getUdAddressFromNdf.run = { udAddressFromNDF }
+      return e2e
     }
-    env.ctx.e2e = .unimplemented
-    env.ctx.e2e!.getId.run = { e2eId }
+    env.ctx.setUD = { didSetUD.append($0) }
     env.udCert = nil
     env.udContact = nil
     env.udAddress = nil
-    env.ctx.e2e!.getUdCertFromNdf.run = { udCertFromNDF }
-    env.ctx.e2e!.getUdContactFromNdf.run = { udContactFromNDF }
-    env.ctx.e2e!.getUdAddressFromNdf.run = { udAddressFromNDF }
     env.newOrLoadUd.run = { params, follower in
       didNewOrLoadUDWithParams.append(params)
       didNewOrLoadUDWithFollower.append(follower)
@@ -56,11 +64,13 @@ final class MessengerRegisterTests: XCTestCase {
       didNewOrLoadUDWithFollower.first?.handle(),
       networkFollowerStatus.rawValue
     )
-    XCTAssertNotNil(env.ctx.ud)
+    XCTAssertEqual(didSetUD.compactMap { $0 }.count, 1)
   }
 
   func testRegisterWithAlternativeUD() throws {
     var didNewOrLoadUDWithParams: [NewOrLoadUd.Params] = []
+    var didSetUD: [UserDiscovery?] = []
+
     let e2eId = 1234
     let registrationSignature = "registration-signature".data(using: .utf8)!
     let altUdCert = "alt-ud-cert".data(using: .utf8)!
@@ -69,13 +79,20 @@ final class MessengerRegisterTests: XCTestCase {
     let username = "new-user-name"
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.cMix!.networkFollowerStatus.run = { .running }
-    env.ctx.cMix!.getReceptionRegistrationValidationSignature.run = {
-      registrationSignature
+    env.ctx.getCMix = {
+      var cMix: CMix = .unimplemented
+      cMix.networkFollowerStatus.run = { .running }
+      cMix.getReceptionRegistrationValidationSignature.run = {
+        registrationSignature
+      }
+      return cMix
     }
-    env.ctx.e2e = .unimplemented
-    env.ctx.e2e!.getId.run = { e2eId }
+    env.ctx.getE2E = {
+      var e2e: E2E = .unimplemented
+      e2e.getId.run = { e2eId }
+      return e2e
+    }
+    env.ctx.setUD = { didSetUD.append($0) }
     env.udCert = altUdCert
     env.udContact = altUdContact
     env.udAddress = altUdAddress
@@ -94,12 +111,12 @@ final class MessengerRegisterTests: XCTestCase {
       contactFile: altUdContact,
       address: altUdAddress
     )])
-    XCTAssertNotNil(env.ctx.ud)
+    XCTAssertEqual(didSetUD.compactMap { $0 }.count, 1)
   }
 
   func testRegisterWithoutCMix() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = nil
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getCMix = { nil }
     let register: MessengerRegister = .live(env)
 
     XCTAssertThrowsError(try register(username: "new-user-name")) { error in
@@ -111,9 +128,9 @@ final class MessengerRegisterTests: XCTestCase {
   }
 
   func testRegisterWithoutE2E() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.e2e = nil
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getCMix = { .unimplemented }
+    env.ctx.getE2E = { nil }
     let register: MessengerRegister = .live(env)
 
     XCTAssertThrowsError(try register(username: "new-user-name")) { error in
@@ -128,11 +145,14 @@ final class MessengerRegisterTests: XCTestCase {
     struct Error: Swift.Error, Equatable {}
     let error = Error()
 
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.cMix!.networkFollowerStatus.run = { .stopped }
-    env.ctx.cMix!.startNetworkFollower.run = { _ in throw error }
-    env.ctx.e2e = .unimplemented
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getCMix = {
+      var cMix: CMix = .unimplemented
+      cMix.networkFollowerStatus.run = { .stopped }
+      cMix.startNetworkFollower.run = { _ in throw error }
+      return cMix
+    }
+    env.ctx.getE2E = { .unimplemented }
     let register: MessengerRegister = .live(env)
 
     XCTAssertThrowsError(try register(username: "new-user-name")) { err in
@@ -145,17 +165,23 @@ final class MessengerRegisterTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.cMix!.networkFollowerStatus.run = { .running }
-    env.ctx.cMix!.getReceptionRegistrationValidationSignature.run = {
-      "registration-signature".data(using: .utf8)!
+    env.ctx.getCMix = {
+      var cMix: CMix = .unimplemented
+      cMix.networkFollowerStatus.run = { .running }
+      cMix.getReceptionRegistrationValidationSignature.run = {
+        "registration-signature".data(using: .utf8)!
+      }
+      return cMix
     }
-    env.ctx.e2e = .unimplemented
-    env.ctx.e2e!.getId.run = { 1234 }
+    env.ctx.getE2E = {
+      var e2e: E2E = .unimplemented
+      e2e.getId.run = { 1234 }
+      e2e.getUdCertFromNdf.run = { "ndf-ud-cert".data(using: .utf8)! }
+      e2e.getUdContactFromNdf.run = { throw error }
+      return e2e
+    }
     env.udCert = nil
     env.udContact = nil
-    env.ctx.e2e!.getUdCertFromNdf.run = { "ndf-ud-cert".data(using: .utf8)! }
-    env.ctx.e2e!.getUdContactFromNdf.run = { throw error }
     let register: MessengerRegister = .live(env)
 
     XCTAssertThrowsError(try register(username: "new-user-name")) { err in
@@ -168,13 +194,19 @@ final class MessengerRegisterTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.cMix!.networkFollowerStatus.run = { .running }
-    env.ctx.cMix!.getReceptionRegistrationValidationSignature.run = {
-      "registration-signature".data(using: .utf8)!
+    env.ctx.getCMix = {
+      var cMix: CMix = .unimplemented
+      cMix.networkFollowerStatus.run = { .running }
+      cMix.getReceptionRegistrationValidationSignature.run = {
+        "registration-signature".data(using: .utf8)!
+      }
+      return cMix
     }
-    env.ctx.e2e = .unimplemented
-    env.ctx.e2e!.getId.run = { 1234 }
+    env.ctx.getE2E = {
+      var e2e: E2E = .unimplemented
+      e2e.getId.run = { 1234 }
+      return e2e
+    }
     env.udCert = "ud-cert".data(using: .utf8)!
     env.udContact = "ud-contact".data(using: .utf8)!
     env.udAddress = "ud-address"

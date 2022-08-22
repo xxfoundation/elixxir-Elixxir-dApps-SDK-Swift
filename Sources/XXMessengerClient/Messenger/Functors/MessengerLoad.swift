@@ -12,11 +12,11 @@ public struct MessengerLoad {
 extension MessengerLoad {
   public static func live(_ env: MessengerEnvironment) -> MessengerLoad {
     MessengerLoad {
-      env.ctx.cMix = try env.loadCMix(
+      env.ctx.setCMix(try env.loadCMix(
         storageDir: env.storageDir,
         password: try env.passwordStorage.load(),
         cMixParamsJSON: env.getCMixParams()
-      )
+      ))
     }
   }
 }

@@ -12,16 +12,22 @@ final class MessengerConnectTests: XCTestCase {
       var identity: ReceptionIdentity
       var e2eParamsJSON: Data
     }
+
     var didLogIn: [DidLogIn] = []
+    var didSetE2E: [E2E?] = []
 
     let cMixId = 1234
     let receptionId = ReceptionIdentity.stub
     let e2eParams = "e2e-params".data(using: .utf8)!
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.cMix!.getId.run = { cMixId }
-    env.ctx.cMix!.makeLegacyReceptionIdentity.run = { receptionId }
+    env.ctx.getCMix = {
+      var cMix: CMix = .unimplemented
+      cMix.getId.run = { cMixId }
+      cMix.makeLegacyReceptionIdentity.run = { receptionId }
+      return cMix
+    }
+    env.ctx.setE2E = { didSetE2E.append($0) }
     env.getE2EParams.run = { e2eParams }
     env.login.run = { ephemeral, cMixId, authCallbacks, identity, e2eParamsJSON in
       didLogIn.append(.init(
@@ -46,13 +52,12 @@ final class MessengerConnectTests: XCTestCase {
         e2eParamsJSON: e2eParams
       )
     ])
-
-    XCTAssertNotNil(env.ctx.e2e)
+    XCTAssertEqual(didSetE2E.compactMap { $0 }.count, 1)
   }
 
   func testConnectWithoutCMix() {
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = nil
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getCMix = { nil }
     let connect: MessengerConnect = .live(env)
 
     XCTAssertThrowsError(try connect()) { error in
@@ -67,10 +72,13 @@ final class MessengerConnectTests: XCTestCase {
     struct Error: Swift.Error, Equatable {}
     let error = Error()
 
-    let env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.cMix!.getId.run = { 1234 }
-    env.ctx.cMix!.makeLegacyReceptionIdentity.run = { throw error }
+    var env: MessengerEnvironment = .unimplemented
+    env.ctx.getCMix = {
+      var cMix: CMix = .unimplemented
+      cMix.getId.run = { 1234 }
+      cMix.makeLegacyReceptionIdentity.run = { throw error }
+      return cMix
+    }
     let connect: MessengerConnect = .live(env)
 
     XCTAssertThrowsError(try connect()) { err in
@@ -83,9 +91,12 @@ final class MessengerConnectTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.cMix = .unimplemented
-    env.ctx.cMix!.getId.run = { 1234 }
-    env.ctx.cMix!.makeLegacyReceptionIdentity.run = { .stub }
+    env.ctx.getCMix = {
+      var cMix: CMix = .unimplemented
+      cMix.getId.run = { 1234 }
+      cMix.makeLegacyReceptionIdentity.run = { .stub }
+      return cMix
+    }
     env.getE2EParams.run = { "e2e-params".data(using: .utf8)! }
     env.login.run = { _, _, _, _, _ in throw error }
     let connect: MessengerConnect = .live(env)
