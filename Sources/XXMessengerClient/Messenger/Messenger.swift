@@ -15,6 +15,7 @@ public struct Messenger {
   public var register: MessengerRegister
   public var isLoggedIn: MessengerIsLoggedIn
   public var logIn: MessengerLogIn
+  public var waitForNetwork: MessengerWaitForNetwork
 }
 
 extension Messenger {
@@ -33,7 +34,8 @@ extension Messenger {
       isRegistered: .live(env),
       register: .live(env),
       isLoggedIn: .live(env),
-      logIn: .live(env)
+      logIn: .live(env),
+      waitForNetwork: .live(env)
     )
   }
 }
@@ -53,6 +55,7 @@ extension Messenger {
     isRegistered: .unimplemented,
     register: .unimplemented,
     isLoggedIn: .unimplemented,
-    logIn: .unimplemented
+    logIn: .unimplemented,
+    waitForNetwork: .unimplemented
   )
 }
