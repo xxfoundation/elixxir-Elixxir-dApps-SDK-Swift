@@ -31,6 +31,10 @@ let package = Package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
       .upToNextMajor(from: "0.4.0")
     ),
+    .package(
+      url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
+      .upToNextMajor(from: "4.2.2")
+    ),
   ],
   targets: [
     .target(
@@ -53,6 +57,7 @@ let package = Package(
       name: "XXMessengerClient",
       dependencies: [
         .target(name: "XXClient"),
+        .product(name: "KeychainAccess", package: "KeychainAccess"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ],
       swiftSettings: swiftSettings

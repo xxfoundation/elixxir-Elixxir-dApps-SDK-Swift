@@ -1,1 +1,0 @@
-private enum Unimplemented {}
