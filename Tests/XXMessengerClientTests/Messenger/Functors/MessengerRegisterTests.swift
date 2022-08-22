@@ -28,9 +28,9 @@ final class MessengerRegisterTests: XCTestCase {
     }
     env.ctx.e2e = .unimplemented
     env.ctx.e2e!.getId.run = { e2eId }
-    env.udCert = { nil }
-    env.udContact = { nil }
-    env.udAddress = { nil }
+    env.udCert = nil
+    env.udContact = nil
+    env.udAddress = nil
     env.ctx.e2e!.getUdCertFromNdf.run = { udCertFromNDF }
     env.ctx.e2e!.getUdContactFromNdf.run = { udContactFromNDF }
     env.ctx.e2e!.getUdAddressFromNdf.run = { udAddressFromNDF }
@@ -76,9 +76,9 @@ final class MessengerRegisterTests: XCTestCase {
     }
     env.ctx.e2e = .unimplemented
     env.ctx.e2e!.getId.run = { e2eId }
-    env.udCert = { altUdCert }
-    env.udContact = { altUdContact }
-    env.udAddress = { altUdAddress }
+    env.udCert = altUdCert
+    env.udContact = altUdContact
+    env.udAddress = altUdAddress
     env.newOrLoadUd.run = { params, _ in
       didNewOrLoadUDWithParams.append(params)
       return .unimplemented
@@ -152,8 +152,8 @@ final class MessengerRegisterTests: XCTestCase {
     }
     env.ctx.e2e = .unimplemented
     env.ctx.e2e!.getId.run = { 1234 }
-    env.udCert = { nil }
-    env.udContact = { nil }
+    env.udCert = nil
+    env.udContact = nil
     env.ctx.e2e!.getUdCertFromNdf.run = { "ndf-ud-cert".data(using: .utf8)! }
     env.ctx.e2e!.getUdContactFromNdf.run = { throw error }
     let register: MessengerRegister = .live(env)
@@ -175,9 +175,9 @@ final class MessengerRegisterTests: XCTestCase {
     }
     env.ctx.e2e = .unimplemented
     env.ctx.e2e!.getId.run = { 1234 }
-    env.udCert = { "ud-cert".data(using: .utf8)! }
-    env.udContact = { "ud-contact".data(using: .utf8)! }
-    env.udAddress = { "ud-address" }
+    env.udCert = "ud-cert".data(using: .utf8)!
+    env.udContact = "ud-contact".data(using: .utf8)!
+    env.udAddress = "ud-address"
     env.newOrLoadUd.run = { _, _ in throw error }
     let register: MessengerRegister = .live(env)
 

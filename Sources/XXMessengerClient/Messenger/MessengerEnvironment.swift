@@ -16,10 +16,10 @@ public struct MessengerEnvironment {
   public var newCMix: NewCMix
   public var newOrLoadUd: NewOrLoadUd
   public var passwordStorage: PasswordStorage
-  public var storageDir: () -> String
-  public var udAddress: () -> String?
-  public var udCert: () -> Data?
-  public var udContact: () -> Data?
+  public var storageDir: String
+  public var udAddress: String?
+  public var udCert: Data?
+  public var udContact: Data?
 }
 
 extension MessengerEnvironment {
@@ -43,10 +43,10 @@ extension MessengerEnvironment {
     newCMix: .live,
     newOrLoadUd: .live,
     passwordStorage: .keychain,
-    storageDir: { MessengerEnvironment.defaultStorageDir },
-    udAddress: { nil },
-    udCert: { nil },
-    udContact: { nil }
+    storageDir: MessengerEnvironment.defaultStorageDir,
+    udAddress: nil,
+    udCert: nil,
+    udContact: nil
   )
 }
 
@@ -65,9 +65,9 @@ extension MessengerEnvironment {
     newCMix: .unimplemented,
     newOrLoadUd: .unimplemented,
     passwordStorage: .unimplemented,
-    storageDir: XCTUnimplemented("\(Self.self).storageDir", placeholder: ""),
-    udAddress: XCTUnimplemented("\(Self.self).udAddress", placeholder: nil),
-    udCert: XCTUnimplemented("\(Self.self).udCert", placeholder: nil),
-    udContact: XCTUnimplemented("\(Self.self).udContact", placeholder: nil)
+    storageDir: "unimplemented",
+    udAddress: nil,
+    udCert: nil,
+    udContact: nil
   )
 }

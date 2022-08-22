@@ -31,9 +31,9 @@ extension MessengerLogIn {
           e2eId: e2e.getId(),
           username: nil,
           registrationValidationSignature: nil,
-          cert: env.udCert() ?? e2e.getUdCertFromNdf(),
-          contactFile: env.udContact() ?? (try e2e.getUdContactFromNdf()),
-          address: env.udAddress() ?? e2e.getUdAddressFromNdf()
+          cert: env.udCert ?? e2e.getUdCertFromNdf(),
+          contactFile: env.udContact ?? (try e2e.getUdContactFromNdf()),
+          address: env.udAddress ?? e2e.getUdAddressFromNdf()
         ),
         follower: .init {
           cMix.networkFollowerStatus().rawValue

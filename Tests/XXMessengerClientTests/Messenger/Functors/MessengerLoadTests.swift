@@ -18,7 +18,7 @@ final class MessengerLoadTests: XCTestCase {
 
     var env: MessengerEnvironment = .unimplemented
     env.ctx.cMix = nil
-    env.storageDir = { storageDir }
+    env.storageDir = storageDir
     env.passwordStorage.load = { password }
     env.getCMixParams.run = { cMixParams }
     env.loadCMix.run = { storageDir, password, cMixParamsJSON in
@@ -46,7 +46,7 @@ final class MessengerLoadTests: XCTestCase {
   func testMissingPassword() {
     var env: MessengerEnvironment = .unimplemented
     env.ctx.cMix = nil
-    env.storageDir = { "storage-dir" }
+    env.storageDir = "storage-dir"
     env.passwordStorage.load = { throw PasswordStorage.MissingPasswordError() }
     let load: MessengerLoad = .live(env)
 
@@ -64,7 +64,7 @@ final class MessengerLoadTests: XCTestCase {
 
     var env: MessengerEnvironment = .unimplemented
     env.ctx.cMix = nil
-    env.storageDir = { "storage-dir" }
+    env.storageDir = "storage-dir"
     env.passwordStorage.load = { "password".data(using: .utf8)! }
     env.getCMixParams.run = { "cmix-params".data(using: .utf8)! }
     env.loadCMix.run = { _, _, _ in throw error }

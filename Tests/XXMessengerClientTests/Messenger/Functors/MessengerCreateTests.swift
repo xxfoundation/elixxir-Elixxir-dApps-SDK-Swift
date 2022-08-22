@@ -36,9 +36,7 @@ final class MessengerCreateTests: XCTestCase {
     env.passwordStorage.save = { password in
       didSavePassword.append(password)
     }
-    env.storageDir = {
-      storageDir
-    }
+    env.storageDir = storageDir
     env.fileManager.removeDirectory = { path in
       didRemoveDirectory.append(path)
     }
@@ -109,7 +107,7 @@ final class MessengerCreateTests: XCTestCase {
     env.downloadNDF.run = { _ in "ndf".data(using: .utf8)! }
     env.generateSecret.run = { _ in "password".data(using: .utf8)! }
     env.passwordStorage.save = { _ in }
-    env.storageDir = { "storage-dir" }
+    env.storageDir = "storage-dir"
     env.fileManager.removeDirectory = { _ in throw error }
     let create: MessengerCreate = .live(env)
 
@@ -127,7 +125,7 @@ final class MessengerCreateTests: XCTestCase {
     env.downloadNDF.run = { _ in "ndf".data(using: .utf8)! }
     env.generateSecret.run = { _ in "password".data(using: .utf8)! }
     env.passwordStorage.save = { _ in }
-    env.storageDir = { "storage-dir" }
+    env.storageDir = "storage-dir"
     env.fileManager.removeDirectory = { _ in }
     env.fileManager.createDirectory = { _ in throw error }
     let create: MessengerCreate = .live(env)
@@ -146,7 +144,7 @@ final class MessengerCreateTests: XCTestCase {
     env.downloadNDF.run = { _ in "ndf".data(using: .utf8)! }
     env.generateSecret.run = { _ in "password".data(using: .utf8)! }
     env.passwordStorage.save = { _ in }
-    env.storageDir = { "storage-dir" }
+    env.storageDir = "storage-dir"
     env.fileManager.removeDirectory = { _ in }
     env.fileManager.createDirectory = { _ in }
     env.newCMix.run = { _, _, _, _ in throw error }

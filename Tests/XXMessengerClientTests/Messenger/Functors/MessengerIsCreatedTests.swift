@@ -8,7 +8,7 @@ final class MessengerIsCreatedTests: XCTestCase {
     let storageDir = "storage-dir"
 
     var env: MessengerEnvironment = .unimplemented
-    env.storageDir = { storageDir }
+    env.storageDir = storageDir
     env.fileManager.isDirectoryEmpty = { path in
       didIsDirectoryEmpty.append(path)
       return false
@@ -24,7 +24,7 @@ final class MessengerIsCreatedTests: XCTestCase {
     let storageDir = "storage-dir"
 
     var env: MessengerEnvironment = .unimplemented
-    env.storageDir = { storageDir }
+    env.storageDir = storageDir
     env.fileManager.isDirectoryEmpty = { path in
       didIsDirectoryEmpty.append(path)
       return true

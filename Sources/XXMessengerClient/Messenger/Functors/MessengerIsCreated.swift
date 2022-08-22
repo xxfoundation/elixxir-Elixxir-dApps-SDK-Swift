@@ -12,7 +12,7 @@ public struct MessengerIsCreated {
 extension MessengerIsCreated {
   public static func live(_ env: MessengerEnvironment) -> MessengerIsCreated {
     MessengerIsCreated {
-      env.fileManager.isDirectoryEmpty(env.storageDir()) == false
+      env.fileManager.isDirectoryEmpty(env.storageDir) == false
     }
   }
 }
