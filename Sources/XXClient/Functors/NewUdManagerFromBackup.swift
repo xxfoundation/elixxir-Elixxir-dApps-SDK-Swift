@@ -6,6 +6,7 @@ public struct NewUdManagerFromBackup {
     public init(
       e2eId: Int,
       follower: UdNetworkStatus,
+      username: Fact,
       email: Fact?,
       phone: Fact?,
       cert: Data,
@@ -14,6 +15,7 @@ public struct NewUdManagerFromBackup {
     ) {
       self.e2eId = e2eId
       self.follower = follower
+      self.username = username
       self.email = email
       self.phone = phone
       self.cert = cert
@@ -23,6 +25,7 @@ public struct NewUdManagerFromBackup {
 
     public var e2eId: Int
     public var follower: UdNetworkStatus
+    public var username: Fact
     public var email: Fact?
     public var phone: Fact?
     public var cert: Data
@@ -43,6 +46,7 @@ extension NewUdManagerFromBackup {
     let bindingsUD = BindingsNewUdManagerFromBackup(
       params.e2eId,
       params.follower.makeBindingsUdNetworkStatus(),
+      try params.username.encode(),
       try params.email?.encode(),
       try params.phone?.encode(),
       params.cert,
