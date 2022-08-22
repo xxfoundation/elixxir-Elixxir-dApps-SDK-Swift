@@ -5,7 +5,6 @@ import XXClient
 
 final class MessengerRegisterTests: XCTestCase {
   func testRegister() throws {
-    var didStartNetworkFollower: [Int] = []
     var didNewOrLoadUDWithParams: [NewOrLoadUd.Params] = []
     var didNewOrLoadUDWithFollower: [UdNetworkStatus] = []
     var didSetUD: [UserDiscovery?] = []
@@ -22,9 +21,6 @@ final class MessengerRegisterTests: XCTestCase {
     env.ctx.getCMix = {
       var cMix: CMix = .unimplemented
       cMix.networkFollowerStatus.run = { networkFollowerStatus }
-      cMix.startNetworkFollower.run = { timeout in
-        didStartNetworkFollower.append(timeout)
-      }
       cMix.getReceptionRegistrationValidationSignature.run = {
         registrationSignature
       }
@@ -50,7 +46,6 @@ final class MessengerRegisterTests: XCTestCase {
     let register: MessengerRegister = .live(env)
     try register(username: username)
 
-    XCTAssertEqual(didStartNetworkFollower, [30_000])
     XCTAssertNoDifference(didNewOrLoadUDWithParams, [.init(
       e2eId: e2eId,
       username: username,
@@ -138,25 +133,6 @@ final class MessengerRegisterTests: XCTestCase {
         error as? MessengerRegister.Error,
         MessengerRegister.Error.notConnected
       )
-    }
-  }
-
-  func testStartNetworkFollowerFailure() {
-    struct Error: Swift.Error, Equatable {}
-    let error = Error()
-
-    var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
-      var cMix: CMix = .unimplemented
-      cMix.networkFollowerStatus.run = { .stopped }
-      cMix.startNetworkFollower.run = { _ in throw error }
-      return cMix
-    }
-    env.ctx.getE2E = { .unimplemented }
-    let register: MessengerRegister = .live(env)
-
-    XCTAssertThrowsError(try register(username: "new-user-name")) { err in
-      XCTAssertEqual(err as? Error, error)
     }
   }
 

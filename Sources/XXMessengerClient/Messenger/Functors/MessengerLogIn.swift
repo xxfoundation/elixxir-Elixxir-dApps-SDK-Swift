@@ -23,9 +23,6 @@ extension MessengerLogIn {
       guard let e2e = env.ctx.getE2E() else {
         throw Error.notConnected
       }
-      if cMix.networkFollowerStatus() != .running {
-        try cMix.startNetworkFollower(timeoutMS: 30_000)
-      }
       env.ctx.setUD(try env.newOrLoadUd(
         params: .init(
           e2eId: e2e.getId(),
