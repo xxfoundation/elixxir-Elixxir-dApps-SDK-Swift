@@ -2053,6 +2053,9 @@ registered facts into store.
 Parameters:
  - e2eID - e2e object ID in the tracker
  - follower - network follower func wrapped in UdNetworkStatus
+ - username - The username this user registered with initially. This should
+              not be nullable, and be JSON marshalled as retrieved from
+              UserDiscovery.GetFacts().
  - emailFactJson - nullable JSON marshalled email [fact.Fact]
  - phoneFactJson - nullable JSON marshalled phone [fact.Fact]
  - cert - the TLS certificate for the UD server this call will connect with.
@@ -2066,7 +2069,7 @@ Parameters:
    may use the UD server run by the xx network team by using
    E2e.GetUdAddressFromNdf.
  */
-FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable emailFactJson, NSData* _Nullable phoneFactJson, NSData* _Nullable cert, NSData* _Nullable contactFile, NSString* _Nullable address, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable usernameJson, NSData* _Nullable emailFactJson, NSData* _Nullable phoneFactJson, NSData* _Nullable cert, NSData* _Nullable contactFile, NSString* _Nullable address, NSError* _Nullable* _Nullable error);
 
 /**
  * RegisterForNotifications allows a client to register for push notifications.
