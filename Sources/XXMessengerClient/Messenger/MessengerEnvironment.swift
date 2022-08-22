@@ -16,6 +16,7 @@ public struct MessengerEnvironment {
   public var newCMix: NewCMix
   public var newOrLoadUd: NewOrLoadUd
   public var passwordStorage: PasswordStorage
+  public var sleep: (Int) -> Void
   public var storageDir: String
   public var udAddress: String?
   public var udCert: Data?
@@ -44,6 +45,7 @@ extension MessengerEnvironment {
       newCMix: .live,
       newOrLoadUd: .live,
       passwordStorage: .keychain,
+      sleep: { Foundation.sleep(UInt32($0)) },
       storageDir: MessengerEnvironment.defaultStorageDir,
       udAddress: nil,
       udCert: nil,
@@ -67,6 +69,7 @@ extension MessengerEnvironment {
     newCMix: .unimplemented,
     newOrLoadUd: .unimplemented,
     passwordStorage: .unimplemented,
+    sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
     udAddress: nil,
     udCert: nil,
