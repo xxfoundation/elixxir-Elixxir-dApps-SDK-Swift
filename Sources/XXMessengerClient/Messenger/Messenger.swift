@@ -8,9 +8,9 @@ public struct Messenger {
   public var create: MessengerCreate
   public var isLoaded: MessengerIsLoaded
   public var load: MessengerLoad
-  public var start: MessengerStart
   public var isConnected: MessengerIsConnected
   public var connect: MessengerConnect
+  public var start: MessengerStart
   public var isRegistered: MessengerIsRegistered
   public var register: MessengerRegister
   public var isLoggedIn: MessengerIsLoggedIn
@@ -29,9 +29,9 @@ extension Messenger {
       create: .live(env),
       isLoaded: .live(env),
       load: .live(env),
-      start: .live(env),
       isConnected: .live(env),
       connect: .live(env),
+      start: .live(env),
       isRegistered: .live(env),
       register: .live(env),
       isLoggedIn: .live(env),
@@ -51,9 +51,9 @@ extension Messenger {
     create: .unimplemented,
     isLoaded: .unimplemented,
     load: .unimplemented,
-    start: .unimplemented,
     isConnected: .unimplemented,
     connect: .unimplemented,
+    start: .unimplemented,
     isRegistered: .unimplemented,
     register: .unimplemented,
     isLoggedIn: .unimplemented,
