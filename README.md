@@ -13,6 +13,8 @@ Also you can checkout included example iOS application.
 
 You can find full documentation with step by step guide [here](https://xxdk-dev.xx.network/mobile%20docs/ios-sdk)
 
+- [XXMessengerClient](Docs/XXMessengerClient.md)
+
 ## 🚀 Quick Start
 
 Add `XXClient` library as a dependency to your project using Swift Package Manager.
