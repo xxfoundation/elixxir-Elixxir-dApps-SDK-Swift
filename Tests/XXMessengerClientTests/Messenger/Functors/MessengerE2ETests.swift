@@ -4,17 +4,15 @@ import XXClient
 
 final class MessengerE2ETests: XCTestCase {
   func testE2E() throws {
-    var env: MessengerEnvironment = .unimplemented
-    env.ctx.getE2E = { .unimplemented }
-    let e2e: MessengerE2E = .live(env)
+    let e2e: MessengerE2E = .live()
+
+    XCTAssertNil(e2e())
+
+    e2e.set(.unimplemented)
 
     XCTAssertNotNil(e2e())
-  }
 
-  func testE2EWhenNotSet() throws {
-    var env: MessengerEnvironment = .unimplemented
-    env.ctx.getE2E = { nil }
-    let e2e: MessengerE2E = .live(env)
+    e2e.set(nil)
 
     XCTAssertNil(e2e())
   }

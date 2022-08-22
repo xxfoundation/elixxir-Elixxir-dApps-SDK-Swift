@@ -8,7 +8,7 @@ final class MessengerStartTests: XCTestCase {
     var didStartNetworkFollower: [Int] = []
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.networkFollowerStatus.run = { .stopped }
       cMix.startNetworkFollower.run = { timeoutMS in
@@ -25,7 +25,7 @@ final class MessengerStartTests: XCTestCase {
 
   func testStartWhenNotLoaded() {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = { nil }
+    env.cMix.get = { nil }
     let start: MessengerStart = .live(env)
 
     XCTAssertThrowsError(try start()) { error in
@@ -38,7 +38,7 @@ final class MessengerStartTests: XCTestCase {
 
   func testStartWhenRunning() throws {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.networkFollowerStatus.run = { .running }
       return cMix
@@ -53,7 +53,7 @@ final class MessengerStartTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.networkFollowerStatus.run = { .stopped }
       cMix.startNetworkFollower.run = { _ in throw error }

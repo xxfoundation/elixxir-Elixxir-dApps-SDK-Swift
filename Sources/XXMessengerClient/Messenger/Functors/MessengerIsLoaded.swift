@@ -12,7 +12,7 @@ public struct MessengerIsLoaded {
 extension MessengerIsLoaded {
   public static func live(_ env: MessengerEnvironment) -> MessengerIsLoaded {
     MessengerIsLoaded {
-      env.ctx.getCMix() != nil
+      env.cMix() != nil
     }
   }
 }

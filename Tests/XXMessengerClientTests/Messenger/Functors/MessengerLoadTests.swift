@@ -18,7 +18,7 @@ final class MessengerLoadTests: XCTestCase {
     let cMixParams = "cmix-params".data(using: .utf8)!
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.setCMix = { didSetCMix.append($0) }
+    env.cMix.set = { didSetCMix.append($0) }
     env.storageDir = storageDir
     env.passwordStorage.load = { password }
     env.getCMixParams.run = { cMixParams }

@@ -24,7 +24,7 @@ public struct MessengerWaitForNodes {
 extension MessengerWaitForNodes {
   public static func live(_ env: MessengerEnvironment) -> MessengerWaitForNodes {
     MessengerWaitForNodes { targetRatio, sleepMS, retries, onProgress in
-      guard let cMix = env.ctx.getCMix() else {
+      guard let cMix = env.cMix() else {
         throw Error.notLoaded
       }
 

@@ -7,7 +7,7 @@ final class MessengerIsRegisteredTests: XCTestCase {
     var didIsRegisteredWithUD: [Int] = []
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getE2E = {
+    env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { 1234 }
       return e2e
@@ -24,7 +24,7 @@ final class MessengerIsRegisteredTests: XCTestCase {
 
   func testNotRegistered() throws {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getE2E = {
+    env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { 1234 }
       return e2e
@@ -37,7 +37,7 @@ final class MessengerIsRegisteredTests: XCTestCase {
 
   func testWithoutE2E() {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getE2E = { nil }
+    env.e2e.get = { nil }
     let isRegistered: MessengerIsRegistered = .live(env)
 
     XCTAssertThrowsError(try isRegistered()) { err in
@@ -53,7 +53,7 @@ final class MessengerIsRegisteredTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getE2E = {
+    env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { 1234 }
       return e2e

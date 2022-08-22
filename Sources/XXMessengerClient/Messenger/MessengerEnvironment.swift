@@ -3,8 +3,9 @@ import XXClient
 import XCTestDynamicOverlay
 
 public struct MessengerEnvironment {
-  public var ctx: MessengerContext
+  public var cMix: MessengerCMix
   public var downloadNDF: DownloadAndVerifySignedNdf
+  public var e2e: MessengerE2E
   public var fileManager: MessengerFileManager
   public var generateSecret: GenerateSecret
   public var getCMixParams: GetCMixParams
@@ -18,6 +19,7 @@ public struct MessengerEnvironment {
   public var passwordStorage: PasswordStorage
   public var sleep: (Int) -> Void
   public var storageDir: String
+  public var ud: MessengerUD
   public var udAddress: String?
   public var udCert: Data?
   public var udContact: Data?
@@ -32,8 +34,9 @@ extension MessengerEnvironment {
 
   public static func live() -> MessengerEnvironment {
     MessengerEnvironment(
-      ctx: .live(),
+      cMix: .live(),
       downloadNDF: .live,
+      e2e: .live(),
       fileManager: .live(),
       generateSecret: .live,
       getCMixParams: .liveDefault,
@@ -47,6 +50,7 @@ extension MessengerEnvironment {
       passwordStorage: .keychain,
       sleep: { Foundation.sleep(UInt32($0)) },
       storageDir: MessengerEnvironment.defaultStorageDir,
+      ud: .live(),
       udAddress: nil,
       udCert: nil,
       udContact: nil
@@ -56,8 +60,9 @@ extension MessengerEnvironment {
 
 extension MessengerEnvironment {
   public static let unimplemented = MessengerEnvironment(
-    ctx: .unimplemented,
+    cMix: .unimplemented,
     downloadNDF: .unimplemented,
+    e2e: .unimplemented,
     fileManager: .unimplemented,
     generateSecret: .unimplemented,
     getCMixParams: .unimplemented,
@@ -71,6 +76,7 @@ extension MessengerEnvironment {
     passwordStorage: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
+    ud: .unimplemented,
     udAddress: nil,
     udCert: nil,
     udContact: nil

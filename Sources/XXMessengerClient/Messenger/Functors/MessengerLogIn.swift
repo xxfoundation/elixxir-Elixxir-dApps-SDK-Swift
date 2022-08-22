@@ -17,13 +17,13 @@ public struct MessengerLogIn {
 extension MessengerLogIn {
   public static func live(_ env: MessengerEnvironment) -> MessengerLogIn {
     MessengerLogIn {
-      guard let cMix = env.ctx.getCMix() else {
+      guard let cMix = env.cMix() else {
         throw Error.notLoaded
       }
-      guard let e2e = env.ctx.getE2E() else {
+      guard let e2e = env.e2e() else {
         throw Error.notConnected
       }
-      env.ctx.setUD(try env.newOrLoadUd(
+      env.ud.set(try env.newOrLoadUd(
         params: .init(
           e2eId: e2e.getId(),
           username: nil,

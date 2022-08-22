@@ -2,21 +2,28 @@ import XXClient
 import XCTestDynamicOverlay
 
 public struct MessengerCMix {
-  public var run: () -> CMix?
+  public var get: () -> CMix?
+  public var set: (CMix?) -> Void
 
   public func callAsFunction() -> CMix? {
-    run()
+    get()
   }
 }
 
 extension MessengerCMix {
-  public static func live(_ env: MessengerEnvironment) -> MessengerCMix {
-    MessengerCMix(run: env.ctx.getCMix)
+  public static func live() -> MessengerCMix {
+    class Storage { var value: CMix? }
+    let storage = Storage()
+    return MessengerCMix(
+      get: { storage.value },
+      set: { storage.value = $0 }
+    )
   }
 }
 
 extension MessengerCMix {
   public static let unimplemented = MessengerCMix(
-    run: XCTUnimplemented("\(Self.self)", placeholder: nil)
+    get: XCTUnimplemented("\(Self.self).get", placeholder: nil),
+    set: XCTUnimplemented("\(Self.self).set")
   )
 }

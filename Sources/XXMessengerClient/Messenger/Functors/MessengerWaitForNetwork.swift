@@ -19,7 +19,7 @@ public struct MessengerWaitForNetwork {
 extension MessengerWaitForNetwork {
   public static func live(_ env: MessengerEnvironment) -> MessengerWaitForNetwork {
     MessengerWaitForNetwork { timeoutMS in
-      guard let cMix = env.ctx.getCMix() else {
+      guard let cMix = env.cMix() else {
         throw Error.notLoaded
       }
       guard cMix.waitForNetwork(timeoutMS: timeoutMS) else {

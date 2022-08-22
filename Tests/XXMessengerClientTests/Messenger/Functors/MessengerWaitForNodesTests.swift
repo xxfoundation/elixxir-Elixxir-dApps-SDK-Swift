@@ -6,7 +6,7 @@ import XXClient
 final class MessengerWaitForNodesTests: XCTestCase {
   func testWaitWhenNotLoaded() {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = { nil }
+    env.cMix.get = { nil }
     let waitForNodes: MessengerWaitForNodes = .live(env)
 
     XCTAssertThrowsError(try waitForNodes()) { error in
@@ -21,7 +21,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
     var didProgress: [NodeRegistrationReport] = []
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getNodeRegistrationStatus.run = {
         NodeRegistrationReport(registered: 8, total: 10)
@@ -53,7 +53,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
     ]
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getNodeRegistrationStatus.run = { reports.removeFirst() }
       return cMix
@@ -88,7 +88,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
     ]
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getNodeRegistrationStatus.run = { reports.removeFirst() }
       return cMix

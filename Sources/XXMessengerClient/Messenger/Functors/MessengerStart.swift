@@ -18,7 +18,7 @@ public struct MessengerStart {
 extension MessengerStart {
   public static func live(_ env: MessengerEnvironment) -> MessengerStart {
     MessengerStart { timeoutMS in
-      guard let cMix = env.ctx.getCMix() else {
+      guard let cMix = env.cMix() else {
         throw Error.notLoaded
       }
       guard cMix.networkFollowerStatus() != .running else {

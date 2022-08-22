@@ -12,7 +12,7 @@ public struct MessengerIsLoggedIn {
 extension MessengerIsLoggedIn {
   public static func live(_ env: MessengerEnvironment) -> MessengerIsLoggedIn {
     MessengerIsLoggedIn {
-      env.ctx.getUD() != nil
+      env.ud() != nil
     }
   }
 }

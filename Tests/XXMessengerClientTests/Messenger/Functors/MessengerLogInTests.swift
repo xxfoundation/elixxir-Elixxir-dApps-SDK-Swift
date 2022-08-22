@@ -16,12 +16,12 @@ final class MessengerLogInTests: XCTestCase {
     let udAddressFromNDF = "ndf-ud-address"
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.networkFollowerStatus.run = { networkFollowerStatus }
       return cMix
     }
-    env.ctx.getE2E = {
+    env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { e2eId }
       e2e.getUdCertFromNdf.run = { udCertFromNDF }
@@ -29,7 +29,7 @@ final class MessengerLogInTests: XCTestCase {
       e2e.getUdAddressFromNdf.run = { udAddressFromNDF }
       return e2e
     }
-    env.ctx.setUD = { didSetUD.append($0) }
+    env.ud.set = { didSetUD.append($0) }
     env.udCert = nil
     env.udContact = nil
     env.udAddress = nil
@@ -67,17 +67,17 @@ final class MessengerLogInTests: XCTestCase {
     let altUdAddress = "alt-ud-address"
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.networkFollowerStatus.run = { .running }
       return cMix
     }
-    env.ctx.getE2E = {
+    env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { e2eId }
       return e2e
     }
-    env.ctx.setUD = { didSetUD.append($0) }
+    env.ud.set = { didSetUD.append($0) }
     env.udCert = altUdCert
     env.udContact = altUdContact
     env.udAddress = altUdAddress
@@ -101,7 +101,7 @@ final class MessengerLogInTests: XCTestCase {
 
   func testLoginWithoutCMix() {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = { nil }
+    env.cMix.get = { nil }
     let logIn: MessengerLogIn = .live(env)
 
     XCTAssertThrowsError(try logIn()) { error in
@@ -114,8 +114,8 @@ final class MessengerLogInTests: XCTestCase {
 
   func testLoginWithoutE2E() {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = { .unimplemented }
-    env.ctx.getE2E = { nil }
+    env.cMix.get = { .unimplemented }
+    env.e2e.get = { nil }
     let logIn: MessengerLogIn = .live(env)
 
     XCTAssertThrowsError(try logIn()) { error in
@@ -131,12 +131,12 @@ final class MessengerLogInTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.networkFollowerStatus.run = { .running }
       return cMix
     }
-    env.ctx.getE2E = {
+    env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { 1234 }
       e2e.getUdCertFromNdf.run = { "ndf-ud-cert".data(using: .utf8)! }
@@ -157,12 +157,12 @@ final class MessengerLogInTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.networkFollowerStatus.run = { .running }
       return cMix
     }
-    env.ctx.getE2E = {
+    env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { 1234 }
       return e2e

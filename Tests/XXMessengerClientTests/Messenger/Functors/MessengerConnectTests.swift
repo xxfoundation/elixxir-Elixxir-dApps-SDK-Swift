@@ -21,13 +21,13 @@ final class MessengerConnectTests: XCTestCase {
     let e2eParams = "e2e-params".data(using: .utf8)!
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getId.run = { cMixId }
       cMix.makeLegacyReceptionIdentity.run = { receptionId }
       return cMix
     }
-    env.ctx.setE2E = { didSetE2E.append($0) }
+    env.e2e.set = { didSetE2E.append($0) }
     env.getE2EParams.run = { e2eParams }
     env.login.run = { ephemeral, cMixId, authCallbacks, identity, e2eParamsJSON in
       didLogIn.append(.init(
@@ -57,7 +57,7 @@ final class MessengerConnectTests: XCTestCase {
 
   func testConnectWithoutCMix() {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = { nil }
+    env.cMix.get = { nil }
     let connect: MessengerConnect = .live(env)
 
     XCTAssertThrowsError(try connect()) { error in
@@ -73,7 +73,7 @@ final class MessengerConnectTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getId.run = { 1234 }
       cMix.makeLegacyReceptionIdentity.run = { throw error }
@@ -91,7 +91,7 @@ final class MessengerConnectTests: XCTestCase {
     let error = Error()
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getId.run = { 1234 }
       cMix.makeLegacyReceptionIdentity.run = { .stub }

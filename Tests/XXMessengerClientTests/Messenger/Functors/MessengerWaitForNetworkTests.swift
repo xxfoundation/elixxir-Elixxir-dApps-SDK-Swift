@@ -8,7 +8,7 @@ final class MessengerWaitForNetworkTests: XCTestCase {
     var didWaitForNetwork: [Int] = []
 
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.waitForNetwork.run = { timeoutMS in
         didWaitForNetwork.append(timeoutMS)
@@ -25,7 +25,7 @@ final class MessengerWaitForNetworkTests: XCTestCase {
 
   func testWaitWhenNotLoaded() {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = { nil }
+    env.cMix.get = { nil }
     let waitForNetwork: MessengerWaitForNetwork = .live(env)
 
     XCTAssertThrowsError(try waitForNetwork()) { error in
@@ -38,7 +38,7 @@ final class MessengerWaitForNetworkTests: XCTestCase {
 
   func testWaitTimeout() {
     var env: MessengerEnvironment = .unimplemented
-    env.ctx.getCMix = {
+    env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.waitForNetwork.run = { _ in false }
       return cMix

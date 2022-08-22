@@ -4,18 +4,16 @@ import XXClient
 
 final class MessengerUDTests: XCTestCase {
   func testUD() throws {
-    var env: MessengerEnvironment = .unimplemented
-    env.ctx.getE2E = { .unimplemented }
-    let e2e: MessengerE2E = .live(env)
+    let ud: MessengerUD = .live()
 
-    XCTAssertNotNil(e2e())
-  }
+    XCTAssertNil(ud())
 
-  func testE2EWhenNotSet() throws {
-    var env: MessengerEnvironment = .unimplemented
-    env.ctx.getE2E = { nil }
-    let e2e: MessengerE2E = .live(env)
+    ud.set(.unimplemented)
 
-    XCTAssertNil(e2e())
+    XCTAssertNotNil(ud())
+
+    ud.set(nil)
+
+    XCTAssertNil(ud())
   }
 }

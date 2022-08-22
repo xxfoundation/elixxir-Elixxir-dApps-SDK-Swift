@@ -12,7 +12,7 @@ public struct MessengerIsConnected {
 extension MessengerIsConnected {
   public static func live(_ env: MessengerEnvironment) -> MessengerIsConnected {
     MessengerIsConnected {
-      env.ctx.getE2E() != nil
+      env.e2e() != nil
     }
   }
 }

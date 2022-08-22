@@ -22,9 +22,9 @@ public struct Messenger {
 extension Messenger {
   public static func live(_ env: MessengerEnvironment) -> Messenger {
     Messenger(
-      cMix: .live(env),
-      e2e: .live(env),
-      ud: .live(env),
+      cMix: env.cMix,
+      e2e: env.e2e,
+      ud: env.ud,
       isCreated: .live(env),
       create: .live(env),
       isLoaded: .live(env),
