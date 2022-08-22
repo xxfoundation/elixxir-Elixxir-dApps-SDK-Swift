@@ -2,7 +2,7 @@ import XXClient
 import XCTestDynamicOverlay
 
 public struct MessengerWaitForNodes {
-  public typealias Progress = (Double) -> Void
+  public typealias Progress = (NodeRegistrationReport) -> Void
 
   public enum Error: Swift.Error {
     case notLoaded
@@ -28,19 +28,15 @@ extension MessengerWaitForNodes {
         throw Error.notLoaded
       }
 
-      func getProgress(_ report: NodeRegistrationReport) -> Double {
-        min(1, ((report.ratio / targetRatio) * 100).rounded() / 100)
-      }
-
       var report = try cMix.getNodeRegistrationStatus()
       var retries = retries
-      onProgress(getProgress(report))
+      onProgress(report)
 
       while report.ratio < targetRatio && retries > 0 {
         env.sleep(sleepMS)
-        retries -= 1
         report = try cMix.getNodeRegistrationStatus()
-        onProgress(getProgress(report))
+        retries -= 1
+        onProgress(report)
       }
 
       if report.ratio < targetRatio {

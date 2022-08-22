@@ -18,7 +18,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
   }
 
   func testWaitWhenHasTargetRatio() throws {
-    var didProgress: [Double] = []
+    var didProgress: [NodeRegistrationReport] = []
 
     var env: MessengerEnvironment = .unimplemented
     env.ctx.getCMix = {
@@ -37,12 +37,14 @@ final class MessengerWaitForNodesTests: XCTestCase {
       onProgress: { didProgress.append($0) }
     )
 
-    XCTAssertNoDifference(didProgress, [1])
+    XCTAssertNoDifference(didProgress, [
+      NodeRegistrationReport(registered: 8, total: 10)
+    ])
   }
 
   func testWaitForTargetRatio() throws {
     var didSleep: [Int] = []
-    var didProgress: [Double] = []
+    var didProgress: [NodeRegistrationReport] = []
 
     var reports: [NodeRegistrationReport] = [
       .init(registered: 0, total: 10),
@@ -67,12 +69,16 @@ final class MessengerWaitForNodesTests: XCTestCase {
     )
 
     XCTAssertNoDifference(didSleep, [123, 123])
-    XCTAssertNoDifference(didProgress, [0, 0.43, 1])
+    XCTAssertNoDifference(didProgress, [
+      NodeRegistrationReport(registered: 0, total: 10),
+      NodeRegistrationReport(registered: 3, total: 10),
+      NodeRegistrationReport(registered: 8, total: 10),
+    ])
   }
 
   func testWaitTimeout() {
     var didSleep: [Int] = []
-    var didProgress: [Double] = []
+    var didProgress: [NodeRegistrationReport] = []
 
     var reports: [NodeRegistrationReport] = [
       .init(registered: 0, total: 10),
@@ -103,6 +109,11 @@ final class MessengerWaitForNodesTests: XCTestCase {
     }
 
     XCTAssertNoDifference(didSleep, [123, 123, 123])
-    XCTAssertNoDifference(didProgress, [0, 0.43, 0.71, 0.86])
+    XCTAssertNoDifference(didProgress, [
+      NodeRegistrationReport(registered: 0, total: 10),
+      NodeRegistrationReport(registered: 3, total: 10),
+      NodeRegistrationReport(registered: 5, total: 10),
+      NodeRegistrationReport(registered: 6, total: 10),
+    ])
   }
 }
