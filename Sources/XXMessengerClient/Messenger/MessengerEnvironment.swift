@@ -3,9 +3,9 @@ import XXClient
 import XCTestDynamicOverlay
 
 public struct MessengerEnvironment {
-  public var cMix: MessengerCMix
+  public var cMix: Stored<CMix?>
   public var downloadNDF: DownloadAndVerifySignedNdf
-  public var e2e: MessengerE2E
+  public var e2e: Stored<E2E?>
   public var fileManager: MessengerFileManager
   public var generateSecret: GenerateSecret
   public var getCMixParams: GetCMixParams
@@ -19,7 +19,7 @@ public struct MessengerEnvironment {
   public var passwordStorage: PasswordStorage
   public var sleep: (Int) -> Void
   public var storageDir: String
-  public var ud: MessengerUD
+  public var ud: Stored<UserDiscovery?>
   public var udAddress: String?
   public var udCert: Data?
   public var udContact: Data?
@@ -34,9 +34,9 @@ extension MessengerEnvironment {
 
   public static func live() -> MessengerEnvironment {
     MessengerEnvironment(
-      cMix: .live(),
+      cMix: .inMemory(),
       downloadNDF: .live,
-      e2e: .live(),
+      e2e: .inMemory(),
       fileManager: .live(),
       generateSecret: .live,
       getCMixParams: .liveDefault,
@@ -50,7 +50,7 @@ extension MessengerEnvironment {
       passwordStorage: .keychain,
       sleep: { Foundation.sleep(UInt32($0)) },
       storageDir: MessengerEnvironment.defaultStorageDir,
-      ud: .live(),
+      ud: .inMemory(),
       udAddress: nil,
       udCert: nil,
       udContact: nil
@@ -60,9 +60,9 @@ extension MessengerEnvironment {
 
 extension MessengerEnvironment {
   public static let unimplemented = MessengerEnvironment(
-    cMix: .unimplemented,
+    cMix: .unimplemented(),
     downloadNDF: .unimplemented,
-    e2e: .unimplemented,
+    e2e: .unimplemented(),
     fileManager: .unimplemented,
     generateSecret: .unimplemented,
     getCMixParams: .unimplemented,
@@ -76,7 +76,7 @@ extension MessengerEnvironment {
     passwordStorage: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
-    ud: .unimplemented,
+    ud: .unimplemented(),
     udAddress: nil,
     udCert: nil,
     udContact: nil
