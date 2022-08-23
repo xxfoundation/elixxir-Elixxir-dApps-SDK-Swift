@@ -2,10 +2,9 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct NewUdManagerFromBackup {
-  public struct Params {
+  public struct Params: Equatable {
     public init(
       e2eId: Int,
-      follower: UdNetworkStatus,
       email: Fact?,
       phone: Fact?,
       cert: Data,
@@ -13,7 +12,6 @@ public struct NewUdManagerFromBackup {
       address: String
     ) {
       self.e2eId = e2eId
-      self.follower = follower
       self.email = email
       self.phone = phone
       self.cert = cert
@@ -22,7 +20,6 @@ public struct NewUdManagerFromBackup {
     }
 
     public var e2eId: Int
-    public var follower: UdNetworkStatus
     public var email: Fact?
     public var phone: Fact?
     public var cert: Data
@@ -30,19 +27,22 @@ public struct NewUdManagerFromBackup {
     public var address: String
   }
 
-  public var run: (Params) throws -> UserDiscovery
+  public var run: (Params, UdNetworkStatus) throws -> UserDiscovery
 
-  public func callAsFunction(_ params: Params) throws -> UserDiscovery {
-    try run(params)
+  public func callAsFunction(
+    params: Params,
+    follower: UdNetworkStatus
+  ) throws -> UserDiscovery {
+    try run(params, follower)
   }
 }
 
 extension NewUdManagerFromBackup {
-  public static let live = NewUdManagerFromBackup { params in
+  public static let live = NewUdManagerFromBackup { params, follower in
     var error: NSError?
     let bindingsUD = BindingsNewUdManagerFromBackup(
       params.e2eId,
-      params.follower.makeBindingsUdNetworkStatus(),
+      follower.makeBindingsUdNetworkStatus(),
       try params.email?.encode(),
       try params.phone?.encode(),
       params.cert,
