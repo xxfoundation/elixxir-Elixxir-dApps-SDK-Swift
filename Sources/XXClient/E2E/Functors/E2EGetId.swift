@@ -17,6 +17,6 @@ extension E2EGetId {
 
 extension E2EGetId {
   public static let unimplemented = E2EGetId(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

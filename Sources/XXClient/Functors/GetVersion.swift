@@ -17,6 +17,6 @@ extension GetVersion {
 
 extension GetVersion {
   public static let unimplemented = GetVersion(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented")
   )
 }

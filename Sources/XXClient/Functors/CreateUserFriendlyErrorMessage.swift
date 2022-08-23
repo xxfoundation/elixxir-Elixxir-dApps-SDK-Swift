@@ -17,6 +17,6 @@ extension CreateUserFriendlyErrorMessage {
 
 extension CreateUserFriendlyErrorMessage {
   public static let unimplemented = CreateUserFriendlyErrorMessage(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented")
   )
 }

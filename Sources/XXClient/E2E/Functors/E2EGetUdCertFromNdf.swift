@@ -22,6 +22,6 @@ extension E2EGetUdCertFromNdf {
 
 extension E2EGetUdCertFromNdf {
   public static let unimplemented = E2EGetUdCertFromNdf(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }

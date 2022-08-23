@@ -22,6 +22,6 @@ extension GroupGetInitMessage {
 
 extension GroupGetInitMessage {
   public static let unimplemented = GroupGetInitMessage(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }

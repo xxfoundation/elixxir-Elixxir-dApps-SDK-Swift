@@ -20,6 +20,6 @@ extension GetCMixParams {
 
 extension GetCMixParams {
   public static let unimplemented = GetCMixParams(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }

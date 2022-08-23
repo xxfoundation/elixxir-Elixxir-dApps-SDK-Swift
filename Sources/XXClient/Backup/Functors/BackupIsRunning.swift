@@ -17,6 +17,6 @@ extension BackupIsRunning {
 
 extension BackupIsRunning {
   public static let unimplemented = BackupIsRunning(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }

@@ -31,6 +31,6 @@ extension ConnectionGetPartner {
 
 extension ConnectionGetPartner {
   public static let unimplemented = ConnectionGetPartner(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }

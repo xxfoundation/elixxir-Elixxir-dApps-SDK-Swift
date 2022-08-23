@@ -17,6 +17,6 @@ extension GroupGetTrackedId {
 
 extension GroupGetTrackedId {
   public static let unimplemented = GroupGetTrackedId(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

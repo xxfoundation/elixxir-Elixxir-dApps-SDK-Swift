@@ -17,6 +17,6 @@ extension GetGitVersion {
 
 extension GetGitVersion {
   public static let unimplemented = GetGitVersion(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented")
   )
 }

@@ -23,8 +23,8 @@ extension E2EPartitionSize {
 
 extension E2EPartitionSize {
   public static let unimplemented = E2EPartitionSize(
-    first: XCTUnimplemented("\(Self.self).first"),
-    second: XCTUnimplemented("\(Self.self).second"),
-    atIndex: XCTUnimplemented("\(Self.self).atIndex")
+    first: XCTUnimplemented("\(Self.self).first", placeholder: 0),
+    second: XCTUnimplemented("\(Self.self).second", placeholder: 0),
+    atIndex: XCTUnimplemented("\(Self.self).atIndex", placeholder: 0)
   )
 }

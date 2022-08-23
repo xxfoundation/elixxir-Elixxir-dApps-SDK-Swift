@@ -17,6 +17,6 @@ extension FileTransferMaxFilenameLen {
 
 extension FileTransferMaxFilenameLen {
   public static let unimplemented = FileTransferMaxFilenameLen(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

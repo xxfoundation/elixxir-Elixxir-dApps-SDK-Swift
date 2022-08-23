@@ -17,6 +17,6 @@ extension GroupGetCreatedNano {
 
 extension GroupGetCreatedNano {
   public static let unimplemented = GroupGetCreatedNano(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

@@ -22,6 +22,6 @@ extension GroupGetId {
 
 extension GroupGetId {
   public static let unimplemented = GroupGetId(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }

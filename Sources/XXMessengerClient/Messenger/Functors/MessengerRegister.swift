@@ -44,6 +44,6 @@ extension MessengerRegister {
 
 extension MessengerRegister {
   public static let unimplemented = MessengerRegister(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)")
   )
 }

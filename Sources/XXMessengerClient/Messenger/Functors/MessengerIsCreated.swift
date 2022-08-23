@@ -19,6 +19,6 @@ extension MessengerIsCreated {
 
 extension MessengerIsCreated {
   public static let unimplemented = MessengerIsCreated(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }
