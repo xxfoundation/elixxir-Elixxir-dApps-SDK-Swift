@@ -17,6 +17,6 @@ extension FileTransferMaxPreviewSize {
 
 extension FileTransferMaxPreviewSize {
   public static let unimplemented = FileTransferMaxPreviewSize(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

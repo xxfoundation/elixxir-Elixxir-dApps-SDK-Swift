@@ -17,6 +17,6 @@ extension FilePartTrackerGetNumParts {
 
 extension FilePartTrackerGetNumParts {
   public static let unimplemented = FilePartTrackerGetNumParts(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

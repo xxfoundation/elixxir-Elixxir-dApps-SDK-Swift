@@ -24,6 +24,6 @@ extension CMixAddHealthCallback {
 
 extension CMixAddHealthCallback {
   public static let unimplemented = CMixAddHealthCallback(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: Cancellable {})
   )
 }

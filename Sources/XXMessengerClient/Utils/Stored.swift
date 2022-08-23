@@ -32,7 +32,14 @@ private final class Memory<Value> {
 }
 
 extension Stored {
-  public static func unimplemented() -> Stored<Value> {
+  public static func unimplemented(placeholder: Value) -> Stored<Value> {
+    Stored<Value>(
+      get: XCTUnimplemented("\(Self.self).get", placeholder: placeholder),
+      set: XCTUnimplemented("\(Self.self).set")
+    )
+  }
+
+  public static func unimplemented<V>() -> Stored<Optional<V>> where Value == Optional<V> {
     Stored<Value>(
       get: XCTUnimplemented("\(Self.self).get"),
       set: XCTUnimplemented("\(Self.self).set")

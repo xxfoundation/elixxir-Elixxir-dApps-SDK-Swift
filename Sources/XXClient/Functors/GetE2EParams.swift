@@ -20,6 +20,6 @@ extension GetE2EParams {
 
 extension GetE2EParams {
   public static let unimplemented = GetE2EParams(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }

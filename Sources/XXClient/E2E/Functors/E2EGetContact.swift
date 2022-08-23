@@ -22,6 +22,6 @@ extension E2EGetContact {
 
 extension E2EGetContact {
   public static let unimplemented = E2EGetContact(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }

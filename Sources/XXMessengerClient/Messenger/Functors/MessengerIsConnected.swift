@@ -19,7 +19,7 @@ extension MessengerIsConnected {
 
 extension MessengerIsConnected {
   public static let unimplemented = MessengerIsConnected(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }
 

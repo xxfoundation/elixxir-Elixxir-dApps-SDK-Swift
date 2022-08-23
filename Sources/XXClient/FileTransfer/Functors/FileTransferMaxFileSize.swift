@@ -17,6 +17,6 @@ extension FileTransferMaxFileSize {
 
 extension FileTransferMaxFileSize {
   public static let unimplemented = FileTransferMaxFileSize(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

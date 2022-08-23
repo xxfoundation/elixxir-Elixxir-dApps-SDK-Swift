@@ -19,6 +19,6 @@ extension MessengerIsLoggedIn {
 
 extension MessengerIsLoggedIn {
   public static let unimplemented = MessengerIsLoggedIn(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }

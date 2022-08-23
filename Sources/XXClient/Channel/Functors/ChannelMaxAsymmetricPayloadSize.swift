@@ -17,6 +17,6 @@ extension ChannelMaxAsymmetricPayloadSize {
 
 extension ChannelMaxAsymmetricPayloadSize {
   public static let unimplemented = ChannelMaxAsymmetricPayloadSize(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

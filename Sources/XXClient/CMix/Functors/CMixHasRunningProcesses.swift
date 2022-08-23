@@ -17,6 +17,6 @@ extension CMixHasRunningProcesses {
 
 extension CMixHasRunningProcesses {
   public static let unimplemented = CMixHasRunningProcesses(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }

@@ -26,6 +26,6 @@ extension MessengerIsRegistered {
 
 extension MessengerIsRegistered {
   public static let unimplemented = MessengerIsRegistered(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)")
   )
 }

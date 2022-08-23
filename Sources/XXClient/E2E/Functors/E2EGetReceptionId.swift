@@ -22,6 +22,6 @@ extension E2EGetReceptionId {
 
 extension E2EGetReceptionId {
   public static let unimplemented = E2EGetReceptionId(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }

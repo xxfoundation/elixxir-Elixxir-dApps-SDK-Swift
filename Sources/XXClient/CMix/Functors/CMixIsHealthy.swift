@@ -17,6 +17,6 @@ extension CMixIsHealthy {
 
 extension CMixIsHealthy {
   public static let unimplemented = CMixIsHealthy(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }

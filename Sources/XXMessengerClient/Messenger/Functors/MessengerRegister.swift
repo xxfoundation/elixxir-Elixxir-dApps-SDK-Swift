@@ -35,7 +35,7 @@ extension MessengerRegister {
           address: env.udAddress ?? e2e.getUdAddressFromNdf()
         ),
         follower: .init {
-          cMix.networkFollowerStatus().rawValue
+          cMix.networkFollowerStatus()
         }
       ))
     }
@@ -44,6 +44,6 @@ extension MessengerRegister {
 
 extension MessengerRegister {
   public static let unimplemented = MessengerRegister(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)")
   )
 }

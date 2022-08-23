@@ -17,6 +17,6 @@ extension GroupChatNumGroups {
 
 extension GroupChatNumGroups {
   public static let unimplemented = GroupChatNumGroups(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

@@ -17,6 +17,6 @@ extension ChannelMaxPayloadSize {
 
 extension ChannelMaxPayloadSize {
   public static let unimplemented = ChannelMaxPayloadSize(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

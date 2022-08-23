@@ -15,6 +15,6 @@ extension GetDependencies {
 
 extension GetDependencies {
   public static let unimplemented = GetDependencies(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented")
   )
 }

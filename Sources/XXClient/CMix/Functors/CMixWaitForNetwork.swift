@@ -17,6 +17,6 @@ extension CMixWaitForNetwork {
 
 extension CMixWaitForNetwork {
   public static let unimplemented = CMixWaitForNetwork(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }
