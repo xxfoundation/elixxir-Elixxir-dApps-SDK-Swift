@@ -2,7 +2,7 @@
 
 `XXMessengerClient` is a client wrapper library for use in xx-messenger application.
 
-## 🛠 Instantiate messenger
+## ▶️ Instantiate messenger
 
 Example:
 
@@ -60,4 +60,19 @@ func start(messenger: Messenger) throws {
     }
   }
 }
+```
+
+## 🛠 Use client components directly
+
+Example:
+
+```swift
+// get cMix:
+let cMix = messenger.cMix()
+
+// get E2E:
+let e2e = messenger.e2e()
+
+// get UserDicovery:
+let ud = messenger.ud()
 ```
