@@ -17,6 +17,6 @@ extension CMixGetId {
 
 extension CMixGetId {
   public static let unimplemented = CMixGetId(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

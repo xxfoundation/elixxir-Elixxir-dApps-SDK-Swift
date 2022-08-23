@@ -17,6 +17,6 @@ extension DummyTrafficGetStatus {
 
 extension DummyTrafficGetStatus {
   public static let unimplemented = DummyTrafficGetStatus(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }

@@ -21,6 +21,6 @@ extension ConnectionGetId {
 
 extension ConnectionGetId {
   public static let unimplemented = ConnectionGetId(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

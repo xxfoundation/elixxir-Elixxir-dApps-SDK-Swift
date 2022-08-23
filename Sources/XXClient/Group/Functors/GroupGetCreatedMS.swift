@@ -17,6 +17,6 @@ extension GroupGetCreatedMS {
 
 extension GroupGetCreatedMS {
   public static let unimplemented = GroupGetCreatedMS(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

@@ -21,6 +21,6 @@ extension ConnectionIsAuthenticated {
 
 extension ConnectionIsAuthenticated {
   public static let unimplemented = ConnectionIsAuthenticated(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }

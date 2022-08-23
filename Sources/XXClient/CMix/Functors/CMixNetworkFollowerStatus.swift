@@ -21,6 +21,6 @@ extension CMixNetworkFollowerStatus {
 
 extension CMixNetworkFollowerStatus {
   public static let unimplemented = CMixNetworkFollowerStatus(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: .unknown(code: -1))
   )
 }

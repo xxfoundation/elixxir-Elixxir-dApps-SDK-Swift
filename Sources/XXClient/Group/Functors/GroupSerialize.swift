@@ -22,7 +22,6 @@ extension GroupSerialize {
 
 extension GroupSerialize {
   public static let unimplemented = GroupSerialize(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }
-

@@ -11,7 +11,7 @@ public struct UdNetworkStatus {
 
 extension UdNetworkStatus {
   public static let unimplemented = UdNetworkStatus(
-    handle: XCTUnimplemented("\(Self.self)")
+    handle: XCTUnimplemented("\(Self.self)", placeholder: -1)
   )
 }
 

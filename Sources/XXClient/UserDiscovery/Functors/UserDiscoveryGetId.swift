@@ -17,7 +17,6 @@ extension UserDiscoveryGetId {
 
 extension UserDiscoveryGetId {
   public static let unimplemented = UserDiscoveryGetId(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }
-

@@ -30,6 +30,6 @@ extension MessengerCreate {
 
 extension MessengerCreate {
   public static let unimplemented = MessengerCreate(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)")
   )
 }

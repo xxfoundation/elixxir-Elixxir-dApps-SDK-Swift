@@ -33,7 +33,7 @@ extension MessengerFileManager {
 
 extension MessengerFileManager {
   public static let unimplemented = MessengerFileManager(
-    isDirectoryEmpty: XCTUnimplemented("\(Self.self).isDirectoryEmpty"),
+    isDirectoryEmpty: XCTUnimplemented("\(Self.self).isDirectoryEmpty", placeholder: false),
     removeDirectory: XCTUnimplemented("\(Self.self).removeDirectory"),
     createDirectory: XCTUnimplemented("\(Self.self).createDirectory")
   )

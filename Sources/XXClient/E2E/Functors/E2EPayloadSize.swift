@@ -17,6 +17,6 @@ extension E2EPayloadSize {
 
 extension E2EPayloadSize {
   public static let unimplemented = E2EPayloadSize(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: 0)
   )
 }

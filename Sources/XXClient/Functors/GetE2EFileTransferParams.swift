@@ -20,7 +20,6 @@ extension GetE2EFileTransferParams {
 
 extension GetE2EFileTransferParams {
   public static let unimplemented = GetE2EFileTransferParams(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }
-

@@ -23,6 +23,6 @@ extension MessengerLoad {
 
 extension MessengerLoad {
   public static let unimplemented = MessengerLoad(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)")
   )
 }

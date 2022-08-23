@@ -42,6 +42,6 @@ extension MessengerLogIn {
 
 extension MessengerLogIn {
   public static let unimplemented = MessengerLogIn(
-    run: XCTUnimplemented()
+    run: XCTUnimplemented("\(Self.self)")
   )
 }

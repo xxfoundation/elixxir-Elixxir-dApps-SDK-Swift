@@ -98,8 +98,8 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 
 extension AppEnvironment {
   static let unimplemented = AppEnvironment(
-    makeId: XCTUnimplemented("\(Self.self).makeId"),
-    hasCMix: XCTUnimplemented("\(Self.self).hasCMix"),
+    makeId: XCTUnimplemented("\(Self.self).makeId", placeholder: UUID()),
+    hasCMix: XCTUnimplemented("\(Self.self).hasCMix", placeholder: Empty().eraseToAnyPublisher()),
     mainScheduler: .unimplemented,
     landing: .unimplemented,
     session: .unimplemented

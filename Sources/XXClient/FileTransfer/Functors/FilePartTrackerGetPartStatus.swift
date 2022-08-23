@@ -19,6 +19,6 @@ extension FilePartTrackerGetPartStatus {
 
 extension FilePartTrackerGetPartStatus {
   public static let unimplemented = FilePartTrackerGetPartStatus(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: .unknown(code: -1))
   )
 }
