@@ -11,7 +11,7 @@ public struct CMixManagerCreate {
 
 extension CMixManagerCreate {
   public static func live(
-    environment: Environment,
+    ndfEnvironment: NDFEnvironment,
     downloadNDF: DownloadAndVerifySignedNdf,
     generateSecret: GenerateSecret,
     passwordStorage: PasswordStorage,
@@ -22,7 +22,7 @@ extension CMixManagerCreate {
     loadCMix: LoadCMix
   ) -> CMixManagerCreate {
     CMixManagerCreate {
-      let ndfData = try downloadNDF(environment)
+      let ndfData = try downloadNDF(ndfEnvironment)
       let password = generateSecret()
       try passwordStorage.save(password)
       try? fileManager.removeItem(atPath: directoryPath)

@@ -20,6 +20,7 @@ let package = Package(
   ],
   products: [
     .library(name: "XXClient", targets: ["XXClient"]),
+    .library(name: "XXMessengerClient", targets: ["XXMessengerClient"]),
   ],
   dependencies: [
     .package(
@@ -29,6 +30,10 @@ let package = Package(
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
       .upToNextMajor(from: "0.4.0")
+    ),
+    .package(
+      url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
+      .upToNextMajor(from: "4.2.2")
     ),
   ],
   targets: [
@@ -44,6 +49,23 @@ let package = Package(
       name: "XXClientTests",
       dependencies: [
         .target(name: "XXClient"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "XXMessengerClient",
+      dependencies: [
+        .target(name: "XXClient"),
+        .product(name: "KeychainAccess", package: "KeychainAccess"),
+        .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "XXMessengerClientTests",
+      dependencies: [
+        .target(name: "XXMessengerClient"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings

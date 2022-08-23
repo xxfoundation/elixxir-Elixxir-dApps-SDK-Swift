@@ -14,20 +14,6 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "XXClient"
-               BuildableName = "XXClient"
-               BlueprintName = "XXClient"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "XXMessengerClient"
                BuildableName = "XXMessengerClient"
                BlueprintName = "XXMessengerClient"
@@ -43,16 +29,6 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       codeCoverageEnabled = "YES">
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "XXClientTests"
-               BuildableName = "XXClientTests"
-               BlueprintName = "XXClientTests"
-               ReferencedContainer = "container:">
-            </BuildableReference>
-         </TestableReference>
          <TestableReference
             skipped = "NO">
             <BuildableReference
@@ -85,9 +61,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "XXClient"
-            BuildableName = "XXClient"
-            BlueprintName = "XXClient"
+            BlueprintIdentifier = "XXMessengerClient"
+            BuildableName = "XXMessengerClient"
+            BlueprintName = "XXMessengerClient"
             ReferencedContainer = "container:">
          </BuildableReference>
       </MacroExpansion>
