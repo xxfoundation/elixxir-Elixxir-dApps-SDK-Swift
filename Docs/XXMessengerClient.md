@@ -26,7 +26,7 @@ let messenger: Messenger = .live(environment)
 
 Example:
 
-```
+```swift
 func start(messenger: Messenger) throws {
   // check if messenger is loaded:
   if messenger.isLoaded() == false {
