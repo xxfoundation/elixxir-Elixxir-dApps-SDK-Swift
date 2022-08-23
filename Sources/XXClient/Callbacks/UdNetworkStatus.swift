@@ -2,16 +2,16 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct UdNetworkStatus {
-  public init(handle: @escaping () -> Int) {
+  public init(handle: @escaping () -> NetworkFollowerStatus) {
     self.handle = handle
   }
 
-  public var handle: () -> Int
+  public var handle: () -> NetworkFollowerStatus
 }
 
 extension UdNetworkStatus {
   public static let unimplemented = UdNetworkStatus(
-    handle: XCTUnimplemented("\(Self.self)", placeholder: -1)
+    handle: XCTUnimplemented("\(Self.self)", placeholder: .unknown(code: -1))
   )
 }
 
@@ -25,7 +25,7 @@ extension UdNetworkStatus {
       let callback: UdNetworkStatus
 
       func udNetworkStatus() -> Int {
-        callback.handle()
+        callback.handle().rawValue
       }
     }
 

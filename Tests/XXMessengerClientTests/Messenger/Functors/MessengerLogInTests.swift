@@ -52,7 +52,7 @@ final class MessengerLogInTests: XCTestCase {
     XCTAssertEqual(didNewOrLoadUDWithFollower.count, 1)
     XCTAssertEqual(
       didNewOrLoadUDWithFollower.first?.handle(),
-      networkFollowerStatus.rawValue
+      networkFollowerStatus
     )
     XCTAssertEqual(didSetUD.compactMap { $0 }.count, 1)
   }

@@ -35,7 +35,7 @@ extension MessengerRegister {
           address: env.udAddress ?? e2e.getUdAddressFromNdf()
         ),
         follower: .init {
-          cMix.networkFollowerStatus().rawValue
+          cMix.networkFollowerStatus()
         }
       ))
     }
