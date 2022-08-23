@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Environment: Equatable {
+public struct NDFEnvironment: Equatable {
   public init(url: URL, cert: String) {
     self.url = url
     self.cert = cert
@@ -10,8 +10,8 @@ public struct Environment: Equatable {
   public var cert: String
 }
 
-extension Environment {
-  public static let mainnet = Environment(
+extension NDFEnvironment {
+  public static let mainnet = NDFEnvironment(
     url: URL(string: "https://elixxir-bins.s3.us-west-1.amazonaws.com/ndf/mainnet.json")!,
     cert: """
       -----BEGIN CERTIFICATE-----
@@ -48,5 +48,12 @@ extension Environment {
       UGb8k8vh6tzqYZAOKg==
       -----END CERTIFICATE-----
       """
+  )
+}
+
+extension NDFEnvironment {
+  public static let unimplemented = NDFEnvironment(
+    url: URL(fileURLWithPath: "unimplemented"),
+    cert: "unimplemented"
   )
 }

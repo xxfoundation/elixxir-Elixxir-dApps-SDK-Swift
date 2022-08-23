@@ -2,10 +2,9 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct NewOrLoadUd {
-  public struct Params {
+  public struct Params: Equatable {
     public init(
       e2eId: Int,
-      follower: UdNetworkStatus,
       username: String?,
       registrationValidationSignature: Data?,
       cert: Data,
@@ -13,7 +12,6 @@ public struct NewOrLoadUd {
       address: String
     ) {
       self.e2eId = e2eId
-      self.follower = follower
       self.username = username
       self.registrationValidationSignature = registrationValidationSignature
       self.cert = cert
@@ -22,7 +20,6 @@ public struct NewOrLoadUd {
     }
 
     public var e2eId: Int
-    public var follower: UdNetworkStatus
     public var username: String?
     public var registrationValidationSignature: Data?
     public var cert: Data
@@ -30,19 +27,22 @@ public struct NewOrLoadUd {
     public var address: String
   }
 
-  public var run: (Params) throws -> UserDiscovery
+  public var run: (Params, UdNetworkStatus) throws -> UserDiscovery
 
-  public func callAsFunction(_ params: Params) throws -> UserDiscovery {
-    try run(params)
+  public func callAsFunction(
+    params: Params,
+    follower: UdNetworkStatus
+  ) throws -> UserDiscovery {
+    try run(params, follower)
   }
 }
 
 extension NewOrLoadUd {
-  public static let live = NewOrLoadUd { params in
+  public static let live = NewOrLoadUd { params, follower in
     var error: NSError?
     let bindingsUD = BindingsNewOrLoadUd(
       params.e2eId,
-      params.follower.makeBindingsUdNetworkStatus(),
+      follower.makeBindingsUdNetworkStatus(),
       params.username,
       params.registrationValidationSignature,
       params.cert,
