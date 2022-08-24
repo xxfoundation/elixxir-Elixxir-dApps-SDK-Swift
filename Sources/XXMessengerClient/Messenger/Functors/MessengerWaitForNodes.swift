@@ -1,3 +1,4 @@
+import Foundation
 import XXClient
 import XCTestDynamicOverlay
 
@@ -9,21 +10,21 @@ public struct MessengerWaitForNodes {
     case timeout
   }
 
-  public var run: (Double, Int, Int, @escaping Progress) throws -> Void
+  public var run: (Double, TimeInterval, Int, @escaping Progress) throws -> Void
 
   public func callAsFunction(
     targetRatio: Double = 0.8,
-    sleepMS: Int = 1_000,
+    sleepInterval: TimeInterval = 1,
     retries: Int = 10,
     onProgress: @escaping Progress = { _ in }
   ) throws {
-    try run(targetRatio, sleepMS, retries, onProgress)
+    try run(targetRatio, sleepInterval, retries, onProgress)
   }
 }
 
 extension MessengerWaitForNodes {
   public static func live(_ env: MessengerEnvironment) -> MessengerWaitForNodes {
-    MessengerWaitForNodes { targetRatio, sleepMS, retries, onProgress in
+    MessengerWaitForNodes { targetRatio, sleepInterval, retries, onProgress in
       guard let cMix = env.cMix() else {
         throw Error.notLoaded
       }
@@ -33,7 +34,7 @@ extension MessengerWaitForNodes {
       onProgress(report)
 
       while report.ratio < targetRatio && retries > 0 {
-        env.sleep(sleepMS)
+        env.sleep(sleepInterval)
         report = try cMix.getNodeRegistrationStatus()
         retries -= 1
         onProgress(report)

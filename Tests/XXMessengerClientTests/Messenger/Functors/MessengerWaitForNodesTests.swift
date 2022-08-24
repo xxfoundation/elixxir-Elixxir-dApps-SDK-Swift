@@ -32,7 +32,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
 
     try waitForNodes(
       targetRatio: 0.7,
-      sleepMS: 123,
+      sleepInterval: 123,
       retries: 3,
       onProgress: { didProgress.append($0) }
     )
@@ -43,7 +43,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
   }
 
   func testWaitForTargetRatio() throws {
-    var didSleep: [Int] = []
+    var didSleep: [TimeInterval] = []
     var didProgress: [NodeRegistrationReport] = []
 
     var reports: [NodeRegistrationReport] = [
@@ -63,7 +63,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
 
     try waitForNodes(
       targetRatio: 0.7,
-      sleepMS: 123,
+      sleepInterval: 123,
       retries: 3,
       onProgress: { didProgress.append($0) }
     )
@@ -77,7 +77,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
   }
 
   func testWaitTimeout() {
-    var didSleep: [Int] = []
+    var didSleep: [TimeInterval] = []
     var didProgress: [NodeRegistrationReport] = []
 
     var reports: [NodeRegistrationReport] = [
@@ -98,7 +98,7 @@ final class MessengerWaitForNodesTests: XCTestCase {
 
     XCTAssertThrowsError(try waitForNodes(
       targetRatio: 0.7,
-      sleepMS: 123,
+      sleepInterval: 123,
       retries: 3,
       onProgress: { didProgress.append($0) }
     )) { error in
