@@ -26,7 +26,7 @@ elixxir-dapps-sdk-swift [Swift Package]
 
 ### Build schemes
 
-- Use `exlixxir-dapps-sdk-swift` scheme to build and test the package.
+- Use `exlixxir-dapps-sdk-swift-Package` scheme to build and test the package.
 - Use other schemes (like `XXClient`) for building and testing individual libraries in isolation.
 
 ## 📄 License
