@@ -17,7 +17,7 @@ public struct MessengerEnvironment {
   public var newCMix: NewCMix
   public var newOrLoadUd: NewOrLoadUd
   public var passwordStorage: PasswordStorage
-  public var sleep: (Int) -> Void
+  public var sleep: (TimeInterval) -> Void
   public var storageDir: String
   public var ud: Stored<UserDiscovery?>
   public var udAddress: String?
@@ -48,7 +48,7 @@ extension MessengerEnvironment {
       newCMix: .live,
       newOrLoadUd: .live,
       passwordStorage: .keychain,
-      sleep: { Foundation.sleep(UInt32($0)) },
+      sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
       ud: .inMemory(),
       udAddress: nil,
