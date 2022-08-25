@@ -27,6 +27,9 @@ let messenger: Messenger = .live(environment)
 Example:
 
 ```swift
+// allow cancellation of auth callbacks registration:
+var authCallbacksCancellable: Cancellable?
+
 func start(messenger: Messenger) throws {
   // check if messenger is loaded:
   if messenger.isLoaded() == false {
@@ -41,6 +44,13 @@ func start(messenger: Messenger) throws {
 
   // start messenger's network follower:
   try messenger.start()
+
+  // register auth callbacks before connecting:
+  authCallbacksCancellable = messenger.registerAuthCallbacks(
+    AuthCallbacks(handle: { callback in
+      // implement auth callbacks handling
+    })
+  )
 
   // check if messenger is connected:
   if messenger.isConnected() == false {
