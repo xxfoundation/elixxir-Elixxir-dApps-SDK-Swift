@@ -30,7 +30,7 @@ extension AuthCallbacksRegistry {
 
 extension AuthCallbacksRegistry {
   public static let unimplemented = AuthCallbacksRegistry(
-    register: XCTUnimplemented("\(Self.self)", placeholder: Cancellable {}),
-    registered: XCTUnimplemented("\(Self.self)", placeholder: AuthCallbacks { _ in })
+    register: XCTUnimplemented("\(Self.self).register", placeholder: Cancellable {}),
+    registered: XCTUnimplemented("\(Self.self).registered", placeholder: AuthCallbacks { _ in })
   )
 }
