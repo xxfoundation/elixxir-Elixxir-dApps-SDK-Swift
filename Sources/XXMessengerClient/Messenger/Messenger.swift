@@ -8,6 +8,7 @@ public struct Messenger {
   public var create: MessengerCreate
   public var isLoaded: MessengerIsLoaded
   public var load: MessengerLoad
+  public var registerAuthCallbacks: MessengerRegisterAuthCallbacks
   public var start: MessengerStart
   public var isConnected: MessengerIsConnected
   public var connect: MessengerConnect
@@ -29,6 +30,7 @@ extension Messenger {
       create: .live(env),
       isLoaded: .live(env),
       load: .live(env),
+      registerAuthCallbacks: .live(env),
       start: .live(env),
       isConnected: .live(env),
       connect: .live(env),
@@ -51,6 +53,7 @@ extension Messenger {
     create: .unimplemented,
     isLoaded: .unimplemented,
     load: .unimplemented,
+    registerAuthCallbacks: .unimplemented,
     start: .unimplemented,
     isConnected: .unimplemented,
     connect: .unimplemented,
