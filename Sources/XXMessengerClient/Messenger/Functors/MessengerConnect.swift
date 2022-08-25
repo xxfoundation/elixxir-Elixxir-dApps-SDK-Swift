@@ -21,6 +21,7 @@ extension MessengerConnect {
       }
       env.e2e.set(try env.login(
         cMixId: cMix.getId(),
+        authCallbacks: env.authCallbacks.registered(),
         identity: try cMix.makeLegacyReceptionIdentity(),
         e2eParamsJSON: env.getE2EParams()
       ))
