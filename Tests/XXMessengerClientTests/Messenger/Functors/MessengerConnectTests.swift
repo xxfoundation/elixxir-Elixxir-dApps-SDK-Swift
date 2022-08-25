@@ -8,13 +8,14 @@ final class MessengerConnectTests: XCTestCase {
     struct DidLogIn: Equatable {
       var ephemeral: Bool
       var cMixId: Int
-      var authCallbacksProvided: Bool
       var identity: ReceptionIdentity
       var e2eParamsJSON: Data
     }
 
     var didLogIn: [DidLogIn] = []
+    var didLogInWithAuthCallbacks: [AuthCallbacks?] = []
     var didSetE2E: [E2E?] = []
+    var didHandleAuthCallbacks: [AuthCallbacks.Callback] = []
 
     let cMixId = 1234
     let receptionId = ReceptionIdentity.stub
@@ -29,14 +30,19 @@ final class MessengerConnectTests: XCTestCase {
     }
     env.e2e.set = { didSetE2E.append($0) }
     env.getE2EParams.run = { e2eParams }
+    env.authCallbacks.registered = {
+      AuthCallbacks { callback in
+        didHandleAuthCallbacks.append(callback)
+      }
+    }
     env.login.run = { ephemeral, cMixId, authCallbacks, identity, e2eParamsJSON in
       didLogIn.append(.init(
         ephemeral: ephemeral,
         cMixId: cMixId,
-        authCallbacksProvided: authCallbacks != nil,
         identity: identity,
         e2eParamsJSON: e2eParamsJSON
       ))
+      didLogInWithAuthCallbacks.append(authCallbacks)
       return .unimplemented
     }
     let connect: MessengerConnect = .live(env)
@@ -47,12 +53,19 @@ final class MessengerConnectTests: XCTestCase {
       DidLogIn(
         ephemeral: false,
         cMixId: 1234,
-        authCallbacksProvided: false,
         identity: .stub,
         e2eParamsJSON: e2eParams
       )
     ])
+    XCTAssertEqual(didLogInWithAuthCallbacks.compactMap { $0 }.count, 1)
     XCTAssertEqual(didSetE2E.compactMap { $0 }.count, 1)
+
+    didLogInWithAuthCallbacks.forEach { authCallbacks in
+      [AuthCallbacks.Callback].stubs.forEach { callback in
+        authCallbacks?.handle(callback)
+      }
+    }
+    XCTAssertNoDifference(didHandleAuthCallbacks, .stubs)
   }
 
   func testConnectWithoutCMix() {
@@ -79,6 +92,7 @@ final class MessengerConnectTests: XCTestCase {
       cMix.makeLegacyReceptionIdentity.run = { throw error }
       return cMix
     }
+    env.authCallbacks.registered = { .unimplemented }
     let connect: MessengerConnect = .live(env)
 
     XCTAssertThrowsError(try connect()) { err in
@@ -97,6 +111,7 @@ final class MessengerConnectTests: XCTestCase {
       cMix.makeLegacyReceptionIdentity.run = { .stub }
       return cMix
     }
+    env.authCallbacks.registered = { .unimplemented }
     env.getE2EParams.run = { "e2e-params".data(using: .utf8)! }
     env.login.run = { _, _, _, _, _ in throw error }
     let connect: MessengerConnect = .live(env)
