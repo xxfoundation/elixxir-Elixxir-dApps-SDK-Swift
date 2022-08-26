@@ -3,9 +3,9 @@ import XCTestDynamicOverlay
 
 public struct AuthCallbacks {
   public enum Callback: Equatable {
-    case confirm(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
-    case request(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
-    case reset(contact: Data, receptionId: Data, ephemeralId: Int64, roundId: Int64)
+    case confirm(contact: Contact, receptionId: Data, ephemeralId: Int64, roundId: Int64)
+    case request(contact: Contact, receptionId: Data, ephemeralId: Int64, roundId: Int64)
+    case reset(contact: Contact, receptionId: Data, ephemeralId: Int64, roundId: Int64)
   }
 
   public init(handle: @escaping (Callback) -> Void) {
@@ -38,7 +38,7 @@ extension AuthCallbacks {
           fatalError("BindingsAuthCallbacks.confirm received `nil` receptionId")
         }
         callback.handle(.confirm(
-          contact: contact,
+          contact: Contact.live(contact),
           receptionId: receptionId,
           ephemeralId: ephemeralId,
           roundId: roundId
@@ -53,7 +53,7 @@ extension AuthCallbacks {
           fatalError("BindingsAuthCallbacks.request received `nil` receptionId")
         }
         callback.handle(.request(
-          contact: contact,
+          contact: Contact.live(contact),
           receptionId: receptionId,
           ephemeralId: ephemeralId,
           roundId: roundId
@@ -68,7 +68,7 @@ extension AuthCallbacks {
           fatalError("BindingsAuthCallbacks.reset received `nil` receptionId")
         }
         callback.handle(.reset(
-          contact: contact,
+          contact: Contact.live(contact),
           receptionId: receptionId,
           ephemeralId: ephemeralId,
           roundId: roundId
