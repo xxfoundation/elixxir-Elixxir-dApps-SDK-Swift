@@ -4,15 +4,15 @@ import XCTestDynamicOverlay
 public struct GetPublicKeyFromContact {
   public var run: (Data) throws -> Data
 
-  public func callAsFunction(_ contact: Data) throws -> Data {
-    try run(contact)
+  public func callAsFunction(_ contactData: Data) throws -> Data {
+    try run(contactData)
   }
 }
 
 extension GetPublicKeyFromContact {
-  public static let live = GetPublicKeyFromContact { contact in
+  public static let live = GetPublicKeyFromContact { contactData in
     var error: NSError?
-    let key = BindingsGetPubkeyFromContact(contact, &error)
+    let key = BindingsGetPubkeyFromContact(contactData, &error)
     if let error = error {
       throw error
     }
