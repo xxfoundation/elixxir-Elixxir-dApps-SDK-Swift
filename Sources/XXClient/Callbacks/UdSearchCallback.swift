@@ -16,20 +16,13 @@ extension UdSearchCallback {
 }
 
 extension UdSearchCallback {
-  func makeBindingsUdSearchCallback(
-    makeContact: MakeContact = .live()
-  ) -> BindingsUdSearchCallbackProtocol {
+  func makeBindingsUdSearchCallback() -> BindingsUdSearchCallbackProtocol {
     class CallbackObject: NSObject, BindingsUdSearchCallbackProtocol {
-      init(
-        callback: UdSearchCallback,
-        makeContact: MakeContact
-      ) {
+      init(_ callback: UdSearchCallback) {
         self.callback = callback
-        self.makeContact = makeContact
       }
 
       let callback: UdSearchCallback
-      let makeContact: MakeContact
 
       func callback(_ contactListJSON: Data?, err: Error?) {
         if let error = err {
@@ -37,7 +30,7 @@ extension UdSearchCallback {
         } else if let data = contactListJSON {
           do {
             let contactsData = try JSONDecoder().decode([Data].self, from: data)
-            let contacts: [Contact] = contactsData.map { makeContact($0) }
+            let contacts: [Contact] = contactsData.map { Contact.live($0) }
             callback.handle(.success(contacts))
           } catch {
             callback.handle(.failure(error as NSError))
@@ -48,9 +41,6 @@ extension UdSearchCallback {
       }
     }
 
-    return CallbackObject(
-      callback: self,
-      makeContact: makeContact
-    )
+    return CallbackObject(self)
   }
 }
