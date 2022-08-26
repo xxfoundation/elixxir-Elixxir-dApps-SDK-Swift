@@ -29,7 +29,15 @@ extension UdSearchCallback {
           callback.handle(.failure(error as NSError))
         } else if let data = contactListJSON {
           do {
-            callback.handle(.success(try [UDSearchResult].decode(data)))
+            let contacts = try JSONDecoder().decode([Data].self, from: data)
+            let results = try contacts.map { contact in
+              UDSearchResult(
+                id: try GetIdFromContact.live(contact),
+                publicKey: try GetPublicKeyFromContact.live(contact: contact),
+                facts: try GetFactsFromContact.live(contact: contact)
+              )
+            }
+            callback.handle(.success(results))
           } catch {
             callback.handle(.failure(error as NSError))
           }
