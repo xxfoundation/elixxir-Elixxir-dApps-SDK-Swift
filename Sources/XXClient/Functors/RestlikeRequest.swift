@@ -9,7 +9,7 @@ public struct RestlikeRequest {
     clientId: Int,
     connectionId: Int,
     request: RestlikeMessage,
-    e2eParams: Data
+    e2eParams: Data = GetE2EParams.liveDefault()
   ) throws -> RestlikeMessage {
     try run(authenticated, clientId, connectionId, request, e2eParams)
   }
