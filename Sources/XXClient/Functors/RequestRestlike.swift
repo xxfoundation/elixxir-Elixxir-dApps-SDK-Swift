@@ -2,11 +2,11 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct RequestRestlike {
-  public var run: (Int, Data, RestlikeMessage, Data) throws -> RestlikeMessage
+  public var run: (Int, Contact, RestlikeMessage, Data) throws -> RestlikeMessage
 
   public func callAsFunction(
     e2eId: Int,
-    recipient: Data,
+    recipient: Contact,
     request: RestlikeMessage,
     paramsJSON: Data
   ) throws -> RestlikeMessage {
@@ -19,7 +19,7 @@ extension RequestRestlike {
     var error: NSError?
     let responseData = BindingsRequestRestLike(
       e2dId,
-      recipient,
+      recipient.data,
       try request.encode(),
       paramsJSON,
       &error
