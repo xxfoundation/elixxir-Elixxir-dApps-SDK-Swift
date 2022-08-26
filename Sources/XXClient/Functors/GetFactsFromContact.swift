@@ -4,7 +4,7 @@ import XCTestDynamicOverlay
 public struct GetFactsFromContact {
   public var run: (Data) throws -> [Fact]
 
-  public func callAsFunction(contact: Data) throws -> [Fact] {
+  public func callAsFunction(_ contact: Data) throws -> [Fact] {
     try run(contact)
   }
 }
