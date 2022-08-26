@@ -4,15 +4,15 @@ import XCTestDynamicOverlay
 public struct UserDiscoveryPermanentDeleteAccount {
   public var run: (Fact) throws -> Void
 
-  public func callAsFunction(_ fact: Fact) throws {
-    try run(fact)
+  public func callAsFunction(username: Fact) throws {
+    try run(username)
   }
 }
 
 extension UserDiscoveryPermanentDeleteAccount {
   public static func live(_ bindingsUD: BindingsUserDiscovery) -> UserDiscoveryPermanentDeleteAccount {
-    UserDiscoveryPermanentDeleteAccount { fact in
-      try bindingsUD.permanentDeleteAccount(fact.encode())
+    UserDiscoveryPermanentDeleteAccount { username in
+      try bindingsUD.permanentDeleteAccount(username.encode())
     }
   }
 }

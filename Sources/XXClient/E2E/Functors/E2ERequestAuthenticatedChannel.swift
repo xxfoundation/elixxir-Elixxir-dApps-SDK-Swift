@@ -2,22 +2,22 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct E2ERequestAuthenticatedChannel {
-  public var run: (Data, [Fact]) throws -> Int64
+  public var run: (Contact, [Fact]) throws -> Int64
 
   public func callAsFunction(
-    partnerContact: Data,
+    partner: Contact,
     myFacts: [Fact]
   ) throws -> Int64 {
-    try run(partnerContact, myFacts)
+    try run(partner, myFacts)
   }
 }
 
 extension E2ERequestAuthenticatedChannel {
   public static func live(_ bindingsE2E: BindingsE2e) -> E2ERequestAuthenticatedChannel {
-    E2ERequestAuthenticatedChannel { partnerContact, myFacts in
+    E2ERequestAuthenticatedChannel { partner, myFacts in
       var roundId: Int64 = 0
       try bindingsE2E.request(
-        partnerContact,
+        partner.data,
         factsListJson: try myFacts.encode(),
         ret0_: &roundId
       )

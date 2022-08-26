@@ -2,16 +2,18 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct UserDiscoveryGetContact {
-  public var run: () throws -> Data
+  public var run: () throws -> Contact
 
-  public func callAsFunction() throws -> Data {
+  public func callAsFunction() throws -> Contact {
     try run()
   }
 }
 
 extension UserDiscoveryGetContact {
   public static func live(_ bindingsUD: BindingsUserDiscovery) -> UserDiscoveryGetContact {
-    UserDiscoveryGetContact(run: bindingsUD.getContact)
+    UserDiscoveryGetContact {
+      Contact.live(try bindingsUD.getContact())
+    }
   }
 }
 

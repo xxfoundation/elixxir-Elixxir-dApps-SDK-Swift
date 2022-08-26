@@ -7,7 +7,7 @@ public struct Login {
   public func callAsFunction(
     ephemeral: Bool = false,
     cMixId: Int,
-    authCallbacks: AuthCallbacks? = nil,
+    authCallbacks: AuthCallbacks?,
     identity: ReceptionIdentity,
     e2eParamsJSON: Data = GetE2EParams.liveDefault()
   ) throws -> E2E {

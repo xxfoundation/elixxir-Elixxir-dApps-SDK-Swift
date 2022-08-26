@@ -9,7 +9,7 @@ public struct NewUdManagerFromBackup {
       email: Fact?,
       phone: Fact?,
       cert: Data,
-      contactFile: Data,
+      contact: Data,
       address: String
     ) {
       self.e2eId = e2eId
@@ -17,7 +17,7 @@ public struct NewUdManagerFromBackup {
       self.email = email
       self.phone = phone
       self.cert = cert
-      self.contactFile = contactFile
+      self.contact = contact
       self.address = address
     }
 
@@ -26,7 +26,7 @@ public struct NewUdManagerFromBackup {
     public var email: Fact?
     public var phone: Fact?
     public var cert: Data
-    public var contactFile: Data
+    public var contact: Data
     public var address: String
   }
 
@@ -50,7 +50,7 @@ extension NewUdManagerFromBackup {
       try params.email?.encode(),
       try params.phone?.encode(),
       params.cert,
-      params.contactFile,
+      params.contact,
       params.address,
       &error
     )

@@ -2,11 +2,11 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct AsyncRequestRestlike {
-  public var run: (Int, Data, RestlikeMessage, Data, RestlikeCallback) throws -> Void
+  public var run: (Int, Contact, RestlikeMessage, Data, RestlikeCallback) throws -> Void
 
   public func callAsFunction(
     e2eId: Int,
-    recipient: Data,
+    recipient: Contact,
     request: RestlikeMessage,
     paramsJSON: Data,
     callback: RestlikeCallback
@@ -20,7 +20,7 @@ extension AsyncRequestRestlike {
     var error: NSError?
     let result = BindingsAsyncRequestRestLike(
       e2dId,
-      recipient,
+      recipient.data,
       try request.encode(),
       paramsJSON,
       callback.makeBindingsRestlikeCallback(),

@@ -2159,7 +2159,7 @@ Parameters:
 Returns:
  - []byte - the JSON marshalled bytes of the SingleUseSendReport object,
    which can be passed into Cmix.WaitForRoundResult to see if the send
-   succeeded.
+   operation succeeded.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdSearchCallback> _Nullable cb, NSData* _Nullable factListJSON, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
@@ -2504,7 +2504,7 @@ received.
 Parameters:
  - callbackReport - the JSON marshalled bytes of the SingleUseCallbackReport
    object, which can be passed into Cmix.WaitForRoundResult to see if the
-   send succeeded.
+   send operation succeeded.
  */
 @interface BindingsSingleUseCallback : NSObject <goSeqRefInterface, BindingsSingleUseCallback> {
 }
@@ -2521,7 +2521,7 @@ clients into TransmitSingleUse.
 Parameters:
  - callbackReport - the JSON marshalled bytes of the SingleUseResponseReport
    object, which can be passed into Cmix.WaitForRoundResult to see if the
-   send succeeded.
+   send operation succeeded.
  */
 @interface BindingsSingleUseResponse : NSObject <goSeqRefInterface, BindingsSingleUseResponse> {
 }
@@ -2583,8 +2583,15 @@ SearchUD.
 
 Parameters:
  - contactListJSON - the JSON marshalled bytes of []contact.Contact, or nil
-   if an error occurs
- - err - any errors that occurred in the search
+   if an error occurs.
+
+  JSON Example:
+  {
+ 	"<xxc(2)F8dL9EC6gy+RMJuk3R+Au6eGExo02Wfio5cacjBcJRwDEgB7Ugdw/BAr6RkCABkWAFV1c2VybmFtZTA7c4LzV05sG+DMt+rFB0NIJg==xxc>",
+ 	"<xxc(2)eMhAi/pYkW5jCmvKE5ZaTglQb+fTo1D8NxVitr5CCFADEgB7Ugdw/BAr6RoCABkWAFV1c2VybmFtZTE7fElAa7z3IcrYrrkwNjMS2w==xxc>",
+ 	"<xxc(2)d7RJTu61Vy1lDThDMn8rYIiKSe1uXA/RCvvcIhq5Yg4DEgB7Ugdw/BAr6RsCABkWAFV1c2VybmFtZTI7N3XWrxIUpR29atpFMkcR6A==xxc>"
+	}
+ - err - any errors that occurred in the search.
  */
 @interface BindingsUdSearchCallback : NSObject <goSeqRefInterface, BindingsUdSearchCallback> {
 }

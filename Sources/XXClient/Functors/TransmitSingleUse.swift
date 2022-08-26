@@ -5,7 +5,7 @@ public struct TransmitSingleUse {
   public struct Params: Equatable {
     public init(
       e2eId: Int,
-      recipient: Data,
+      recipient: Contact,
       tag: String,
       payload: Data,
       paramsJSON: Data
@@ -18,7 +18,7 @@ public struct TransmitSingleUse {
     }
 
     public var e2eId: Int
-    public var recipient: Data
+    public var recipient: Contact
     public var tag: String
     public var payload: Data
     public var paramsJSON: Data
@@ -39,7 +39,7 @@ extension TransmitSingleUse {
     var error: NSError?
     let reportData = BindingsTransmitSingleUse(
       params.e2eId,
-      params.recipient,
+      params.recipient.data,
       params.tag,
       params.payload,
       params.paramsJSON,

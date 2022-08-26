@@ -2,31 +2,31 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct CMixConnect {
-  public var run: (Bool, Int, Data, Data) throws -> Connection
+  public var run: (Bool, Int, Contact, Data) throws -> Connection
 
   public func callAsFunction(
     withAuthentication: Bool,
     e2eId: Int,
-    recipientContact: Data,
+    recipient: Contact,
     e2eParamsJSON: Data = GetE2EParams.liveDefault()
   ) throws -> Connection {
-    try run(withAuthentication, e2eId, recipientContact, e2eParamsJSON)
+    try run(withAuthentication, e2eId, recipient, e2eParamsJSON)
   }
 }
 
 extension CMixConnect {
   public static func live(_ bindingsCMix: BindingsCmix) -> CMixConnect {
-    CMixConnect { withAuthentication, e2eId, recipientContact, e2eParamsJSON in
+    CMixConnect { withAuthentication, e2eId, recipient, e2eParamsJSON in
       if withAuthentication {
         return .live(try bindingsCMix.connect(
           withAuthentication: e2eId,
-          recipientContact: recipientContact,
+          recipientContact: recipient.data,
           e2eParamsJSON: e2eParamsJSON
         ))
       } else {
         return .live(try bindingsCMix.connect(
           e2eId,
-          recipientContact: recipientContact,
+          recipientContact: recipient.data,
           e2eParamsJSON: e2eParamsJSON
         ))
       }

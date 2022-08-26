@@ -29,7 +29,7 @@ extension MessengerLogIn {
           username: nil,
           registrationValidationSignature: nil,
           cert: env.udCert ?? e2e.getUdCertFromNdf(),
-          contactFile: env.udContact ?? (try e2e.getUdContactFromNdf()),
+          contact: env.udContact ?? (try e2e.getUdContactFromNdf()),
           address: env.udAddress ?? e2e.getUdAddressFromNdf()
         ),
         follower: .init {

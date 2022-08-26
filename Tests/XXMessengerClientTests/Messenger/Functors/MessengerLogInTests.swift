@@ -46,7 +46,7 @@ final class MessengerLogInTests: XCTestCase {
       username: nil,
       registrationValidationSignature: nil,
       cert: udCertFromNDF,
-      contactFile: udContactFromNDF,
+      contact: udContactFromNDF,
       address: udAddressFromNDF
     )])
     XCTAssertEqual(didNewOrLoadUDWithFollower.count, 1)
@@ -93,7 +93,7 @@ final class MessengerLogInTests: XCTestCase {
       username: nil,
       registrationValidationSignature: nil,
       cert: altUdCert,
-      contactFile: altUdContact,
+      contact: altUdContact,
       address: altUdAddress
     )])
     XCTAssertEqual(didSetUD.compactMap { $0 }.count, 1)

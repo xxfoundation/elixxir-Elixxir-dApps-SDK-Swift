@@ -2,11 +2,11 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct UdSearchCallback {
-  public init(handle: @escaping (Result<[UDSearchResult], NSError>) -> Void) {
+  public init(handle: @escaping (Result<[Contact], NSError>) -> Void) {
     self.handle = handle
   }
 
-  public var handle: (Result<[UDSearchResult], NSError>) -> Void
+  public var handle: (Result<[Contact], NSError>) -> Void
 }
 
 extension UdSearchCallback {
@@ -29,7 +29,9 @@ extension UdSearchCallback {
           callback.handle(.failure(error as NSError))
         } else if let data = contactListJSON {
           do {
-            callback.handle(.success(try [UDSearchResult].decode(data)))
+            let contactsData = try JSONDecoder().decode([Data].self, from: data)
+            let contacts: [Contact] = contactsData.map { Contact.live($0) }
+            callback.handle(.success(contacts))
           } catch {
             callback.handle(.failure(error as NSError))
           }
