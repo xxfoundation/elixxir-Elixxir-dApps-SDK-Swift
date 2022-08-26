@@ -4,15 +4,15 @@ import XCTestDynamicOverlay
 public struct GetIdFromContact {
   public var run: (Data) throws -> Data
 
-  public func callAsFunction(_ contact: Data) throws -> Data {
-    try run(contact)
+  public func callAsFunction(_ contactData: Data) throws -> Data {
+    try run(contactData)
   }
 }
 
 extension GetIdFromContact {
-  public static let live = GetIdFromContact { contact in
+  public static let live = GetIdFromContact { contactData in
     var error: NSError?
-    let id = BindingsGetIDFromContact(contact, &error)
+    let id = BindingsGetIDFromContact(contactData, &error)
     if let error = error {
       throw error
     }
