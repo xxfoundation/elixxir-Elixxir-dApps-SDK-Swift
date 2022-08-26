@@ -2,11 +2,11 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct SearchUD {
-  public var run: (Int, Data, [Fact], Data, UdSearchCallback) throws -> SingleUseSendReport
+  public var run: (Int, Contact, [Fact], Data, UdSearchCallback) throws -> SingleUseSendReport
 
   public func callAsFunction(
     e2eId: Int,
-    udContact: Data,
+    udContact: Contact,
     facts: [Fact],
     singleRequestParamsJSON: Data = GetSingleUseParams.liveDefault(),
     callback: UdSearchCallback
@@ -22,7 +22,7 @@ extension SearchUD {
     var error: NSError?
     let reportData = BindingsSearchUD(
       e2eId,
-      udContact,
+      udContact.data,
       callback.makeBindingsUdSearchCallback(),
       try facts.encode(),
       singleRequestParamsJSON,
