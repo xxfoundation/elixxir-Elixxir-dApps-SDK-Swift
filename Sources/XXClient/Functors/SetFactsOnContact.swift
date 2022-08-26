@@ -5,25 +5,25 @@ public struct SetFactsOnContact {
   public var run: (Data, [Fact]) throws -> Data
 
   public func callAsFunction(
-    contact: Data,
+    contactData: Data,
     facts: [Fact]
   ) throws -> Data {
-    try run(contact, facts)
+    try run(contactData, facts)
   }
 }
 
 extension SetFactsOnContact {
-  public static let live = SetFactsOnContact { contact, facts in
+  public static let live = SetFactsOnContact { contactData, facts in
     let factsData = try facts.encode()
     var error: NSError?
-    let updatedContact = BindingsSetFactsOnContact(contact, factsData, &error)
+    let updatedContactData = BindingsSetFactsOnContact(contactData, factsData, &error)
     if let error = error {
       throw error
     }
-    guard let updatedContact = updatedContact else {
+    guard let updatedContactData = updatedContactData else {
       fatalError("BindingsSetFactsOnContact returned `nil` without providing error")
     }
-    return updatedContact
+    return updatedContactData
   }
 }
 
