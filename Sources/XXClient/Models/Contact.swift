@@ -1,29 +1,40 @@
 import Foundation
-import XCTestDynamicOverlay
 
 public struct Contact {
   public init(
     data: Data,
-    getId: @escaping () throws -> Data,
-    getPublicKey: @escaping () throws -> Data,
-    getFacts: @escaping () throws -> [Fact],
-    setFacts: @escaping (Data, [Fact]) throws -> Data
+    getIdFromContact: GetIdFromContact,
+    getPublicKeyFromContact: GetPublicKeyFromContact,
+    getFactsFromContact: GetFactsFromContact,
+    setFactsOnContact: SetFactsOnContact
   ) {
     self.data = data
-    self.getId = getId
-    self.getPublicKey = getPublicKey
-    self.getFacts = getFacts
-    self._setFacts = setFacts
+    self.getIdFromContact = getIdFromContact
+    self.getPublicKeyFromContact = getPublicKeyFromContact
+    self.getFactsFromContact = getFactsFromContact
+    self.setFactsOnContact = setFactsOnContact
   }
 
   public var data: Data
-  public var getId: () throws -> Data
-  public var getPublicKey: () throws -> Data
-  public var getFacts: () throws -> [Fact]
-  public var _setFacts: (Data, [Fact]) throws -> Data
+  public var getIdFromContact: GetIdFromContact
+  public var getPublicKeyFromContact: GetPublicKeyFromContact
+  public var getFactsFromContact: GetFactsFromContact
+  public var setFactsOnContact: SetFactsOnContact
+
+  public func getId() throws -> Data {
+    try getIdFromContact(data)
+  }
+
+  public func getPublicKey() throws -> Data {
+    try getPublicKeyFromContact(data)
+  }
+
+  public func getFacts() throws -> [Fact] {
+    try getFactsFromContact(data)
+  }
 
   public mutating func setFacts(_ facts: [Fact]) throws {
-    data = try _setFacts(data, facts)
+    data = try setFactsOnContact(contactData: data, facts: facts)
   }
 }
 
@@ -43,10 +54,10 @@ extension Contact {
   ) -> Contact {
     Contact(
       data: data,
-      getId: { try getIdFromContact(data) },
-      getPublicKey: { try getPublicKeyFromContact(data) },
-      getFacts: { try getFactsFromContact(data) },
-      setFacts: { try setFactsOnContact(contactData: $0, facts: $1) }
+      getIdFromContact: getIdFromContact,
+      getPublicKeyFromContact: getPublicKeyFromContact,
+      getFactsFromContact: getFactsFromContact,
+      setFactsOnContact: setFactsOnContact
     )
   }
 }
@@ -55,10 +66,10 @@ extension Contact {
   public static func unimplemented(_ data: Data) -> Contact {
     Contact(
       data: data,
-      getId: XCTUnimplemented("\(Self.self).getId"),
-      getPublicKey: XCTUnimplemented("\(Self.self).getPublicKey"),
-      getFacts: XCTUnimplemented("\(Self.self).getFacts"),
-      setFacts: XCTUnimplemented("\(Self.self).updateFacts")
+      getIdFromContact: .unimplemented,
+      getPublicKeyFromContact: .unimplemented,
+      getFactsFromContact: .unimplemented,
+      setFactsOnContact: .unimplemented
     )
   }
 }
