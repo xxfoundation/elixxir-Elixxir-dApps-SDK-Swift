@@ -31,7 +31,7 @@ extension MessengerRegister {
           username: username,
           registrationValidationSignature: cMix.getReceptionRegistrationValidationSignature(),
           cert: env.udCert ?? e2e.getUdCertFromNdf(),
-          contactFile: env.udContact ?? (try e2e.getUdContactFromNdf()),
+          contact: env.udContact ?? (try e2e.getUdContactFromNdf()),
           address: env.udAddress ?? e2e.getUdAddressFromNdf()
         ),
         follower: .init {

@@ -8,14 +8,14 @@ public struct NewOrLoadUd {
       username: String?,
       registrationValidationSignature: Data?,
       cert: Data,
-      contactFile: Data,
+      contact: Data,
       address: String
     ) {
       self.e2eId = e2eId
       self.username = username
       self.registrationValidationSignature = registrationValidationSignature
       self.cert = cert
-      self.contactFile = contactFile
+      self.contact = contact
       self.address = address
     }
 
@@ -23,7 +23,7 @@ public struct NewOrLoadUd {
     public var username: String?
     public var registrationValidationSignature: Data?
     public var cert: Data
-    public var contactFile: Data
+    public var contact: Data
     public var address: String
   }
 
@@ -46,7 +46,7 @@ extension NewOrLoadUd {
       params.username,
       params.registrationValidationSignature,
       params.cert,
-      params.contactFile,
+      params.contact,
       params.address,
       &error
     )
