@@ -12,6 +12,7 @@ final class MessengerConnectTests: XCTestCase {
       var e2eParamsJSON: Data
     }
 
+    var didMakeReceptionIdentity: [Bool] = []
     var didLogIn: [DidLogIn] = []
     var didLogInWithAuthCallbacks: [AuthCallbacks?] = []
     var didSetE2E: [E2E?] = []
@@ -25,7 +26,10 @@ final class MessengerConnectTests: XCTestCase {
     env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getId.run = { cMixId }
-      cMix.makeLegacyReceptionIdentity.run = { receptionId }
+      cMix.makeReceptionIdentity.run = { legacy in
+        didMakeReceptionIdentity.append(legacy)
+        return receptionId
+      }
       return cMix
     }
     env.e2e.set = { didSetE2E.append($0) }
@@ -49,11 +53,12 @@ final class MessengerConnectTests: XCTestCase {
 
     try connect()
 
+    XCTAssertNoDifference(didMakeReceptionIdentity, [true])
     XCTAssertNoDifference(didLogIn, [
       DidLogIn(
         ephemeral: false,
         cMixId: 1234,
-        identity: .stub,
+        identity: receptionId,
         e2eParamsJSON: e2eParams
       )
     ])
@@ -89,7 +94,7 @@ final class MessengerConnectTests: XCTestCase {
     env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getId.run = { 1234 }
-      cMix.makeLegacyReceptionIdentity.run = { throw error }
+      cMix.makeReceptionIdentity.run = { _ in throw error }
       return cMix
     }
     env.authCallbacks.registered = { .unimplemented }
@@ -108,7 +113,7 @@ final class MessengerConnectTests: XCTestCase {
     env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getId.run = { 1234 }
-      cMix.makeLegacyReceptionIdentity.run = { .stub }
+      cMix.makeReceptionIdentity.run = { _ in .stub }
       return cMix
     }
     env.authCallbacks.registered = { .unimplemented }
