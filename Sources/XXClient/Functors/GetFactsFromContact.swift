@@ -4,15 +4,15 @@ import XCTestDynamicOverlay
 public struct GetFactsFromContact {
   public var run: (Data) throws -> [Fact]
 
-  public func callAsFunction(_ contact: Data) throws -> [Fact] {
-    try run(contact)
+  public func callAsFunction(_ contactData: Data) throws -> [Fact] {
+    try run(contactData)
   }
 }
 
 extension GetFactsFromContact {
-  public static let live = GetFactsFromContact { contact in
+  public static let live = GetFactsFromContact { contactData in
     var error: NSError?
-    let data = BindingsGetFactsFromContact(contact, &error)
+    let data = BindingsGetFactsFromContact(contactData, &error)
     if let error = error {
       throw error
     }
