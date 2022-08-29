@@ -12,17 +12,25 @@ public enum HomeAction: Equatable {
 
 public struct HomeEnvironment {
   public init(
-    messenger: Messenger
+    messenger: Messenger,
+    mainQueue: AnySchedulerOf<DispatchQueue>,
+    bgQueue: AnySchedulerOf<DispatchQueue>
   ) {
     self.messenger = messenger
+    self.mainQueue = mainQueue
+    self.bgQueue = bgQueue
   }
 
   public var messenger: Messenger
+  public var mainQueue: AnySchedulerOf<DispatchQueue>
+  public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
 
 extension HomeEnvironment {
   public static let unimplemented = HomeEnvironment(
-    messenger: .unimplemented
+    messenger: .unimplemented,
+    mainQueue: .unimplemented,
+    bgQueue: .unimplemented
   )
 }
 
