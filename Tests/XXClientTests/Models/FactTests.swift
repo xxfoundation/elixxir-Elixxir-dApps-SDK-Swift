@@ -25,4 +25,17 @@ final class FactTests: XCTestCase {
 
     XCTAssertNoDifference(decodedModel, model)
   }
+
+  func testCodingArray() throws {
+    let models = [
+      Fact(fact: "abcd", type: 0),
+      Fact(fact: "efgh", type: 1),
+      Fact(fact: "ijkl", type: 2),
+    ]
+
+    let encodedModels = try models.encode()
+    let decodedModels = try [Fact].decode(encodedModels)
+
+    XCTAssertNoDifference(models, decodedModels)
+  }
 }
