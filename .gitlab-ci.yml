@@ -1,9 +1,16 @@
 stages:
   - test
 
-tests:
+package-tests:
   stage: test
   tags: 
     - ios
   script:
     - ./run-tests.sh
+
+examples-tests:
+  stage: test
+  tags: 
+    - ios
+  script:
+    - ./run-tests.sh examples

@@ -44,7 +44,9 @@ extension AppEnvironment {
       },
       home: {
         HomeEnvironment(
-          messenger: messenger
+          messenger: messenger,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
         )
       }
     )
