@@ -11,10 +11,10 @@ public struct MessengerDestroy {
 extension MessengerDestroy {
   public static func live(_ env: MessengerEnvironment) -> MessengerDestroy {
     MessengerDestroy {
-      try env.fileManager.removeDirectory(env.storageDir)
       env.ud.set(nil)
       env.e2e.set(nil)
       env.cMix.set(nil)
+      try env.fileManager.removeDirectory(env.storageDir)
     }
   }
 }
