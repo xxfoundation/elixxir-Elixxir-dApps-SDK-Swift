@@ -5,13 +5,15 @@ import XCTest
 final class E2ESendReportTests: XCTestCase {
   func testCoding() throws {
     let rounds = [1, 5, 9]
-    let messageIdB64 = "51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ="
-    let timestamp: Int = 1_653_582_683_183_384_000
+    let messageIdB64 = "iM34yCIr4Je8ZIzL9iAAG1UWAeDiHybxMTioMAaezvs="
+    let timestamp: Int = 1_661_532_254_302_612_000
+    let keyResidueB64 = "9q2/A69EAuFM1hFAT7Bzy5uGOQ4T6bPFF72h5PlgCWE="
     let jsonString = """
     {
       "Rounds": [\(rounds.map { "\($0)" }.joined(separator: ", "))],
       "MessageID": "\(messageIdB64)",
-      "Timestamp": \(timestamp)
+      "Timestamp": \(timestamp),
+      "KeyResidue": "\(keyResidueB64)"
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
@@ -20,7 +22,8 @@ final class E2ESendReportTests: XCTestCase {
     XCTAssertNoDifference(model, E2ESendReport(
       roundList: rounds,
       messageId: Data(base64Encoded: messageIdB64)!,
-      timestamp: timestamp
+      timestamp: timestamp,
+      keyResidue: Data(base64Encoded: keyResidueB64)
     ))
 
     let encodedModel = try model.encode()
@@ -37,7 +40,8 @@ final class E2ESendReportTests: XCTestCase {
     XCTAssertNoDifference(model, E2ESendReport(
       roundList: nil,
       messageId: nil,
-      timestamp: nil
+      timestamp: nil,
+      keyResidue: nil
     ))
   }
 }
