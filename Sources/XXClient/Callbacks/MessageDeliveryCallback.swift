@@ -30,12 +30,15 @@ extension MessageDeliveryCallback {
       let callback: MessageDeliveryCallback
 
       func eventCallback(_ delivered: Bool, timedOut: Bool, roundResults: Data?) {
-        if delivered,
-           !timedOut,
-           let roundResultsData = roundResults,
-           let roundResults = try? JSONDecoder().decode([Int].self, from: roundResultsData)
-        {
-          callback.handle(.delivered(roundResults: roundResults))
+        if delivered && !timedOut {
+          let roundResultsArray: [Int]
+          if let data = roundResults,
+             let array = try? JSONDecoder().decode([Int].self, from: data) {
+            roundResultsArray = array
+          } else {
+            roundResultsArray = []
+          }
+          callback.handle(.delivered(roundResults: roundResultsArray))
           return
         }
 
@@ -48,7 +51,7 @@ extension MessageDeliveryCallback {
           BindingsMessageDeliveryCallback received invalid parameters:
           - delivered → \(delivered)
           - timedOut → \(timedOut)
-          - roundResults → \(roundResults.map { String(data: $0, encoding: .utf8) ?? "" } ?? "")
+          - roundResults → \(roundResults.map { String(data: $0, encoding: .utf8) ?? "\($0)" } ?? "nil")
           """)
       }
     }
