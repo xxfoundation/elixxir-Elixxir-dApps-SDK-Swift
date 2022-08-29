@@ -21,7 +21,7 @@ extension E2ESend {
         messageType,
         recipientId: recipientId,
         payload: payload,
-        e2eParams: e2eParams
+        e2eParamsJSON: e2eParams
       )
       return try E2ESendReport.decode(reportData)
     }
