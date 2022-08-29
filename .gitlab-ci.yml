@@ -6,4 +6,4 @@ tests:
   tags: 
     - ios
   script:
-    - xcodebuild -scheme 'elixxir-dapps-sdk-swift-Package' -sdk iphonesimulator -destination 'platform=iOS Simulator,OS=15.5,name=iPhone 13' test
+    - ./run-tests.sh
