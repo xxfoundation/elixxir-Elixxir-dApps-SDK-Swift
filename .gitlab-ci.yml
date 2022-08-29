@@ -3,5 +3,7 @@ stages:
 
 tests:
   stage: test
+  tags: 
+    - ios
   script:
     - echo test
