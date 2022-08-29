@@ -18,6 +18,7 @@ public struct Messenger {
   public var logIn: MessengerLogIn
   public var waitForNetwork: MessengerWaitForNetwork
   public var waitForNodes: MessengerWaitForNodes
+  public var destroy: MessengerDestroy
 }
 
 extension Messenger {
@@ -39,7 +40,8 @@ extension Messenger {
       isLoggedIn: .live(env),
       logIn: .live(env),
       waitForNetwork: .live(env),
-      waitForNodes: .live(env)
+      waitForNodes: .live(env),
+      destroy: .live(env)
     )
   }
 }
@@ -62,6 +64,7 @@ extension Messenger {
     isLoggedIn: .unimplemented,
     logIn: .unimplemented,
     waitForNetwork: .unimplemented,
-    waitForNodes: .unimplemented
+    waitForNodes: .unimplemented,
+    destroy: .unimplemented
   )
 }
