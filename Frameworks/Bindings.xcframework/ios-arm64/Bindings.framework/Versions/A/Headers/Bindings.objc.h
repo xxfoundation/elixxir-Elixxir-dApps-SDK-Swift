@@ -681,11 +681,12 @@ Returns:
 SendE2E.
 
 Example E2ESendReport:
- {
-  "Rounds":[1,5,9],
-  "MessageID":"51Yy47uZbP0o2Y9B/kkreDLTB6opUol3M3mYiY2dcdQ=",
-  "Timestamp":1653582683183384000
- }
+{
+"Rounds": [ 1, 4, 9],
+"MessageID": "iM34yCIr4Je8ZIzL9iAAG1UWAeDiHybxMTioMAaezvs=",
+"Timestamp": 1661532254302612000,
+"KeyResidue": "9q2/A69EAuFM1hFAT7Bzy5uGOQ4T6bPFF72h5PlgCWE="
+}
  */
 @interface BindingsE2ESendReport : NSObject <goSeqRefInterface> {
 }
@@ -697,6 +698,7 @@ Example E2ESendReport:
 
 @property (nonatomic) NSData* _Nullable messageID;
 @property (nonatomic) int64_t timestamp;
+@property (nonatomic) NSData* _Nullable keyResidue;
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
 
@@ -971,7 +973,7 @@ Returns:
  - []byte - the JSON marshalled bytes of the E2ESendReport object, which can
    be passed into Cmix.WaitForRoundResult to see if the send succeeded.
  */
-- (NSData* _Nullable)sendE2E:(long)messageType recipientId:(NSData* _Nullable)recipientId payload:(NSData* _Nullable)payload e2eParams:(NSData* _Nullable)e2eParams error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)sendE2E:(long)messageType recipientId:(NSData* _Nullable)recipientId payload:(NSData* _Nullable)payload e2eParamsJSON:(NSData* _Nullable)e2eParamsJSON error:(NSError* _Nullable* _Nullable)error;
 /**
  * VerifyOwnership checks if the received ownership proof is valid.
 

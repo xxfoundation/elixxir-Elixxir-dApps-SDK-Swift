@@ -4,16 +4,19 @@ public struct E2ESendReport: Equatable {
   public init(
     roundList: [Int]?,
     messageId: Data?,
-    timestamp: Int?
+    timestamp: Int?,
+    keyResidue: Data?
   ) {
     self.roundList = roundList
     self.messageId = messageId
     self.timestamp = timestamp
+    self.keyResidue = keyResidue
   }
 
   public var roundList: [Int]?
   public var messageId: Data?
   public var timestamp: Int?
+  public var keyResidue: Data?
 }
 
 extension E2ESendReport: Codable {
@@ -21,6 +24,7 @@ extension E2ESendReport: Codable {
     case roundList = "Rounds"
     case messageId = "MessageID"
     case timestamp = "Timestamp"
+    case keyResidue = "KeyResidue"
   }
 
   public static func decode(_ data: Data) throws -> Self {
