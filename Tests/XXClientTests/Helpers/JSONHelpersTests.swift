@@ -2,33 +2,33 @@ import CustomDump
 import XCTest
 @testable import XXClient
 
-final class ConvertJsonNumberToStringTests: XCTestCase {
-  func testConverting() {
-    assert(
+final class JSONHelpersTests: XCTestCase {
+  func testConvertingNumberToStringByKey() {
+    assertConvertingJsonNumberToString(
       input: #"{"number":1234567890,"text":"hello"}"#,
       key: "number",
       expected: #"{"number":"1234567890","text":"hello"}"#
     )
 
-    assert(
+    assertConvertingJsonNumberToString(
       input: #"{"text":"hello","number":1234567890}"#,
       key: "number",
       expected: #"{"text":"hello","number":"1234567890"}"#
     )
 
-    assert(
+    assertConvertingJsonNumberToString(
       input: #"{  "number"  :  1234567890  ,  "text"  :  "hello"  }"#,
       key: "number",
       expected: #"{  "number"  :  "1234567890"  ,  "text"  :  "hello"  }"#
     )
 
-    assert(
+    assertConvertingJsonNumberToString(
       input: #"{  "text"  :  "hello"  ,  "number"  :  1234567890  }"#,
       key: "number",
       expected: #"{  "text"  :  "hello"  ,  "number"  :  "1234567890"  }"#
     )
 
-    assert(
+    assertConvertingJsonNumberToString(
       input: """
       {
         "number": 1234567890,
@@ -44,7 +44,7 @@ final class ConvertJsonNumberToStringTests: XCTestCase {
       """
     )
 
-    assert(
+    assertConvertingJsonNumberToString(
       input: """
       {
         "text": "hello",
@@ -59,32 +59,68 @@ final class ConvertJsonNumberToStringTests: XCTestCase {
       }
       """
     )
+  }
 
-    assert(
+  func testConvertingStringToNumber() {
+    assertConvertingJsonStringToNumber(
+      input: #"{"number":"1234567890","text":"hello"}"#,
+      key: "number",
+      expected: #"{"number":1234567890,"text":"hello"}"#
+    )
+
+    assertConvertingJsonStringToNumber(
+      input: #"{"text":"hello","number":"1234567890"}"#,
+      key: "number",
+      expected: #"{"text":"hello","number":1234567890}"#
+    )
+
+    assertConvertingJsonStringToNumber(
+      input: #"{  "number"  :  "1234567890"  ,  "text"  :  "hello"  }"#,
+      key: "number",
+      expected: #"{  "number"  :  1234567890  ,  "text"  :  "hello"  }"#
+    )
+
+    assertConvertingJsonStringToNumber(
+      input: #"{  "text"  :  "hello"  ,  "number"  :  "1234567890"  }"#,
+      key: "number",
+      expected: #"{  "text"  :  "hello"  ,  "number"  :  1234567890  }"#
+    )
+
+    assertConvertingJsonStringToNumber(
+      input: """
+      {
+        "number": "1234567890",
+        "text": "hello"
+      }
+      """,
+      key: "number",
+      expected: """
+      {
+        "number": 1234567890,
+        "text": "hello"
+      }
+      """
+    )
+
+    assertConvertingJsonStringToNumber(
       input: """
       {
         "text": "hello",
-        "number1": 123456789,
-        "number2": 1234567890,
-        "number3": 123456789,
-        "number4": 1234567890
+        "number": "1234567890"
       }
       """,
-      minNumberLength: 10,
+      key: "number",
       expected: """
       {
         "text": "hello",
-        "number1": 123456789,
-        "number2": "1234567890",
-        "number3": 123456789,
-        "number4": "1234567890"
+        "number": 1234567890
       }
       """
     )
   }
 }
 
-private func assert(
+private func assertConvertingJsonNumberToString(
   input: String,
   key: String,
   expected: String,
@@ -105,18 +141,18 @@ private func assert(
   )
 }
 
-private func assert(
+private func assertConvertingJsonStringToNumber(
   input: String,
-  minNumberLength: Int,
+  key: String,
   expected: String,
   file: StaticString = #file,
   line: UInt = #line
 ) {
   XCTAssertNoDifference(
     String(
-      data: convertJsonNumberToString(
+      data: convertJsonStringToNumber(
         in: input.data(using: .utf8)!,
-        minNumberLength: minNumberLength
+        at: key
       ),
       encoding: .utf8
     )!,
