@@ -60,6 +60,7 @@ go get golang.org/x/mobile/bind
 go install golang.org/x/mobile/cmd/gomobile@latest
 gomobile init
 gomobile bind -target $framework_target gitlab.com/elixxir/client/bindings
+
 message "Move framework..."
 cd $working_dir
 rm -rf "$frameworks_dir/Bindings.xcframework"
