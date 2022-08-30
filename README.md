@@ -29,6 +29,11 @@ elixxir-dapps-sdk-swift [Swift Package]
 - Use `exlixxir-dapps-sdk-swift-Package` scheme to build and test the package.
 - Use other schemes (like `XXClient`) for building and testing individual libraries in isolation.
 
+
+### Bindings
+
+The package uses `Bindings.xcframework` dependency, built from [go client](https://git.xx.network/elixxir/client) repository. Use `build-bindings.sh` script to update the framework. Information about currently used version is contained in [Frameworks/Bindings.txt](Frameworks/Bindings.txt) file.
+
 ## 📄 License
 
 Copyright © 2022 xx network SEZC
