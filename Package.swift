@@ -41,6 +41,7 @@ let package = Package(
       name: "XXClient",
       dependencies: [
         .target(name: "Bindings"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ],
       swiftSettings: swiftSettings
