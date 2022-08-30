@@ -7,6 +7,7 @@ test-package-macos:
     - ios
   script:
     - ./run-tests.sh macos
+  retry: 1
 
 test-package-ios:
   stage: test
@@ -14,6 +15,7 @@ test-package-ios:
     - ios
   script:
     - ./run-tests.sh ios
+  retry: 1
 
 test-examples-ios:
   stage: test
@@ -21,3 +23,4 @@ test-examples-ios:
     - ios
   script:
     - ./run-tests.sh ios-examples
+  retry: 1
