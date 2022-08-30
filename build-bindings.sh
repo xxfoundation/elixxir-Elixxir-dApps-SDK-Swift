@@ -9,7 +9,7 @@ temp_dir="$(dirname $(realpath $0))/.build-bindings"
 client_git_url="https://gitlab.com/elixxir/client.git"
 client_git_dir="$temp_dir/client"
 client_git_commit="$1"
-framework_target="ios"
+framework_target="ios,iossimulator,macos"
 frameworks_dir="$(dirname $(realpath $0))/Frameworks"
 
 #=======================================
