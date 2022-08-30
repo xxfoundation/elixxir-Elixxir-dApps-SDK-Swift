@@ -1182,7 +1182,26 @@ the first contact is the leader/creator of the group.
 All subsequent members are ordered by their ID.
 
 Returns:
- - []byte - a JSON marshalled version of the member list.
+ - []byte - JSON marshalled [group.Membership], which is an array of
+   [group.Member].
+
+Example JSON [group.Membership] return:
+ [
+   {
+     "ID": "U4x/lrFkvxuXu59LtHLon1sUhPJSCcnZND6SugndnVID",
+     "DhKey": {
+       "Value": 3534334367214237261,
+       "Fingerprint": 16801541511233098363
+     }
+   },
+   {
+     "ID": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+     "DhKey": {
+       "Value": 7497468244883513247,
+       "Fingerprint": 16801541511233098363
+     }
+   }
+ ]
  */
 - (NSData* _Nullable)getMembership:(NSError* _Nullable* _Nullable)error;
 /**

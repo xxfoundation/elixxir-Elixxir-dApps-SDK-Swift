@@ -2,9 +2,9 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct GroupGetMembership {
-  public var run: () throws -> Data
+  public var run: () throws -> [GroupMember]
 
-  public func callAsFunction() throws -> Data {
+  public func callAsFunction() throws -> [GroupMember] {
     try run()
   }
 }
@@ -12,7 +12,8 @@ public struct GroupGetMembership {
 extension GroupGetMembership {
   public static func live(_ bindingsGroup: BindingsGroup) -> GroupGetMembership {
     GroupGetMembership {
-      try bindingsGroup.getMembership()
+      let data = try bindingsGroup.getMembership()
+      return try [GroupMember].decode(data)
     }
   }
 }
