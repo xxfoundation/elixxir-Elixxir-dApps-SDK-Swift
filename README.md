@@ -1,7 +1,7 @@
 # Elixxir dApps Swift SDK
 
 ![Swift 5.6](https://img.shields.io/badge/swift-5.6-orange.svg)
-![platform iOS](https://img.shields.io/badge/platform-iOS-blue.svg)
+![platform iOS, macOS](https://img.shields.io/badge/platform-iOS,_macOS-blue.svg)
 
 ## 📖 Documentation 
 
@@ -14,7 +14,7 @@ Check out included [examples](Examples).
 
 ## 🛠 Development
 
-Open `Package.swift` in Xcode (≥13.4).
+Open `Package.swift` in Xcode (≥13.4.1).
 
 ### Project structure
 
