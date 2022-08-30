@@ -1,12 +1,12 @@
 import CustomDump
 import Foundation
 
-public class JSONDecoder: Foundation.JSONDecoder {
-  public override init() {
+class JSONDecoder: Foundation.JSONDecoder {
+  override init() {
     super.init()
   }
 
-  public override func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
+  override func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
     do {
       let data = convertNumberToString(in: data, at: "Value")
       return try super.decode(type, from: data)

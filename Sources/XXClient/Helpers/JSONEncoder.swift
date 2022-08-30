@@ -1,12 +1,12 @@
 import CustomDump
 import Foundation
 
-public class JSONEncoder: Foundation.JSONEncoder {
-  public override init() {
+class JSONEncoder: Foundation.JSONEncoder {
+  override init() {
     super.init()
   }
 
-  public override func encode<T>(_ value: T) throws -> Data where T: Encodable {
+  override func encode<T>(_ value: T) throws -> Data where T: Encodable {
     do {
       var data = try super.encode(value)
       data = convertStringToNumber(in: data, at: "Value")
