@@ -7,6 +7,7 @@ package-tests:
     - ios
   script:
     - ./run-tests.sh
+  retry: 1
 
 examples-tests:
   stage: test
@@ -14,3 +15,4 @@ examples-tests:
     - ios
   script:
     - ./run-tests.sh examples
+  retry: 1
