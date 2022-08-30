@@ -17,12 +17,10 @@ extension DHKey: Codable {
   }
 
   public static func decode(_ data: Data) throws -> Self {
-    let data = convertJsonNumberToString(in: data, at: "Value")
-    return try JSONDecoder().decode(Self.self, from: data)
+    try JSONDecoder().decode(Self.self, from: data)
   }
 
   public func encode() throws -> Data {
-    let data = try JSONEncoder().encode(self)
-    return convertJsonStringToNumber(in: data, at: "Value")
+    try JSONEncoder().encode(self)
   }
 }
