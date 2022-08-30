@@ -61,7 +61,7 @@ message "Make Bindings.xcframework..."
 go get golang.org/x/mobile/bind
 go install golang.org/x/mobile/cmd/gomobile@latest
 gomobile init
-gomobile bind -target ios gitlab.com/elixxir/client/bindings
+gomobile bind -target ios,iossimulator,macos gitlab.com/elixxir/client/bindings
 
 message "Move framework..."
 cd $working_dir
