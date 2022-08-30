@@ -1,16 +1,23 @@
 stages:
   - test
 
-package-tests:
+test-package-macos:
   stage: test
   tags: 
     - ios
   script:
-    - ./run-tests.sh
+    - ./run-tests.sh macos
 
-examples-tests:
+test-package-ios:
   stage: test
   tags: 
     - ios
   script:
-    - ./run-tests.sh examples
+    - ./run-tests.sh ios
+
+test-examples-ios:
+  stage: test
+  tags: 
+    - ios
+  script:
+    - ./run-tests.sh ios-examples
