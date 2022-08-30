@@ -22,5 +22,5 @@ test-examples-ios:
   tags: 
     - ios
   script:
-    - ./run-tests.sh ios-examples
+    - ./run-tests.sh examples-ios
   retry: 1
