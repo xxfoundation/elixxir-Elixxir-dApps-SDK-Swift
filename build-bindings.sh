@@ -67,9 +67,11 @@ rm -rf "$frameworks_dir/Bindings.xcframework"
 mv "$client_git_dir/Bindings.xcframework" "$frameworks_dir/"
 
 message "Summary"
-echo "Update Bindings.xcframework"
-echo "https://git.xx.network/elixxir/client/-/commit/$client_git_commit"
-go version
 xcode_version=`xcodebuild -version`
-echo "${xcode_version/$'\n'/ }"
-echo "gomobile bind target: $framework_target"
+summary="https://git.xx.network/elixxir/client/-/commit/$client_git_commit"
+summary="$summary\n$(go version)"
+summary="$summary\n${xcode_version/$'\n'/ }"
+summary="$summary\ngomobile bind target: $framework_target"
+echo "Update Bindings.xcframework"
+echo $summary
+echo $summary > "$frameworks_dir/Bindings.txt"
