@@ -9,6 +9,7 @@ temp_dir="$(dirname $(realpath $0))/.build-bindings"
 client_git_url="https://gitlab.com/elixxir/client.git"
 client_git_dir="$temp_dir/client"
 client_git_commit="$1"
+framework_target="ios,iossimulator,macos"
 frameworks_dir="$(dirname $(realpath $0))/Frameworks"
 
 #=======================================
@@ -32,9 +33,6 @@ if [ ! -n "$client_git_commit" ]; then
   echo "  build-bindings.sh COMMIT_HASH - Build Bindings from provided commit"
   exit 1
 fi
-
-message "Go version..."
-go version
 
 if [ ! -d "$client_git_dir" ]; then
   message "Cloning client repo..."
@@ -61,11 +59,16 @@ message "Make Bindings.xcframework..."
 go get golang.org/x/mobile/bind
 go install golang.org/x/mobile/cmd/gomobile@latest
 gomobile init
-gomobile bind -target ios,iossimulator,macos gitlab.com/elixxir/client/bindings
-
+gomobile bind -target $framework_target gitlab.com/elixxir/client/bindings
 message "Move framework..."
 cd $working_dir
 rm -rf "$frameworks_dir/Bindings.xcframework"
 mv "$client_git_dir/Bindings.xcframework" "$frameworks_dir/"
 
-message "Done."
+message "Summary"
+echo "Update Bindings.xcframework"
+echo "https://git.xx.network/elixxir/client/-/commit/$client_git_commit"
+go version
+xcode_version=`xcodebuild -version`
+echo "${xcode_version/$'\n'/ }"
+echo "gomobile bind target: $framework_target"
