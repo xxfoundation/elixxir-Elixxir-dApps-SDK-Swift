@@ -19,10 +19,5 @@ final class DHKeyTests: XCTestCase {
       value: value,
       fingerprint: fingerprint
     ))
-
-    let encodedModel = try model.encode()
-    let decodedModel = try DHKey.decode(encodedModel)
-
-    XCTAssertNoDifference(decodedModel, model)
   }
 }

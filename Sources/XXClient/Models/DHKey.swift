@@ -10,7 +10,7 @@ public struct DHKey: Equatable {
   public var fingerprint: UInt64
 }
 
-extension DHKey: Codable {
+extension DHKey: Decodable {
   enum CodingKeys: String, CodingKey {
     case value = "Value"
     case fingerprint = "Fingerprint"
@@ -19,9 +19,5 @@ extension DHKey: Codable {
   public static func decode(_ data: Data) throws -> Self {
     let data = convertJsonNumberToString(in: data, at: "Value")
     return try JSONDecoder().decode(Self.self, from: data)
-  }
-
-  public func encode() throws -> Data {
-    try JSONEncoder().encode(self)
   }
 }
