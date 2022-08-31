@@ -33,6 +33,7 @@
 @class BindingsGroupSendReport;
 @class BindingsMessage;
 @class BindingsNodeRegistrationReport;
+@class BindingsNotificationReport;
 @class BindingsProgress;
 @class BindingsReceivedFile;
 @class BindingsReceptionIdentity;
@@ -78,6 +79,8 @@
 @class BindingsSingleUseResponse;
 @protocol BindingsStopper;
 @class BindingsStopper;
+@protocol BindingsTrackServicesCallback;
+@class BindingsTrackServicesCallback;
 @protocol BindingsUdLookupCallback;
 @class BindingsUdLookupCallback;
 @protocol BindingsUdNetworkStatus;
@@ -194,6 +197,10 @@ Parameters:
 
 @protocol BindingsStopper <NSObject>
 - (void)stop;
+@end
+
+@protocol BindingsTrackServicesCallback <NSObject>
+- (void)callback:(NSData* _Nullable)marshalData err:(NSError* _Nullable)err;
 @end
 
 @protocol BindingsUdLookupCallback <NSObject>
@@ -552,6 +559,17 @@ If the network follower is running and this fails, the Cmix object will
 most likely be in an unrecoverable state and need to be trashed.
  */
 - (BOOL)stopNetworkFollower:(NSError* _Nullable* _Nullable)error;
+/**
+ * TrackServices will return via a callback the list of services the
+backend keeps track of, which is formally referred to as a
+[message.ServiceList]. This may be passed into other bindings call which
+may need context on the available services for this client.
+
+Parameters:
+  - cb - A TrackServicesCallback, which will be passed the marshalled
+    message.ServiceList.
+ */
+- (void)trackServices:(id<BindingsTrackServicesCallback> _Nullable)cb;
 /**
  * WaitForNetwork will block until either the network is healthy or the passed
 timeout is reached. It will return true if the network is healthy.
@@ -1407,6 +1425,57 @@ Cmix.GetNodeRegistrationStatus returns JSON marshalled.
 @end
 
 /**
+ * NotificationReport is the bindings' representation for notifications for
+this user.
+
+Example NotificationReport JSON:
+
+{
+ "ForMe": true,
+ "Type": "e2e",
+ "Source": "dGVzdGVyMTIzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+}
+
+Given the Type, the Source value will have specific contextual meanings.
+Below is a table that will define the contextual meaning of the Source field
+given all possible Type fields.
+
+     TYPE     |     SOURCE         |    DESCRIPTION
+    ________________________________________________________________________________________
+    "default" |  recipient user ID |  A message with no association.
+	   "request" |  sender user ID    |  A channel request has been received, from Source.
+    "reset"   |  sender user ID    |  A channel reset has been received.
+    "confirm" |  sender user ID    |  A channel request has been accepted.
+    "silent"  |  sender user ID    |  A message where the user should not be notified.
+    "e2e"     |  sender user ID    |  A reception of an E2E message.
+    "group"   |  group ID          |  A reception of a group chat message.
+    "endFT"   |  sender user ID    |  The last message sent confirming end of file transfer.
+    "groupRQ" |  sender user ID    |  A request from Source to join a group chat.
+ todo iterate over this docstring, ensure descriptions/sources are
+   still accurate (they are from the old implementation
+ */
+@interface BindingsNotificationReport : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * ForMe determines whether this value is for the user. If it is
+false, this report may be ignored.
+ */
+@property (nonatomic) BOOL forMe;
+/**
+ * Type is the type of notification. The list can be seen
+ */
+@property (nonatomic) NSString* _Nonnull type;
+/**
+ * Source is the source of the notification.
+ */
+@property (nonatomic) NSData* _Nullable source;
+@end
+
+/**
  * Progress is a public struct that represents the progress of an in-progress
 file transfer.
 
@@ -1809,6 +1878,25 @@ Returns:
  - []byte - bytes of the [id.ID] object
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetIDFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
+
+/**
+ * GetNotificationsReport parses the received notification data to determine which
+notifications are for this user. // This returns the JSON-marshalled
+NotificationReports.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker
+ - notificationCSV - the notification data received from the
+   notifications' server.
+ - marshalledServices - the JSON-marshalled list of services the backend
+   keeps track of. Refer to Cmix.TrackServices for information about this.
+
+Returns:
+ - []byte - A JSON marshalled NotificationReports. Some NotificationReport's
+   within in this structure may have their NotificationReport.ForMe
+   set to false. These may be ignored.
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetNotificationsReport(long e2eId, NSString* _Nullable notificationCSV, NSData* _Nullable marshalledServices, NSError* _Nullable* _Nullable error);
 
 /**
  * GetPubkeyFromContact returns the DH public key in the [contact.Contact]
@@ -2283,6 +2371,8 @@ FOUNDATION_EXPORT BOOL BindingsUpdateCommonErrors(NSString* _Nullable jsonFile, 
 
 @class BindingsStopper;
 
+@class BindingsTrackServicesCallback;
+
 @class BindingsUdLookupCallback;
 
 @class BindingsUdNetworkStatus;
@@ -2562,6 +2652,45 @@ registered listener.
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (void)stop;
+@end
+
+/**
+ * TrackServicesCallback is the callback for Cmix.TrackServices.
+This will pass to the user a JSON-marshalled list of backend services.
+If there was an error retrieving or marshalling the service list,
+there is an error for the second parameter which will be non-null.
+
+Example JSON:
+
+[
+ {
+   "Id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+   "Services": [
+     {
+       "Identifier": null,
+       "Tag": "test",
+       "Metadata": null
+     }
+   ]
+ },
+ {
+   "Id": "AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+   "Services": [
+     {
+       "Identifier": null,
+       "Tag": "test",
+       "Metadata": null
+     }
+   ]
+ },
+]
+ */
+@interface BindingsTrackServicesCallback : NSObject <goSeqRefInterface, BindingsTrackServicesCallback> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)callback:(NSData* _Nullable)marshalData err:(NSError* _Nullable)err;
 @end
 
 /**
