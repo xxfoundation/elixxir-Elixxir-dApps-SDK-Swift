@@ -1,4 +1,6 @@
 import ComposableArchitecture
+import ComposablePresentation
+import RegisterFeature
 import SwiftUI
 
 public struct HomeView: View {
@@ -9,19 +11,54 @@ public struct HomeView: View {
   let store: Store<HomeState, HomeAction>
 
   struct ViewState: Equatable {
-    init(state: HomeState) {}
+    var username: String?
+    var failure: String?
+
+    init(state: HomeState) {
+      username = state.username
+      failure = state.failure
+    }
   }
 
   public var body: some View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       NavigationView {
         Form {
+          if let username = viewStore.username {
+            Section {
+              Text(username)
+            } header: {
+              Text("Username")
+            }
+          }
 
+          if let failure = viewStore.failure {
+            Section {
+              Text(failure)
+              Button {
+                viewStore.send(.start)
+              } label: {
+                Text("Retry")
+              }
+            } header: {
+              Text("Error")
+            }
+          }
         }
         .navigationTitle("Home")
       }
       .navigationViewStyle(.stack)
       .task { viewStore.send(.start) }
+      .fullScreenCover(
+        store.scope(
+          state: \.register,
+          action: HomeAction.register
+        ),
+        onDismiss: {
+          viewStore.send(.set(\.$register, nil))
+        },
+        content: RegisterView.init(store:)
+      )
     }
   }
 }

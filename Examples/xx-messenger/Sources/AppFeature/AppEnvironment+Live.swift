@@ -34,7 +34,14 @@ extension AppEnvironment {
         HomeEnvironment(
           messenger: messenger,
           mainQueue: mainQueue,
-          bgQueue: bgQueue
+          bgQueue: bgQueue,
+          register: {
+            RegisterEnvironment(
+              messenger: messenger,
+              mainQueue: mainQueue,
+              bgQueue: bgQueue
+            )
+          }
         )
       }
     )
