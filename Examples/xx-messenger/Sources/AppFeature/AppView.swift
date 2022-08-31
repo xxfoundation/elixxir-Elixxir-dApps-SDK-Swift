@@ -1,19 +1,26 @@
 import ComposableArchitecture
-import SwiftUI
 import HomeFeature
-import LaunchFeature
+import RestoreFeature
+import SwiftUI
+import WelcomeFeature
 
 struct AppView: View {
   let store: Store<AppState, AppAction>
 
   enum ViewState: Equatable {
-    case launch
+    case loading
+    case welcome
+    case restore
     case home
+    case failure(String)
 
     init(_ state: AppState) {
       switch state.screen {
-      case .launch(_): self = .launch
+      case .loading: self = .loading
+      case .welcome(_): self = .welcome
+      case .restore(_): self = .restore
       case .home(_): self = .home
+      case .failure(let failure): self = .failure(failure)
       }
     }
   }
@@ -21,20 +28,53 @@ struct AppView: View {
   var body: some View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       ZStack {
-        SwitchStore(store.scope(state: \.screen)) {
-          CaseLet(
-            state: /AppState.Screen.launch,
-            action: AppAction.launch,
+        switch viewStore.state {
+        case .loading:
+          ProgressView {
+            Text("Loading")
+          }
+          .controlSize(.large)
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+          .transition(.opacity)
+
+        case .welcome:
+          IfLetStore(
+            store.scope(
+              state: { (/AppState.Screen.welcome).extract(from: $0.screen) },
+              action: AppAction.welcome
+            ),
             then: { store in
-              LaunchView(store: store)
+              WelcomeView(store: store)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .transition(.opacity)
+                .transition(.asymmetric(
+                  insertion: .move(edge: .trailing),
+                  removal: .opacity
+                ))
             }
           )
 
-          CaseLet(
-            state: /AppState.Screen.home,
-            action: AppAction.home,
+        case .restore:
+          IfLetStore(
+            store.scope(
+              state: { (/AppState.Screen.restore).extract(from: $0.screen) },
+              action: AppAction.restore
+            ),
+            then: { store in
+              RestoreView(store: store)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.asymmetric(
+                  insertion: .move(edge: .trailing),
+                  removal: .opacity
+                ))
+            }
+          )
+
+        case .home:
+          IfLetStore(
+            store.scope(
+              state: { (/AppState.Screen.home).extract(from: $0.screen) },
+              action: AppAction.home
+            ),
             then: { store in
               HomeView(store: store)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -44,9 +84,40 @@ struct AppView: View {
                 ))
             }
           )
+
+        case .failure(let failure):
+          NavigationView {
+            VStack(spacing: 0) {
+              ScrollView {
+                Text(failure)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .padding()
+              }
+
+              Divider()
+
+              Button {
+                viewStore.send(.start)
+              } label: {
+                Text("Retry")
+                  .frame(maxWidth: .infinity)
+              }
+              .buttonStyle(.borderedProminent)
+              .controlSize(.large)
+              .padding()
+            }
+            .navigationTitle("Error")
+          }
+          .navigationViewStyle(.stack)
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+          .transition(.asymmetric(
+            insertion: .move(edge: .trailing),
+            removal: .opacity
+          ))
         }
       }
       .animation(.default, value: viewStore.state)
+      .task { viewStore.send(.start) }
     }
   }
 }

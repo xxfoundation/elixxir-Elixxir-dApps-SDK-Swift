@@ -21,7 +21,6 @@ let package = Package(
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
-    .library(name: "LaunchFeature", targets: ["LaunchFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
     .library(name: "WelcomeFeature", targets: ["WelcomeFeature"]),
@@ -69,7 +68,6 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "HomeFeature"),
-        .target(name: "LaunchFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
         .target(name: "WelcomeFeature"),
@@ -91,7 +89,9 @@ let package = Package(
       name: "HomeFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "RegisterFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
       ],
       swiftSettings: swiftSettings
@@ -100,26 +100,6 @@ let package = Package(
       name: "HomeFeatureTests",
       dependencies: [
         .target(name: "HomeFeature"),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .target(
-      name: "LaunchFeature",
-      dependencies: [
-        .target(name: "AppCore"),
-        .target(name: "RegisterFeature"),
-        .target(name: "RestoreFeature"),
-        .target(name: "WelcomeFeature"),
-        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
-        .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
-        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
-      ],
-      swiftSettings: swiftSettings
-    ),
-    .testTarget(
-      name: "LaunchFeatureTests",
-      dependencies: [
-        .target(name: "LaunchFeature"),
       ],
       swiftSettings: swiftSettings
     ),
