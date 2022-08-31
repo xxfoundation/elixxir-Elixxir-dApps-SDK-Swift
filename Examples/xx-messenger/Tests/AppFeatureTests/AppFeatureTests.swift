@@ -170,4 +170,50 @@ final class AppFeatureTests: XCTestCase {
       $0.screen = .failure(failure)
     }
   }
+
+  func testStartDatabaseMakeFailure() {
+    let store = TestStore(
+      initialState: AppState(),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    struct Failure: Error {}
+    let error = Failure()
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.dbManager.hasDB.run = { false }
+    store.environment.dbManager.makeDB.run = { throw error }
+
+    store.send(.start)
+
+    store.receive(.set(\.$screen, .failure(error.localizedDescription))) {
+      $0.screen = .failure(error.localizedDescription)
+    }
+  }
+
+  func testStartMessengerLoadFailure() {
+    let store = TestStore(
+      initialState: AppState(),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    struct Failure: Error {}
+    let error = Failure()
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.dbManager.hasDB.run = { true }
+    store.environment.messenger.isLoaded.run = { false }
+    store.environment.messenger.isCreated.run = { true }
+    store.environment.messenger.load.run = { throw error }
+
+    store.send(.start)
+
+    store.receive(.set(\.$screen, .failure(error.localizedDescription))) {
+      $0.screen = .failure(error.localizedDescription)
+    }
+  }
 }
