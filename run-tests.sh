@@ -1,9 +1,6 @@
 #!/bin/sh
 set -e
 
-echo "\n\033[1;32m▶ Xcode version\033[0m"
-xcodebuild -version
-
 if [ "$1" = "macos" ]; then
 
   echo "\n\033[1;32m▶ Running package tests on macOS...\033[0m"
