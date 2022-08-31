@@ -1,19 +1,173 @@
 import ComposableArchitecture
 import HomeFeature
+import RestoreFeature
+import WelcomeFeature
 import XCTest
 @testable import AppFeature
 
-@MainActor
 final class AppFeatureTests: XCTestCase {
-  func testLaunchFinished() async throws {
+  func testStartWithoutMessengerCreated() {
     let store = TestStore(
       initialState: AppState(),
       reducer: appReducer,
       environment: .unimplemented
     )
 
-    await store.send(.launch(.finished)) {
+    let mainQueue = DispatchQueue.test
+    let bgQueue = DispatchQueue.test
+    var didMakeDB = 0
+
+    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.dbManager.hasDB.run = { false }
+    store.environment.dbManager.makeDB.run = { didMakeDB += 1 }
+    store.environment.messenger.isLoaded.run = { false }
+    store.environment.messenger.isCreated.run = { false }
+
+    store.send(.start)
+
+    bgQueue.advance()
+
+    XCTAssertNoDifference(didMakeDB, 1)
+
+    mainQueue.advance()
+
+    store.receive(.set(\.$screen, .welcome(WelcomeState()))) {
+      $0.screen = .welcome(WelcomeState())
+    }
+  }
+
+  func testStartWithMessengerCreated() {
+    let store = TestStore(
+      initialState: AppState(),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    let mainQueue = DispatchQueue.test
+    let bgQueue = DispatchQueue.test
+    var didMakeDB = 0
+    var messengerDidLoad = 0
+
+    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.dbManager.hasDB.run = { false }
+    store.environment.dbManager.makeDB.run = { didMakeDB += 1 }
+    store.environment.messenger.isLoaded.run = { false }
+    store.environment.messenger.isCreated.run = { true }
+    store.environment.messenger.load.run = { messengerDidLoad += 1 }
+
+    store.send(.start)
+
+    bgQueue.advance()
+
+    XCTAssertNoDifference(didMakeDB, 1)
+    XCTAssertNoDifference(messengerDidLoad, 1)
+
+    mainQueue.advance()
+
+    store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
+    }
+  }
+
+  func testWelcomeFinished() {
+    let store = TestStore(
+      initialState: AppState(
+        screen: .welcome(WelcomeState())
+      ),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    let mainQueue = DispatchQueue.test
+    let bgQueue = DispatchQueue.test
+    var messengerDidLoad = 0
+
+    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.dbManager.hasDB.run = { true }
+    store.environment.messenger.isLoaded.run = { false }
+    store.environment.messenger.isCreated.run = { true }
+    store.environment.messenger.load.run = { messengerDidLoad += 1 }
+
+    store.send(.welcome(.finished)) {
+      $0.screen = .loading
+    }
+
+    bgQueue.advance()
+
+    XCTAssertNoDifference(messengerDidLoad, 1)
+
+    mainQueue.advance()
+
+    store.receive(.set(\.$screen, .home(HomeState()))) {
+      $0.screen = .home(HomeState())
+    }
+  }
+
+  func testRestoreFinished() {
+    let store = TestStore(
+      initialState: AppState(
+        screen: .restore(RestoreState())
+      ),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    let mainQueue = DispatchQueue.test
+    let bgQueue = DispatchQueue.test
+    var messengerDidLoad = 0
+
+    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.dbManager.hasDB.run = { true }
+    store.environment.messenger.isLoaded.run = { false }
+    store.environment.messenger.isCreated.run = { true }
+    store.environment.messenger.load.run = { messengerDidLoad += 1 }
+
+    store.send(.restore(.finished)) {
+      $0.screen = .loading
+    }
+
+    bgQueue.advance()
+
+    XCTAssertNoDifference(messengerDidLoad, 1)
+
+    mainQueue.advance()
+
+    store.receive(.set(\.$screen, .home(HomeState()))) {
+      $0.screen = .home(HomeState())
+    }
+  }
+
+  func testWelcomeRestoreTapped() {
+    let store = TestStore(
+      initialState: AppState(
+        screen: .welcome(WelcomeState())
+      ),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.welcome(.restoreTapped)) {
+      $0.screen = .restore(RestoreState())
+    }
+  }
+
+  func testWelcomeFailed() {
+    let store = TestStore(
+      initialState: AppState(
+        screen: .welcome(WelcomeState())
+      ),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    let failure = "Something went wrong"
+
+    store.send(.welcome(.failed(failure))) {
+      $0.screen = .failure(failure)
     }
   }
 }

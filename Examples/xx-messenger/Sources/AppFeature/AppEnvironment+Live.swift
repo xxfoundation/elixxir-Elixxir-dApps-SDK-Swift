@@ -1,7 +1,6 @@
 import AppCore
 import Foundation
 import HomeFeature
-import LaunchFeature
 import RegisterFeature
 import RestoreFeature
 import WelcomeFeature
@@ -17,30 +16,19 @@ extension AppEnvironment {
     let bgQueue = DispatchQueue.global(qos: .background).eraseToAnyScheduler()
 
     return AppEnvironment(
-      launch: {
-        LaunchEnvironment(
-          dbManager: dbManager,
+      dbManager: dbManager,
+      messenger: messenger,
+      mainQueue: mainQueue,
+      bgQueue: bgQueue,
+      welcome: {
+        WelcomeEnvironment(
           messenger: messenger,
           mainQueue: mainQueue,
-          bgQueue: bgQueue,
-          welcome: {
-            WelcomeEnvironment(
-              messenger: messenger,
-              mainQueue: mainQueue,
-              bgQueue: bgQueue
-            )
-          },
-          restore: {
-            RestoreEnvironment()
-          },
-          register: {
-            RegisterEnvironment(
-              messenger: messenger,
-              mainQueue: mainQueue,
-              bgQueue: bgQueue
-            )
-          }
+          bgQueue: bgQueue
         )
+      },
+      restore: {
+        RestoreEnvironment()
       },
       home: {
         HomeEnvironment(

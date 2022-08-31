@@ -69,8 +69,6 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "HomeFeature"),
-        .target(name: "LaunchFeature"),
-        .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
