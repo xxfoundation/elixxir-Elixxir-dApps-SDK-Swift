@@ -2,6 +2,7 @@ import AppCore
 import Combine
 import ComposableArchitecture
 import ComposablePresentation
+import Foundation
 import RegisterFeature
 import RestoreFeature
 import WelcomeFeature
