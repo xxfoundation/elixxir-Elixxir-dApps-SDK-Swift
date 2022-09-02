@@ -23,6 +23,7 @@ extension MessengerDestroy {
       env.e2e.set(nil)
       env.cMix.set(nil)
       try env.fileManager.removeDirectory(env.storageDir)
+      try env.passwordStorage.remove()
     }
   }
 }
