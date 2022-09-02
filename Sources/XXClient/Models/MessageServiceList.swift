@@ -1,21 +1,8 @@
 import Foundation
 
-public struct TrackServicesCallbackResult: Equatable {
-  public init(id: Data, services: [MessageService]) {
-    self.id = id
-    self.services = services
-  }
+public typealias MessageServiceList = Array<MessageServiceListElement>
 
-  public var id: Data
-  public var services: [MessageService]
-}
-
-extension TrackServicesCallbackResult: Codable {
-  enum CodingKeys: String, CodingKey {
-    case id = "Id"
-    case services = "Services"
-  }
-
+extension MessageServiceList {
   public static func decode(_ data: Data) throws -> Self {
     try JSONDecoder().decode(Self.self, from: data)
   }
@@ -25,7 +12,22 @@ extension TrackServicesCallbackResult: Codable {
   }
 }
 
-extension Array where Element == TrackServicesCallbackResult {
+public struct MessageServiceListElement: Equatable {
+  public init(id: Data, services: [MessageService]) {
+    self.id = id
+    self.services = services
+  }
+
+  public var id: Data
+  public var services: [MessageService]
+}
+
+extension MessageServiceListElement: Codable {
+  enum CodingKeys: String, CodingKey {
+    case id = "Id"
+    case services = "Services"
+  }
+
   public static func decode(_ data: Data) throws -> Self {
     try JSONDecoder().decode(Self.self, from: data)
   }

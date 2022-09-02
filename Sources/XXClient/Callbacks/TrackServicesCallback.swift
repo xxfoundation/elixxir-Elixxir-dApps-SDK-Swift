@@ -2,11 +2,11 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct TrackServicesCallback {
-  public init(handle: @escaping (Result<[TrackServicesCallbackResult], Error>) -> Void) {
+  public init(handle: @escaping (Result<MessageServiceList, Error>) -> Void) {
     self.handle = handle
   }
 
-  public var handle: (Result<[TrackServicesCallbackResult], Error>) -> Void
+  public var handle: (Result<MessageServiceList, Error>) -> Void
 }
 
 extension TrackServicesCallback {
@@ -31,7 +31,7 @@ extension TrackServicesCallback {
         }
         if let marshalData = marshalData {
           do {
-            callback.handle(.success(try [TrackServicesCallbackResult].decode(marshalData)))
+            callback.handle(.success(try MessageServiceList.decode(marshalData)))
           } catch {
             callback.handle(.failure(error))
           }
