@@ -6,12 +6,23 @@ import XXClient
 final class MessengerDestroyTests: XCTestCase {
   func testDestroy() throws {
     let storageDir = "test-storage-dir"
+    var hasRunningProcesses: [Bool] = [true, true, false]
+    var didStopNetworkFollower = 0
+    var didSleep: [TimeInterval] = []
     var didRemoveDirectory: [String] = []
     var didSetUD: [UserDiscovery?] = []
     var didSetE2E: [E2E?] = []
     var didSetCMix: [CMix?] = []
 
     var env: MessengerEnvironment = .unimplemented
+    env.cMix.get = {
+      var cMix: CMix = .unimplemented
+      cMix.networkFollowerStatus.run = { .running }
+      cMix.stopNetworkFollower.run = { didStopNetworkFollower += 1 }
+      cMix.hasRunningProcesses.run = { hasRunningProcesses.removeFirst() }
+      return cMix
+    }
+    env.sleep = { didSleep.append($0) }
     env.storageDir = storageDir
     env.ud.set = { didSetUD.append($0) }
     env.e2e.set = { didSetE2E.append($0) }
@@ -21,10 +32,29 @@ final class MessengerDestroyTests: XCTestCase {
 
     try destroy()
 
+    XCTAssertNoDifference(didStopNetworkFollower, 1)
+    XCTAssertNoDifference(didSleep, [1, 1])
     XCTAssertNoDifference(didSetUD.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetE2E.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetCMix.map { $0 == nil }, [true])
     XCTAssertNoDifference(didRemoveDirectory, [storageDir])
+  }
+
+  func testStopNetworkFollowerFailure() {
+    struct Error: Swift.Error, Equatable {}
+    let error = Error()
+    var env: MessengerEnvironment = .unimplemented
+    env.cMix.get = {
+      var cMix: CMix = .unimplemented
+      cMix.networkFollowerStatus.run = { .running }
+      cMix.stopNetworkFollower.run = { throw error }
+      return cMix
+    }
+    let destroy: MessengerDestroy = .live(env)
+
+    XCTAssertThrowsError(try destroy()) { err in
+      XCTAssertEqual(err as? Error, error)
+    }
   }
 
   func testRemoveDirectoryFailure() {
@@ -35,6 +65,7 @@ final class MessengerDestroyTests: XCTestCase {
     var didSetCMix: [CMix?] = []
 
     var env: MessengerEnvironment = .unimplemented
+    env.cMix.get = { nil }
     env.ud.set = { didSetUD.append($0) }
     env.e2e.set = { didSetE2E.append($0) }
     env.cMix.set = { didSetCMix.append($0) }
