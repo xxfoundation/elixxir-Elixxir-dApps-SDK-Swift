@@ -525,29 +525,28 @@ These threads may become a significant drain on battery when offline, ensure
 they are stopped if there is no internet access.
 
 Threads Started:
-  - Network Follower (/network/follow.go)
-    tracks the network events and hands them off to workers for handling.
-  - Historical Round Retrieval (/network/rounds/historical.go)
-    retrieves data about rounds that are too old to be stored by the client.
-	 - Message Retrieval Worker Group (/network/rounds/retrieve.go)
-	   requests all messages in a given round from the gateway of the last
-	   nodes.
-	 - Message Handling Worker Group (/network/message/handle.go)
-	   decrypts and partitions messages when signals via the Switchboard.
-	 - Health Tracker (/network/health),
-	   via the network instance, tracks the state of the network.
-	 - Garbled Messages (/network/message/garbled.go)
-	   can be signaled to check all recent messages that could be decoded. It
-	   uses a message store on disk for persistence.
-	 - Critical Messages (/network/message/critical.go)
-	   ensures all protocol layer mandatory messages are sent. It uses a message
-	   store on disk for persistence.
-	 - KeyExchange Trigger (/keyExchange/trigger.go)
-	   responds to sent rekeys and executes them.
-  - KeyExchange Confirm (/keyExchange/confirm.go)
-	   responds to confirmations of successful rekey operations.
-  - Auth Callback (/auth/callback.go)
-    handles both auth confirm and requests.
+ - Network Follower (/network/follow.go)
+   tracks the network events and hands them off to workers for handling.
+ - Historical Round Retrieval (/network/rounds/historical.go)
+   retrieves data about rounds that are too old to be stored by the client.
+ - Message Retrieval Worker Group (/network/rounds/retrieve.go)
+	  requests all messages in a given round from the gateway of the last nodes.
+ - Message Handling Worker Group (/network/message/handle.go)
+	  decrypts and partitions messages when signals via the Switchboard.
+	- Health Tracker (/network/health),
+	  via the network instance, tracks the state of the network.
+ - Garbled Messages (/network/message/garbled.go)
+	  can be signaled to check all recent messages that could be decoded. It
+	  uses a message store on disk for persistence.
+	- Critical Messages (/network/message/critical.go)
+	  ensures all protocol layer mandatory messages are sent. It uses a message
+	  store on disk for persistence.
+	- KeyExchange Trigger (/keyExchange/trigger.go)
+	  responds to sent rekeys and executes them.
+ - KeyExchange Confirm (/keyExchange/confirm.go)
+	  responds to confirmations of successful rekey operations.
+ - Auth Callback (/auth/callback.go)
+   handles both auth confirm and requests.
  */
 - (BOOL)startNetworkFollower:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -566,8 +565,8 @@ backend keeps track of, which is formally referred to as a
 may need context on the available services for this client.
 
 Parameters:
-  - cb - A TrackServicesCallback, which will be passed the marshalled
-    message.ServiceList.
+ - cb - A TrackServicesCallback, which will be passed the marshalled
+   message.ServiceList.
  */
 - (void)trackServices:(id<BindingsTrackServicesCallback> _Nullable)cb;
 /**
@@ -1429,30 +1428,27 @@ Cmix.GetNodeRegistrationStatus returns JSON marshalled.
 this user.
 
 Example NotificationReport JSON:
-
-{
- "ForMe": true,
- "Type": "e2e",
- "Source": "dGVzdGVyMTIzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
-}
+ {
+   "ForMe": true,
+   "Type": "e2e",
+   "Source": "dGVzdGVyMTIzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+ }
 
 Given the Type, the Source value will have specific contextual meanings.
 Below is a table that will define the contextual meaning of the Source field
 given all possible Type fields.
 
-     TYPE     |     SOURCE         |    DESCRIPTION
-    ________________________________________________________________________________________
-    "default" |  recipient user ID |  A message with no association.
-	   "request" |  sender user ID    |  A channel request has been received, from Source.
-    "reset"   |  sender user ID    |  A channel reset has been received.
-    "confirm" |  sender user ID    |  A channel request has been accepted.
-    "silent"  |  sender user ID    |  A message where the user should not be notified.
-    "e2e"     |  sender user ID    |  A reception of an E2E message.
-    "group"   |  group ID          |  A reception of a group chat message.
-    "endFT"   |  sender user ID    |  The last message sent confirming end of file transfer.
-    "groupRQ" |  sender user ID    |  A request from Source to join a group chat.
- todo iterate over this docstring, ensure descriptions/sources are
-   still accurate (they are from the old implementation
+  TYPE     |     SOURCE         |    DESCRIPTION
+ ----------+--------------------+--------------------------------------------------------
+ "default" |  recipient user ID |  A message with no association.
+ "request" |  sender user ID    |  A channel request has been received, from Source.
+ "reset"   |  sender user ID    |  A channel reset has been received.
+ "confirm" |  sender user ID    |  A channel request has been accepted.
+ "silent"  |  sender user ID    |  A message where the user should not be notified.
+ "e2e"     |  sender user ID    |  A reception of an E2E message.
+ "group"   |  group ID          |  A reception of a group chat message.
+ "endFT"   |  sender user ID    |  The last message sent confirming end of file transfer.
+ "groupRQ" |  sender user ID    |  A request from Source to join a group chat.
  */
 @interface BindingsNotificationReport : NSObject <goSeqRefInterface> {
 }
@@ -2655,35 +2651,39 @@ registered listener.
 @end
 
 /**
- * TrackServicesCallback is the callback for Cmix.TrackServices.
+ * TrackServicesCallback is the callback for [Cmix.TrackServices].
 This will pass to the user a JSON-marshalled list of backend services.
 If there was an error retrieving or marshalling the service list,
 there is an error for the second parameter which will be non-null.
 
-Example JSON:
+Parameters:
+ - marshalData - JSON marshalled bytes of [message.ServiceList], which is an
+   array of [id.ID] and [message.Service].
+ - err - JSON unmarshalling error
 
-[
- {
-   "Id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
-   "Services": [
-     {
-       "Identifier": null,
-       "Tag": "test",
-       "Metadata": null
-     }
-   ]
- },
- {
-   "Id": "AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
-   "Services": [
-     {
-       "Identifier": null,
-       "Tag": "test",
-       "Metadata": null
-     }
-   ]
- },
-]
+Example JSON:
+ [
+   {
+     "Id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD", // bytes of id.ID encoded as base64 string
+     "Services": [
+       {
+         "Identifier": "AQID",                             // bytes encoded as base64 string
+         "Tag": "TestTag 1",                               // string
+         "Metadata": "BAUG"                                // bytes encoded as base64 string
+       }
+     ]
+   },
+   {
+     "Id": "AAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+     "Services": [
+       {
+         "Identifier": "AQID",
+         "Tag": "TestTag 2",
+         "Metadata": "BAUG"
+       }
+     ]
+   },
+ ]
  */
 @interface BindingsTrackServicesCallback : NSObject <goSeqRefInterface, BindingsTrackServicesCallback> {
 }
