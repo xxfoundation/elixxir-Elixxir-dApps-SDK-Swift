@@ -8,19 +8,23 @@ public struct PasswordStorage {
 
   public init(
     save: @escaping (Data) throws -> Void,
-    load: @escaping () throws -> Data
+    load: @escaping () throws -> Data,
+    remove: @escaping () throws -> Void
   ) {
     self.save = save
     self.load = load
+    self.remove = remove
   }
 
   public var save: (Data) throws -> Void
   public var load: () throws -> Data
+  public var remove: () throws -> Void
 }
 
 extension PasswordStorage {
   public static let unimplemented = PasswordStorage(
     save: XCTUnimplemented("\(Self.self).save"),
-    load: XCTUnimplemented("\(Self.self).load")
+    load: XCTUnimplemented("\(Self.self).load"),
+    remove: XCTUnimplemented("\(Self.self).remove")
   )
 }

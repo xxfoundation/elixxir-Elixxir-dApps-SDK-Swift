@@ -15,16 +15,15 @@ extension MessengerDestroy {
         if cMix.networkFollowerStatus() == .running {
           try cMix.stopNetworkFollower()
         }
-        var hasRunningProcesses = cMix.hasRunningProcesses()
-        while hasRunningProcesses {
+        while cMix.hasRunningProcesses() {
           env.sleep(1)
-          hasRunningProcesses = cMix.hasRunningProcesses()
         }
       }
       env.ud.set(nil)
       env.e2e.set(nil)
       env.cMix.set(nil)
       try env.fileManager.removeDirectory(env.storageDir)
+      try env.passwordStorage.remove()
     }
   }
 }
