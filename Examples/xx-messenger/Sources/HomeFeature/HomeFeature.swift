@@ -11,6 +11,7 @@ public struct HomeState: Equatable {
   public init(
     failure: String? = nil,
     isNetworkHealthy: Bool? = nil,
+    networkNodesReport: NodeRegistrationReport? = nil,
     isDeletingAccount: Bool = false,
     alert: AlertState<HomeAction>? = nil,
     register: RegisterState? = nil
@@ -24,6 +25,7 @@ public struct HomeState: Equatable {
 
   public var failure: String?
   public var isNetworkHealthy: Bool?
+  public var networkNodesReport: NodeRegistrationReport?
   public var isDeletingAccount: Bool
   public var alert: AlertState<HomeAction>?
   public var register: RegisterState?
@@ -41,6 +43,7 @@ public enum HomeAction: Equatable {
     case start
     case stop
     case health(Bool)
+    case nodes(NodeRegistrationReport)
   }
 
   public enum DeleteAccount: Equatable {
@@ -93,6 +96,7 @@ extension HomeEnvironment {
 public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 { state, action, env in
   enum NetworkHealthEffectId {}
+  enum NetworkNodesEffectId {}
 
   switch action {
   case .messenger(.start):
@@ -135,24 +139,42 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     return .none
 
   case .networkMonitor(.start):
-    return .run { subscriber in
-      let callback = HealthCallback { isHealthy in
-        subscriber.send(.networkMonitor(.health(isHealthy)))
+    return .merge(
+      Effect.run { subscriber in
+        let callback = HealthCallback { isHealthy in
+          subscriber.send(.networkMonitor(.health(isHealthy)))
+        }
+        let cancellable = env.messenger.cMix()?.addHealthCallback(callback)
+        return AnyCancellable { cancellable?.cancel() }
       }
-      let cancellable = env.messenger.cMix()?.addHealthCallback(callback)
-      return AnyCancellable { cancellable?.cancel() }
-    }
-    .cancellable(id: NetworkHealthEffectId.self, cancelInFlight: true)
+        .cancellable(id: NetworkHealthEffectId.self, cancelInFlight: true),
+      Effect.timer(
+        id: NetworkNodesEffectId.self,
+        every: .seconds(2),
+        on: env.bgQueue
+      )
+      .compactMap { _ in try? env.messenger.cMix()?.getNodeRegistrationStatus() }
+        .map { HomeAction.networkMonitor(.nodes($0)) }
+        .eraseToEffect()
+    )
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
 
   case .networkMonitor(.stop):
     state.isNetworkHealthy = nil
-    return .cancel(id: NetworkHealthEffectId.self)
+    state.networkNodesReport = nil
+    return .merge(
+      .cancel(id: NetworkHealthEffectId.self),
+      .cancel(id: NetworkNodesEffectId.self)
+    )
 
   case .networkMonitor(.health(let isHealthy)):
     state.isNetworkHealthy = isHealthy
+    return .none
+
+  case .networkMonitor(.nodes(let report)):
+    state.networkNodesReport = report
     return .none
 
   case .deleteAccount(.buttonTapped):

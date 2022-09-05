@@ -2,6 +2,7 @@ import ComposableArchitecture
 import ComposablePresentation
 import RegisterFeature
 import SwiftUI
+import XXClient
 
 public struct HomeView: View {
   public init(store: Store<HomeState, HomeAction>) {
@@ -13,12 +14,14 @@ public struct HomeView: View {
   struct ViewState: Equatable {
     var failure: String?
     var isNetworkHealthy: Bool?
+    var networkNodesReport: NodeRegistrationReport?
     var isDeletingAccount: Bool
 
     init(state: HomeState) {
       failure = state.failure
       isNetworkHealthy = state.isNetworkHealthy
       isDeletingAccount = state.isDeletingAccount
+      networkNodesReport = state.networkNodesReport
     }
   }
 
@@ -26,15 +29,17 @@ public struct HomeView: View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       NavigationView {
         Form {
-          if let failure = viewStore.failure {
-            Section {
+          Section {
+            if let failure = viewStore.failure {
               Text(failure)
               Button {
                 viewStore.send(.messenger(.start))
               } label: {
                 Text("Retry")
               }
-            } header: {
+            }
+          } header: {
+            if viewStore.failure != nil {
               Text("Error")
             }
           }
@@ -57,6 +62,26 @@ public struct HomeView: View {
                   .foregroundColor(.gray)
               }
             }
+
+            ProgressView(
+              value: viewStore.networkNodesReport?.ratio ?? 0,
+              label: {
+                Text("Node registration")
+              },
+              currentValueLabel: {
+                if let report = viewStore.networkNodesReport {
+                  HStack {
+                    Text("\(Int((report.ratio * 100).rounded(.down)))%")
+                    Spacer()
+                    Text("\(report.registered) / \(report.total)")
+                  }
+                } else {
+                  Text("Unknown")
+                }
+              }
+            )
+            .tint((viewStore.networkNodesReport?.ratio ?? 0) >= 0.8 ? .green : .orange)
+            .animation(.default, value: viewStore.networkNodesReport?.ratio)
           } header: {
             Text("Network")
           }
