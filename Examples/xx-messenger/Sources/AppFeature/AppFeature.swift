@@ -68,7 +68,7 @@ extension AppEnvironment {
 let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 { state, action, env in
   switch action {
-  case .start, .welcome(.finished), .restore(.finished), .home(.didDeleteAccount):
+  case .start, .welcome(.finished), .restore(.finished), .home(.deleteAccount(.success)):
     state.screen = .loading
     return .run { subscriber in
       do {

@@ -159,7 +159,7 @@ final class AppFeatureTests: XCTestCase {
     store.environment.messenger.isLoaded.run = { false }
     store.environment.messenger.isCreated.run = { false }
 
-    store.send(.home(.didDeleteAccount)) {
+    store.send(.home(.deleteAccount(.success))) {
       $0.screen = .loading
     }
 

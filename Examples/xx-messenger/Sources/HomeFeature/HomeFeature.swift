@@ -10,28 +10,54 @@ import XXMessengerClient
 public struct HomeState: Equatable {
   public init(
     failure: String? = nil,
-    register: RegisterState? = nil,
+    isNetworkHealthy: Bool? = nil,
+    networkNodesReport: NodeRegistrationReport? = nil,
+    isDeletingAccount: Bool = false,
     alert: AlertState<HomeAction>? = nil,
-    isDeletingAccount: Bool = false
+    register: RegisterState? = nil
   ) {
     self.failure = failure
-    self.register = register
-    self.alert = alert
+    self.isNetworkHealthy = isNetworkHealthy
     self.isDeletingAccount = isDeletingAccount
+    self.alert = alert
+    self.register = register
   }
 
-  @BindableState public var failure: String?
-  @BindableState public var register: RegisterState?
-  @BindableState public var alert: AlertState<HomeAction>?
-  @BindableState public var isDeletingAccount: Bool
+  public var failure: String?
+  public var isNetworkHealthy: Bool?
+  public var networkNodesReport: NodeRegistrationReport?
+  public var isDeletingAccount: Bool
+  public var alert: AlertState<HomeAction>?
+  public var register: RegisterState?
 }
 
-public enum HomeAction: Equatable, BindableAction {
-  case start
-  case deleteAccountButtonTapped
-  case deleteAccountConfirmed
-  case didDeleteAccount
-  case binding(BindingAction<HomeState>)
+public enum HomeAction: Equatable {
+  public enum Messenger: Equatable {
+    case start
+    case didStartRegistered
+    case didStartUnregistered
+    case failure(NSError)
+  }
+
+  public enum NetworkMonitor: Equatable {
+    case start
+    case stop
+    case health(Bool)
+    case nodes(NodeRegistrationReport)
+  }
+
+  public enum DeleteAccount: Equatable {
+    case buttonTapped
+    case confirmed
+    case success
+    case failure(NSError)
+  }
+
+  case messenger(Messenger)
+  case networkMonitor(NetworkMonitor)
+  case deleteAccount(DeleteAccount)
+  case didDismissAlert
+  case didDismissRegister
   case register(RegisterAction)
 }
 
@@ -69,41 +95,95 @@ extension HomeEnvironment {
 
 public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 { state, action, env in
+  enum NetworkHealthEffectId {}
+  enum NetworkNodesEffectId {}
+
   switch action {
-  case .start:
-    return .run { subscriber in
-      do {
-        try env.messenger.start()
+  case .messenger(.start):
+    return .merge(
+      Effect(value: .networkMonitor(.stop)),
+      Effect.result {
+        do {
+          try env.messenger.start()
 
-        if env.messenger.isConnected() == false {
-          try env.messenger.connect()
-        }
-
-        if env.messenger.isLoggedIn() == false {
-          if try env.messenger.isRegistered() == false {
-            subscriber.send(.set(\.$register, RegisterState()))
-            subscriber.send(completion: .finished)
-            return AnyCancellable {}
+          if env.messenger.isConnected() == false {
+            try env.messenger.connect()
           }
-          try env.messenger.logIn()
+
+          if env.messenger.isLoggedIn() == false {
+            if try env.messenger.isRegistered() == false {
+              return .success(.messenger(.didStartUnregistered))
+            }
+            try env.messenger.logIn()
+          }
+
+          return .success(.messenger(.didStartRegistered))
+        } catch {
+          return .success(.messenger(.failure(error as NSError)))
         }
-      } catch {
-        subscriber.send(.set(\.$failure, error.localizedDescription))
       }
-      subscriber.send(completion: .finished)
-      return AnyCancellable {}
-    }
+    )
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
 
-  case .deleteAccountButtonTapped:
+  case .messenger(.didStartUnregistered):
+    state.register = RegisterState()
+    return .none
+
+  case .messenger(.didStartRegistered):
+    return Effect(value: .networkMonitor(.start))
+
+  case .messenger(.failure(let error)):
+    state.failure = error.localizedDescription
+    return .none
+
+  case .networkMonitor(.start):
+    return .merge(
+      Effect.run { subscriber in
+        let callback = HealthCallback { isHealthy in
+          subscriber.send(.networkMonitor(.health(isHealthy)))
+        }
+        let cancellable = env.messenger.cMix()?.addHealthCallback(callback)
+        return AnyCancellable { cancellable?.cancel() }
+      }
+        .cancellable(id: NetworkHealthEffectId.self, cancelInFlight: true),
+      Effect.timer(
+        id: NetworkNodesEffectId.self,
+        every: .seconds(2),
+        on: env.bgQueue
+      )
+      .compactMap { _ in try? env.messenger.cMix()?.getNodeRegistrationStatus() }
+        .map { HomeAction.networkMonitor(.nodes($0)) }
+        .eraseToEffect()
+    )
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+
+  case .networkMonitor(.stop):
+    state.isNetworkHealthy = nil
+    state.networkNodesReport = nil
+    return .merge(
+      .cancel(id: NetworkHealthEffectId.self),
+      .cancel(id: NetworkNodesEffectId.self)
+    )
+
+  case .networkMonitor(.health(let isHealthy)):
+    state.isNetworkHealthy = isHealthy
+    return .none
+
+  case .networkMonitor(.nodes(let report)):
+    state.networkNodesReport = report
+    return .none
+
+  case .deleteAccount(.buttonTapped):
     state.alert = .confirmAccountDeletion()
     return .none
 
-  case .deleteAccountConfirmed:
+  case .deleteAccount(.confirmed):
     state.isDeletingAccount = true
-    return .run { subscriber in
+    return .result {
       do {
         let contactId = try env.messenger.e2e.tryGet().getContact().getId()
         let contact = try env.db().fetchContacts(.init(id: [contactId])).first
@@ -113,31 +193,40 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
         }
         try env.messenger.destroy()
         try env.db().drop()
-        subscriber.send(.didDeleteAccount)
+        return .success(.deleteAccount(.success))
       } catch {
-        subscriber.send(.set(\.$isDeletingAccount, false))
-        subscriber.send(.set(\.$alert, .accountDeletionFailed(error)))
+        return .success(.deleteAccount(.failure(error as NSError)))
       }
-      subscriber.send(completion: .finished)
-      return AnyCancellable {}
     }
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
 
-  case .didDeleteAccount:
+  case .deleteAccount(.success):
     state.isDeletingAccount = false
+    return .none
+
+  case .deleteAccount(.failure(let error)):
+    state.isDeletingAccount = false
+    state.alert = .accountDeletionFailed(error)
+    return .none
+
+  case .didDismissAlert:
+    state.alert = nil
+    return .none
+
+  case .didDismissRegister:
+    state.register = nil
     return .none
 
   case .register(.finished):
     state.register = nil
-    return Effect(value: .start)
+    return Effect(value: .messenger(.start))
 
-  case .binding(_), .register(_):
+  case .register(_):
     return .none
   }
 }
-.binding()
 .presenting(
   registerReducer,
   state: .keyPath(\.register),
