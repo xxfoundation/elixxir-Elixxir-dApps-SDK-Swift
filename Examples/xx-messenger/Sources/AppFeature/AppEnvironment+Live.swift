@@ -33,11 +33,14 @@ extension AppEnvironment {
       home: {
         HomeEnvironment(
           messenger: messenger,
+          db: dbManager.getDB,
           mainQueue: mainQueue,
           bgQueue: bgQueue,
           register: {
             RegisterEnvironment(
               messenger: messenger,
+              db: dbManager.getDB,
+              now: Date.init,
               mainQueue: mainQueue,
               bgQueue: bgQueue
             )

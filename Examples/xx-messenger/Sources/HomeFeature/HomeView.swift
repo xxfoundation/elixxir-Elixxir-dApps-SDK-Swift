@@ -11,12 +11,12 @@ public struct HomeView: View {
   let store: Store<HomeState, HomeAction>
 
   struct ViewState: Equatable {
-    var username: String?
     var failure: String?
+    var isDeletingAccount: Bool
 
     init(state: HomeState) {
-      username = state.username
       failure = state.failure
+      isDeletingAccount = state.isDeletingAccount
     }
   }
 
@@ -24,14 +24,6 @@ public struct HomeView: View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       NavigationView {
         Form {
-          if let username = viewStore.username {
-            Section {
-              Text(username)
-            } header: {
-              Text("Username")
-            }
-          }
-
           if let failure = viewStore.failure {
             Section {
               Text(failure)
@@ -44,8 +36,29 @@ public struct HomeView: View {
               Text("Error")
             }
           }
+
+          Section {
+            Button(role: .destructive) {
+              viewStore.send(.deleteAccountButtonTapped)
+            } label: {
+              HStack {
+                Text("Delete Account")
+                Spacer()
+                if viewStore.isDeletingAccount {
+                  ProgressView()
+                }
+              }
+            }
+            .disabled(viewStore.isDeletingAccount)
+          } header: {
+            Text("Account")
+          }
         }
         .navigationTitle("Home")
+        .alert(
+          store.scope(state: \.alert),
+          dismiss: HomeAction.set(\.$alert, nil)
+        )
       }
       .navigationViewStyle(.stack)
       .task { viewStore.send(.start) }
