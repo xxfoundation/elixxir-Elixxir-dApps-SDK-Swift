@@ -1,6 +1,9 @@
+import AppCore
 import ComposableArchitecture
 import SwiftUI
+import XCTestDynamicOverlay
 import XXMessengerClient
+import XXModels
 
 public struct RegisterState: Equatable {
   public enum Field: String, Hashable {
@@ -33,15 +36,21 @@ public enum RegisterAction: Equatable, BindableAction {
 public struct RegisterEnvironment {
   public init(
     messenger: Messenger,
+    db: DBManagerGetDB,
+    now: @escaping () -> Date,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>
   ) {
     self.messenger = messenger
+    self.db = db
+    self.now = now
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
   }
 
   public var messenger: Messenger
+  public var db: DBManagerGetDB
+  public var now: () -> Date
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
@@ -49,6 +58,8 @@ public struct RegisterEnvironment {
 extension RegisterEnvironment {
   public static let unimplemented = RegisterEnvironment(
     messenger: .unimplemented,
+    db: .unimplemented,
+    now: XCTUnimplemented("\(Self.self).now"),
     mainQueue: .unimplemented,
     bgQueue: .unimplemented
   )
@@ -66,7 +77,15 @@ public let registerReducer = Reducer<RegisterState, RegisterAction, RegisterEnvi
     state.failure = nil
     return .future { [username = state.username] fulfill in
       do {
+        let db = try env.db()
         try env.messenger.register(username: username)
+        let contact = env.messenger.e2e()!.getContact()
+        try db.saveContact(Contact(
+          id: try contact.getId(),
+          marshaled: contact.data,
+          username: username,
+          createdAt: env.now()
+        ))
         fulfill(.success(.finished))
       }
       catch {
