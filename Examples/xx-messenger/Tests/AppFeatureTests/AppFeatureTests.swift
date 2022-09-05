@@ -141,6 +141,36 @@ final class AppFeatureTests: XCTestCase {
     }
   }
 
+  func testHomeDidDeleteAccount() {
+    let store = TestStore(
+      initialState: AppState(
+        screen: .home(HomeState())
+      ),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    let mainQueue = DispatchQueue.test
+    let bgQueue = DispatchQueue.test
+
+    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.dbManager.hasDB.run = { true }
+    store.environment.messenger.isLoaded.run = { false }
+    store.environment.messenger.isCreated.run = { false }
+
+    store.send(.home(.didDeleteAccount)) {
+      $0.screen = .loading
+    }
+
+    bgQueue.advance()
+    mainQueue.advance()
+
+    store.receive(.set(\.$screen, .welcome(WelcomeState()))) {
+      $0.screen = .welcome(WelcomeState())
+    }
+  }
+
   func testWelcomeRestoreTapped() {
     let store = TestStore(
       initialState: AppState(

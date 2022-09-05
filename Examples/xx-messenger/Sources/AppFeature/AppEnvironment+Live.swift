@@ -33,6 +33,7 @@ extension AppEnvironment {
       home: {
         HomeEnvironment(
           messenger: messenger,
+          db: dbManager.getDB,
           mainQueue: mainQueue,
           bgQueue: bgQueue,
           register: {

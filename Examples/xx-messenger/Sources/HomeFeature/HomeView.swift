@@ -12,9 +12,11 @@ public struct HomeView: View {
 
   struct ViewState: Equatable {
     var failure: String?
+    var isDeletingAccount: Bool
 
     init(state: HomeState) {
       failure = state.failure
+      isDeletingAccount = state.isDeletingAccount
     }
   }
 
@@ -34,8 +36,29 @@ public struct HomeView: View {
               Text("Error")
             }
           }
+
+          Section {
+            Button(role: .destructive) {
+              viewStore.send(.deleteAccountButtonTapped)
+            } label: {
+              HStack {
+                Text("Delete Account")
+                Spacer()
+                if viewStore.isDeletingAccount {
+                  ProgressView()
+                }
+              }
+            }
+            .disabled(viewStore.isDeletingAccount)
+          } header: {
+            Text("Account")
+          }
         }
         .navigationTitle("Home")
+        .alert(
+          store.scope(state: \.alert),
+          dismiss: HomeAction.set(\.$alert, nil)
+        )
       }
       .navigationViewStyle(.stack)
       .task { viewStore.send(.start) }
