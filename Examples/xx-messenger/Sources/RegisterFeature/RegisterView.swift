@@ -46,14 +46,12 @@ public struct RegisterView: View {
               viewStore.send(.registerTapped)
             } label: {
               HStack {
+                Text("Register")
+                Spacer()
                 if viewStore.isRegistering {
-                  ProgressView().padding(.trailing)
-                  Text("Registering...")
-                } else {
-                  Text("Register")
+                  ProgressView()
                 }
               }
-              .frame(maxWidth: .infinity)
             }
           }
 

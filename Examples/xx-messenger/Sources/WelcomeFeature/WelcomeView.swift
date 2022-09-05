@@ -29,21 +29,18 @@ public struct WelcomeView: View {
               viewStore.send(.newAccountTapped)
             } label: {
               HStack {
+                Text("New Account")
+                Spacer()
                 if viewStore.isCreatingAccount {
-                  ProgressView().padding(.trailing)
-                  Text("Creating Account...")
-                } else {
-                  Text("New Account")
+                  ProgressView()
                 }
               }
-              .frame(maxWidth: .infinity)
             }
 
             Button {
               viewStore.send(.restoreTapped)
             } label: {
               Text("Restore from Backup")
-                .frame(maxWidth: .infinity)
             }
           }
         }
