@@ -6,7 +6,7 @@ extension AlertState {
       title: TextState("Delete Account"),
       message: TextState("This will permanently delete your account and can't be undone."),
       buttons: [
-        .destructive(TextState("Delete"), action: .send(.deleteAccountConfirmed)),
+        .destructive(TextState("Delete"), action: .send(.deleteAccount(.confirmed))),
         .cancel(TextState("Cancel"))
       ]
     )

@@ -7,7 +7,7 @@ import XXModels
 @testable import HomeFeature
 
 final class HomeFeatureTests: XCTestCase {
-  func testStartUnregistered() {
+  func testMessengerStartUnregistered() {
     let store = TestStore(
       initialState: HomeState(),
       reducer: homeReducer,
@@ -27,7 +27,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { false }
 
-    store.send(.start)
+    store.send(.messenger(.start))
 
     bgQueue.advance()
 
@@ -36,12 +36,12 @@ final class HomeFeatureTests: XCTestCase {
 
     mainQueue.advance()
 
-    store.receive(.set(\.$register, RegisterState())) {
+    store.receive(.messenger(.didStartUnregistered)) {
       $0.register = RegisterState()
     }
   }
 
-  func testStartRegistered() {
+  func testMessengerStartRegistered() {
     let store = TestStore(
       initialState: HomeState(),
       reducer: homeReducer,
@@ -63,7 +63,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
 
-    store.send(.start)
+    store.send(.messenger(.start))
 
     bgQueue.advance()
 
@@ -72,6 +72,8 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
     mainQueue.advance()
+
+    store.receive(.messenger(.didStartRegistered))
   }
 
   func testRegisterFinished() {
@@ -100,7 +102,7 @@ final class HomeFeatureTests: XCTestCase {
       $0.register = nil
     }
 
-    store.receive(.start)
+    store.receive(.messenger(.start))
 
     bgQueue.advance()
 
@@ -108,9 +110,11 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
     mainQueue.advance()
+
+    store.receive(.messenger(.didStartRegistered))
   }
 
-  func testStartMessengerStartFailure() {
+  func testMessengerStartFailure() {
     let store = TestStore(
       initialState: HomeState(),
       reducer: homeReducer,
@@ -124,14 +128,14 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.mainQueue = .immediate
     store.environment.messenger.start.run = { _ in throw error }
 
-    store.send(.start)
+    store.send(.messenger(.start))
 
-    store.receive(.set(\.$failure, error.localizedDescription)) {
+    store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
   }
 
-  func testStartMessengerConnectFailure() {
+  func testMessengerStartConnectFailure() {
     let store = TestStore(
       initialState: HomeState(),
       reducer: homeReducer,
@@ -147,14 +151,14 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { throw error }
 
-    store.send(.start)
+    store.send(.messenger(.start))
 
-    store.receive(.set(\.$failure, error.localizedDescription)) {
+    store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
   }
 
-  func testStartMessengerIsRegisteredFailure() {
+  func testMessengerStartIsRegisteredFailure() {
     let store = TestStore(
       initialState: HomeState(),
       reducer: homeReducer,
@@ -171,14 +175,14 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { throw error }
 
-    store.send(.start)
+    store.send(.messenger(.start))
 
-    store.receive(.set(\.$failure, error.localizedDescription)) {
+    store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
   }
 
-  func testStartMessengerLogInFailure() {
+  func testMessengerStartLogInFailure() {
     let store = TestStore(
       initialState: HomeState(),
       reducer: homeReducer,
@@ -196,9 +200,9 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { throw error }
 
-    store.send(.start)
+    store.send(.messenger(.start))
 
-    store.receive(.set(\.$failure, error.localizedDescription)) {
+    store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
   }
@@ -254,15 +258,15 @@ final class HomeFeatureTests: XCTestCase {
       messengerDidDestroy += 1
     }
 
-    store.send(.deleteAccountButtonTapped) {
+    store.send(.deleteAccount(.buttonTapped)) {
       $0.alert = .confirmAccountDeletion()
     }
 
-    store.send(.set(\.$alert, nil)) {
+    store.send(.didDismissAlert) {
       $0.alert = nil
     }
 
-    store.send(.deleteAccountConfirmed) {
+    store.send(.deleteAccount(.confirmed)) {
       $0.isDeletingAccount = true
     }
 
@@ -271,7 +275,7 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidDestroy, 1)
     XCTAssertNoDifference(dbDidDrop, 1)
 
-    store.receive(.didDeleteAccount) {
+    store.receive(.deleteAccount(.success)) {
       $0.isDeletingAccount = false
     }
   }
@@ -298,16 +302,41 @@ final class HomeFeatureTests: XCTestCase {
       return e2e
     }
 
-    store.send(.deleteAccountConfirmed) {
+    store.send(.deleteAccount(.confirmed)) {
       $0.isDeletingAccount = true
     }
 
-    store.receive(.set(\.$isDeletingAccount, false)) {
+    store.receive(.deleteAccount(.failure(error as NSError))) {
       $0.isDeletingAccount = false
-    }
-
-    store.receive(.set(\.$alert, .accountDeletionFailed(error))) {
       $0.alert = .accountDeletionFailed(error)
+    }
+  }
+
+  func testDidDismissAlert() {
+    let store = TestStore(
+      initialState: HomeState(
+        alert: AlertState(title: TextState(""))
+      ),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.didDismissAlert) {
+      $0.alert = nil
+    }
+  }
+
+  func testDidDismissRegister() {
+    let store = TestStore(
+      initialState: HomeState(
+        register: RegisterState()
+      ),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.didDismissRegister) {
+      $0.register = nil
     }
   }
 }

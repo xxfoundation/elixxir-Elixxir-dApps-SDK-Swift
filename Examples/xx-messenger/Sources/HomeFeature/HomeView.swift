@@ -28,7 +28,7 @@ public struct HomeView: View {
             Section {
               Text(failure)
               Button {
-                viewStore.send(.start)
+                viewStore.send(.messenger(.start))
               } label: {
                 Text("Retry")
               }
@@ -39,7 +39,7 @@ public struct HomeView: View {
 
           Section {
             Button(role: .destructive) {
-              viewStore.send(.deleteAccountButtonTapped)
+              viewStore.send(.deleteAccount(.buttonTapped))
             } label: {
               HStack {
                 Text("Delete Account")
@@ -57,18 +57,18 @@ public struct HomeView: View {
         .navigationTitle("Home")
         .alert(
           store.scope(state: \.alert),
-          dismiss: HomeAction.set(\.$alert, nil)
+          dismiss: HomeAction.didDismissAlert
         )
       }
       .navigationViewStyle(.stack)
-      .task { viewStore.send(.start) }
+      .task { viewStore.send(.messenger(.start)) }
       .fullScreenCover(
         store.scope(
           state: \.register,
           action: HomeAction.register
         ),
         onDismiss: {
-          viewStore.send(.set(\.$register, nil))
+          viewStore.send(.didDismissRegister)
         },
         content: RegisterView.init(store:)
       )

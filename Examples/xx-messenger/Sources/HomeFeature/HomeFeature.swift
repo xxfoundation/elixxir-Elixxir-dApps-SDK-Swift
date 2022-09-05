@@ -20,18 +20,31 @@ public struct HomeState: Equatable {
     self.isDeletingAccount = isDeletingAccount
   }
 
-  @BindableState public var failure: String?
-  @BindableState public var register: RegisterState?
-  @BindableState public var alert: AlertState<HomeAction>?
-  @BindableState public var isDeletingAccount: Bool
+  public var failure: String?
+  public var register: RegisterState?
+  public var alert: AlertState<HomeAction>?
+  public var isDeletingAccount: Bool
 }
 
-public enum HomeAction: Equatable, BindableAction {
-  case start
-  case deleteAccountButtonTapped
-  case deleteAccountConfirmed
-  case didDeleteAccount
-  case binding(BindingAction<HomeState>)
+public enum HomeAction: Equatable {
+  public enum Messenger: Equatable {
+    case start
+    case didStartRegistered
+    case didStartUnregistered
+    case failure(NSError)
+  }
+
+  public enum DeleteAccount: Equatable {
+    case buttonTapped
+    case confirmed
+    case success
+    case failure(NSError)
+  }
+
+  case messenger(Messenger)
+  case deleteAccount(DeleteAccount)
+  case didDismissAlert
+  case didDismissRegister
   case register(RegisterAction)
 }
 
@@ -70,8 +83,8 @@ extension HomeEnvironment {
 public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 { state, action, env in
   switch action {
-  case .start:
-    return .run { subscriber in
+  case .messenger(.start):
+    return .result {
       do {
         try env.messenger.start()
 
@@ -81,29 +94,38 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 
         if env.messenger.isLoggedIn() == false {
           if try env.messenger.isRegistered() == false {
-            subscriber.send(.set(\.$register, RegisterState()))
-            subscriber.send(completion: .finished)
-            return AnyCancellable {}
+            return .success(.messenger(.didStartUnregistered))
           }
           try env.messenger.logIn()
         }
+
+        return .success(.messenger(.didStartRegistered))
       } catch {
-        subscriber.send(.set(\.$failure, error.localizedDescription))
+        return .success(.messenger(.failure(error as NSError)))
       }
-      subscriber.send(completion: .finished)
-      return AnyCancellable {}
     }
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
 
-  case .deleteAccountButtonTapped:
+  case .messenger(.didStartUnregistered):
+    state.register = RegisterState()
+    return .none
+
+  case .messenger(.didStartRegistered):
+    return .none
+
+  case .messenger(.failure(let error)):
+    state.failure = error.localizedDescription
+    return .none
+
+  case .deleteAccount(.buttonTapped):
     state.alert = .confirmAccountDeletion()
     return .none
 
-  case .deleteAccountConfirmed:
+  case .deleteAccount(.confirmed):
     state.isDeletingAccount = true
-    return .run { subscriber in
+    return .result {
       do {
         let contactId = try env.messenger.e2e.tryGet().getContact().getId()
         let contact = try env.db().fetchContacts(.init(id: [contactId])).first
@@ -113,31 +135,40 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
         }
         try env.messenger.destroy()
         try env.db().drop()
-        subscriber.send(.didDeleteAccount)
+        return .success(.deleteAccount(.success))
       } catch {
-        subscriber.send(.set(\.$isDeletingAccount, false))
-        subscriber.send(.set(\.$alert, .accountDeletionFailed(error)))
+        return .success(.deleteAccount(.failure(error as NSError)))
       }
-      subscriber.send(completion: .finished)
-      return AnyCancellable {}
     }
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
 
-  case .didDeleteAccount:
+  case .deleteAccount(.success):
     state.isDeletingAccount = false
+    return .none
+
+  case .deleteAccount(.failure(let error)):
+    state.isDeletingAccount = false
+    state.alert = .accountDeletionFailed(error)
+    return .none
+
+  case .didDismissAlert:
+    state.alert = nil
+    return .none
+
+  case .didDismissRegister:
+    state.register = nil
     return .none
 
   case .register(.finished):
     state.register = nil
-    return Effect(value: .start)
+    return Effect(value: .messenger(.start))
 
-  case .binding(_), .register(_):
+  case .register(_):
     return .none
   }
 }
-.binding()
 .presenting(
   registerReducer,
   state: .keyPath(\.register),
