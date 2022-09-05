@@ -10,20 +10,23 @@ import XXMessengerClient
 public struct HomeState: Equatable {
   public init(
     failure: String? = nil,
-    register: RegisterState? = nil,
+    isNetworkHealthy: Bool? = nil,
+    isDeletingAccount: Bool = false,
     alert: AlertState<HomeAction>? = nil,
-    isDeletingAccount: Bool = false
+    register: RegisterState? = nil
   ) {
     self.failure = failure
-    self.register = register
-    self.alert = alert
+    self.isNetworkHealthy = isNetworkHealthy
     self.isDeletingAccount = isDeletingAccount
+    self.alert = alert
+    self.register = register
   }
 
   public var failure: String?
-  public var register: RegisterState?
-  public var alert: AlertState<HomeAction>?
+  public var isNetworkHealthy: Bool?
   public var isDeletingAccount: Bool
+  public var alert: AlertState<HomeAction>?
+  public var register: RegisterState?
 }
 
 public enum HomeAction: Equatable {
@@ -34,6 +37,12 @@ public enum HomeAction: Equatable {
     case failure(NSError)
   }
 
+  public enum NetworkMonitor: Equatable {
+    case start
+    case stop
+    case health(Bool)
+  }
+
   public enum DeleteAccount: Equatable {
     case buttonTapped
     case confirmed
@@ -42,6 +51,7 @@ public enum HomeAction: Equatable {
   }
 
   case messenger(Messenger)
+  case networkMonitor(NetworkMonitor)
   case deleteAccount(DeleteAccount)
   case didDismissAlert
   case didDismissRegister
@@ -82,28 +92,33 @@ extension HomeEnvironment {
 
 public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 { state, action, env in
+  enum NetworkHealthEffectId {}
+
   switch action {
   case .messenger(.start):
-    return .result {
-      do {
-        try env.messenger.start()
+    return .merge(
+      Effect(value: .networkMonitor(.stop)),
+      Effect.result {
+        do {
+          try env.messenger.start()
 
-        if env.messenger.isConnected() == false {
-          try env.messenger.connect()
-        }
-
-        if env.messenger.isLoggedIn() == false {
-          if try env.messenger.isRegistered() == false {
-            return .success(.messenger(.didStartUnregistered))
+          if env.messenger.isConnected() == false {
+            try env.messenger.connect()
           }
-          try env.messenger.logIn()
-        }
 
-        return .success(.messenger(.didStartRegistered))
-      } catch {
-        return .success(.messenger(.failure(error as NSError)))
+          if env.messenger.isLoggedIn() == false {
+            if try env.messenger.isRegistered() == false {
+              return .success(.messenger(.didStartUnregistered))
+            }
+            try env.messenger.logIn()
+          }
+
+          return .success(.messenger(.didStartRegistered))
+        } catch {
+          return .success(.messenger(.failure(error as NSError)))
+        }
       }
-    }
+    )
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
@@ -113,10 +128,31 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     return .none
 
   case .messenger(.didStartRegistered):
-    return .none
+    return Effect(value: .networkMonitor(.start))
 
   case .messenger(.failure(let error)):
     state.failure = error.localizedDescription
+    return .none
+
+  case .networkMonitor(.start):
+    return .run { subscriber in
+      let callback = HealthCallback { isHealthy in
+        subscriber.send(.networkMonitor(.health(isHealthy)))
+      }
+      let cancellable = env.messenger.cMix()?.addHealthCallback(callback)
+      return AnyCancellable { cancellable?.cancel() }
+    }
+    .cancellable(id: NetworkHealthEffectId.self, cancelInFlight: true)
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+
+  case .networkMonitor(.stop):
+    state.isNetworkHealthy = nil
+    return .cancel(id: NetworkHealthEffectId.self)
+
+  case .networkMonitor(.health(let isHealthy)):
+    state.isNetworkHealthy = isHealthy
     return .none
 
   case .deleteAccount(.buttonTapped):

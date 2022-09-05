@@ -12,10 +12,12 @@ public struct HomeView: View {
 
   struct ViewState: Equatable {
     var failure: String?
+    var isNetworkHealthy: Bool?
     var isDeletingAccount: Bool
 
     init(state: HomeState) {
       failure = state.failure
+      isNetworkHealthy = state.isNetworkHealthy
       isDeletingAccount = state.isDeletingAccount
     }
   }
@@ -35,6 +37,28 @@ public struct HomeView: View {
             } header: {
               Text("Error")
             }
+          }
+
+          Section {
+            HStack {
+              Text("Health")
+              Spacer()
+              switch viewStore.isNetworkHealthy {
+              case .some(true):
+                Image(systemName: "checkmark.circle.fill")
+                  .foregroundColor(.green)
+
+              case .some(false):
+                Image(systemName: "xmark.diamond.fill")
+                  .foregroundColor(.red)
+
+              case .none:
+                Image(systemName: "questionmark.circle")
+                  .foregroundColor(.gray)
+              }
+            }
+          } header: {
+            Text("Network")
           }
 
           Section {

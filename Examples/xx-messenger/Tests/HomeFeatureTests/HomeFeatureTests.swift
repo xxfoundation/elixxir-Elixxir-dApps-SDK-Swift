@@ -14,13 +14,11 @@ final class HomeFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let bgQueue = DispatchQueue.test
-    let mainQueue = DispatchQueue.test
     var messengerDidStartWithTimeout: [Int] = []
     var messengerDidConnect = 0
 
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.environment.bgQueue = .immediate
+    store.environment.mainQueue = .immediate
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { messengerDidConnect += 1 }
@@ -29,13 +27,10 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.messenger(.start))
 
-    bgQueue.advance()
-
     XCTAssertNoDifference(messengerDidStartWithTimeout, [30_000])
     XCTAssertNoDifference(messengerDidConnect, 1)
 
-    mainQueue.advance()
-
+    store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartUnregistered)) {
       $0.register = RegisterState()
     }
@@ -48,32 +43,35 @@ final class HomeFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let bgQueue = DispatchQueue.test
-    let mainQueue = DispatchQueue.test
     var messengerDidStartWithTimeout: [Int] = []
     var messengerDidConnect = 0
     var messengerDidLogIn = 0
 
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.environment.bgQueue = .immediate
+    store.environment.mainQueue = .immediate
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { messengerDidConnect += 1 }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
+    store.environment.messenger.cMix.get = {
+      var cMix: CMix = .unimplemented
+      cMix.addHealthCallback.run = { _ in Cancellable {} }
+      return cMix
+    }
 
     store.send(.messenger(.start))
-
-    bgQueue.advance()
 
     XCTAssertNoDifference(messengerDidStartWithTimeout, [30_000])
     XCTAssertNoDifference(messengerDidConnect, 1)
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
-    mainQueue.advance()
-
+    store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartRegistered))
+    store.receive(.networkMonitor(.start))
+
+    store.send(.networkMonitor(.stop))
   }
 
   func testRegisterFinished() {
@@ -85,18 +83,21 @@ final class HomeFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let bgQueue = DispatchQueue.test
-    let mainQueue = DispatchQueue.test
     var messengerDidStartWithTimeout: [Int] = []
     var messengerDidLogIn = 0
 
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.environment.bgQueue = .immediate
+    store.environment.mainQueue = .immediate
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
+    store.environment.messenger.cMix.get = {
+      var cMix: CMix = .unimplemented
+      cMix.addHealthCallback.run = { _ in Cancellable {} }
+      return cMix
+    }
 
     store.send(.register(.finished)) {
       $0.register = nil
@@ -104,14 +105,14 @@ final class HomeFeatureTests: XCTestCase {
 
     store.receive(.messenger(.start))
 
-    bgQueue.advance()
-
     XCTAssertNoDifference(messengerDidStartWithTimeout, [30_000])
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
-    mainQueue.advance()
-
+    store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartRegistered))
+    store.receive(.networkMonitor(.start))
+
+    store.send(.networkMonitor(.stop))
   }
 
   func testMessengerStartFailure() {
@@ -130,6 +131,7 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.messenger(.start))
 
+    store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
@@ -153,6 +155,7 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.messenger(.start))
 
+    store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
@@ -177,6 +180,7 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.messenger(.start))
 
+    store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
@@ -202,9 +206,54 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.messenger(.start))
 
+    store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
+  }
+
+  func testNetworkMonitorStart() {
+    let store = TestStore(
+      initialState: HomeState(),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    var cMixDidAddHealthCallback: [HealthCallback] = []
+    var healthCallbackDidCancel = 0
+
+    store.environment.bgQueue = .immediate
+    store.environment.mainQueue = .immediate
+    store.environment.messenger.cMix.get = {
+      var cMix: CMix = .unimplemented
+      cMix.addHealthCallback.run = { callback in
+        cMixDidAddHealthCallback.append(callback)
+        return Cancellable { healthCallbackDidCancel += 1 }
+      }
+      return cMix
+    }
+
+    store.send(.networkMonitor(.start))
+
+    XCTAssertNoDifference(cMixDidAddHealthCallback.count, 1)
+
+    cMixDidAddHealthCallback.first?.handle(true)
+
+    store.receive(.networkMonitor(.health(true))) {
+      $0.isNetworkHealthy = true
+    }
+
+    cMixDidAddHealthCallback.first?.handle(false)
+
+    store.receive(.networkMonitor(.health(false))) {
+      $0.isNetworkHealthy = false
+    }
+
+    store.send(.networkMonitor(.stop)) {
+      $0.isNetworkHealthy = nil
+    }
+
+    XCTAssertNoDifference(healthCallbackDidCancel, 1)
   }
 
   func testAccountDeletion() {
