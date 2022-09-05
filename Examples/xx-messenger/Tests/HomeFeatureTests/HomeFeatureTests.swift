@@ -47,7 +47,6 @@ final class HomeFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let username = "test_username"
     let bgQueue = DispatchQueue.test
     let mainQueue = DispatchQueue.test
     var messengerDidStartWithTimeout: [Int] = []
@@ -62,15 +61,6 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
-    store.environment.messenger.e2e.get = {
-      var e2e = E2E.unimplemented
-      e2e.getContact.run = {
-        var contact = Contact.unimplemented(Data())
-        contact.getFactsFromContact.run = { _ in [Fact(fact: username, type: 0)] }
-        return contact
-      }
-      return e2e
-    }
 
     store.send(.start)
 
@@ -81,10 +71,6 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
     mainQueue.advance()
-
-    store.receive(.set(\.$username, username)) {
-      $0.username = username
-    }
   }
 
   func testRegisterFinished() {
@@ -96,7 +82,6 @@ final class HomeFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let username = "test_username"
     let bgQueue = DispatchQueue.test
     let mainQueue = DispatchQueue.test
     var messengerDidStartWithTimeout: [Int] = []
@@ -109,15 +94,6 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
-    store.environment.messenger.e2e.get = {
-      var e2e = E2E.unimplemented
-      e2e.getContact.run = {
-        var contact = Contact.unimplemented(Data())
-        contact.getFactsFromContact.run = { _ in [Fact(fact: username, type: 0)] }
-        return contact
-      }
-      return e2e
-    }
 
     store.send(.register(.finished)) {
       $0.register = nil
@@ -131,10 +107,6 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
     mainQueue.advance()
-
-    store.receive(.set(\.$username, username)) {
-      $0.username = username
-    }
   }
 
   func testStartMessengerStartFailure() {

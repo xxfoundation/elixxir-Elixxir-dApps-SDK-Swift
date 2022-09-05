@@ -8,16 +8,13 @@ import XXMessengerClient
 
 public struct HomeState: Equatable {
   public init(
-    username: String? = nil,
     failure: String? = nil,
     register: RegisterState? = nil
   ) {
-    self.username = username
     self.failure = failure
     self.register = register
   }
 
-  @BindableState public var username: String?
   @BindableState public var failure: String?
   @BindableState public var register: RegisterState?
 }
@@ -75,12 +72,6 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
             return AnyCancellable {}
           }
           try env.messenger.logIn()
-        }
-
-        if let contact = env.messenger.e2e()?.getContact(),
-           let facts = try? contact.getFacts(),
-           let username = facts.first(where: { $0.type == 0 })?.fact {
-          subscriber.send(.set(\.$username, username))
         }
       } catch {
         subscriber.send(.set(\.$failure, error.localizedDescription))
