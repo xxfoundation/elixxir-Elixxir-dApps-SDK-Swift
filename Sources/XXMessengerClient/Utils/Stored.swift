@@ -32,6 +32,23 @@ private final class Memory<Value> {
 }
 
 extension Stored {
+  public struct MissingValueError: Error, Equatable {
+    public init(typeDescription: String) {
+      self.typeDescription = typeDescription
+    }
+
+    public var typeDescription: String
+  }
+
+  public func tryGet<T>() throws -> T where Value == Optional<T> {
+    guard let value = get() else {
+      throw MissingValueError(typeDescription: "\(Self.self)")
+    }
+    return value
+  }
+}
+
+extension Stored {
   public static func unimplemented(placeholder: Value) -> Stored<Value> {
     Stored<Value>(
       get: XCTUnimplemented("\(Self.self).get", placeholder: placeholder),
