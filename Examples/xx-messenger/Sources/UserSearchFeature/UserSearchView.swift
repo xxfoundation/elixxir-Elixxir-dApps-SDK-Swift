@@ -15,14 +15,12 @@ public struct UserSearchView: View {
     var query: MessengerSearchUsers.Query
     var isSearching: Bool
     var failure: String?
-    var results: IdentifiedArrayOf<UserSearchState.Result>
 
     init(state: UserSearchState) {
       focusedField = state.focusedField
       query = state.query
       isSearching = state.isSearching
       failure = state.failure
-      results = state.results
     }
   }
 
@@ -87,23 +85,13 @@ public struct UserSearchView: View {
           }
         }
 
-        ForEach(viewStore.results) { result in
-          Section {
-            if let username = result.username {
-              Text(username)
-            }
-            if let email = result.email {
-              Text(email)
-            }
-            if let phone = result.phone {
-              Text(phone)
-            }
-            if result.username == nil, result.email == nil, result.phone == nil {
-              Image(systemName: "questionmark")
-                .frame(maxWidth: .infinity)
-            }
-          }
-        }
+        ForEachStore(
+          store.scope(
+            state: \.results,
+            action: UserSearchAction.result(id:action:)
+          ),
+          content: UserSearchResultView.init(store:)
+        )
       }
       .onChange(of: viewStore.focusedField) { focusedField = $0 }
       .onChange(of: focusedField) { viewStore.send(.set(\.$focusedField, $0)) }

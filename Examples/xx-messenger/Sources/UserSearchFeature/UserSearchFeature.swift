@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import ComposablePresentation
 import Foundation
 import XCTestDynamicOverlay
 import XXClient
@@ -11,34 +12,12 @@ public struct UserSearchState: Equatable {
     case phone
   }
 
-  public struct Result: Equatable, Identifiable {
-    public init(
-      id: Data,
-      contact: Contact,
-      username: String? = nil,
-      email: String? = nil,
-      phone: String? = nil
-    ) {
-      self.id = id
-      self.contact = contact
-      self.username = username
-      self.email = email
-      self.phone = phone
-    }
-
-    public var id: Data
-    public var contact: XXClient.Contact
-    public var username: String?
-    public var email: String?
-    public var phone: String?
-  }
-
   public init(
     focusedField: Field? = nil,
     query: MessengerSearchUsers.Query = .init(),
     isSearching: Bool = false,
     failure: String? = nil,
-    results: IdentifiedArrayOf<Result> = []
+    results: IdentifiedArrayOf<UserSearchResultState> = []
   ) {
     self.focusedField = focusedField
     self.query = query
@@ -51,7 +30,7 @@ public struct UserSearchState: Equatable {
   @BindableState public var query: MessengerSearchUsers.Query
   public var isSearching: Bool
   public var failure: String?
-  public var results: IdentifiedArrayOf<Result>
+  public var results: IdentifiedArrayOf<UserSearchResultState>
 }
 
 public enum UserSearchAction: Equatable, BindableAction {
@@ -59,22 +38,26 @@ public enum UserSearchAction: Equatable, BindableAction {
   case didFail(String)
   case didSucceed([Contact])
   case binding(BindingAction<UserSearchState>)
+  case result(id: UserSearchResultState.ID, action: UserSearchResultAction)
 }
 
 public struct UserSearchEnvironment {
   public init(
     messenger: Messenger,
     mainQueue: AnySchedulerOf<DispatchQueue>,
-    bgQueue: AnySchedulerOf<DispatchQueue>
+    bgQueue: AnySchedulerOf<DispatchQueue>,
+    result: @escaping () -> UserSearchResultEnvironment
   ) {
     self.messenger = messenger
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
+    self.result = result
   }
 
   public var messenger: Messenger
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
+  public var result: () -> UserSearchResultEnvironment
 }
 
 #if DEBUG
@@ -82,7 +65,8 @@ extension UserSearchEnvironment {
   public static let unimplemented = UserSearchEnvironment(
     messenger: .unimplemented,
     mainQueue: .unimplemented,
-    bgQueue: .unimplemented
+    bgQueue: .unimplemented,
+    result: { .unimplemented }
   )
 }
 #endif
@@ -111,14 +95,7 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
     state.failure = nil
     state.results = IdentifiedArray(uniqueElements: contacts.compactMap { contact in
       guard let id = try? contact.getId() else { return nil }
-      let facts = (try? contact.getFacts()) ?? []
-      return UserSearchState.Result(
-        id: id,
-        contact: contact,
-        username: facts.first(where: { $0.type == 0 })?.fact,
-        email: facts.first(where: { $0.type == 1 })?.fact,
-        phone: facts.first(where: { $0.type == 2 })?.fact
-      )
+      return UserSearchResultState(id: id, contact: contact)
     })
     return .none
 
@@ -128,8 +105,14 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
     state.results = []
     return .none
 
-  case .binding(_):
+  case .binding(_), .result(_, _):
     return .none
   }
 }
 .binding()
+.presenting(
+  forEach: userSearchResultReducer,
+  state: \.results,
+  action: /UserSearchAction.result(id:action:),
+  environment: { $0.result() }
+)

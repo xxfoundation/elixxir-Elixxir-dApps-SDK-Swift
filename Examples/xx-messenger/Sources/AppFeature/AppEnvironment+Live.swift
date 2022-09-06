@@ -50,7 +50,10 @@ extension AppEnvironment {
             UserSearchEnvironment(
               messenger: messenger,
               mainQueue: mainQueue,
-              bgQueue: bgQueue
+              bgQueue: bgQueue,
+              result: {
+                UserSearchResultEnvironment()
+              }
             )
           }
         )
