@@ -6,20 +6,20 @@ import XXClient
 public struct UserSearchResultState: Equatable, Identifiable {
   public init(
     id: Data,
-    contact: Contact,
+    xxContact: Contact,
     username: String? = nil,
     email: String? = nil,
     phone: String? = nil
   ) {
     self.id = id
-    self.contact = contact
+    self.xxContact = xxContact
     self.username = username
     self.email = email
     self.phone = phone
   }
 
   public var id: Data
-  public var contact: XXClient.Contact
+  public var xxContact: XXClient.Contact
   public var username: String?
   public var email: String?
   public var phone: String?
@@ -43,7 +43,7 @@ public let userSearchResultReducer = Reducer<UserSearchResultState, UserSearchRe
 { state, action, env in
   switch action {
   case .start:
-    let facts = (try? state.contact.getFacts()) ?? []
+    let facts = (try? state.xxContact.getFacts()) ?? []
     state.username = facts.first(where: { $0.type == 0 })?.fact
     state.email = facts.first(where: { $0.type == 1 })?.fact
     state.phone = facts.first(where: { $0.type == 2 })?.fact

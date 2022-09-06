@@ -53,9 +53,9 @@ final class UserSearchFeatureTests: XCTestCase {
       $0.isSearching = false
       $0.failure = nil
       $0.results = [
-        .init(id: "contact-1-id".data(using: .utf8)!, contact: contact1),
-        .init(id: "contact-2-id".data(using: .utf8)!, contact: contact2),
-        .init(id: "contact-4-id".data(using: .utf8)!, contact: contact4)
+        .init(id: "contact-1-id".data(using: .utf8)!, xxContact: contact1),
+        .init(id: "contact-2-id".data(using: .utf8)!, xxContact: contact2),
+        .init(id: "contact-4-id".data(using: .utf8)!, xxContact: contact4)
       ]
     }
   }

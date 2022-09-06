@@ -53,7 +53,7 @@ public struct UserSearchResultView_Previews: PreviewProvider {
     UserSearchResultView(store: Store(
       initialState: UserSearchResultState(
         id: "contact-id".data(using: .utf8)!,
-        contact: .unimplemented("contact-data".data(using: .utf8)!)
+        xxContact: .unimplemented("contact-data".data(using: .utf8)!)
       ),
       reducer: .empty,
       environment: ()

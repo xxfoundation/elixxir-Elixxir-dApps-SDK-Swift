@@ -17,7 +17,7 @@ final class UserSearchResultFeatureTests: XCTestCase {
     let store = TestStore(
       initialState: UserSearchResultState(
         id: "contact-id".data(using: .utf8)!,
-        contact: contact
+        xxContact: contact
       ),
       reducer: userSearchResultReducer,
       environment: .unimplemented

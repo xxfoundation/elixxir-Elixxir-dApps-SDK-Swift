@@ -95,7 +95,7 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
     state.failure = nil
     state.results = IdentifiedArray(uniqueElements: contacts.compactMap { contact in
       guard let id = try? contact.getId() else { return nil }
-      return UserSearchResultState(id: id, contact: contact)
+      return UserSearchResultState(id: id, xxContact: contact)
     })
     return .none
 
