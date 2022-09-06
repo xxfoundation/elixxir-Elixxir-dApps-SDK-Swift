@@ -37,6 +37,8 @@ public struct RegisterView: View {
               label: { Text("Username") }
             )
             .focused($focusedField, equals: .username)
+            .textInputAutocapitalization(.never)
+            .disableAutocorrection(true)
           } header: {
             Text("Username")
           }
