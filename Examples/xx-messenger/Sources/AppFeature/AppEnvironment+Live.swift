@@ -47,7 +47,11 @@ extension AppEnvironment {
             )
           },
           userSearch: {
-            UserSearchEnvironment()
+            UserSearchEnvironment(
+              messenger: messenger,
+              mainQueue: mainQueue,
+              bgQueue: bgQueue
+            )
           }
         )
       }
