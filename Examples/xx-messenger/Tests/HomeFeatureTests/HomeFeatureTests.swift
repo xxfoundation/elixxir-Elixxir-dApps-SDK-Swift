@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import RegisterFeature
+import UserSearchFeature
 import XCTest
 import XXClient
 import XXMessengerClient
@@ -435,6 +436,32 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.didDismissRegister) {
       $0.register = nil
+    }
+  }
+
+  func testUserSearchButtonTapped() {
+    let store = TestStore(
+      initialState: HomeState(),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.userSearchButtonTapped) {
+      $0.userSearch = UserSearchState()
+    }
+  }
+
+  func testDidDismissUserSearch() {
+    let store = TestStore(
+      initialState: HomeState(
+        userSearch: UserSearchState()
+      ),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.didDismissUserSearch) {
+      $0.userSearch = nil
     }
   }
 }

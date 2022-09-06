@@ -3,6 +3,7 @@ import Foundation
 import HomeFeature
 import RegisterFeature
 import RestoreFeature
+import UserSearchFeature
 import WelcomeFeature
 import XXMessengerClient
 import XXModels
@@ -44,6 +45,9 @@ extension AppEnvironment {
               mainQueue: mainQueue,
               bgQueue: bgQueue
             )
+          },
+          userSearch: {
+            UserSearchEnvironment()
           }
         )
       }

@@ -71,6 +71,7 @@ let package = Package(
         .target(name: "HomeFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
+        .target(name: "UserSearchFeature"),
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
@@ -91,6 +92,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "RegisterFeature"),
+        .target(name: "UserSearchFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),

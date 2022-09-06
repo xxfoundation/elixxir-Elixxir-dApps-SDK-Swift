@@ -4,6 +4,7 @@ import ComposableArchitecture
 import ComposablePresentation
 import Foundation
 import RegisterFeature
+import UserSearchFeature
 import XXClient
 import XXMessengerClient
 
@@ -14,13 +15,15 @@ public struct HomeState: Equatable {
     networkNodesReport: NodeRegistrationReport? = nil,
     isDeletingAccount: Bool = false,
     alert: AlertState<HomeAction>? = nil,
-    register: RegisterState? = nil
+    register: RegisterState? = nil,
+    userSearch: UserSearchState? = nil
   ) {
     self.failure = failure
     self.isNetworkHealthy = isNetworkHealthy
     self.isDeletingAccount = isDeletingAccount
     self.alert = alert
     self.register = register
+    self.userSearch = userSearch
   }
 
   public var failure: String?
@@ -29,6 +32,7 @@ public struct HomeState: Equatable {
   public var isDeletingAccount: Bool
   public var alert: AlertState<HomeAction>?
   public var register: RegisterState?
+  public var userSearch: UserSearchState?
 }
 
 public enum HomeAction: Equatable {
@@ -58,7 +62,10 @@ public enum HomeAction: Equatable {
   case deleteAccount(DeleteAccount)
   case didDismissAlert
   case didDismissRegister
+  case userSearchButtonTapped
+  case didDismissUserSearch
   case register(RegisterAction)
+  case userSearch(UserSearchAction)
 }
 
 public struct HomeEnvironment {
@@ -67,13 +74,15 @@ public struct HomeEnvironment {
     db: DBManagerGetDB,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
-    register: @escaping () -> RegisterEnvironment
+    register: @escaping () -> RegisterEnvironment,
+    userSearch: @escaping () -> UserSearchEnvironment
   ) {
     self.messenger = messenger
     self.db = db
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
     self.register = register
+    self.userSearch = userSearch
   }
 
   public var messenger: Messenger
@@ -81,6 +90,7 @@ public struct HomeEnvironment {
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var register: () -> RegisterEnvironment
+  public var userSearch: () -> UserSearchEnvironment
 }
 
 extension HomeEnvironment {
@@ -89,7 +99,8 @@ extension HomeEnvironment {
     db: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
-    register: { .unimplemented }
+    register: { .unimplemented },
+    userSearch: { .unimplemented }
   )
 }
 
@@ -219,11 +230,19 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     state.register = nil
     return .none
 
+  case .userSearchButtonTapped:
+    state.userSearch = UserSearchState()
+    return .none
+
+  case .didDismissUserSearch:
+    state.userSearch = nil
+    return .none
+
   case .register(.finished):
     state.register = nil
     return Effect(value: .messenger(.start))
 
-  case .register(_):
+  case .register(_), .userSearch(_):
     return .none
   }
 }
@@ -233,4 +252,11 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
   id: .notNil(),
   action: /HomeAction.register,
   environment: { $0.register() }
+)
+.presenting(
+  userSearchReducer,
+  state: .keyPath(\.userSearch),
+  id: .notNil(),
+  action: /HomeAction.userSearch,
+  environment: { $0.userSearch() }
 )
