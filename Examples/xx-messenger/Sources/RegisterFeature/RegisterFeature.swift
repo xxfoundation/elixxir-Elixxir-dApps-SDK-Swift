@@ -1,6 +1,6 @@
 import AppCore
 import ComposableArchitecture
-import SwiftUI
+import Foundation
 import XCTestDynamicOverlay
 import XXMessengerClient
 import XXModels
@@ -13,11 +13,13 @@ public struct RegisterState: Equatable {
   public init(
     focusedField: Field? = nil,
     username: String = "",
-    isRegistering: Bool = false
+    isRegistering: Bool = false,
+    failure: String? = nil
   ) {
     self.focusedField = focusedField
     self.username = username
     self.isRegistering = isRegistering
+    self.failure = failure
   }
 
   @BindableState public var focusedField: Field?

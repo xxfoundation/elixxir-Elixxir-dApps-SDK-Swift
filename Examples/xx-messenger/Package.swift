@@ -23,6 +23,7 @@ let package = Package(
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
+    .library(name: "UserSearchFeature", targets: ["UserSearchFeature"]),
     .library(name: "WelcomeFeature", targets: ["WelcomeFeature"]),
   ],
   dependencies: [
@@ -70,6 +71,7 @@ let package = Package(
         .target(name: "HomeFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
+        .target(name: "UserSearchFeature"),
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
@@ -90,6 +92,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "RegisterFeature"),
+        .target(name: "UserSearchFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
@@ -131,6 +134,22 @@ let package = Package(
       name: "RestoreFeatureTests",
       dependencies: [
         .target(name: "RestoreFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "UserSearchFeature",
+      dependencies: [
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "UserSearchFeatureTests",
+      dependencies: [
+        .target(name: "UserSearchFeature"),
       ],
       swiftSettings: swiftSettings
     ),

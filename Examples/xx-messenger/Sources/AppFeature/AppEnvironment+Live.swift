@@ -3,6 +3,7 @@ import Foundation
 import HomeFeature
 import RegisterFeature
 import RestoreFeature
+import UserSearchFeature
 import WelcomeFeature
 import XXMessengerClient
 import XXModels
@@ -41,6 +42,13 @@ extension AppEnvironment {
               messenger: messenger,
               db: dbManager.getDB,
               now: Date.init,
+              mainQueue: mainQueue,
+              bgQueue: bgQueue
+            )
+          },
+          userSearch: {
+            UserSearchEnvironment(
+              messenger: messenger,
               mainQueue: mainQueue,
               bgQueue: bgQueue
             )

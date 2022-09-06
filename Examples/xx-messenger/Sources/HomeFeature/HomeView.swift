@@ -2,6 +2,7 @@ import ComposableArchitecture
 import ComposablePresentation
 import RegisterFeature
 import SwiftUI
+import UserSearchFeature
 import XXClient
 
 public struct HomeView: View {
@@ -87,6 +88,20 @@ public struct HomeView: View {
           }
 
           Section {
+            Button {
+              viewStore.send(.userSearchButtonTapped)
+            } label: {
+              HStack {
+                Text("Search users")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+          } header: {
+            Text("Contacts")
+          }
+
+          Section {
             Button(role: .destructive) {
               viewStore.send(.deleteAccount(.buttonTapped))
             } label: {
@@ -108,6 +123,16 @@ public struct HomeView: View {
           store.scope(state: \.alert),
           dismiss: HomeAction.didDismissAlert
         )
+        .background(NavigationLinkWithStore(
+          store.scope(
+            state: \.userSearch,
+            action: HomeAction.userSearch
+          ),
+          onDeactivate: {
+            viewStore.send(.didDismissUserSearch)
+          },
+          destination: UserSearchView.init(store:)
+        ))
       }
       .navigationViewStyle(.stack)
       .task { viewStore.send(.messenger(.start)) }
