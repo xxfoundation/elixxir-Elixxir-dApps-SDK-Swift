@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SwiftUI
+import XXModels
 
 public struct UserSearchResultView: View {
   public init(store: Store<UserSearchResultState, UserSearchResultAction>) {
@@ -12,11 +13,13 @@ public struct UserSearchResultView: View {
     var username: String?
     var email: String?
     var phone: String?
+    var dbContactAuth: XXModels.Contact.AuthStatus?
 
     init(state: UserSearchResultState) {
       username = state.username
       email = state.email
       phone = state.phone
+      dbContactAuth = state.dbContact?.authStatus
     }
 
     var isEmpty: Bool {
@@ -39,6 +42,91 @@ public struct UserSearchResultView: View {
           }
           if let phone = viewStore.phone {
             Text(phone)
+          }
+        }
+        switch viewStore.dbContactAuth {
+        case .none, .stranger:
+          Button {
+            viewStore.send(.sendRequestButtonTapped)
+          } label: {
+            HStack {
+              Text("Send request")
+              Spacer()
+              Image(systemName: "person.badge.plus")
+            }
+          }
+
+        case .requesting:
+          HStack {
+            Text("Sending auth request")
+            Spacer()
+            ProgressView()
+          }
+
+        case .requested:
+          HStack {
+            Text("Request sent")
+            Spacer()
+            Image(systemName: "paperplane")
+          }
+
+        case .requestFailed:
+          HStack {
+            Text("Sending request failed")
+            Spacer()
+            Image(systemName: "xmark.diamond.fill")
+              .foregroundColor(.red)
+          }
+
+        case .verificationInProgress:
+          HStack {
+            Text("Verification is progress")
+            Spacer()
+            ProgressView()
+          }
+
+        case .verified:
+          HStack {
+            Text("Verified")
+            Spacer()
+            Image(systemName: "person.fill.checkmark")
+          }
+
+        case .verificationFailed:
+          HStack {
+            Text("Verification failed")
+            Spacer()
+            Image(systemName: "xmark.diamond.fill")
+              .foregroundColor(.red)
+          }
+
+        case .confirming:
+          HStack {
+            Text("Confirming auth request")
+            Spacer()
+            ProgressView()
+          }
+
+        case .confirmationFailed:
+          HStack {
+            Text("Confirmation failed")
+            Spacer()
+            Image(systemName: "xmark.diamond.fill")
+              .foregroundColor(.red)
+          }
+
+        case .friend:
+          HStack {
+            Text("Friend")
+            Spacer()
+            Image(systemName: "person.fill.checkmark")
+          }
+
+        case .hidden:
+          HStack {
+            Text("Hidden")
+            Spacer()
+            Image(systemName: "eye.slash")
           }
         }
       }

@@ -140,10 +140,12 @@ let package = Package(
     .target(
       name: "UserSearchFeature",
       dependencies: [
+        .target(name: "AppCore"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
       ],
       swiftSettings: swiftSettings
     ),

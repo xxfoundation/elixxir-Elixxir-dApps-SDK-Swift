@@ -52,7 +52,11 @@ extension AppEnvironment {
               mainQueue: mainQueue,
               bgQueue: bgQueue,
               result: {
-                UserSearchResultEnvironment()
+                UserSearchResultEnvironment(
+                  db: dbManager.getDB,
+                  mainQueue: mainQueue,
+                  bgQueue: bgQueue
+                )
               }
             )
           }
