@@ -23,6 +23,7 @@ let package = Package(
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
+    .library(name: "UserSearchFeature", targets: ["UserSearchFeature"]),
     .library(name: "WelcomeFeature", targets: ["WelcomeFeature"]),
   ],
   dependencies: [
@@ -131,6 +132,20 @@ let package = Package(
       name: "RestoreFeatureTests",
       dependencies: [
         .target(name: "RestoreFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "UserSearchFeature",
+      dependencies: [
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "UserSearchFeatureTests",
+      dependencies: [
+        .target(name: "UserSearchFeature"),
       ],
       swiftSettings: swiftSettings
     ),
