@@ -11,6 +11,7 @@ public struct MessengerEnvironment {
   public var generateSecret: GenerateSecret
   public var getCMixParams: GetCMixParams
   public var getE2EParams: GetE2EParams
+  public var getSingleUseParams: GetSingleUseParams
   public var isRegisteredWithUD: IsRegisteredWithUD
   public var loadCMix: LoadCMix
   public var login: Login
@@ -18,6 +19,7 @@ public struct MessengerEnvironment {
   public var newCMix: NewCMix
   public var newOrLoadUd: NewOrLoadUd
   public var passwordStorage: PasswordStorage
+  public var searchUD: SearchUD
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
   public var ud: Stored<UserDiscovery?>
@@ -43,6 +45,7 @@ extension MessengerEnvironment {
       generateSecret: .live,
       getCMixParams: .liveDefault,
       getE2EParams: .liveDefault,
+      getSingleUseParams: .liveDefault,
       isRegisteredWithUD: .live,
       loadCMix: .live,
       login: .live,
@@ -50,6 +53,7 @@ extension MessengerEnvironment {
       newCMix: .live,
       newOrLoadUd: .live,
       passwordStorage: .keychain,
+      searchUD: .live,
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
       ud: .inMemory(),
@@ -70,6 +74,7 @@ extension MessengerEnvironment {
     generateSecret: .unimplemented,
     getCMixParams: .unimplemented,
     getE2EParams: .unimplemented,
+    getSingleUseParams: .unimplemented,
     isRegisteredWithUD: .unimplemented,
     loadCMix: .unimplemented,
     login: .unimplemented,
@@ -77,6 +82,7 @@ extension MessengerEnvironment {
     newCMix: .unimplemented,
     newOrLoadUd: .unimplemented,
     passwordStorage: .unimplemented,
+    searchUD: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
     ud: .unimplemented(),
