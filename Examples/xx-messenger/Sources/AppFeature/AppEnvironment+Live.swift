@@ -63,7 +63,12 @@ extension AppEnvironment {
                   mainQueue: mainQueue,
                   bgQueue: bgQueue,
                   sendRequest: {
-                    SendRequestEnvironment()
+                    SendRequestEnvironment(
+                      messenger: messenger,
+                      db: dbManager.getDB,
+                      mainQueue: mainQueue,
+                      bgQueue: bgQueue
+                    )
                   }
                 )
               }
