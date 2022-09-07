@@ -37,6 +37,8 @@ public struct SendRequestState: Equatable {
 public enum SendRequestAction: Equatable, BindableAction {
   case start
   case sendTapped
+  case sendSucceeded
+  case sendFailed(String)
   case binding(BindingAction<SendRequestState>)
   case myContactFetched(XXClient.Contact?)
 }
@@ -95,6 +97,51 @@ public let sendRequestReducer = Reducer<SendRequestState, SendRequestAction, Sen
     return .none
 
   case .sendTapped:
+    state.isSending = true
+    state.failure = nil
+    return .result { [state] in
+      func updateAuthStatus(_ authStatus: XXModels.Contact.AuthStatus) throws {
+        try env.db().bulkUpdateContacts(
+          .init(id: [try state.contact.getId()]),
+          .init(authStatus: authStatus)
+        )
+      }
+      do {
+        try updateAuthStatus(.requesting)
+        let myFacts = try state.myContact?.getFacts() ?? []
+        var includedFacts: [Fact] = []
+        if state.sendUsername, let fact = myFacts.first(where: { $0.type == 0 }) {
+          includedFacts.append(fact)
+        }
+        if state.sendEmail, let fact = myFacts.first(where: { $0.type == 1 }) {
+          includedFacts.append(fact)
+        }
+        if state.sendPhone, let fact = myFacts.first(where: { $0.type == 2 }) {
+          includedFacts.append(fact)
+        }
+        _ = try env.messenger.e2e.tryGet().requestAuthenticatedChannel(
+          partner: state.contact,
+          myFacts: includedFacts
+        )
+        try updateAuthStatus(.requested)
+        return .success(.sendSucceeded)
+      } catch {
+        try? updateAuthStatus(.requestFailed)
+        return .success(.sendFailed(error.localizedDescription))
+      }
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+
+  case .sendSucceeded:
+    state.isSending = false
+    state.failure = nil
+    return .none
+
+  case .sendFailed(let failure):
+    state.isSending = false
+    state.failure = failure
     return .none
 
   case .binding(_):
