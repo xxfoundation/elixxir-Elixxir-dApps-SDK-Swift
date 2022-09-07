@@ -146,4 +146,21 @@ final class ContactFeatureTests: XCTestCase {
       $0.sendRequest = nil
     }
   }
+
+  func testSendRequestSucceeded() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!,
+        sendRequest: SendRequestState(
+          contact: .unimplemented("contact-id".data(using: .utf8)!)
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.sendRequest(.sendSucceeded)) {
+      $0.sendRequest = nil
+    }
+  }
 }

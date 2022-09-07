@@ -115,6 +115,10 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.sendRequest = nil
     return .none
 
+  case .sendRequest(.sendSucceeded):
+    state.sendRequest = nil
+    return .none
+
   case .sendRequest(_):
     return .none
   }
