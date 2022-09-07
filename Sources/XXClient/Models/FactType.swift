@@ -28,6 +28,12 @@ extension FactType: RawRepresentable {
   }
 }
 
+extension FactType: ExpressibleByIntegerLiteral {
+  public init(integerLiteral value: IntegerLiteralType) {
+    self.init(rawValue: value)
+  }
+}
+
 extension FactType: Codable {
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
