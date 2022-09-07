@@ -43,3 +43,17 @@ extension Array where Element == Fact {
     return try JSONEncoder().encode(self)
   }
 }
+
+extension Array where Element == Fact {
+  public func get(_ type: FactType) -> Fact? {
+    first(where: { $0.type == type.rawValue })
+  }
+
+  public mutating func set(_ type: FactType, _ value: String?) {
+    removeAll(where: { $0.type == type.rawValue })
+    if let value = value {
+      append(Fact(fact: value, type: type.rawValue))
+      sort(by: { $0.type < $1.type })
+    }
+  }
+}

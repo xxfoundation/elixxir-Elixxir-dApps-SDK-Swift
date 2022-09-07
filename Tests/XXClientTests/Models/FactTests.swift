@@ -51,4 +51,49 @@ final class FactTests: XCTestCase {
 
     XCTAssertNoDifference(encodedModels, jsonData)
   }
+
+  func testArrayGetter() {
+    let facts = [
+      Fact(fact: "username", type: 0),
+      Fact(fact: "email", type: 1),
+      Fact(fact: "phone", type: 2),
+      Fact(fact: "other", type: 3),
+    ]
+
+    XCTAssertNoDifference(
+      [
+        facts.get(.username),
+        facts.get(.email),
+        facts.get(.phone),
+        facts.get(.other(3)),
+        facts.get(.other(4)),
+      ],
+      [
+        Fact(fact: "username", type: 0),
+        Fact(fact: "email", type: 1),
+        Fact(fact: "phone", type: 2),
+        Fact(fact: "other", type: 3),
+        nil
+      ]
+    )
+  }
+
+  func testArraySetter() {
+    var facts: [Fact] = []
+
+    facts.set(.email, "email")
+    facts.set(.phone, "phone")
+    facts.set(.other(3), "other")
+    facts.set(.username, "username")
+
+    XCTAssertNoDifference(
+      facts,
+      [
+        Fact(fact: "username", type: 0),
+        Fact(fact: "email", type: 1),
+        Fact(fact: "phone", type: 2),
+        Fact(fact: "other", type: 3),
+      ]
+    )
+  }
 }
