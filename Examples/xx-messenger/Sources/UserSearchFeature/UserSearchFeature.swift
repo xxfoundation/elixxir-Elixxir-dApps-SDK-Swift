@@ -140,7 +140,7 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
 .presenting(
   contactReducer,
   state: .keyPath(\.contact),
-  id: .notNil(), // TODO: use Contact.ID
+  id: .keyPath(\.?.id),
   action: /UserSearchAction.contact,
   environment: { $0.contact() }
 )
