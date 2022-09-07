@@ -16,8 +16,8 @@ final class FactTests: XCTestCase {
     let model = try Fact.decode(jsonData)
 
     XCTAssertNoDifference(model, Fact(
-      fact: factValue,
-      type: 123
+      type: .other(123),
+      value: factValue
     ))
 
     let encodedModel = try model.encode()
@@ -28,9 +28,9 @@ final class FactTests: XCTestCase {
 
   func testCodingArray() throws {
     let models = [
-      Fact(fact: "abcd", type: 0),
-      Fact(fact: "efgh", type: 1),
-      Fact(fact: "ijkl", type: 2),
+      Fact(type: .username, value: "abcd"),
+      Fact(type: .email, value: "efgh"),
+      Fact(type: .phone, value: "ijkl"),
     ]
 
     let encodedModels = try models.encode()
@@ -54,10 +54,10 @@ final class FactTests: XCTestCase {
 
   func testArrayGetter() {
     let facts = [
-      Fact(fact: "username", type: 0),
-      Fact(fact: "email", type: 1),
-      Fact(fact: "phone", type: 2),
-      Fact(fact: "other", type: 3),
+      Fact(type: .username, value: "username"),
+      Fact(type: .email, value: "email"),
+      Fact(type: .phone, value: "phone"),
+      Fact(type: .other(3), value: "other"),
     ]
 
     XCTAssertNoDifference(
@@ -69,10 +69,10 @@ final class FactTests: XCTestCase {
         facts.get(.other(4)),
       ],
       [
-        Fact(fact: "username", type: 0),
-        Fact(fact: "email", type: 1),
-        Fact(fact: "phone", type: 2),
-        Fact(fact: "other", type: 3),
+        Fact(type: .username, value: "username"),
+        Fact(type: .email, value: "email"),
+        Fact(type: .phone, value: "phone"),
+        Fact(type: .other(3), value: "other"),
         nil
       ]
     )
@@ -89,10 +89,10 @@ final class FactTests: XCTestCase {
     XCTAssertNoDifference(
       facts,
       [
-        Fact(fact: "username", type: 0),
-        Fact(fact: "email", type: 1),
-        Fact(fact: "phone", type: 2),
-        Fact(fact: "other", type: 3),
+        Fact(type: .username, value: "username"),
+        Fact(type: .email, value: "email"),
+        Fact(type: .phone, value: "phone"),
+        Fact(type: .other(3), value: "other"),
       ]
     )
   }

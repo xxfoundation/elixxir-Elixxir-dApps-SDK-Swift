@@ -7,10 +7,10 @@ final class ContactTests: XCTestCase {
     var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
     contact.getFactsFromContact.run = { _ in
       [
-        Fact(fact: "username", type: 0),
-        Fact(fact: "email", type: 1),
-        Fact(fact: "phone", type: 2),
-        Fact(fact: "other", type: 3),
+        Fact(type: .username, value: "username"),
+        Fact(type: .email, value: "email"),
+        Fact(type: .phone, value: "phone"),
+        Fact(type: .other(3), value: "other"),
       ]
     }
 
@@ -23,10 +23,10 @@ final class ContactTests: XCTestCase {
         try contact.getFact(.other(4)),
       ],
       [
-        Fact(fact: "username", type: 0),
-        Fact(fact: "email", type: 1),
-        Fact(fact: "phone", type: 2),
-        Fact(fact: "other", type: 3),
+        Fact(type: .username, value: "username"),
+        Fact(type: .email, value: "email"),
+        Fact(type: .phone, value: "phone"),
+        Fact(type: .other(3), value: "other"),
         nil
       ]
     )
@@ -35,10 +35,10 @@ final class ContactTests: XCTestCase {
   func testSetFact() throws {
     var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
     var facts: [Fact] = [
-      Fact(fact: "username", type: 0),
-      Fact(fact: "email", type: 1),
-      Fact(fact: "phone", type: 2),
-      Fact(fact: "other-3", type: 3),
+      Fact(type: .username, value: "username"),
+      Fact(type: .email, value: "email"),
+      Fact(type: .phone, value: "phone"),
+      Fact(type: .other(3), value: "other-3"),
     ]
     contact.getFactsFromContact.run = { _ in facts }
     contact.setFactsOnContact.run = { data, newFacts in
@@ -52,10 +52,10 @@ final class ContactTests: XCTestCase {
     try contact.setFact(.email, nil)
 
     XCTAssertNoDifference(facts, [
-      Fact(fact: "new-username", type: 0),
-      Fact(fact: "phone", type: 2),
-      Fact(fact: "new-other-3", type: 3),
-      Fact(fact: "new-other-4", type: 4),
+      Fact(type: .username, value: "new-username"),
+      Fact(type: .phone, value: "phone"),
+      Fact(type: .other(3), value: "new-other-3"),
+      Fact(type: .other(4), value: "new-other-4"),
     ])
   }
 }
