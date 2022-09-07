@@ -3,14 +3,14 @@ import Foundation
 public struct Fact: Equatable {
   public init(
     fact: String,
-    type: Int
+    type: FactType
   ) {
     self.fact = fact
     self.type = type
   }
 
   public var fact: String
-  public var type: Int
+  public var type: FactType
 }
 
 extension Fact: Codable {
@@ -46,13 +46,13 @@ extension Array where Element == Fact {
 
 extension Array where Element == Fact {
   public func get(_ type: FactType) -> Fact? {
-    first(where: { $0.type == type.rawValue })
+    first(where: { $0.type == type })
   }
 
   public mutating func set(_ type: FactType, _ value: String?) {
-    removeAll(where: { $0.type == type.rawValue })
+    removeAll(where: { $0.type == type })
     if let value = value {
-      append(Fact(fact: value, type: type.rawValue))
+      append(Fact(fact: value, type: type))
       sort(by: { $0.type < $1.type })
     }
   }

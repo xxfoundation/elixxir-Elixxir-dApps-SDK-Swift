@@ -5,7 +5,7 @@ import XCTest
 final class FactTests: XCTestCase {
   func testCoding() throws {
     let factValue = "Zezima"
-    let factType: Int = 0
+    let factType: Int = 123
     let jsonString = """
     {
       "Fact": "\(factValue)",
@@ -17,7 +17,7 @@ final class FactTests: XCTestCase {
 
     XCTAssertNoDifference(model, Fact(
       fact: factValue,
-      type: factType
+      type: 123
     ))
 
     let encodedModel = try model.encode()
