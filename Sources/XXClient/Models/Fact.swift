@@ -30,10 +30,16 @@ extension Fact: Codable {
 
 extension Array where Element == Fact {
   public static func decode(_ data: Data) throws -> Self {
-    try JSONDecoder().decode(Self.self, from: data)
+    if let string = String(data: data, encoding: .utf8), string == "null" {
+      return []
+    }
+    return try JSONDecoder().decode(Self.self, from: data)
   }
 
   public func encode() throws -> Data {
-    try JSONEncoder().encode(self)
+    if isEmpty {
+      return "null".data(using: .utf8)!
+    }
+    return try JSONEncoder().encode(self)
   }
 }
