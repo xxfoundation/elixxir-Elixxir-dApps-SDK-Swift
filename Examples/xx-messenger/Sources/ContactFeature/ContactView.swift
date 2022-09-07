@@ -26,7 +26,9 @@ public struct ContactView: View {
 public struct ContactView_Previews: PreviewProvider {
   public static var previews: some View {
     ContactView(store: Store(
-      initialState: ContactState(),
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!
+      ),
       reducer: .empty,
       environment: ()
     ))

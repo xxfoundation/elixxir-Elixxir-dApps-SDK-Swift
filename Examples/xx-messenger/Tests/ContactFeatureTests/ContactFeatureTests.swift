@@ -5,7 +5,9 @@ import XCTest
 final class ContactFeatureTests: XCTestCase {
   func testStart() {
     let store = TestStore(
-      initialState: ContactState(),
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!
+      ),
       reducer: contactReducer,
       environment: .unimplemented
     )

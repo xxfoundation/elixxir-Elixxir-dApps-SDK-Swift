@@ -1,4 +1,5 @@
 import AppCore
+import ContactFeature
 import Foundation
 import HomeFeature
 import RegisterFeature
@@ -55,7 +56,12 @@ extension AppEnvironment {
                 UserSearchResultEnvironment()
               },
               contact: {
-                ContactEnvironment()
+                ContactEnvironment(
+                  messenger: messenger,
+                  db: dbManager.getDB,
+                  mainQueue: mainQueue,
+                  bgQueue: bgQueue
+                )
               }
             )
           }

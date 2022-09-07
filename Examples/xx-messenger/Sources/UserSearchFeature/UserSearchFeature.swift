@@ -120,7 +120,10 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
     return .none
 
   case .result(let id, action: .tapped):
-    state.contact = ContactState()
+    state.contact = ContactState(
+      id: id,
+      xxContact: state.results[id: id]?.xxContact
+    )
     return .none
 
   case .binding(_), .result(_, _), .contact(_):
