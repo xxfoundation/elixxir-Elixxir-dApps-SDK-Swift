@@ -1,5 +1,6 @@
 import AppCore
 import ComposableArchitecture
+import ComposablePresentation
 import Foundation
 import XCTestDynamicOverlay
 import XXClient
@@ -10,16 +11,19 @@ public struct ContactState: Equatable {
   public init(
     id: Data,
     dbContact: XXModels.Contact? = nil,
-    xxContact: XXClient.Contact? = nil
+    xxContact: XXClient.Contact? = nil,
+    sendRequest: ContactSendRequestState? = nil
   ) {
     self.id = id
     self.dbContact = dbContact
     self.xxContact = xxContact
+    self.sendRequest = sendRequest
   }
 
   public var id: Data
   public var dbContact: XXModels.Contact?
   public var xxContact: XXClient.Contact?
+  public var sendRequest: ContactSendRequestState?
 }
 
 public enum ContactAction: Equatable {
@@ -27,6 +31,8 @@ public enum ContactAction: Equatable {
   case dbContactFetched(XXModels.Contact?)
   case saveFactsTapped
   case sendRequestTapped
+  case sendRequestDismissed
+  case sendRequest(ContactSendRequestAction)
 }
 
 public struct ContactEnvironment {
@@ -34,18 +40,21 @@ public struct ContactEnvironment {
     messenger: Messenger,
     db: DBManagerGetDB,
     mainQueue: AnySchedulerOf<DispatchQueue>,
-    bgQueue: AnySchedulerOf<DispatchQueue>
+    bgQueue: AnySchedulerOf<DispatchQueue>,
+    sendRequest: @escaping () -> ContactSendRequestEnvironment
   ) {
     self.messenger = messenger
     self.db = db
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
+    self.sendRequest = sendRequest
   }
 
   public var messenger: Messenger
   public var db: DBManagerGetDB
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
+  public var sendRequest: () -> ContactSendRequestEnvironment
 }
 
 #if DEBUG
@@ -54,7 +63,8 @@ extension ContactEnvironment {
     messenger: .unimplemented,
     db: .unimplemented,
     mainQueue: .unimplemented,
-    bgQueue: .unimplemented
+    bgQueue: .unimplemented,
+    sendRequest: { .unimplemented }
   )
 }
 #endif
@@ -93,6 +103,21 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     .eraseToEffect()
 
   case .sendRequestTapped:
+    state.sendRequest = ContactSendRequestState()
+    return .none
+
+  case .sendRequestDismissed:
+    state.sendRequest = nil
+    return .none
+
+  case .sendRequest(_):
     return .none
   }
 }
+.presenting(
+  contactSendRequestReducer,
+  state: .keyPath(\.sendRequest),
+  id: .notNil(),
+  action: /ContactAction.sendRequest,
+  environment: { $0.sendRequest() }
+)

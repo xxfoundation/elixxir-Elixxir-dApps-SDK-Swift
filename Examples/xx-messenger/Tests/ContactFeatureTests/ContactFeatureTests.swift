@@ -103,6 +103,12 @@ final class ContactFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    store.send(.sendRequestTapped)
+    store.send(.sendRequestTapped) {
+      $0.sendRequest = ContactSendRequestState()
+    }
+
+    store.send(.sendRequestDismissed) {
+      $0.sendRequest = nil
+    }
   }
 }

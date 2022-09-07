@@ -60,7 +60,10 @@ extension AppEnvironment {
                   messenger: messenger,
                   db: dbManager.getDB,
                   mainQueue: mainQueue,
-                  bgQueue: bgQueue
+                  bgQueue: bgQueue,
+                  sendRequest: {
+                    ContactSendRequestEnvironment()
+                  }
                 )
               }
             )

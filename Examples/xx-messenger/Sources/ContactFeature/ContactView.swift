@@ -1,5 +1,6 @@
 import AppCore
 import ComposableArchitecture
+import ComposablePresentation
 import SwiftUI
 import XXClient
 import XXModels
@@ -160,6 +161,14 @@ public struct ContactView: View {
       }
       .navigationTitle("Contact")
       .task { viewStore.send(.start) }
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.sendRequest,
+          action: ContactAction.sendRequest
+        ),
+        onDeactivate: { viewStore.send(.sendRequestDismissed) },
+        destination: ContactSendRequestView.init(store:)
+      ))
     }
   }
 }
