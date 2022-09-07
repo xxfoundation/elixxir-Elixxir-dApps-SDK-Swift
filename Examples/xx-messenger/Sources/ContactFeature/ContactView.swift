@@ -16,10 +16,16 @@ public struct ContactView: View {
   struct ViewState: Equatable {
     var dbContact: XXModels.Contact?
     var xxContact: XXClient.Contact?
+    var importUsername: Bool
+    var importEmail: Bool
+    var importPhone: Bool
 
     init(state: ContactState) {
       dbContact = state.dbContact
       xxContact = state.xxContact
+      importUsername = state.importUsername
+      importEmail = state.importEmail
+      importPhone = state.importPhone
     }
   }
 
@@ -28,11 +34,44 @@ public struct ContactView: View {
       Form {
         if let xxContact = viewStore.xxContact {
           Section {
-            Label(xxContact.username ?? "", systemImage: "person")
-            Label(xxContact.email ?? "", systemImage: "envelope")
-            Label(xxContact.phone ?? "", systemImage: "phone")
             Button {
-              viewStore.send(.saveFactsTapped)
+              viewStore.send(.set(\.$importUsername, !viewStore.importUsername))
+            } label: {
+              HStack {
+                Label(xxContact.username ?? "", systemImage: "person")
+                  .tint(Color.primary)
+                Spacer()
+                Image(systemName: viewStore.importUsername ? "checkmark.circle.fill" : "circle")
+                  .foregroundColor(.accentColor)
+              }
+            }
+
+            Button {
+              viewStore.send(.set(\.$importEmail, !viewStore.importEmail))
+            } label: {
+              HStack {
+                Label(xxContact.email ?? "", systemImage: "envelope")
+                  .tint(Color.primary)
+                Spacer()
+                Image(systemName: viewStore.importEmail ? "checkmark.circle.fill" : "circle")
+                  .foregroundColor(.accentColor)
+              }
+            }
+
+            Button {
+              viewStore.send(.set(\.$importPhone, !viewStore.importPhone))
+            } label: {
+              HStack {
+                Label(xxContact.phone ?? "", systemImage: "phone")
+                  .tint(Color.primary)
+                Spacer()
+                Image(systemName: viewStore.importPhone ? "checkmark.circle.fill" : "circle")
+                  .foregroundColor(.accentColor)
+              }
+            }
+
+            Button {
+              viewStore.send(.importFactsTapped)
             } label: {
               if viewStore.dbContact == nil {
                 Text("Save contact")

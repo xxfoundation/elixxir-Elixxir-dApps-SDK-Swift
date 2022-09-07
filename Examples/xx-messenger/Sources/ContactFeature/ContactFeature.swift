@@ -13,27 +13,37 @@ public struct ContactState: Equatable {
     id: Data,
     dbContact: XXModels.Contact? = nil,
     xxContact: XXClient.Contact? = nil,
+    importUsername: Bool = true,
+    importEmail: Bool = true,
+    importPhone: Bool = true,
     sendRequest: SendRequestState? = nil
   ) {
     self.id = id
     self.dbContact = dbContact
     self.xxContact = xxContact
+    self.importUsername = importUsername
+    self.importEmail = importEmail
+    self.importPhone = importPhone
     self.sendRequest = sendRequest
   }
 
   public var id: Data
   public var dbContact: XXModels.Contact?
   public var xxContact: XXClient.Contact?
+  @BindableState public var importUsername: Bool
+  @BindableState public var importEmail: Bool
+  @BindableState public var importPhone: Bool
   public var sendRequest: SendRequestState?
 }
 
-public enum ContactAction: Equatable {
+public enum ContactAction: Equatable, BindableAction {
   case start
   case dbContactFetched(XXModels.Contact?)
-  case saveFactsTapped
+  case importFactsTapped
   case sendRequestTapped
   case sendRequestDismissed
   case sendRequest(SendRequestAction)
+  case binding(BindingAction<ContactState>)
 }
 
 public struct ContactEnvironment {
@@ -89,14 +99,20 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.dbContact = contact
     return .none
 
-  case .saveFactsTapped:
+  case .importFactsTapped:
     guard let xxContact = state.xxContact else { return .none }
     return .fireAndForget { [state] in
       var dbContact = state.dbContact ?? XXModels.Contact(id: state.id)
       dbContact.marshaled = xxContact.data
-      dbContact.username = xxContact.username
-      dbContact.email = xxContact.email
-      dbContact.phone = xxContact.phone
+      if state.importUsername {
+        dbContact.username = xxContact.username
+      }
+      if state.importEmail {
+        dbContact.email = xxContact.email
+      }
+      if state.importPhone {
+        dbContact.phone = xxContact.phone
+      }
       _ = try! env.db().saveContact(dbContact)
     }
     .subscribe(on: env.bgQueue)
@@ -121,8 +137,12 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
 
   case .sendRequest(_):
     return .none
+
+  case .binding(_):
+    return .none
   }
 }
+.binding()
 .presenting(
   sendRequestReducer,
   state: .keyPath(\.sendRequest),

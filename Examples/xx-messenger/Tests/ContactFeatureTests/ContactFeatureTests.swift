@@ -47,7 +47,7 @@ final class ContactFeatureTests: XCTestCase {
     dbContactsPublisher.send(completion: .finished)
   }
 
-  func testSaveFacts() {
+  func testImportFacts() {
     let dbContact: XXModels.Contact = .init(
       id: "contact-id".data(using: .utf8)!
     )
@@ -84,7 +84,7 @@ final class ContactFeatureTests: XCTestCase {
       return db
     }
 
-    store.send(.saveFactsTapped)
+    store.send(.importFactsTapped)
 
     var expectedSavedContact = dbContact
     expectedSavedContact.marshaled = xxContact.data
