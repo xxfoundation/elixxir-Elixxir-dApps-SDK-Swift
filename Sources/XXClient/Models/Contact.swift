@@ -45,6 +45,18 @@ extension Contact: Equatable {
 }
 
 extension Contact {
+  public func getFact(_ type: FactType) throws -> Fact? {
+    try getFacts().get(type)
+  }
+
+  public mutating func setFact(_ type: FactType, _ value: String?) throws {
+    var facts = try getFacts()
+    facts.set(type, value)
+    try setFacts(facts)
+  }
+}
+
+extension Contact {
   public static func live(
     _ data: Data,
     getIdFromContact: GetIdFromContact = .live,

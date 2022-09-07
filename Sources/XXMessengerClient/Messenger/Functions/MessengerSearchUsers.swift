@@ -74,13 +74,13 @@ extension MessengerSearchUsers.Query {
   var facts: [Fact] {
     var facts: [Fact] = []
     if let username = username, username.isEmpty == false {
-      facts.append(Fact(fact: username, type: 0))
+      facts.set(.username, username)
     }
     if let email = email, email.isEmpty == false {
-      facts.append(Fact(fact: email, type: 1))
+      facts.set(.email, email)
     }
     if let phone = phone, phone.isEmpty == false {
-      facts.append(Fact(fact: phone, type: 2))
+      facts.set(.phone, phone)
     }
     return facts
   }

@@ -4,6 +4,7 @@ public struct DBManager {
   public var hasDB: DBManagerHasDB
   public var makeDB: DBManagerMakeDB
   public var getDB: DBManagerGetDB
+  public var removeDB: DBManagerRemoveDB
 }
 
 extension DBManager {
@@ -17,7 +18,8 @@ extension DBManager {
     return DBManager(
       hasDB: .init { container.db != nil },
       makeDB: .live(setDB: { container.db = $0 }),
-      getDB: .live(getDB: { container.db })
+      getDB: .live(getDB: { container.db }),
+      removeDB: .live(getDB: { container.db }, unsetDB: { container.db = nil })
     )
   }
 }
@@ -26,6 +28,7 @@ extension DBManager {
   public static let unimplemented = DBManager(
     hasDB: .unimplemented,
     makeDB: .unimplemented,
-    getDB: .unimplemented
+    getDB: .unimplemented,
+    removeDB: .unimplemented
   )
 }
