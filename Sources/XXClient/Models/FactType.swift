@@ -34,6 +34,8 @@ extension FactType: ExpressibleByIntegerLiteral {
   }
 }
 
+extension FactType: Comparable {}
+
 extension FactType: Codable {
   public init(from decoder: Decoder) throws {
     let container = try decoder.singleValueContainer()
