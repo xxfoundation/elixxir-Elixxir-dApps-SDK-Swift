@@ -62,15 +62,6 @@ public struct ContactView: View {
                 Spacer()
                 Image(systemName: "person.fill.questionmark")
               }
-              Button {
-                viewStore.send(.sendRequestTapped)
-              } label: {
-                HStack {
-                  Text("Send request")
-                  Spacer()
-                  Image(systemName: "chevron.forward")
-                }
-              }
 
             case .requesting:
               HStack {
@@ -92,15 +83,6 @@ public struct ContactView: View {
                 Spacer()
                 Image(systemName: "xmark.diamond.fill")
                   .foregroundColor(.red)
-              }
-              Button {
-                viewStore.send(.sendRequestTapped)
-              } label: {
-                HStack {
-                  Text("Resend request")
-                  Spacer()
-                  Image(systemName: "paperplane")
-                }
               }
 
             case .verificationInProgress:
@@ -154,8 +136,17 @@ public struct ContactView: View {
                 Image(systemName: "eye.slash")
               }
             }
+            Button {
+              viewStore.send(.sendRequestTapped)
+            } label: {
+              HStack {
+                Text("Send request")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
           } header: {
-            Text("Auth status")
+            Text("Auth")
           }
           .animation(.default, value: viewStore.dbContact?.authStatus)
         }
@@ -167,6 +158,7 @@ public struct ContactView: View {
           state: \.sendRequest,
           action: ContactAction.sendRequest
         ),
+        mapState: replayNonNil(),
         onDeactivate: { viewStore.send(.sendRequestDismissed) },
         destination: SendRequestView.init(store:)
       ))
