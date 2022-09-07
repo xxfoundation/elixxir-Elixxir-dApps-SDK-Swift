@@ -34,41 +34,44 @@ public struct SendRequestView: View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       Form {
         Section {
-          HStack {
-            Label(viewStore.myContact?.username ?? "", systemImage: "person")
-            Spacer()
-            Toggle(
-              isOn: viewStore.binding(
-                get: \.sendUsername,
-                send: { SendRequestAction.set(\.$sendUsername, $0) }
-              ),
-              label: EmptyView.init
-            )
+          Button {
+            viewStore.send(.set(\.$sendUsername, !viewStore.sendUsername))
+          } label: {
+            HStack {
+              Label(viewStore.myContact?.username ?? "", systemImage: "person")
+                .tint(Color.primary)
+              Spacer()
+              Image(systemName: viewStore.sendUsername ? "checkmark.circle.fill" : "circle")
+                .foregroundColor(.accentColor)
+            }
           }
+          .animation(.default, value: viewStore.sendUsername)
 
-          HStack {
-            Label(viewStore.myContact?.email ?? "", systemImage: "envelope")
-            Spacer()
-            Toggle(
-              isOn: viewStore.binding(
-                get: \.sendEmail,
-                send: { SendRequestAction.set(\.$sendEmail, $0) }
-              ),
-              label: EmptyView.init
-            )
+          Button {
+            viewStore.send(.set(\.$sendEmail, !viewStore.sendEmail))
+          } label: {
+            HStack {
+              Label(viewStore.myContact?.email ?? "", systemImage: "envelope")
+                .tint(Color.primary)
+              Spacer()
+              Image(systemName: viewStore.sendEmail ? "checkmark.circle.fill" : "circle")
+                .foregroundColor(.accentColor)
+            }
           }
+          .animation(.default, value: viewStore.sendEmail)
 
-          HStack {
-            Label(viewStore.myContact?.phone ?? "", systemImage: "phone")
-            Spacer()
-            Toggle(
-              isOn: viewStore.binding(
-                get: \.sendPhone,
-                send: { SendRequestAction.set(\.$sendPhone, $0) }
-              ),
-              label: EmptyView.init
-            )
+          Button {
+            viewStore.send(.set(\.$sendPhone, !viewStore.sendPhone))
+          } label: {
+            HStack {
+              Label(viewStore.myContact?.phone ?? "", systemImage: "phone")
+                .tint(Color.primary)
+              Spacer()
+              Image(systemName: viewStore.sendPhone ? "checkmark.circle.fill" : "circle")
+                .foregroundColor(.accentColor)
+            }
           }
+          .animation(.default, value: viewStore.sendPhone)
         } header: {
           Text("My facts")
         }
@@ -141,7 +144,10 @@ public struct SendRequestView_Previews: PreviewProvider {
             }
             return contact
           }(),
-          isSending: true,
+          sendUsername: true,
+          sendEmail: false,
+          sendPhone: true,
+          isSending: false,
           failure: "Something went wrong"
         ),
         reducer: .empty,
