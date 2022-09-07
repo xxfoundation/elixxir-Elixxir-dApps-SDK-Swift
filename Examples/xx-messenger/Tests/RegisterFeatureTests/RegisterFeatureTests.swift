@@ -16,6 +16,7 @@ final class RegisterFeatureTests: XCTestCase {
     let now = Date()
     let mainQueue = DispatchQueue.test
     let bgQueue = DispatchQueue.test
+    var didSetFactsOnContact: [[XXClient.Fact]] = []
     var dbDidSaveContact: [XXModels.Contact] = []
     var messengerDidRegisterUsername: [String] = []
 
@@ -30,6 +31,11 @@ final class RegisterFeatureTests: XCTestCase {
       e2e.getContact.run = {
         var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
         contact.getIdFromContact.run = { _ in "contact-id".data(using: .utf8)! }
+        contact.getFactsFromContact.run = { _ in [] }
+        contact.setFactsOnContact.run = { data, facts in
+          didSetFactsOnContact.append(facts)
+          return data
+        }
         return contact
       }
       return e2e
@@ -57,6 +63,7 @@ final class RegisterFeatureTests: XCTestCase {
     bgQueue.advance()
 
     XCTAssertNoDifference(messengerDidRegisterUsername, ["NewUser"])
+    XCTAssertNoDifference(didSetFactsOnContact, [[Fact(fact: "NewUser", type: 0)]])
     XCTAssertNoDifference(dbDidSaveContact, [
       XXModels.Contact(
         id: "contact-id".data(using: .utf8)!,

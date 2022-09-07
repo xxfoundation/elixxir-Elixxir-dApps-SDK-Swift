@@ -135,6 +135,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXModels", package: "client-ios-db"),
       ],

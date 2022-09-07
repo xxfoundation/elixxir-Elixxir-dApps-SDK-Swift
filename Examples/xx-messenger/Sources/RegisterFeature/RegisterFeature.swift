@@ -2,6 +2,7 @@ import AppCore
 import ComposableArchitecture
 import Foundation
 import XCTestDynamicOverlay
+import XXClient
 import XXMessengerClient
 import XXModels
 
@@ -81,7 +82,11 @@ public let registerReducer = Reducer<RegisterState, RegisterAction, RegisterEnvi
       do {
         let db = try env.db()
         try env.messenger.register(username: username)
-        let contact = env.messenger.e2e()!.getContact()
+        var contact = try env.messenger.e2e.tryGet().getContact()
+        var facts: [Fact] = (try? contact.getFacts()) ?? []
+        facts.removeAll(where: { $0.type == 0 })
+        facts.append(Fact(fact: username, type: 0))
+        try contact.setFacts(facts)
         try db.saveContact(Contact(
           id: try contact.getId(),
           marshaled: contact.data,
