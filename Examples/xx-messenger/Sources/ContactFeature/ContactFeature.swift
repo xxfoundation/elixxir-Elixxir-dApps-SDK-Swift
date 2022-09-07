@@ -2,6 +2,7 @@ import AppCore
 import ComposableArchitecture
 import ComposablePresentation
 import Foundation
+import SendRequestFeature
 import XCTestDynamicOverlay
 import XXClient
 import XXMessengerClient
@@ -12,7 +13,7 @@ public struct ContactState: Equatable {
     id: Data,
     dbContact: XXModels.Contact? = nil,
     xxContact: XXClient.Contact? = nil,
-    sendRequest: ContactSendRequestState? = nil
+    sendRequest: SendRequestState? = nil
   ) {
     self.id = id
     self.dbContact = dbContact
@@ -23,7 +24,7 @@ public struct ContactState: Equatable {
   public var id: Data
   public var dbContact: XXModels.Contact?
   public var xxContact: XXClient.Contact?
-  public var sendRequest: ContactSendRequestState?
+  public var sendRequest: SendRequestState?
 }
 
 public enum ContactAction: Equatable {
@@ -32,7 +33,7 @@ public enum ContactAction: Equatable {
   case saveFactsTapped
   case sendRequestTapped
   case sendRequestDismissed
-  case sendRequest(ContactSendRequestAction)
+  case sendRequest(SendRequestAction)
 }
 
 public struct ContactEnvironment {
@@ -41,7 +42,7 @@ public struct ContactEnvironment {
     db: DBManagerGetDB,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
-    sendRequest: @escaping () -> ContactSendRequestEnvironment
+    sendRequest: @escaping () -> SendRequestEnvironment
   ) {
     self.messenger = messenger
     self.db = db
@@ -54,7 +55,7 @@ public struct ContactEnvironment {
   public var db: DBManagerGetDB
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
-  public var sendRequest: () -> ContactSendRequestEnvironment
+  public var sendRequest: () -> SendRequestEnvironment
 }
 
 #if DEBUG
@@ -103,7 +104,7 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     .eraseToEffect()
 
   case .sendRequestTapped:
-    state.sendRequest = ContactSendRequestState()
+    state.sendRequest = SendRequestState()
     return .none
 
   case .sendRequestDismissed:
@@ -115,7 +116,7 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
   }
 }
 .presenting(
-  contactSendRequestReducer,
+  sendRequestReducer,
   state: .keyPath(\.sendRequest),
   id: .notNil(),
   action: /ContactAction.sendRequest,

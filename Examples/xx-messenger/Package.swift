@@ -24,6 +24,7 @@ let package = Package(
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
+    .library(name: "SendRequestFeature", targets: ["SendRequestFeature"]),
     .library(name: "UserSearchFeature", targets: ["UserSearchFeature"]),
     .library(name: "WelcomeFeature", targets: ["WelcomeFeature"]),
   ],
@@ -74,6 +75,7 @@ let package = Package(
         .target(name: "HomeFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
+        .target(name: "SendRequestFeature"),
         .target(name: "UserSearchFeature"),
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
@@ -94,6 +96,7 @@ let package = Package(
       name: "ContactFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "SendRequestFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
@@ -155,6 +158,20 @@ let package = Package(
       name: "RestoreFeatureTests",
       dependencies: [
         .target(name: "RestoreFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "SendRequestFeature",
+      dependencies: [
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "SendRequestFeatureTests",
+      dependencies: [
+        .target(name: "SendRequestFeature"),
       ],
       swiftSettings: swiftSettings
     ),

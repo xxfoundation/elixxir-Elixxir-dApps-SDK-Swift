@@ -62,7 +62,7 @@ extension AppEnvironment {
                   mainQueue: mainQueue,
                   bgQueue: bgQueue,
                   sendRequest: {
-                    ContactSendRequestEnvironment()
+                    SendRequestEnvironment()
                   }
                 )
               }

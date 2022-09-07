@@ -1,6 +1,7 @@
 import Combine
 import ComposableArchitecture
 import CustomDump
+import SendRequestFeature
 import XCTest
 import XXClient
 import XXModels
@@ -104,7 +105,7 @@ final class ContactFeatureTests: XCTestCase {
     )
 
     store.send(.sendRequestTapped) {
-      $0.sendRequest = ContactSendRequestState()
+      $0.sendRequest = SendRequestState()
     }
 
     store.send(.sendRequestDismissed) {

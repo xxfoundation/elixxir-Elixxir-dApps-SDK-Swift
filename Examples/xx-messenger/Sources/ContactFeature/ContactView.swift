@@ -1,6 +1,7 @@
 import AppCore
 import ComposableArchitecture
 import ComposablePresentation
+import SendRequestFeature
 import SwiftUI
 import XXClient
 import XXModels
@@ -167,7 +168,7 @@ public struct ContactView: View {
           action: ContactAction.sendRequest
         ),
         onDeactivate: { viewStore.send(.sendRequestDismissed) },
-        destination: ContactSendRequestView.init(store:)
+        destination: SendRequestView.init(store:)
       ))
     }
   }

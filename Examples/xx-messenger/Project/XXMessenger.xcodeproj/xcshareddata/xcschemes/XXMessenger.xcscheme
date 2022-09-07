@@ -93,6 +93,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "SendRequestFeatureTests"
+               BuildableName = "SendRequestFeatureTests"
+               BlueprintName = "SendRequestFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "UserSearchFeatureTests"
                BuildableName = "UserSearchFeatureTests"
                BlueprintName = "UserSearchFeatureTests"

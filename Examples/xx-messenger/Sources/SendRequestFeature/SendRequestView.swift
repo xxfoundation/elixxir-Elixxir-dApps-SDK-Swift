@@ -1,15 +1,15 @@
 import ComposableArchitecture
 import SwiftUI
 
-public struct ContactSendRequestView: View {
-  public init(store: Store<ContactSendRequestState, ContactSendRequestAction>) {
+public struct SendRequestView: View {
+  public init(store: Store<SendRequestState, SendRequestAction>) {
     self.store = store
   }
 
-  let store: Store<ContactSendRequestState, ContactSendRequestAction>
+  let store: Store<SendRequestState, SendRequestAction>
 
   struct ViewState: Equatable {
-    init(state: ContactSendRequestState) {}
+    init(state: SendRequestState) {}
   }
 
   public var body: some View {
@@ -24,10 +24,10 @@ public struct ContactSendRequestView: View {
 }
 
 #if DEBUG
-public struct ContactSendRequestView_Previews: PreviewProvider {
+public struct SendRequestView_Previews: PreviewProvider {
   public static var previews: some View {
-    ContactSendRequestView(store: Store(
-      initialState: ContactSendRequestState(),
+    SendRequestView(store: Store(
+      initialState: SendRequestState(),
       reducer: .empty,
       environment: ()
     ))
