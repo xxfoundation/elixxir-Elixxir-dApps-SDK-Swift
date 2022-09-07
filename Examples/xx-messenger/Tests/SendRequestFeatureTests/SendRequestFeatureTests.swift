@@ -5,7 +5,9 @@ import XCTest
 final class SendRequestFeatureTests: XCTestCase {
   func testStart() {
     let store = TestStore(
-      initialState: SendRequestState(),
+      initialState: SendRequestState(
+        contact: .unimplemented("contact-data".data(using: .utf8)!)
+      ),
       reducer: sendRequestReducer,
       environment: .unimplemented
     )

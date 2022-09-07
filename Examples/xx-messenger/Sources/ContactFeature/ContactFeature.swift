@@ -104,7 +104,11 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     .eraseToEffect()
 
   case .sendRequestTapped:
-    state.sendRequest = SendRequestState()
+    if let xxContact = state.xxContact {
+      state.sendRequest = SendRequestState(contact: xxContact)
+    } else if let marshaled = state.dbContact?.marshaled {
+      state.sendRequest = SendRequestState(contact: .live(marshaled))
+    }
     return .none
 
   case .sendRequestDismissed:

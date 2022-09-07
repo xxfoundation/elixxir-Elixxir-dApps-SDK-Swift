@@ -95,18 +95,52 @@ final class ContactFeatureTests: XCTestCase {
     XCTAssertNoDifference(dbDidSaveContact, [expectedSavedContact])
   }
 
-  func testSendRequest() {
+  func testSendRequestWithDBContact() {
+    var dbContact = XXModels.Contact(id: "contact-id".data(using: .utf8)!)
+    dbContact.marshaled = "contact-data".data(using: .utf8)!
+
     let store = TestStore(
       initialState: ContactState(
-        id: "contact-id".data(using: .utf8)!
+        id: dbContact.id,
+        dbContact: dbContact
       ),
       reducer: contactReducer,
       environment: .unimplemented
     )
 
     store.send(.sendRequestTapped) {
-      $0.sendRequest = SendRequestState()
+      $0.sendRequest = SendRequestState(contact: .live(dbContact.marshaled!))
     }
+  }
+
+  func testSendRequestWithXXContact() {
+    let xxContact = XXClient.Contact.unimplemented("contact-id".data(using: .utf8)!)
+
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!,
+        xxContact: xxContact
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.sendRequestTapped) {
+      $0.sendRequest = SendRequestState(contact: xxContact)
+    }
+  }
+
+  func testSendRequestDismissed() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!,
+        sendRequest: SendRequestState(
+          contact: .unimplemented("contact-id".data(using: .utf8)!)
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
 
     store.send(.sendRequestDismissed) {
       $0.sendRequest = nil

@@ -4,6 +4,7 @@ import Foundation
 import HomeFeature
 import RegisterFeature
 import RestoreFeature
+import SendRequestFeature
 import UserSearchFeature
 import WelcomeFeature
 import XXMessengerClient
