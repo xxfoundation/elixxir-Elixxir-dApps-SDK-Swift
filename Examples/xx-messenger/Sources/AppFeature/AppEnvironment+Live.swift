@@ -1,8 +1,10 @@
 import AppCore
+import ContactFeature
 import Foundation
 import HomeFeature
 import RegisterFeature
 import RestoreFeature
+import SendRequestFeature
 import UserSearchFeature
 import WelcomeFeature
 import XXMessengerClient
@@ -34,7 +36,7 @@ extension AppEnvironment {
       home: {
         HomeEnvironment(
           messenger: messenger,
-          db: dbManager.getDB,
+          dbManager: dbManager,
           mainQueue: mainQueue,
           bgQueue: bgQueue,
           register: {
@@ -50,7 +52,26 @@ extension AppEnvironment {
             UserSearchEnvironment(
               messenger: messenger,
               mainQueue: mainQueue,
-              bgQueue: bgQueue
+              bgQueue: bgQueue,
+              result: {
+                UserSearchResultEnvironment()
+              },
+              contact: {
+                ContactEnvironment(
+                  messenger: messenger,
+                  db: dbManager.getDB,
+                  mainQueue: mainQueue,
+                  bgQueue: bgQueue,
+                  sendRequest: {
+                    SendRequestEnvironment(
+                      messenger: messenger,
+                      db: dbManager.getDB,
+                      mainQueue: mainQueue,
+                      bgQueue: bgQueue
+                    )
+                  }
+                )
+              }
             )
           }
         )

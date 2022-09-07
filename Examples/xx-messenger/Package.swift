@@ -20,9 +20,11 @@ let package = Package(
   products: [
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
+    .library(name: "ContactFeature", targets: ["ContactFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
+    .library(name: "SendRequestFeature", targets: ["SendRequestFeature"]),
     .library(name: "UserSearchFeature", targets: ["UserSearchFeature"]),
     .library(name: "WelcomeFeature", targets: ["WelcomeFeature"]),
   ],
@@ -52,6 +54,7 @@ let package = Package(
       name: "AppCore",
       dependencies: [
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXDatabase", package: "client-ios-db"),
         .product(name: "XXModels", package: "client-ios-db"),
       ],
@@ -68,9 +71,11 @@ let package = Package(
       name: "AppFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "ContactFeature"),
         .target(name: "HomeFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
+        .target(name: "SendRequestFeature"),
         .target(name: "UserSearchFeature"),
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
@@ -84,6 +89,25 @@ let package = Package(
       name: "AppFeatureTests",
       dependencies: [
         .target(name: "AppFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "ContactFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .target(name: "SendRequestFeature"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ContactFeatureTests",
+      dependencies: [
+        .target(name: "ContactFeature"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -111,6 +135,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXModels", package: "client-ios-db"),
       ],
@@ -138,11 +163,32 @@ let package = Package(
       swiftSettings: swiftSettings
     ),
     .target(
-      name: "UserSearchFeature",
+      name: "SendRequestFeature",
       dependencies: [
+        .target(name: "AppCore"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "SendRequestFeatureTests",
+      dependencies: [
+        .target(name: "SendRequestFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "UserSearchFeature",
+      dependencies: [
+        .target(name: "ContactFeature"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
       ],
       swiftSettings: swiftSettings
     ),

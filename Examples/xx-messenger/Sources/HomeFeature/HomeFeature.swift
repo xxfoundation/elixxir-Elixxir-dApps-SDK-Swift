@@ -71,14 +71,14 @@ public enum HomeAction: Equatable {
 public struct HomeEnvironment {
   public init(
     messenger: Messenger,
-    db: DBManagerGetDB,
+    dbManager: DBManager,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
     register: @escaping () -> RegisterEnvironment,
     userSearch: @escaping () -> UserSearchEnvironment
   ) {
     self.messenger = messenger
-    self.db = db
+    self.dbManager = dbManager
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
     self.register = register
@@ -86,7 +86,7 @@ public struct HomeEnvironment {
   }
 
   public var messenger: Messenger
-  public var db: DBManagerGetDB
+  public var dbManager: DBManager
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var register: () -> RegisterEnvironment
@@ -96,7 +96,7 @@ public struct HomeEnvironment {
 extension HomeEnvironment {
   public static let unimplemented = HomeEnvironment(
     messenger: .unimplemented,
-    db: .unimplemented,
+    dbManager: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
     register: { .unimplemented },
@@ -197,13 +197,13 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     return .result {
       do {
         let contactId = try env.messenger.e2e.tryGet().getContact().getId()
-        let contact = try env.db().fetchContacts(.init(id: [contactId])).first
+        let contact = try env.dbManager.getDB().fetchContacts(.init(id: [contactId])).first
         if let username = contact?.username {
           let ud = try env.messenger.ud.tryGet()
           try ud.permanentDeleteAccount(username: Fact(fact: username, type: 0))
         }
         try env.messenger.destroy()
-        try env.db().drop()
+        try env.dbManager.removeDB()
         return .success(.deleteAccount(.success))
       } catch {
         return .success(.deleteAccount(.failure(error as NSError)))

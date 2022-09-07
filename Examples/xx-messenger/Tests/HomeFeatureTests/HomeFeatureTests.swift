@@ -316,7 +316,7 @@ final class HomeFeatureTests: XCTestCase {
     var dbDidFetchContacts: [XXModels.Contact.Query] = []
     var udDidPermanentDeleteAccount: [Fact] = []
     var messengerDidDestroy = 0
-    var dbDidDrop = 0
+    var didRemoveDB = 0
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
@@ -329,7 +329,7 @@ final class HomeFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.environment.dbManager.getDB.run = {
       var db: Database = .failing
       db.fetchContacts.run = { query in
         dbDidFetchContacts.append(query)
@@ -341,10 +341,10 @@ final class HomeFeatureTests: XCTestCase {
           )
         ]
       }
-      db.drop.run = {
-        dbDidDrop += 1
-      }
       return db
+    }
+    store.environment.dbManager.removeDB.run = {
+      didRemoveDB += 1
     }
     store.environment.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
@@ -372,7 +372,7 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(dbDidFetchContacts, [.init(id: ["contact-id".data(using: .utf8)!])])
     XCTAssertNoDifference(udDidPermanentDeleteAccount, [Fact(fact: "MyUsername", type: 0)])
     XCTAssertNoDifference(messengerDidDestroy, 1)
-    XCTAssertNoDifference(dbDidDrop, 1)
+    XCTAssertNoDifference(didRemoveDB, 1)
 
     store.receive(.deleteAccount(.success)) {
       $0.isDeletingAccount = false
