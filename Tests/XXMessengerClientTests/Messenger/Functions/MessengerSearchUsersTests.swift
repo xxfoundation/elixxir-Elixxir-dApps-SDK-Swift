@@ -181,9 +181,9 @@ final class MessengerSearchUsersTests: XCTestCase {
         phone: "phone"
       ).facts,
       [
-        Fact(fact: "username", type: 0),
-        Fact(fact: "email", type: 1),
-        Fact(fact: "phone", type: 2),
+        Fact(type: .username, value: "username"),
+        Fact(type: .email, value: "email"),
+        Fact(type: .phone, value: "phone"),
       ]
     )
 
@@ -194,7 +194,7 @@ final class MessengerSearchUsersTests: XCTestCase {
         phone: nil
       ).facts,
       [
-        Fact(fact: "username", type: 0),
+        Fact(type: .username, value: "username"),
       ]
     )
   }
