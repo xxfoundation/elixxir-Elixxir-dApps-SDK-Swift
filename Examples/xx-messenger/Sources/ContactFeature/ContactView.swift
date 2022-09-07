@@ -83,7 +83,7 @@ public struct ContactView: View {
               HStack {
                 Text("Request sent")
                 Spacer()
-                Image(systemName: "chevron.forward")
+                Image(systemName: "paperplane")
               }
 
             case .requestFailed:
