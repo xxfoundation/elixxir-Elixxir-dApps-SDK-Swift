@@ -24,6 +24,7 @@ public struct ContactState: Equatable {
 
 public enum ContactAction: Equatable {
   case start
+  case dbContactFetched(XXModels.Contact?)
 }
 
 public struct ContactEnvironment {
@@ -58,8 +59,21 @@ extension ContactEnvironment {
 
 public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironment>
 { state, action, env in
+  enum DBFetchEffectID {}
+
   switch action {
   case .start:
+    return try! env.db().fetchContactsPublisher(.init(id: [state.id]))
+      .assertNoFailure()
+      .map(\.first)
+      .map(ContactAction.dbContactFetched)
+      .subscribe(on: env.bgQueue)
+      .receive(on: env.mainQueue)
+      .eraseToEffect()
+      .cancellable(id: DBFetchEffectID.self, cancelInFlight: true)
+
+  case .dbContactFetched(let contact):
+    state.dbContact = contact
     return .none
   }
 }
