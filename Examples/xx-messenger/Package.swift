@@ -53,6 +53,7 @@ let package = Package(
       name: "AppCore",
       dependencies: [
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXDatabase", package: "client-ios-db"),
         .product(name: "XXModels", package: "client-ios-db"),
       ],
