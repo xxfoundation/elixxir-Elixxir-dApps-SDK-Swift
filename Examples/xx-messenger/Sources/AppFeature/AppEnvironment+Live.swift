@@ -52,11 +52,10 @@ extension AppEnvironment {
               mainQueue: mainQueue,
               bgQueue: bgQueue,
               result: {
-                UserSearchResultEnvironment(
-                  db: dbManager.getDB,
-                  mainQueue: mainQueue,
-                  bgQueue: bgQueue
-                )
+                UserSearchResultEnvironment()
+              },
+              contact: {
+                ContactEnvironment()
               }
             )
           }

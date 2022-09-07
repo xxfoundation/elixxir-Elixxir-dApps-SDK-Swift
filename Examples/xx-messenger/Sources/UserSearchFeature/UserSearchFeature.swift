@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import ComposablePresentation
+import ContactFeature
 import Foundation
 import XCTestDynamicOverlay
 import XXClient
@@ -17,13 +18,15 @@ public struct UserSearchState: Equatable {
     query: MessengerSearchUsers.Query = .init(),
     isSearching: Bool = false,
     failure: String? = nil,
-    results: IdentifiedArrayOf<UserSearchResultState> = []
+    results: IdentifiedArrayOf<UserSearchResultState> = [],
+    contact: ContactState? = nil
   ) {
     self.focusedField = focusedField
     self.query = query
     self.isSearching = isSearching
     self.failure = failure
     self.results = results
+    self.contact = contact
   }
 
   @BindableState public var focusedField: Field?
@@ -31,14 +34,17 @@ public struct UserSearchState: Equatable {
   public var isSearching: Bool
   public var failure: String?
   public var results: IdentifiedArrayOf<UserSearchResultState>
+  public var contact: ContactState?
 }
 
 public enum UserSearchAction: Equatable, BindableAction {
   case searchTapped
   case didFail(String)
   case didSucceed([Contact])
+  case didDismissContact
   case binding(BindingAction<UserSearchState>)
   case result(id: UserSearchResultState.ID, action: UserSearchResultAction)
+  case contact(ContactAction)
 }
 
 public struct UserSearchEnvironment {
@@ -46,18 +52,21 @@ public struct UserSearchEnvironment {
     messenger: Messenger,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
-    result: @escaping () -> UserSearchResultEnvironment
+    result: @escaping () -> UserSearchResultEnvironment,
+    contact: @escaping () -> ContactEnvironment
   ) {
     self.messenger = messenger
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
     self.result = result
+    self.contact = contact
   }
 
   public var messenger: Messenger
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var result: () -> UserSearchResultEnvironment
+  public var contact: () -> ContactEnvironment
 }
 
 #if DEBUG
@@ -66,7 +75,8 @@ extension UserSearchEnvironment {
     messenger: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
-    result: { .unimplemented }
+    result: { .unimplemented },
+    contact: { .unimplemented }
   )
 }
 #endif
@@ -105,7 +115,15 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
     state.results = []
     return .none
 
-  case .binding(_), .result(_, _):
+  case .didDismissContact:
+    state.contact = nil
+    return .none
+
+  case .result(let id, action: .tapped):
+    state.contact = ContactState()
+    return .none
+
+  case .binding(_), .result(_, _), .contact(_):
     return .none
   }
 }
@@ -115,4 +133,11 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
   state: \.results,
   action: /UserSearchAction.result(id:action:),
   environment: { $0.result() }
+)
+.presenting(
+  contactReducer,
+  state: .keyPath(\.contact),
+  id: .notNil(), // TODO: use Contact.ID
+  action: /UserSearchAction.contact,
+  environment: { $0.contact() }
 )

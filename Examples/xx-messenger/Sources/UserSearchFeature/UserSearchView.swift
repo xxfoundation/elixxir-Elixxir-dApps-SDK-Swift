@@ -1,4 +1,6 @@
 import ComposableArchitecture
+import ComposablePresentation
+import ContactFeature
 import SwiftUI
 import XXMessengerClient
 
@@ -96,6 +98,14 @@ public struct UserSearchView: View {
       .onChange(of: viewStore.focusedField) { focusedField = $0 }
       .onChange(of: focusedField) { viewStore.send(.set(\.$focusedField, $0)) }
       .navigationTitle("User Search")
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.contact,
+          action: UserSearchAction.contact
+        ),
+        onDeactivate: { viewStore.send(.didDismissContact) },
+        destination: ContactView.init(store:)
+      ))
     }
   }
 }
