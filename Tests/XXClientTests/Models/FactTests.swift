@@ -38,4 +38,17 @@ final class FactTests: XCTestCase {
 
     XCTAssertNoDifference(models, decodedModels)
   }
+
+  func testCodingEmptyArray() throws {
+    let jsonString = "null"
+    let jsonData = jsonString.data(using: .utf8)!
+
+    let decodedModels = try [Fact].decode(jsonData)
+
+    XCTAssertNoDifference(decodedModels, [])
+
+    let encodedModels = try decodedModels.encode()
+
+    XCTAssertNoDifference(encodedModels, jsonData)
+  }
 }
