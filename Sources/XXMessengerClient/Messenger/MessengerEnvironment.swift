@@ -19,6 +19,7 @@ public struct MessengerEnvironment {
   public var newCMix: NewCMix
   public var newOrLoadUd: NewOrLoadUd
   public var passwordStorage: PasswordStorage
+  public var registerForNotifications: RegisterForNotifications
   public var searchUD: SearchUD
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
@@ -53,6 +54,7 @@ extension MessengerEnvironment {
       newCMix: .live,
       newOrLoadUd: .live,
       passwordStorage: .keychain,
+      registerForNotifications: .live,
       searchUD: .live,
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
@@ -82,6 +84,7 @@ extension MessengerEnvironment {
     newCMix: .unimplemented,
     newOrLoadUd: .unimplemented,
     passwordStorage: .unimplemented,
+    registerForNotifications: .unimplemented,
     searchUD: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
