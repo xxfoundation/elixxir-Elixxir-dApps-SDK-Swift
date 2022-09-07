@@ -1,13 +1,15 @@
 import Foundation
 
 public enum FactType: Equatable {
+  public static let knownTypes: [FactType] = [.username, .email, .phone]
+
   case username
   case email
   case phone
   case other(Int)
+}
 
-  public static let knownTypes: [FactType] = [.username, .email, .phone]
-
+extension FactType: RawRepresentable {
   public init(rawValue: Int) {
     if let known = FactType.knownTypes.first(where: { $0.rawValue == rawValue }) {
       self = known
