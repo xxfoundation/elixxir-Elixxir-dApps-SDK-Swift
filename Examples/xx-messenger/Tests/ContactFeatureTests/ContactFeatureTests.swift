@@ -44,4 +44,28 @@ final class ContactFeatureTests: XCTestCase {
 
     dbContactsPublisher.send(completion: .finished)
   }
+
+  func testSaveFacts() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.saveFactsTapped)
+  }
+
+  func testSendRequest() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.sendRequestTapped)
+  }
 }

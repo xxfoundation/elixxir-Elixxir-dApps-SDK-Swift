@@ -25,6 +25,8 @@ public struct ContactState: Equatable {
 public enum ContactAction: Equatable {
   case start
   case dbContactFetched(XXModels.Contact?)
+  case saveFactsTapped
+  case sendRequestTapped
 }
 
 public struct ContactEnvironment {
@@ -74,6 +76,12 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
 
   case .dbContactFetched(let contact):
     state.dbContact = contact
+    return .none
+
+  case .saveFactsTapped:
+    return .none
+
+  case .sendRequestTapped:
     return .none
   }
 }
