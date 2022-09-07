@@ -5,7 +5,7 @@ import XCTest
 final class FactTests: XCTestCase {
   func testCoding() throws {
     let factValue = "Zezima"
-    let factType: Int = 0
+    let factType: Int = 123
     let jsonString = """
     {
       "Fact": "\(factValue)",
@@ -16,8 +16,8 @@ final class FactTests: XCTestCase {
     let model = try Fact.decode(jsonData)
 
     XCTAssertNoDifference(model, Fact(
-      fact: factValue,
-      type: factType
+      type: .other(123),
+      value: factValue
     ))
 
     let encodedModel = try model.encode()
@@ -28,9 +28,9 @@ final class FactTests: XCTestCase {
 
   func testCodingArray() throws {
     let models = [
-      Fact(fact: "abcd", type: 0),
-      Fact(fact: "efgh", type: 1),
-      Fact(fact: "ijkl", type: 2),
+      Fact(type: .username, value: "abcd"),
+      Fact(type: .email, value: "efgh"),
+      Fact(type: .phone, value: "ijkl"),
     ]
 
     let encodedModels = try models.encode()
@@ -50,5 +50,50 @@ final class FactTests: XCTestCase {
     let encodedModels = try decodedModels.encode()
 
     XCTAssertNoDifference(encodedModels, jsonData)
+  }
+
+  func testArrayGetter() {
+    let facts = [
+      Fact(type: .username, value: "username"),
+      Fact(type: .email, value: "email"),
+      Fact(type: .phone, value: "phone"),
+      Fact(type: .other(3), value: "other"),
+    ]
+
+    XCTAssertNoDifference(
+      [
+        facts.get(.username),
+        facts.get(.email),
+        facts.get(.phone),
+        facts.get(.other(3)),
+        facts.get(.other(4)),
+      ],
+      [
+        Fact(type: .username, value: "username"),
+        Fact(type: .email, value: "email"),
+        Fact(type: .phone, value: "phone"),
+        Fact(type: .other(3), value: "other"),
+        nil
+      ]
+    )
+  }
+
+  func testArraySetter() {
+    var facts: [Fact] = []
+
+    facts.set(.email, "email")
+    facts.set(.phone, "phone")
+    facts.set(.other(3), "other")
+    facts.set(.username, "username")
+
+    XCTAssertNoDifference(
+      facts,
+      [
+        Fact(type: .username, value: "username"),
+        Fact(type: .email, value: "email"),
+        Fact(type: .phone, value: "phone"),
+        Fact(type: .other(3), value: "other"),
+      ]
+    )
   }
 }
