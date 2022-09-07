@@ -79,7 +79,18 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     return .none
 
   case .saveFactsTapped:
-    return .none
+    guard let xxContact = state.xxContact else { return .none }
+    return .fireAndForget { [state] in
+      var dbContact = state.dbContact ?? XXModels.Contact(id: state.id)
+      dbContact.marshaled = xxContact.data
+      dbContact.username = xxContact.username
+      dbContact.email = xxContact.email
+      dbContact.phone = xxContact.phone
+      _ = try! env.db().saveContact(dbContact)
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
 
   case .sendRequestTapped:
     return .none

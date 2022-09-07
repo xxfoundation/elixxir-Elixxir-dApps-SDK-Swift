@@ -159,6 +159,7 @@ public struct ContactView: View {
         }
       }
       .navigationTitle("Contact")
+      .task { viewStore.send(.start) }
     }
   }
 }

@@ -2,6 +2,7 @@ import Combine
 import ComposableArchitecture
 import CustomDump
 import XCTest
+import XXClient
 import XXModels
 @testable import ContactFeature
 
@@ -46,15 +47,51 @@ final class ContactFeatureTests: XCTestCase {
   }
 
   func testSaveFacts() {
+    let dbContact: XXModels.Contact = .init(
+      id: "contact-id".data(using: .utf8)!
+    )
+
+    var xxContact: XXClient.Contact = .unimplemented("contact-data".data(using: .utf8)!)
+    xxContact.getFactsFromContact.run = { _ in
+      [
+        Fact(fact: "contact-username", type: 0),
+        Fact(fact: "contact-email", type: 1),
+        Fact(fact: "contact-phone", type: 2),
+      ]
+    }
+
     let store = TestStore(
       initialState: ContactState(
-        id: "contact-id".data(using: .utf8)!
+        id: "contact-id".data(using: .utf8)!,
+        dbContact: dbContact,
+        xxContact: xxContact
       ),
       reducer: contactReducer,
       environment: .unimplemented
     )
 
+    var dbDidSaveContact: [XXModels.Contact] = []
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.saveContact.run = { contact in
+        dbDidSaveContact.append(contact)
+        return contact
+      }
+      return db
+    }
+
     store.send(.saveFactsTapped)
+
+    var expectedSavedContact = dbContact
+    expectedSavedContact.marshaled = xxContact.data
+    expectedSavedContact.username = "contact-username"
+    expectedSavedContact.email = "contact-email"
+    expectedSavedContact.phone = "contact-phone"
+
+    XCTAssertNoDifference(dbDidSaveContact, [expectedSavedContact])
   }
 
   func testSendRequest() {
