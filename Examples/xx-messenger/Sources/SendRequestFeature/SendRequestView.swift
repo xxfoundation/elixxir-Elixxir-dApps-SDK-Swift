@@ -11,8 +11,12 @@ public struct SendRequestView: View {
   let store: Store<SendRequestState, SendRequestAction>
 
   struct ViewState: Equatable {
-    var contact: XXClient.Contact
-    var myContact: XXClient.Contact?
+    var contactUsername: String?
+    var contactEmail: String?
+    var contactPhone: String?
+    var myUsername: String?
+    var myEmail: String?
+    var myPhone: String?
     var sendUsername: Bool
     var sendEmail: Bool
     var sendPhone: Bool
@@ -20,8 +24,12 @@ public struct SendRequestView: View {
     var failure: String?
 
     init(state: SendRequestState) {
-      contact = state.contact
-      myContact = state.myContact
+      contactUsername = try? state.contact.getFact(.username)?.fact
+      contactEmail = try? state.contact.getFact(.email)?.fact
+      contactPhone = try? state.contact.getFact(.phone)?.fact
+      myUsername = try? state.myContact?.getFact(.username)?.fact
+      myEmail = try? state.myContact?.getFact(.email)?.fact
+      myPhone = try? state.myContact?.getFact(.phone)?.fact
       sendUsername = state.sendUsername
       sendEmail = state.sendEmail
       sendPhone = state.sendPhone
@@ -38,7 +46,7 @@ public struct SendRequestView: View {
             viewStore.send(.set(\.$sendUsername, !viewStore.sendUsername))
           } label: {
             HStack {
-              Label(viewStore.myContact?.username ?? "", systemImage: "person")
+              Label(viewStore.myUsername ?? "", systemImage: "person")
                 .tint(Color.primary)
               Spacer()
               Image(systemName: viewStore.sendUsername ? "checkmark.circle.fill" : "circle")
@@ -51,7 +59,7 @@ public struct SendRequestView: View {
             viewStore.send(.set(\.$sendEmail, !viewStore.sendEmail))
           } label: {
             HStack {
-              Label(viewStore.myContact?.email ?? "", systemImage: "envelope")
+              Label(viewStore.myEmail ?? "", systemImage: "envelope")
                 .tint(Color.primary)
               Spacer()
               Image(systemName: viewStore.sendEmail ? "checkmark.circle.fill" : "circle")
@@ -64,7 +72,7 @@ public struct SendRequestView: View {
             viewStore.send(.set(\.$sendPhone, !viewStore.sendPhone))
           } label: {
             HStack {
-              Label(viewStore.myContact?.phone ?? "", systemImage: "phone")
+              Label(viewStore.myPhone ?? "", systemImage: "phone")
                 .tint(Color.primary)
               Spacer()
               Image(systemName: viewStore.sendPhone ? "checkmark.circle.fill" : "circle")
@@ -78,9 +86,9 @@ public struct SendRequestView: View {
         .disabled(viewStore.isSending)
 
         Section {
-          Label(viewStore.contact.username ?? "", systemImage: "person")
-          Label(viewStore.contact.email ?? "", systemImage: "envelope")
-          Label(viewStore.contact.phone ?? "", systemImage: "phone")
+          Label(viewStore.contactUsername ?? "", systemImage: "person")
+          Label(viewStore.contactEmail ?? "", systemImage: "envelope")
+          Label(viewStore.contactPhone ?? "", systemImage: "phone")
         } header: {
           Text("Contact")
         }

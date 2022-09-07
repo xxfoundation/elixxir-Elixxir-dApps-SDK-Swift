@@ -110,13 +110,13 @@ public let sendRequestReducer = Reducer<SendRequestState, SendRequestAction, Sen
         try updateAuthStatus(.requesting)
         let myFacts = try state.myContact?.getFacts() ?? []
         var includedFacts: [Fact] = []
-        if state.sendUsername, let fact = myFacts.first(where: { $0.type == 0 }) {
+        if state.sendUsername, let fact = myFacts.get(.username) {
           includedFacts.append(fact)
         }
-        if state.sendEmail, let fact = myFacts.first(where: { $0.type == 1 }) {
+        if state.sendEmail, let fact = myFacts.get(.email) {
           includedFacts.append(fact)
         }
-        if state.sendPhone, let fact = myFacts.first(where: { $0.type == 2 }) {
+        if state.sendPhone, let fact = myFacts.get(.phone) {
           includedFacts.append(fact)
         }
         _ = try env.messenger.e2e.tryGet().requestAuthenticatedChannel(

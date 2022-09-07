@@ -83,10 +83,7 @@ public let registerReducer = Reducer<RegisterState, RegisterAction, RegisterEnvi
         let db = try env.db()
         try env.messenger.register(username: username)
         var contact = try env.messenger.e2e.tryGet().getContact()
-        var facts: [Fact] = try contact.getFacts()
-        facts.removeAll(where: { $0.type == 0 })
-        facts.append(Fact(fact: username, type: 0))
-        try contact.setFacts(facts)
+        try contact.setFact(.username, username)
         try db.saveContact(Contact(
           id: try contact.getId(),
           marshaled: contact.data,

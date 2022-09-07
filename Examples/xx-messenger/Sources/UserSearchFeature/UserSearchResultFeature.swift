@@ -44,9 +44,9 @@ public let userSearchResultReducer = Reducer<UserSearchResultState, UserSearchRe
 { state, action, env in
   switch action {
   case .start:
-    state.username = state.xxContact.username
-    state.email = state.xxContact.email
-    state.phone = state.xxContact.phone
+    state.username = try? state.xxContact.getFact(.username)?.fact
+    state.email = try? state.xxContact.getFact(.email)?.fact
+    state.phone = try? state.xxContact.getFact(.phone)?.fact
     return .none
 
   case .tapped:

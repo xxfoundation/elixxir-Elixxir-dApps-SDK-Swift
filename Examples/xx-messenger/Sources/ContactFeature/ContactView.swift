@@ -15,14 +15,20 @@ public struct ContactView: View {
 
   struct ViewState: Equatable {
     var dbContact: XXModels.Contact?
-    var xxContact: XXClient.Contact?
+    var xxContactIsSet: Bool
+    var xxContactUsername: String?
+    var xxContactEmail: String?
+    var xxContactPhone: String?
     var importUsername: Bool
     var importEmail: Bool
     var importPhone: Bool
 
     init(state: ContactState) {
       dbContact = state.dbContact
-      xxContact = state.xxContact
+      xxContactIsSet = state.xxContact != nil
+      xxContactUsername = try? state.xxContact?.getFact(.username)?.fact
+      xxContactEmail = try? state.xxContact?.getFact(.email)?.fact
+      xxContactPhone = try? state.xxContact?.getFact(.phone)?.fact
       importUsername = state.importUsername
       importEmail = state.importEmail
       importPhone = state.importPhone
@@ -32,13 +38,13 @@ public struct ContactView: View {
   public var body: some View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       Form {
-        if let xxContact = viewStore.xxContact {
+        if viewStore.xxContactIsSet {
           Section {
             Button {
               viewStore.send(.set(\.$importUsername, !viewStore.importUsername))
             } label: {
               HStack {
-                Label(xxContact.username ?? "", systemImage: "person")
+                Label(viewStore.xxContactUsername ?? "", systemImage: "person")
                   .tint(Color.primary)
                 Spacer()
                 Image(systemName: viewStore.importUsername ? "checkmark.circle.fill" : "circle")
@@ -50,7 +56,7 @@ public struct ContactView: View {
               viewStore.send(.set(\.$importEmail, !viewStore.importEmail))
             } label: {
               HStack {
-                Label(xxContact.email ?? "", systemImage: "envelope")
+                Label(viewStore.xxContactEmail ?? "", systemImage: "envelope")
                   .tint(Color.primary)
                 Spacer()
                 Image(systemName: viewStore.importEmail ? "checkmark.circle.fill" : "circle")
@@ -62,7 +68,7 @@ public struct ContactView: View {
               viewStore.send(.set(\.$importPhone, !viewStore.importPhone))
             } label: {
               HStack {
-                Label(xxContact.phone ?? "", systemImage: "phone")
+                Label(viewStore.xxContactPhone ?? "", systemImage: "phone")
                   .tint(Color.primary)
                 Spacer()
                 Image(systemName: viewStore.importPhone ? "checkmark.circle.fill" : "circle")
