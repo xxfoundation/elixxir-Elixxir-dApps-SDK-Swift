@@ -39,7 +39,7 @@ public struct SendRequestView: View {
   }
 
   public var body: some View {
-    WithViewStore(store.scope(state: ViewState.init)) { viewStore in
+    WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
         Section {
           Button {
