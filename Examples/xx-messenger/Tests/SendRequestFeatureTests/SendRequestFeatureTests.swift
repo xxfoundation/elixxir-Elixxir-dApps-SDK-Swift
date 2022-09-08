@@ -63,9 +63,9 @@ final class SendRequestFeatureTests: XCTestCase {
 
     var myContact: XXClient.Contact = .unimplemented("my-contact-data".data(using: .utf8)!)
     let myFacts = [
-      Fact(fact: "my-username", type: 0),
-      Fact(fact: "my-email", type: 1),
-      Fact(fact: "my-phone", type: 2),
+      Fact(type: .username, value: "my-username"),
+      Fact(type: .email, value: "my-email"),
+      Fact(type: .phone, value: "my-phone"),
     ]
     myContact.getFactsFromContact.run = { _ in myFacts }
 
@@ -142,9 +142,9 @@ final class SendRequestFeatureTests: XCTestCase {
 
     var myContact: XXClient.Contact = .unimplemented("my-contact-data".data(using: .utf8)!)
     let myFacts = [
-      Fact(fact: "my-username", type: 0),
-      Fact(fact: "my-email", type: 1),
-      Fact(fact: "my-phone", type: 2),
+      Fact(type: .username, value: "my-username"),
+      Fact(type: .email, value: "my-email"),
+      Fact(type: .phone, value: "my-phone"),
     ]
     myContact.getFactsFromContact.run = { _ in myFacts }
 

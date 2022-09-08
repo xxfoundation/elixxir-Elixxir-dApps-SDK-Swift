@@ -55,9 +55,9 @@ final class ContactFeatureTests: XCTestCase {
     var xxContact: XXClient.Contact = .unimplemented("contact-data".data(using: .utf8)!)
     xxContact.getFactsFromContact.run = { _ in
       [
-        Fact(fact: "contact-username", type: 0),
-        Fact(fact: "contact-email", type: 1),
-        Fact(fact: "contact-phone", type: 2),
+        Fact(type: .username, value: "contact-username"),
+        Fact(type: .email, value: "contact-email"),
+        Fact(type: .phone, value: "contact-phone"),
       ]
     }
 

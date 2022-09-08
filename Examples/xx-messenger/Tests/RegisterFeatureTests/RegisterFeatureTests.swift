@@ -63,7 +63,7 @@ final class RegisterFeatureTests: XCTestCase {
     bgQueue.advance()
 
     XCTAssertNoDifference(messengerDidRegisterUsername, ["NewUser"])
-    XCTAssertNoDifference(didSetFactsOnContact, [[Fact(fact: "NewUser", type: 0)]])
+    XCTAssertNoDifference(didSetFactsOnContact, [[Fact(type: .username, value: "NewUser")]])
     XCTAssertNoDifference(dbDidSaveContact, [
       XXModels.Contact(
         id: "contact-id".data(using: .utf8)!,
