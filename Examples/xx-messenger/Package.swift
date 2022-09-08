@@ -21,6 +21,7 @@ let package = Package(
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
+    .library(name: "ContactsFeature", targets: ["ContactsFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
@@ -72,6 +73,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "ContactFeature"),
+        .target(name: "ContactsFeature"),
         .target(name: "HomeFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
@@ -112,9 +114,30 @@ let package = Package(
       swiftSettings: swiftSettings
     ),
     .target(
+      name: "ContactsFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .target(name: "ContactFeature"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ContactsFeatureTests",
+      dependencies: [
+        .target(name: "ContactsFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
       name: "HomeFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "ContactsFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "UserSearchFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),

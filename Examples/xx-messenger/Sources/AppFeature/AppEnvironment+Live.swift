@@ -1,5 +1,6 @@
 import AppCore
 import ContactFeature
+import ContactsFeature
 import Foundation
 import HomeFeature
 import RegisterFeature
@@ -17,6 +18,21 @@ extension AppEnvironment {
     let messenger = Messenger.live(messengerEnv)
     let mainQueue = DispatchQueue.main.eraseToAnyScheduler()
     let bgQueue = DispatchQueue.global(qos: .background).eraseToAnyScheduler()
+
+    let contactEnvironment = ContactEnvironment(
+      messenger: messenger,
+      db: dbManager.getDB,
+      mainQueue: mainQueue,
+      bgQueue: bgQueue,
+      sendRequest: {
+        SendRequestEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      }
+    )
 
     return AppEnvironment(
       dbManager: dbManager,
@@ -48,27 +64,21 @@ extension AppEnvironment {
               bgQueue: bgQueue
             )
           },
+          contacts: {
+            ContactsEnvironment(
+              messenger: messenger,
+              db: dbManager.getDB,
+              mainQueue: mainQueue,
+              bgQueue: bgQueue,
+              contact: { contactEnvironment }
+            )
+          },
           userSearch: {
             UserSearchEnvironment(
               messenger: messenger,
               mainQueue: mainQueue,
               bgQueue: bgQueue,
-              contact: {
-                ContactEnvironment(
-                  messenger: messenger,
-                  db: dbManager.getDB,
-                  mainQueue: mainQueue,
-                  bgQueue: bgQueue,
-                  sendRequest: {
-                    SendRequestEnvironment(
-                      messenger: messenger,
-                      db: dbManager.getDB,
-                      mainQueue: mainQueue,
-                      bgQueue: bgQueue
-                    )
-                  }
-                )
-              }
+              contact: { contactEnvironment }
             )
           }
         )

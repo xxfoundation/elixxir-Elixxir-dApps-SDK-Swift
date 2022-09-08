@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import ContactsFeature
 import RegisterFeature
 import UserSearchFeature
 import XCTest
@@ -462,6 +463,32 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.didDismissUserSearch) {
       $0.userSearch = nil
+    }
+  }
+
+  func testContactsButtonTapped() {
+    let store = TestStore(
+      initialState: HomeState(),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.contactsButtonTapped) {
+      $0.contacts = ContactsState()
+    }
+  }
+
+  func testDidDismissContacts() {
+    let store = TestStore(
+      initialState: HomeState(
+        contacts: ContactsState()
+      ),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.didDismissContacts) {
+      $0.contacts = nil
     }
   }
 }
