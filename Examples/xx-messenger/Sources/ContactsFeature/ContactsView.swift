@@ -23,7 +23,7 @@ public struct ContactsView: View {
   }
 
   public var body: some View {
-    WithViewStore(store.scope(state: ViewState.init)) { viewStore in
+    WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
         ForEach(viewStore.contacts) { contact in
           if contact.id == viewStore.myId {
