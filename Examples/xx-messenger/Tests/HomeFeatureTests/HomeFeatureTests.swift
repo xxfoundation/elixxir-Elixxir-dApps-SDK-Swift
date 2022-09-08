@@ -370,7 +370,7 @@ final class HomeFeatureTests: XCTestCase {
     }
 
     XCTAssertNoDifference(dbDidFetchContacts, [.init(id: ["contact-id".data(using: .utf8)!])])
-    XCTAssertNoDifference(udDidPermanentDeleteAccount, [Fact(fact: "MyUsername", type: 0)])
+    XCTAssertNoDifference(udDidPermanentDeleteAccount, [Fact(type: .username, value: "MyUsername")])
     XCTAssertNoDifference(messengerDidDestroy, 1)
     XCTAssertNoDifference(didRemoveDB, 1)
 

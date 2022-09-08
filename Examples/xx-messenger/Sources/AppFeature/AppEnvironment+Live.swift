@@ -53,9 +53,6 @@ extension AppEnvironment {
               messenger: messenger,
               mainQueue: mainQueue,
               bgQueue: bgQueue,
-              result: {
-                UserSearchResultEnvironment()
-              },
               contact: {
                 ContactEnvironment(
                   messenger: messenger,

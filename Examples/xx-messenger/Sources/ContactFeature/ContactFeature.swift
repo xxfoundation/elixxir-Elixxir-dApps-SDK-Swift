@@ -105,13 +105,13 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
       var dbContact = state.dbContact ?? XXModels.Contact(id: state.id)
       dbContact.marshaled = xxContact.data
       if state.importUsername {
-        dbContact.username = try? xxContact.getFact(.username)?.fact
+        dbContact.username = try? xxContact.getFact(.username)?.value
       }
       if state.importEmail {
-        dbContact.email = try? xxContact.getFact(.email)?.fact
+        dbContact.email = try? xxContact.getFact(.email)?.value
       }
       if state.importPhone {
-        dbContact.phone = try? xxContact.getFact(.phone)?.fact
+        dbContact.phone = try? xxContact.getFact(.phone)?.value
       }
       _ = try! env.db().saveContact(dbContact)
     }

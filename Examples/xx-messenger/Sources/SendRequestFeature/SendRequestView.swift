@@ -24,12 +24,12 @@ public struct SendRequestView: View {
     var failure: String?
 
     init(state: SendRequestState) {
-      contactUsername = try? state.contact.getFact(.username)?.fact
-      contactEmail = try? state.contact.getFact(.email)?.fact
-      contactPhone = try? state.contact.getFact(.phone)?.fact
-      myUsername = try? state.myContact?.getFact(.username)?.fact
-      myEmail = try? state.myContact?.getFact(.email)?.fact
-      myPhone = try? state.myContact?.getFact(.phone)?.fact
+      contactUsername = try? state.contact.getFact(.username)?.value
+      contactEmail = try? state.contact.getFact(.email)?.value
+      contactPhone = try? state.contact.getFact(.phone)?.value
+      myUsername = try? state.myContact?.getFact(.username)?.value
+      myEmail = try? state.myContact?.getFact(.email)?.value
+      myPhone = try? state.myContact?.getFact(.phone)?.value
       sendUsername = state.sendUsername
       sendEmail = state.sendEmail
       sendPhone = state.sendPhone
@@ -134,9 +134,9 @@ public struct SendRequestView_Previews: PreviewProvider {
             var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
             contact.getFactsFromContact.run = { _ in
               [
-                Fact(fact: "contact-username", type: 0),
-                Fact(fact: "contact-email", type: 1),
-                Fact(fact: "contact-phone", type: 2),
+                Fact(type: .username, value: "contact-username"),
+                Fact(type: .email, value: "contact-email"),
+                Fact(type: .phone, value: "contact-phone"),
               ]
             }
             return contact
@@ -145,9 +145,9 @@ public struct SendRequestView_Previews: PreviewProvider {
             var contact = XXClient.Contact.unimplemented("my-data".data(using: .utf8)!)
             contact.getFactsFromContact.run = { _ in
               [
-                Fact(fact: "my-username", type: 0),
-                Fact(fact: "my-email", type: 1),
-                Fact(fact: "my-phone", type: 2),
+                Fact(type: .username, value: "my-username"),
+                Fact(type: .email, value: "my-email"),
+                Fact(type: .phone, value: "my-phone"),
               ]
             }
             return contact
