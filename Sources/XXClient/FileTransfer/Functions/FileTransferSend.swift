@@ -6,20 +6,17 @@ public struct FileTransferSend {
     public init(
       payload: FileSend,
       recipientId: Data,
-      paramsJSON: Data,
       retry: Float,
       period: String
     ) {
       self.payload = payload
       self.recipientId = recipientId
-      self.paramsJSON = paramsJSON
       self.retry = retry
       self.period = period
     }
 
     public var payload: FileSend
     public var recipientId: Data
-    public var paramsJSON: Data
     public var retry: Float
     public var period: String
   }
