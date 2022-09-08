@@ -55,6 +55,7 @@ extension AppEnvironment {
           dbManager: dbManager,
           mainQueue: mainQueue,
           bgQueue: bgQueue,
+          now: Date.init,
           register: {
             RegisterEnvironment(
               messenger: messenger,

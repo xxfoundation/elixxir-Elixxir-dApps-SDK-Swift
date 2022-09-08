@@ -6,8 +6,10 @@ import ContactsFeature
 import Foundation
 import RegisterFeature
 import UserSearchFeature
+import XCTestDynamicOverlay
 import XXClient
 import XXMessengerClient
+import XXModels
 
 public struct HomeState: Equatable {
   public init(
@@ -47,6 +49,12 @@ public enum HomeAction: Equatable {
     case failure(NSError)
   }
 
+  public enum AuthCallbacks: Equatable {
+    case register
+    case unregister
+    case handle(XXClient.AuthCallbacks.Callback)
+  }
+
   public enum NetworkMonitor: Equatable {
     case start
     case stop
@@ -62,6 +70,7 @@ public enum HomeAction: Equatable {
   }
 
   case messenger(Messenger)
+  case authCallbacks(AuthCallbacks)
   case networkMonitor(NetworkMonitor)
   case deleteAccount(DeleteAccount)
   case didDismissAlert
@@ -81,6 +90,7 @@ public struct HomeEnvironment {
     dbManager: DBManager,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
+    now: @escaping () -> Date,
     register: @escaping () -> RegisterEnvironment,
     contacts: @escaping () -> ContactsEnvironment,
     userSearch: @escaping () -> UserSearchEnvironment
@@ -89,6 +99,7 @@ public struct HomeEnvironment {
     self.dbManager = dbManager
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
+    self.now = now
     self.register = register
     self.contacts = contacts
     self.userSearch = userSearch
@@ -98,6 +109,7 @@ public struct HomeEnvironment {
   public var dbManager: DBManager
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
+  public var now: () -> Date
   public var register: () -> RegisterEnvironment
   public var contacts: () -> ContactsEnvironment
   public var userSearch: () -> UserSearchEnvironment
@@ -109,6 +121,7 @@ extension HomeEnvironment {
     dbManager: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
+    now: XCTUnimplemented("\(Self.self).now", placeholder: Date()),
     register: { .unimplemented },
     contacts: { .unimplemented },
     userSearch: { .unimplemented }
@@ -119,10 +132,12 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 { state, action, env in
   enum NetworkHealthEffectId {}
   enum NetworkNodesEffectId {}
+  enum AuthCallbacksEffectId {}
 
   switch action {
   case .messenger(.start):
     return .merge(
+      Effect(value: .authCallbacks(.register)),
       Effect(value: .networkMonitor(.stop)),
       Effect.result {
         do {
@@ -158,6 +173,59 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 
   case .messenger(.failure(let error)):
     state.failure = error.localizedDescription
+    return .none
+
+  case .authCallbacks(.register):
+    return Effect.run { subscriber in
+      let handler = AuthCallbacks { callback in
+        subscriber.send(.authCallbacks(.handle(callback)))
+      }
+      let cancellable = env.messenger.registerAuthCallbacks(handler)
+      return AnyCancellable { cancellable.cancel() }
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+    .cancellable(id: AuthCallbacksEffectId.self, cancelInFlight: true)
+
+  case .authCallbacks(.unregister):
+    return .cancel(id: AuthCallbacksEffectId.self)
+
+  case .authCallbacks(.handle(.request(let contact, _, _, _))):
+    return .fireAndForget {
+      let db = try env.dbManager.getDB()
+      let contactId = try contact.getId()
+      guard try db.fetchContacts(.init(id: [contactId])).isEmpty else {
+        return
+      }
+      var dbContact = XXModels.Contact(id: contactId)
+      dbContact.marshaled = contact.data
+      dbContact.username = try contact.getFact(.username)?.value
+      dbContact.email = try contact.getFact(.email)?.value
+      dbContact.phone = try contact.getFact(.phone)?.value
+      dbContact.authStatus = .verificationInProgress
+      dbContact.createdAt = env.now()
+      dbContact = try db.saveContact(dbContact)
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+
+  case .authCallbacks(.handle(.confirm(let contact, _, _, _))):
+    return .fireAndForget {
+      let db = try env.dbManager.getDB()
+      let contactId = try contact.getId()
+      guard var dbContact = try db.fetchContacts(.init(id: [contactId])).first else {
+        return
+      }
+      dbContact.authStatus = .friend
+      dbContact = try db.saveContact(dbContact)
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+
+  case .authCallbacks(.handle(.reset(let contact, _, _, _))):
     return .none
 
   case .networkMonitor(.start):
