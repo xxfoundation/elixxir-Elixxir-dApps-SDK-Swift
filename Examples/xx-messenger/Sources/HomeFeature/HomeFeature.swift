@@ -2,6 +2,7 @@ import AppCore
 import Combine
 import ComposableArchitecture
 import ComposablePresentation
+import ContactsFeature
 import Foundation
 import RegisterFeature
 import UserSearchFeature
@@ -16,6 +17,7 @@ public struct HomeState: Equatable {
     isDeletingAccount: Bool = false,
     alert: AlertState<HomeAction>? = nil,
     register: RegisterState? = nil,
+    contacts: ContactsState? = nil,
     userSearch: UserSearchState? = nil
   ) {
     self.failure = failure
@@ -23,6 +25,7 @@ public struct HomeState: Equatable {
     self.isDeletingAccount = isDeletingAccount
     self.alert = alert
     self.register = register
+    self.contacts = contacts
     self.userSearch = userSearch
   }
 
@@ -32,6 +35,7 @@ public struct HomeState: Equatable {
   public var isDeletingAccount: Bool
   public var alert: AlertState<HomeAction>?
   public var register: RegisterState?
+  public var contacts: ContactsState?
   public var userSearch: UserSearchState?
 }
 
@@ -64,7 +68,10 @@ public enum HomeAction: Equatable {
   case didDismissRegister
   case userSearchButtonTapped
   case didDismissUserSearch
+  case contactsButtonTapped
+  case didDismissContacts
   case register(RegisterAction)
+  case contacts(ContactsAction)
   case userSearch(UserSearchAction)
 }
 
@@ -75,6 +82,7 @@ public struct HomeEnvironment {
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
     register: @escaping () -> RegisterEnvironment,
+    contacts: @escaping () -> ContactsEnvironment,
     userSearch: @escaping () -> UserSearchEnvironment
   ) {
     self.messenger = messenger
@@ -82,6 +90,7 @@ public struct HomeEnvironment {
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
     self.register = register
+    self.contacts = contacts
     self.userSearch = userSearch
   }
 
@@ -90,6 +99,7 @@ public struct HomeEnvironment {
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var register: () -> RegisterEnvironment
+  public var contacts: () -> ContactsEnvironment
   public var userSearch: () -> UserSearchEnvironment
 }
 
@@ -100,6 +110,7 @@ extension HomeEnvironment {
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
     register: { .unimplemented },
+    contacts: { .unimplemented },
     userSearch: { .unimplemented }
   )
 }
@@ -238,11 +249,19 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     state.userSearch = nil
     return .none
 
+  case .contactsButtonTapped:
+    state.contacts = ContactsState()
+    return .none
+
+  case .didDismissContacts:
+    state.contacts = nil
+    return .none
+
   case .register(.finished):
     state.register = nil
     return Effect(value: .messenger(.start))
 
-  case .register(_), .userSearch(_):
+  case .register(_), .contacts(_), .userSearch(_):
     return .none
   }
 }
@@ -252,6 +271,13 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
   id: .notNil(),
   action: /HomeAction.register,
   environment: { $0.register() }
+)
+.presenting(
+  contactsReducer,
+  state: .keyPath(\.contacts),
+  id: .notNil(),
+  action: /HomeAction.contacts,
+  environment: { $0.contacts() }
 )
 .presenting(
   userSearchReducer,

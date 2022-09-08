@@ -73,6 +73,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "ContactFeature"),
+        .target(name: "ContactsFeature"),
         .target(name: "HomeFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
@@ -133,6 +134,7 @@ let package = Package(
       name: "HomeFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "ContactsFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "UserSearchFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),

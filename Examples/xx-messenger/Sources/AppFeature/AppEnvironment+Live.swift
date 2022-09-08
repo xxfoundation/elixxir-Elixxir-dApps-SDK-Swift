@@ -1,5 +1,6 @@
 import AppCore
 import ContactFeature
+import ContactsFeature
 import Foundation
 import HomeFeature
 import RegisterFeature
@@ -47,6 +48,9 @@ extension AppEnvironment {
               mainQueue: mainQueue,
               bgQueue: bgQueue
             )
+          },
+          contacts: {
+            ContactsEnvironment()
           },
           userSearch: {
             UserSearchEnvironment(

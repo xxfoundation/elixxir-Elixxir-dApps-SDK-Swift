@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import ComposablePresentation
+import ContactsFeature
 import RegisterFeature
 import SwiftUI
 import UserSearchFeature
@@ -89,6 +90,16 @@ public struct HomeView: View {
 
           Section {
             Button {
+              viewStore.send(.contactsButtonTapped)
+            } label: {
+              HStack {
+                Text("Contacts")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+
+            Button {
               viewStore.send(.userSearchButtonTapped)
             } label: {
               HStack {
@@ -123,6 +134,16 @@ public struct HomeView: View {
           store.scope(state: \.alert),
           dismiss: HomeAction.didDismissAlert
         )
+        .background(NavigationLinkWithStore(
+          store.scope(
+            state: \.contacts,
+            action: HomeAction.contacts
+          ),
+          onDeactivate: {
+            viewStore.send(.didDismissContacts)
+          },
+          destination: ContactsView.init(store:)
+        ))
         .background(NavigationLinkWithStore(
           store.scope(
             state: \.userSearch,
