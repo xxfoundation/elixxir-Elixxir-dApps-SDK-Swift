@@ -2,21 +2,25 @@ import Foundation
 
 public struct BroadcastReport: Equatable {
   public init(
-    roundId: Int,
-    ephId: [Int]
+    rounds: [Int],
+    ephId: [Int],
+    roundURL: String
   ) {
-    self.roundId = roundId
+    self.rounds = rounds
     self.ephId = ephId
+    self.roundURL = roundURL
   }
 
-  public var roundId: Int
+  public var rounds: [Int]
   public var ephId: [Int]
+  public var roundURL: String
 }
 
 extension BroadcastReport: Codable {
   enum CodingKeys: String, CodingKey {
-    case roundId = "RoundID"
+    case rounds = "Rounds"
     case ephId = "EphID"
+    case roundURL = "RoundURL"
   }
 
   public static func decode(_ data: Data) throws -> Self {
