@@ -2,23 +2,27 @@ import Foundation
 
 public struct GroupSendReport: Equatable {
   public init(
-    roundId: UInt64,
+    rounds: [Int],
+    roundURL: String,
     timestamp: Int64,
     messageId: Data
   ) {
-    self.roundId = roundId
+    self.rounds = rounds
+    self.roundURL = roundURL
     self.timestamp = timestamp
     self.messageId = messageId
   }
 
-  public var roundId: UInt64
+  public var rounds: [Int]
+  public var roundURL: String
   public var timestamp: Int64
   public var messageId: Data
 }
 
 extension GroupSendReport: Codable {
   enum CodingKeys: String, CodingKey {
-    case roundId = "RoundID"
+    case rounds = "Rounds"
+    case roundURL = "RoundURL"
     case timestamp = "Timestamp"
     case messageId = "MessageID"
   }

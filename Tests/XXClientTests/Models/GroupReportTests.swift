@@ -4,13 +4,15 @@ import XCTest
 
 final class GroupReportTests: XCTestCase {
   func testCoding() throws {
-    let idB64 = "EB/70R5HYEw5htZ4Hg9ondrn3+cAc/lH2G0mjQMja3w="
-    let rounds: [Int] = [1, 5, 9]
-    let status: Int = 123
+    let idB64 = "AAAAAAAAAM0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE"
+    let rounds: [Int] = [25, 64]
+    let roundURL = "https://dashboard.xx.network/rounds/25?xxmessenger=true"
+    let status: Int = 1
     let jsonString = """
     {
       "Id": "\(idB64)",
       "Rounds": [\(rounds.map { "\($0)" }.joined(separator: ", "))],
+      "RoundURL": "\(roundURL)",
       "Status": \(status)
     }
     """
@@ -20,6 +22,7 @@ final class GroupReportTests: XCTestCase {
     XCTAssertNoDifference(model, GroupReport(
       id: Data(base64Encoded: idB64)!,
       rounds: rounds,
+      roundURL: roundURL,
       status: status
     ))
 
