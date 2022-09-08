@@ -21,6 +21,7 @@ let package = Package(
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
+    .library(name: "ContactsFeature", targets: ["ContactsFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
@@ -108,6 +109,23 @@ let package = Package(
       name: "ContactFeatureTests",
       dependencies: [
         .target(name: "ContactFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "ContactsFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ContactsFeatureTests",
+      dependencies: [
+        .target(name: "ContactsFeature"),
       ],
       swiftSettings: swiftSettings
     ),
