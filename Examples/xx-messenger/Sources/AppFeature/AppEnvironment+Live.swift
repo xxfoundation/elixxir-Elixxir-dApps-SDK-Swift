@@ -50,7 +50,11 @@ extension AppEnvironment {
             )
           },
           contacts: {
-            ContactsEnvironment()
+            ContactsEnvironment(
+              db: dbManager.getDB,
+              mainQueue: mainQueue,
+              bgQueue: bgQueue
+            )
           },
           userSearch: {
             UserSearchEnvironment(
