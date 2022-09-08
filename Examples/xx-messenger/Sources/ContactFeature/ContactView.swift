@@ -26,9 +26,9 @@ public struct ContactView: View {
     init(state: ContactState) {
       dbContact = state.dbContact
       xxContactIsSet = state.xxContact != nil
-      xxContactUsername = try? state.xxContact?.getFact(.username)?.fact
-      xxContactEmail = try? state.xxContact?.getFact(.email)?.fact
-      xxContactPhone = try? state.xxContact?.getFact(.phone)?.fact
+      xxContactUsername = try? state.xxContact?.getFact(.username)?.value
+      xxContactEmail = try? state.xxContact?.getFact(.email)?.value
+      xxContactPhone = try? state.xxContact?.getFact(.phone)?.value
       importUsername = state.importUsername
       importEmail = state.importEmail
       importPhone = state.importPhone

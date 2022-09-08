@@ -130,9 +130,9 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
       return UserSearchState.Result(
         id: id,
         xxContact: contact,
-        username: try? contact.getFact(.username)?.fact,
-        email: try? contact.getFact(.email)?.fact,
-        phone: try? contact.getFact(.phone)?.fact
+        username: try? contact.getFact(.username)?.value,
+        email: try? contact.getFact(.email)?.value,
+        phone: try? contact.getFact(.phone)?.value
       )
     })
     return .none

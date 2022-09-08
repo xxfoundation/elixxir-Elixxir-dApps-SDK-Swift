@@ -200,7 +200,7 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
         let contact = try env.dbManager.getDB().fetchContacts(.init(id: [contactId])).first
         if let username = contact?.username {
           let ud = try env.messenger.ud.tryGet()
-          try ud.permanentDeleteAccount(username: Fact(fact: username, type: 0))
+          try ud.permanentDeleteAccount(username: Fact(type: .username, value: username))
         }
         try env.messenger.destroy()
         try env.dbManager.removeDB()
