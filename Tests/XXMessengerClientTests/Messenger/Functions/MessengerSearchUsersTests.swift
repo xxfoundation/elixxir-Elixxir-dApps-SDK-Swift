@@ -38,7 +38,7 @@ final class MessengerSearchUsersTests: XCTestCase {
         .unimplemented("contact-2".data(using: .utf8)!),
         .unimplemented("contact-3".data(using: .utf8)!),
       ]))
-      return SingleUseSendReport(rounds: [], ephId: 0, receptionId: Data())
+      return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
 
     let search: MessengerSearchUsers = .live(env)
@@ -128,7 +128,7 @@ final class MessengerSearchUsersTests: XCTestCase {
     env.getSingleUseParams.run = { Data() }
     env.searchUD.run = { _, _, _, _, callback in
       callback.handle(.failure(error as NSError))
-      return SingleUseSendReport(rounds: [], ephId: 0, receptionId: Data())
+      return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
 
     let search: MessengerSearchUsers = .live(env)

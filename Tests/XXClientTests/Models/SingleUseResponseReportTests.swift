@@ -5,12 +5,14 @@ import XCTest
 final class SingleUseResponseReportTests: XCTestCase {
   func testCoding() throws {
     let rounds: [Int] = [1, 5, 9]
+    let roundURL = "https://dashboard.xx.network/rounds/25?xxmessenger=true"
     let payloadB64 = "rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw=="
     let ephId: Int64 = 1_655_533
     let receptionIdB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
     let jsonString = """
     {
       "Rounds": [\(rounds.map { "\($0)" }.joined(separator: ", "))],
+      "RoundURL": "\(roundURL)",
       "Payload": "\(payloadB64)",
       "EphID": \(ephId),
       "ReceptionID": "\(receptionIdB64)",
@@ -22,6 +24,7 @@ final class SingleUseResponseReportTests: XCTestCase {
 
     XCTAssertNoDifference(model, SingleUseResponseReport(
       rounds: rounds,
+      roundURL: roundURL,
       payload: Data(base64Encoded: payloadB64)!,
       ephId: ephId,
       receptionId: Data(base64Encoded: receptionIdB64)!,
@@ -36,6 +39,7 @@ final class SingleUseResponseReportTests: XCTestCase {
 
   func testDecodingReportWithError() throws {
     let rounds: [Int] = [1, 5, 9]
+    let roundURL = "https://dashboard.xx.network/rounds/25?xxmessenger=true"
     let payloadB64 = "rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw=="
     let ephId: Int64 = 1_655_533
     let receptionIdB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
@@ -43,6 +47,7 @@ final class SingleUseResponseReportTests: XCTestCase {
     let jsonString = """
     {
       "Rounds": [\(rounds.map { "\($0)" }.joined(separator: ", "))],
+      "RoundURL": "\(roundURL)",
       "Payload": "\(payloadB64)",
       "EphID": \(ephId),
       "ReceptionID": "\(receptionIdB64)",
@@ -54,6 +59,7 @@ final class SingleUseResponseReportTests: XCTestCase {
 
     XCTAssertNoDifference(model, SingleUseResponseReport(
       rounds: rounds,
+      roundURL: roundURL,
       payload: Data(base64Encoded: payloadB64)!,
       ephId: ephId,
       receptionId: Data(base64Encoded: receptionIdB64)!,
