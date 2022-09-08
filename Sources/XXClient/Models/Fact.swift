@@ -29,14 +29,12 @@ extension Fact: Codable {
 }
 
 extension Fact {
-  @available(iOS, deprecated: 9999.0, message: "This API has been soft-deprecated in favor of `Fact.init(type:value:)`.")
-  @available(macOS, deprecated: 9999.0, message: "This API has been soft-deprecated in favor of `Fact.init(type:value:)`.")
+  @available(*, deprecated, message: "This API has been deprecated in favor of `Fact.init(type:value:)`.")
   public init(fact: String, type: Int) {
     self.init(type: .init(rawValue: type), value: fact)
   }
 
-  @available(iOS, deprecated: 9999.0, message: "This API has been soft-deprecated in favor of `Fact.value`.")
-  @available(macOS, deprecated: 9999.0, message: "This API has been soft-deprecated in favor of `Fact.value`.")
+  @available(*, deprecated, message: "This API has been deprecated in favor of `Fact.value`.")
   public var fact: String {
     get { value }
     set { value = newValue }
