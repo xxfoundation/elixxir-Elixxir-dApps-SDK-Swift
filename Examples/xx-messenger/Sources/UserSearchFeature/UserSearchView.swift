@@ -98,19 +98,19 @@ public struct UserSearchView: View {
                 VStack {
                   if result.hasFacts {
                     if let username = result.username {
-                      Text(username)
+                      Label(username, systemImage: "person")
                     }
                     if let email = result.email {
-                      Text(email)
+                      Label(email, systemImage: "envelope")
                     }
                     if let phone = result.phone {
-                      Text(phone)
+                      Label(phone, systemImage: "phone")
                     }
                   } else {
-                    Image(systemName: "questionmark")
-                      .frame(maxWidth: .infinity)
+                    Label("No facts", systemImage: "questionmark")
                   }
                 }
+                .tint(Color.primary)
                 Spacer()
                 Image(systemName: "chevron.forward")
               }

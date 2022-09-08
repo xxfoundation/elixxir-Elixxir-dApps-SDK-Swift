@@ -79,10 +79,14 @@ public struct ContactView: View {
             Button {
               viewStore.send(.importFactsTapped)
             } label: {
-              if viewStore.dbContact == nil {
-                Text("Save contact")
-              } else {
-                Text("Update contact")
+              HStack {
+                if viewStore.dbContact == nil {
+                  Text("Save contact")
+                } else {
+                  Text("Update contact")
+                }
+                Spacer()
+                Image(systemName: "arrow.down")
               }
             }
           } header: {
