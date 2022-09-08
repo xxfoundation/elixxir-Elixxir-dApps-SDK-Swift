@@ -19,6 +19,21 @@ extension AppEnvironment {
     let mainQueue = DispatchQueue.main.eraseToAnyScheduler()
     let bgQueue = DispatchQueue.global(qos: .background).eraseToAnyScheduler()
 
+    let contactEnvironment = ContactEnvironment(
+      messenger: messenger,
+      db: dbManager.getDB,
+      mainQueue: mainQueue,
+      bgQueue: bgQueue,
+      sendRequest: {
+        SendRequestEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      }
+    )
+
     return AppEnvironment(
       dbManager: dbManager,
       messenger: messenger,
@@ -53,7 +68,8 @@ extension AppEnvironment {
             ContactsEnvironment(
               db: dbManager.getDB,
               mainQueue: mainQueue,
-              bgQueue: bgQueue
+              bgQueue: bgQueue,
+              contact: { contactEnvironment }
             )
           },
           userSearch: {
@@ -61,22 +77,7 @@ extension AppEnvironment {
               messenger: messenger,
               mainQueue: mainQueue,
               bgQueue: bgQueue,
-              contact: {
-                ContactEnvironment(
-                  messenger: messenger,
-                  db: dbManager.getDB,
-                  mainQueue: mainQueue,
-                  bgQueue: bgQueue,
-                  sendRequest: {
-                    SendRequestEnvironment(
-                      messenger: messenger,
-                      db: dbManager.getDB,
-                      mainQueue: mainQueue,
-                      bgQueue: bgQueue
-                    )
-                  }
-                )
-              }
+              contact: { contactEnvironment }
             )
           }
         )

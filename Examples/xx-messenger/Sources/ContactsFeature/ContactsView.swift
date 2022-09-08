@@ -1,5 +1,7 @@
 import AppCore
 import ComposableArchitecture
+import ComposablePresentation
+import ContactFeature
 import SwiftUI
 import XXModels
 
@@ -24,7 +26,7 @@ public struct ContactsView: View {
         ForEach(viewStore.contacts) { contact in
           Section {
             Button {
-              // TODO:
+              viewStore.send(.contactSelected(contact))
             } label: {
               HStack {
                 VStack(alignment: .leading, spacing: 8) {
@@ -44,6 +46,14 @@ public struct ContactsView: View {
       }
       .navigationTitle("Contacts")
       .task { viewStore.send(.start) }
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.contact,
+          action: ContactsAction.contact
+        ),
+        onDeactivate: { viewStore.send(.contactDismissed) },
+        destination: ContactView.init(store:)
+      ))
     }
   }
 }
