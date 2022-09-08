@@ -19,6 +19,6 @@ extension MessengerRegisterAuthCallbacks {
 
 extension MessengerRegisterAuthCallbacks {
   public static let unimplemented = MessengerRegisterAuthCallbacks(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: Cancellable {})
   )
 }
