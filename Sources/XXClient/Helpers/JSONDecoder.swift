@@ -8,14 +8,14 @@ class JSONDecoder: Foundation.JSONDecoder {
 
   override func decode<T>(_ type: T.Type, from data: Data) throws -> T where T: Decodable {
     do {
-      let data = convertNumberToString(in: data, at: "Value")
+      let data = Self.convertNumberToString(in: data, at: "Value")
       return try super.decode(type, from: data)
     } catch {
       throw JSONDecodingError(error, data: data)
     }
   }
 
-  func convertNumberToString(
+  static func convertNumberToString(
     in input: Data,
     at key: String
   ) -> Data {

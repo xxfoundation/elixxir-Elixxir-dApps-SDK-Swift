@@ -9,14 +9,14 @@ class JSONEncoder: Foundation.JSONEncoder {
   override func encode<T>(_ value: T) throws -> Data where T: Encodable {
     do {
       var data = try super.encode(value)
-      data = convertStringToNumber(in: data, at: "Value")
+      data = Self.convertStringToNumber(in: data, at: "Value")
       return data
     } catch {
       throw JSONEncodingError(error, value: value)
     }
   }
 
-  func convertStringToNumber(
+  static func convertStringToNumber(
     in input: Data,
     at key: String
   ) -> Data {

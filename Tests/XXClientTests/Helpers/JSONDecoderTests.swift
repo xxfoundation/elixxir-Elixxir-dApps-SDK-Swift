@@ -71,7 +71,7 @@ private func assertConvertingNumberToString(
 ) {
   XCTAssertNoDifference(
     String(
-      data: JSONDecoder().convertNumberToString(
+      data: JSONDecoder.convertNumberToString(
         in: input.data(using: .utf8)!,
         at: key
       ),
