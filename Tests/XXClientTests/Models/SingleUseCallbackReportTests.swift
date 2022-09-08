@@ -5,6 +5,7 @@ import XCTest
 final class SingleUseCallbackReportTests: XCTestCase {
   func testCoding() throws {
     let rounds: [Int] = [1, 5, 9]
+    let roundURL = "https://dashboard.xx.network/rounds/25?xxmessenger=true"
     let payloadB64 = "rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw=="
     let partnerB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
     let ephId: Int64 = 1_655_533
@@ -12,6 +13,7 @@ final class SingleUseCallbackReportTests: XCTestCase {
     let jsonString = """
     {
       "Rounds": [\(rounds.map { "\($0)" }.joined(separator: ", "))],
+      "RoundURL": "\(roundURL)",
       "Payload": "\(payloadB64)",
       "Partner": "\(partnerB64)",
       "EphID": \(ephId),
@@ -23,6 +25,7 @@ final class SingleUseCallbackReportTests: XCTestCase {
 
     XCTAssertNoDifference(model, SingleUseCallbackReport(
       rounds: rounds,
+      roundURL: roundURL,
       payload: Data(base64Encoded: payloadB64)!,
       partner: Data(base64Encoded: partnerB64)!,
       ephId: ephId,
