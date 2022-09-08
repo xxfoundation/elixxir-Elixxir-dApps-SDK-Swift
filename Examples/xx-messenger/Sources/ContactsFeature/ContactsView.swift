@@ -13,9 +13,11 @@ public struct ContactsView: View {
   let store: Store<ContactsState, ContactsAction>
 
   struct ViewState: Equatable {
+    var myId: Data?
     var contacts: IdentifiedArrayOf<XXModels.Contact>
 
     init(state: ContactsState) {
+      myId = state.myId
       contacts = state.contacts
     }
   }
@@ -24,23 +26,37 @@ public struct ContactsView: View {
     WithViewStore(store.scope(state: ViewState.init)) { viewStore in
       Form {
         ForEach(viewStore.contacts) { contact in
-          Section {
-            Button {
-              viewStore.send(.contactSelected(contact))
-            } label: {
-              HStack {
-                VStack(alignment: .leading, spacing: 8) {
-                  Label(contact.username ?? "", systemImage: "person")
-                  Label(contact.email ?? "", systemImage: "envelope")
-                  Label(contact.phone ?? "", systemImage: "phone")
-                }
-                .font(.callout)
-                .tint(Color.primary)
-                Spacer()
-                Image(systemName: "chevron.forward")
+          if contact.id == viewStore.myId {
+            Section {
+              VStack(alignment: .leading, spacing: 8) {
+                Label(contact.username ?? "", systemImage: "person")
+                Label(contact.email ?? "", systemImage: "envelope")
+                Label(contact.phone ?? "", systemImage: "phone")
               }
+              .font(.callout)
+              .tint(Color.primary)
+            } header: {
+              Text("My contact")
             }
-            ContactAuthStatusView(contact.authStatus)
+          } else {
+            Section {
+              Button {
+                viewStore.send(.contactSelected(contact))
+              } label: {
+                HStack {
+                  VStack(alignment: .leading, spacing: 8) {
+                    Label(contact.username ?? "", systemImage: "person")
+                    Label(contact.email ?? "", systemImage: "envelope")
+                    Label(contact.phone ?? "", systemImage: "phone")
+                  }
+                  .font(.callout)
+                  .tint(Color.primary)
+                  Spacer()
+                  Image(systemName: "chevron.forward")
+                }
+              }
+              ContactAuthStatusView(contact.authStatus)
+            }
           }
         }
       }

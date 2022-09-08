@@ -66,6 +66,7 @@ extension AppEnvironment {
           },
           contacts: {
             ContactsEnvironment(
+              messenger: messenger,
               db: dbManager.getDB,
               mainQueue: mainQueue,
               bgQueue: bgQueue,

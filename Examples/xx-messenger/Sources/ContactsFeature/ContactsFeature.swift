@@ -4,17 +4,22 @@ import ComposablePresentation
 import ContactFeature
 import Foundation
 import XCTestDynamicOverlay
+import XXClient
+import XXMessengerClient
 import XXModels
 
 public struct ContactsState: Equatable {
   public init(
-    contacts: IdentifiedArrayOf<Contact> = [],
+    myId: Data? = nil,
+    contacts: IdentifiedArrayOf<XXModels.Contact> = [],
     contact: ContactState? = nil
   ) {
+    self.myId = myId
     self.contacts = contacts
     self.contact = contact
   }
 
+  public var myId: Data?
   public var contacts: IdentifiedArrayOf<XXModels.Contact>
   public var contact: ContactState?
 }
@@ -29,17 +34,20 @@ public enum ContactsAction: Equatable {
 
 public struct ContactsEnvironment {
   public init(
+    messenger: Messenger,
     db: DBManagerGetDB,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
     contact: @escaping () -> ContactEnvironment
   ) {
+    self.messenger = messenger
     self.db = db
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
     self.contact = contact
   }
 
+  public var messenger: Messenger
   public var db: DBManagerGetDB
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
@@ -49,6 +57,7 @@ public struct ContactsEnvironment {
 #if DEBUG
 extension ContactsEnvironment {
   public static let unimplemented = ContactsEnvironment(
+    messenger: .unimplemented,
     db: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
@@ -61,6 +70,7 @@ public let contactsReducer = Reducer<ContactsState, ContactsAction, ContactsEnvi
 { state, action, env in
   switch action {
   case .start:
+    state.myId = try? env.messenger.e2e.tryGet().getContact().getId()
     return Effect
       .catching { try env.db() }
       .flatMap { $0.fetchContactsPublisher(.init()) }
@@ -70,7 +80,11 @@ public let contactsReducer = Reducer<ContactsState, ContactsAction, ContactsEnvi
       .receive(on: env.mainQueue)
       .eraseToEffect()
 
-  case .didFetchContacts(let contacts):
+  case .didFetchContacts(var contacts):
+    if let myId = state.myId,
+       let myIndex = contacts.firstIndex(where: { $0.id == myId }) {
+      contacts.move(fromOffsets: [myIndex], toOffset: contacts.startIndex)
+    }
     state.contacts = IdentifiedArray(uniqueElements: contacts)
     return .none
 

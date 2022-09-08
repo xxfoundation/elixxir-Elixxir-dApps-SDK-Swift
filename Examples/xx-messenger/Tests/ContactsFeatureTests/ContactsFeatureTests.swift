@@ -3,6 +3,8 @@ import ComposableArchitecture
 import ContactFeature
 import CustomDump
 import XCTest
+import XXClient
+import XXMessengerClient
 import XXModels
 @testable import ContactsFeature
 
@@ -14,11 +16,21 @@ final class ContactsFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
+    let myId = "2".data(using: .utf8)!
     var didFetchContacts: [XXModels.Contact.Query] = []
     let contactsPublisher = PassthroughSubject<[XXModels.Contact], Error>()
 
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in myId }
+        return contact
+      }
+      return e2e
+    }
     store.environment.db.run = {
       var db: Database = .failing
       db.fetchContactsPublisher.run = { query in
@@ -28,7 +40,9 @@ final class ContactsFeatureTests: XCTestCase {
       return db
     }
 
-    store.send(.start)
+    store.send(.start) {
+      $0.myId = myId
+    }
 
     XCTAssertNoDifference(didFetchContacts, [XXModels.Contact.Query()])
 
@@ -40,7 +54,11 @@ final class ContactsFeatureTests: XCTestCase {
     contactsPublisher.send(contacts)
 
     store.receive(.didFetchContacts(contacts)) {
-      $0.contacts = IdentifiedArray(uniqueElements: contacts)
+      $0.contacts = IdentifiedArray(uniqueElements: [
+        contacts[1],
+        contacts[0],
+        contacts[2],
+      ])
     }
 
     contactsPublisher.send(completion: .finished)
