@@ -298,9 +298,11 @@ Example BackupReport:
 /**
  * BroadcastMessage is the bindings representation of a broadcast message.
 
-Example JSON:
- {"RoundID":42,
+BroadcastMessage Example JSON:
+ {
+	 "RoundID":42,
   "EphID":[0,0,0,0,0,0,24,61],
+  "RoundURL":"https://dashboard.xx.network/rounds/25?xxmessenger=true",
   "Payload":"SGVsbG8sIGJyb2FkY2FzdCBmcmllbmRzIQ=="
  }
  */
@@ -320,9 +322,11 @@ Example JSON:
  * BroadcastReport is the bindings representation of the info on how a broadcast
 message was sent
 
-Example JSON:
- {"RoundID":42,
-  "EphID":[0,0,0,0,0,0,24,61]
+BroadcastReport Example JSON:
+ {
+	 "Rounds": [25, 26, 29],
+  "EphID":[0,0,0,0,0,0,24,61],
+  "RoundURL":"https://dashboard.xx.network/rounds/25?xxmessenger=true"
  }
  */
 @interface BindingsBroadcastReport : NSObject <goSeqRefInterface> {
@@ -333,6 +337,7 @@ Example JSON:
 - (nonnull instancetype)init;
 // skipped field BroadcastReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
+@property (nonatomic) NSString* _Nonnull roundURL;
 // skipped field BroadcastReport.EphID with unsupported type: gitlab.com/xx_network/primitives/id/ephemeral.Id
 
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
@@ -697,13 +702,14 @@ Returns:
  * E2ESendReport is the bindings' representation of the return values of
 SendE2E.
 
-Example E2ESendReport:
-{
-"Rounds": [ 1, 4, 9],
-"MessageID": "iM34yCIr4Je8ZIzL9iAAG1UWAeDiHybxMTioMAaezvs=",
-"Timestamp": 1661532254302612000,
-"KeyResidue": "9q2/A69EAuFM1hFAT7Bzy5uGOQ4T6bPFF72h5PlgCWE="
-}
+E2ESendReport Example JSON:
+ {
+		"Rounds": [ 1, 4, 9],
+     "RoundURL":"https://dashboard.xx.network/rounds/25?xxmessenger=true",
+		"MessageID": "iM34yCIr4Je8ZIzL9iAAG1UWAeDiHybxMTioMAaezvs=",
+		"Timestamp": 1661532254302612000,
+		"KeyResidue": "9q2/A69EAuFM1hFAT7Bzy5uGOQ4T6bPFF72h5PlgCWE="
+ }
  */
 @interface BindingsE2ESendReport : NSObject <goSeqRefInterface> {
 }
@@ -713,6 +719,7 @@ Example E2ESendReport:
 - (nonnull instancetype)init;
 // skipped field E2ESendReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
+@property (nonatomic) NSString* _Nonnull roundURL;
 @property (nonatomic) NSData* _Nullable messageID;
 @property (nonatomic) int64_t timestamp;
 @property (nonatomic) NSData* _Nullable keyResidue;
@@ -1346,6 +1353,14 @@ Returns:
  * GroupReport is returned when creating a new group and contains the ID of
 the group, a list of rounds that the group requests were sent on, and the
 status of the send operation.
+
+Example GroupReport JSON:
+		{
+			"Id": "AAAAAAAAAM0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE",
+			"Rounds": [25, 64],
+			"RoundURL": "https://dashboard.xx.network/rounds/25?xxmessenger=true",
+			"Status": 1
+		}
  */
 @interface BindingsGroupReport : NSObject <goSeqRefInterface> {
 }
@@ -1356,6 +1371,7 @@ status of the send operation.
 @property (nonatomic) NSData* _Nullable id_;
 // skipped field GroupReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
+@property (nonatomic) NSString* _Nonnull roundURL;
 @property (nonatomic) long status;
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
 @end
@@ -1363,6 +1379,14 @@ status of the send operation.
 /**
  * GroupSendReport is returned when sending a group message. It contains the
 round ID sent on and the timestamp of the send operation.
+
+Example GroupSendReport JSON:
+     {
+ 	"Rounds": [25,	64],
+ 	"RoundURL": "https://dashboard.xx.network/rounds/25?xxmessenger=true",
+ 	"Timestamp": 1662577352813112000,
+ 	"MessageID": "69ug6FA50UT2q6MWH3hne9PkHQ+H9DnEDsBhc0m0Aww="
+	    }
  */
 @interface BindingsGroupSendReport : NSObject <goSeqRefInterface> {
 }
@@ -1372,6 +1396,7 @@ round ID sent on and the timestamp of the send operation.
 - (nonnull instancetype)init;
 // skipped field GroupSendReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
+@property (nonatomic) NSString* _Nonnull roundURL;
 @property (nonatomic) int64_t timestamp;
 @property (nonatomic) NSData* _Nullable messageID;
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
@@ -1579,7 +1604,7 @@ JSON example:
 /**
  * RoundsList contains a list of round IDs.
 
-Example marshalled roundList object:
+JSON Example:
  [1001,1003,1006]
  */
 @interface BindingsRoundsList : NSObject <goSeqRefInterface> {
@@ -1600,14 +1625,15 @@ Example marshalled roundList object:
  * SingleUseCallbackReport is the bindings-layer struct used to represent
 single -use messages received by a callback passed into single.Listen.
 
-JSON example:
- {
-  "Rounds":[1,5,9],
-  "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
-  "Partner":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
-  "EphID":1655533,
-  "ReceptionID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
- }
+SingleUseCallbackReport JSON example:
+   {
+     "Rounds":[1,5,9],
+     "RoundURL": "https://dashboard.xx.network/rounds/25?xxmessenger=true",
+     "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
+     "Partner":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+     "EphID":1655533,
+     "ReceptionID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
+   }
  */
 @interface BindingsSingleUseCallbackReport : NSObject <goSeqRefInterface> {
 }
@@ -1617,6 +1643,7 @@ JSON example:
 - (nonnull instancetype)init;
 // skipped field SingleUseCallbackReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
+@property (nonatomic) NSString* _Nonnull roundURL;
 @property (nonatomic) NSData* _Nullable payload;
 // skipped field SingleUseCallbackReport.Partner with unsupported type: *gitlab.com/xx_network/primitives/id.ID
 
@@ -1631,9 +1658,10 @@ JSON example:
 information passed to the single.Response callback interface in response to
 single.TransmitRequest.
 
-JSON example:
+SingleUseResponseReport JSON example:
  {
   "Rounds":[1,5,9],
+  "RoundURL": "https://dashboard.xx.network/rounds/25?xxmessenger=true",
   "Payload":"rSuPD35ELWwm5KTR9ViKIz/r1YGRgXIl5792SF8o8piZzN6sT4Liq4rUU/nfOPvQEjbfWNh/NYxdJ72VctDnWw==",
   "EphID":1655533,
   "ReceptionID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"},
@@ -1648,6 +1676,7 @@ JSON example:
 - (nonnull instancetype)init;
 // skipped field SingleUseResponseReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
+@property (nonatomic) NSString* _Nonnull roundURL;
 @property (nonatomic) NSData* _Nullable payload;
 // skipped field SingleUseResponseReport.ReceptionID with unsupported type: *gitlab.com/xx_network/primitives/id.ID
 
@@ -1660,9 +1689,10 @@ JSON example:
  * SingleUseSendReport is the bindings-layer struct used to represent
 information returned by single.TransmitRequest.
 
-JSON example:
+SingleUseSendReport JSON example:
  {
   "Rounds":[1,5,9],
+  "RoundURL": "https://dashboard.xx.network/rounds/25?xxmessenger=true",
   "EphID":1655533,
   "ReceptionID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"}
  }
@@ -1675,6 +1705,7 @@ JSON example:
 - (nonnull instancetype)init;
 // skipped field SingleUseSendReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
 
+@property (nonatomic) NSString* _Nonnull roundURL;
 // skipped field SingleUseSendReport.ReceptionID with unsupported type: *gitlab.com/xx_network/primitives/id.ID
 
 @property (nonatomic) int64_t ephID;
@@ -2267,6 +2298,19 @@ Returns:
    operation succeeded.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdSearchCallback> _Nullable cb, NSData* _Nullable factListJSON, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
+
+/**
+ * SetDashboardURL is a function which modifies the base dashboard URL
+that is returned as part of any send report. Internally, this is defaulted
+to "https://dashboard.xx.network". This should only be called if the user
+explicitly wants to modify the dashboard URL. This function is not
+thread-safe, and as such should only be called on setup.
+
+Parameters:
+ - newURL - A valid URL that will be used for round look up on any send
+   report.
+ */
+FOUNDATION_EXPORT void BindingsSetDashboardURL(NSString* _Nullable newURL);
 
 /**
  * SetFactsOnContact replaces the facts on the contact with the passed in facts
