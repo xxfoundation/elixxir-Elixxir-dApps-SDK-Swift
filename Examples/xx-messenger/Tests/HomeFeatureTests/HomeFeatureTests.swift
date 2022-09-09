@@ -1,3 +1,4 @@
+import AppCore
 import ComposableArchitecture
 import ContactsFeature
 import RegisterFeature
@@ -21,7 +22,7 @@ final class HomeFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.registerAuthCallbacks.run = { _ in Cancellable {} }
+    store.environment.authHandler.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { messengerDidConnect += 1 }
@@ -33,13 +34,13 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidStartWithTimeout, [30_000])
     XCTAssertNoDifference(messengerDidConnect, 1)
 
-    store.receive(.authCallbacks(.register))
+    store.receive(.authHandler(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartUnregistered)) {
       $0.register = RegisterState()
     }
 
-    store.send(.authCallbacks(.unregister))
+    store.send(.authHandler(.stop))
   }
 
   func testMessengerStartRegistered() {
@@ -55,7 +56,7 @@ final class HomeFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.registerAuthCallbacks.run = { _ in Cancellable {} }
+    store.environment.authHandler.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { messengerDidConnect += 1 }
@@ -78,14 +79,13 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidConnect, 1)
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
-    store.receive(.authCallbacks(.register))
+    store.receive(.authHandler(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartRegistered))
     store.receive(.networkMonitor(.start))
 
     store.send(.networkMonitor(.stop))
-
-    store.send(.authCallbacks(.unregister))
+    store.send(.authHandler(.stop))
   }
 
   func testRegisterFinished() {
@@ -102,7 +102,7 @@ final class HomeFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.registerAuthCallbacks.run = { _ in Cancellable {} }
+    store.environment.authHandler.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
@@ -127,14 +127,13 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidStartWithTimeout, [30_000])
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
-    store.receive(.authCallbacks(.register))
+    store.receive(.authHandler(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartRegistered))
     store.receive(.networkMonitor(.start))
 
     store.send(.networkMonitor(.stop))
-
-    store.send(.authCallbacks(.unregister))
+    store.send(.authHandler(.stop))
   }
 
   func testMessengerStartFailure() {
@@ -149,18 +148,18 @@ final class HomeFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.registerAuthCallbacks.run = { _ in Cancellable {} }
+    store.environment.authHandler.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in throw error }
 
     store.send(.messenger(.start))
 
-    store.receive(.authCallbacks(.register))
+    store.receive(.authHandler(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
 
-    store.send(.authCallbacks(.unregister))
+    store.send(.authHandler(.stop))
   }
 
   func testMessengerStartConnectFailure() {
@@ -175,20 +174,20 @@ final class HomeFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.registerAuthCallbacks.run = { _ in Cancellable {} }
+    store.environment.authHandler.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { throw error }
 
     store.send(.messenger(.start))
 
-    store.receive(.authCallbacks(.register))
+    store.receive(.authHandler(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
 
-    store.send(.authCallbacks(.unregister))
+    store.send(.authHandler(.stop))
   }
 
   func testMessengerStartIsRegisteredFailure() {
@@ -203,7 +202,7 @@ final class HomeFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.registerAuthCallbacks.run = { _ in Cancellable {} }
+    store.environment.authHandler.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in }
     store.environment.messenger.isConnected.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
@@ -211,13 +210,13 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.messenger(.start))
 
-    store.receive(.authCallbacks(.register))
+    store.receive(.authHandler(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
 
-    store.send(.authCallbacks(.unregister))
+    store.send(.authHandler(.stop))
   }
 
   func testMessengerStartLogInFailure() {
@@ -232,7 +231,7 @@ final class HomeFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.registerAuthCallbacks.run = { _ in Cancellable {} }
+    store.environment.authHandler.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in }
     store.environment.messenger.isConnected.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
@@ -241,13 +240,13 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.messenger(.start))
 
-    store.receive(.authCallbacks(.register))
+    store.receive(.authHandler(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
 
-    store.send(.authCallbacks(.unregister))
+    store.send(.authHandler(.stop))
   }
 
   func testNetworkMonitorStart() {
@@ -527,101 +526,37 @@ final class HomeFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let now = Date()
-    var didRegisterCallbacks: [AuthCallbacks] = []
-    var didCancelAuthCallbacks = 0
-    var dbContact: XXModels.Contact?
-    var dbDidSaveContact: [XXModels.Contact] = []
+    var didRunAuthHandler = 0
+    var didCancelAuthHandler = 0
+    var authHandlerOnError: [AuthCallbackHandler.OnError] = []
 
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
-    store.environment.now = { now }
-    store.environment.messenger.registerAuthCallbacks.run = { callbacks in
-      didRegisterCallbacks.append(callbacks)
-      return Cancellable { didCancelAuthCallbacks += 1 }
-    }
-    store.environment.dbManager.getDB.run = {
-      var db: Database = .failing
-      db.fetchContacts.run = { _ in [dbContact].compactMap { $0 } }
-      db.saveContact.run = { contact in
-        dbDidSaveContact.append(contact)
-        return contact
-      }
-      return db
+    store.environment.authHandler.run = { onError in
+      didRunAuthHandler += 1
+      authHandlerOnError.append(onError)
+      return Cancellable { didCancelAuthHandler += 1 }
     }
 
-    store.send(.authCallbacks(.register))
+    store.send(.authHandler(.start))
 
-    XCTAssertNoDifference(didRegisterCallbacks.count, 1)
+    XCTAssertNoDifference(didRunAuthHandler, 1)
 
-    var contact = XXClient.Contact.unimplemented("data".data(using: .utf8)!)
-    contact.getIdFromContact.run = { _ in "id".data(using: .utf8)! }
-    contact.getFactsFromContact.run = { _ in
-      [
-        Fact(type: .username, value: "username"),
-        Fact(type: .email, value: "email"),
-        Fact(type: .phone, value: "phone"),
-      ]
+    struct AuthHandlerError: Error { var id: Int }
+    authHandlerOnError.first?(AuthHandlerError(id: 1))
+
+    store.receive(.authHandler(.failure(AuthHandlerError(id: 1) as NSError))) {
+      $0.authFailure = AuthHandlerError(id: 1).localizedDescription
     }
 
-    dbContact = nil
-    dbDidSaveContact = []
-    didRegisterCallbacks.first?.handle(
-      .request(contact: contact, receptionId: Data(), ephemeralId: 0, roundId: 0)
-    )
+    store.send(.authHandler(.failureDismissed)) {
+      $0.authFailure = nil
+    }
 
-    store.receive(.authCallbacks(.handle(
-      .request(contact: contact, receptionId: Data(), ephemeralId: 0, roundId: 0)
-    )))
-    XCTAssertNoDifference(dbDidSaveContact, [.init(
-      id: "id".data(using: .utf8)!,
-      marshaled: "data".data(using: .utf8)!,
-      username: "username",
-      email: "email",
-      phone: "phone",
-      authStatus: .verificationInProgress,
-      createdAt: now
-    )])
+    store.send(.authHandler(.stop))
 
-    dbContact = .init(id: "id".data(using: .utf8)!)
-    dbDidSaveContact = []
-    didRegisterCallbacks.first?.handle(
-      .request(contact: contact, receptionId: Data(), ephemeralId: 0, roundId: 0)
-    )
+    XCTAssertNoDifference(didCancelAuthHandler, 1)
 
-    store.receive(.authCallbacks(.handle(
-      .request(contact: contact, receptionId: Data(), ephemeralId: 0, roundId: 0)
-    )))
-    XCTAssertNoDifference(dbDidSaveContact, [])
-
-    dbContact = .init(id: "id".data(using: .utf8)!)
-    dbDidSaveContact = []
-    didRegisterCallbacks.first?.handle(
-      .confirm(contact: contact, receptionId: Data(), ephemeralId: 0, roundId: 0)
-    )
-
-    store.receive(.authCallbacks(.handle(
-      .confirm(contact: contact, receptionId: Data(), ephemeralId: 0, roundId: 0)
-    )))
-    XCTAssertNoDifference(dbDidSaveContact, [.init(
-      id: "id".data(using: .utf8)!,
-      authStatus: .friend,
-      createdAt: dbContact!.createdAt
-    )])
-
-    dbContact = nil
-    dbDidSaveContact = []
-    didRegisterCallbacks.first?.handle(
-      .reset(contact: contact, receptionId: Data(), ephemeralId: 0, roundId: 0)
-    )
-
-    store.receive(.authCallbacks(.handle(
-      .reset(contact: contact, receptionId: Data(), ephemeralId: 0, roundId: 0)
-    )))
-    XCTAssertNoDifference(dbDidSaveContact, [])
-
-    store.send(.authCallbacks(.unregister))
-
-    XCTAssertNoDifference(didCancelAuthCallbacks, 1)
+    authHandlerOnError.first?(AuthHandlerError(id: 2))
   }
 }

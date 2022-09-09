@@ -14,6 +14,7 @@ import XXModels
 public struct HomeState: Equatable {
   public init(
     failure: String? = nil,
+    authFailure: String? = nil,
     isNetworkHealthy: Bool? = nil,
     networkNodesReport: NodeRegistrationReport? = nil,
     isDeletingAccount: Bool = false,
@@ -23,6 +24,7 @@ public struct HomeState: Equatable {
     userSearch: UserSearchState? = nil
   ) {
     self.failure = failure
+    self.authFailure = authFailure
     self.isNetworkHealthy = isNetworkHealthy
     self.isDeletingAccount = isDeletingAccount
     self.alert = alert
@@ -32,6 +34,7 @@ public struct HomeState: Equatable {
   }
 
   public var failure: String?
+  public var authFailure: String?
   public var isNetworkHealthy: Bool?
   public var networkNodesReport: NodeRegistrationReport?
   public var isDeletingAccount: Bool
@@ -49,10 +52,11 @@ public enum HomeAction: Equatable {
     case failure(NSError)
   }
 
-  public enum AuthCallbacks: Equatable {
-    case register
-    case unregister
-    case handle(XXClient.AuthCallbacks.Callback)
+  public enum AuthHandler: Equatable {
+    case start
+    case stop
+    case failure(NSError)
+    case failureDismissed
   }
 
   public enum NetworkMonitor: Equatable {
@@ -70,7 +74,7 @@ public enum HomeAction: Equatable {
   }
 
   case messenger(Messenger)
-  case authCallbacks(AuthCallbacks)
+  case authHandler(AuthHandler)
   case networkMonitor(NetworkMonitor)
   case deleteAccount(DeleteAccount)
   case didDismissAlert
@@ -88,18 +92,18 @@ public struct HomeEnvironment {
   public init(
     messenger: Messenger,
     dbManager: DBManager,
+    authHandler: AuthCallbackHandler,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
-    now: @escaping () -> Date,
     register: @escaping () -> RegisterEnvironment,
     contacts: @escaping () -> ContactsEnvironment,
     userSearch: @escaping () -> UserSearchEnvironment
   ) {
     self.messenger = messenger
     self.dbManager = dbManager
+    self.authHandler = authHandler
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
-    self.now = now
     self.register = register
     self.contacts = contacts
     self.userSearch = userSearch
@@ -107,9 +111,9 @@ public struct HomeEnvironment {
 
   public var messenger: Messenger
   public var dbManager: DBManager
+  public var authHandler: AuthCallbackHandler
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
-  public var now: () -> Date
   public var register: () -> RegisterEnvironment
   public var contacts: () -> ContactsEnvironment
   public var userSearch: () -> UserSearchEnvironment
@@ -119,9 +123,9 @@ extension HomeEnvironment {
   public static let unimplemented = HomeEnvironment(
     messenger: .unimplemented,
     dbManager: .unimplemented,
+    authHandler: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
-    now: XCTUnimplemented("\(Self.self).now", placeholder: Date()),
     register: { .unimplemented },
     contacts: { .unimplemented },
     userSearch: { .unimplemented }
@@ -137,7 +141,7 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
   switch action {
   case .messenger(.start):
     return .merge(
-      Effect(value: .authCallbacks(.register)),
+      Effect(value: .authHandler(.start)),
       Effect(value: .networkMonitor(.stop)),
       Effect.result {
         do {
@@ -175,12 +179,11 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     state.failure = error.localizedDescription
     return .none
 
-  case .authCallbacks(.register):
+  case .authHandler(.start):
     return Effect.run { subscriber in
-      let handler = AuthCallbacks { callback in
-        subscriber.send(.authCallbacks(.handle(callback)))
-      }
-      let cancellable = env.messenger.registerAuthCallbacks(handler)
+      let cancellable = env.authHandler(onError: { error in
+        subscriber.send(.authHandler(.failure(error as NSError)))
+      })
       return AnyCancellable { cancellable.cancel() }
     }
     .subscribe(on: env.bgQueue)
@@ -188,44 +191,15 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     .eraseToEffect()
     .cancellable(id: AuthCallbacksEffectId.self, cancelInFlight: true)
 
-  case .authCallbacks(.unregister):
+  case .authHandler(.stop):
     return .cancel(id: AuthCallbacksEffectId.self)
 
-  case .authCallbacks(.handle(.request(let contact, _, _, _))):
-    return .fireAndForget {
-      let db = try env.dbManager.getDB()
-      let contactId = try contact.getId()
-      guard try db.fetchContacts(.init(id: [contactId])).isEmpty else {
-        return
-      }
-      var dbContact = XXModels.Contact(id: contactId)
-      dbContact.marshaled = contact.data
-      dbContact.username = try contact.getFact(.username)?.value
-      dbContact.email = try contact.getFact(.email)?.value
-      dbContact.phone = try contact.getFact(.phone)?.value
-      dbContact.authStatus = .verificationInProgress
-      dbContact.createdAt = env.now()
-      dbContact = try db.saveContact(dbContact)
-    }
-    .subscribe(on: env.bgQueue)
-    .receive(on: env.mainQueue)
-    .eraseToEffect()
+  case .authHandler(.failure(let error)):
+    state.authFailure = error.localizedDescription
+    return .none
 
-  case .authCallbacks(.handle(.confirm(let contact, _, _, _))):
-    return .fireAndForget {
-      let db = try env.dbManager.getDB()
-      let contactId = try contact.getId()
-      guard var dbContact = try db.fetchContacts(.init(id: [contactId])).first else {
-        return
-      }
-      dbContact.authStatus = .friend
-      dbContact = try db.saveContact(dbContact)
-    }
-    .subscribe(on: env.bgQueue)
-    .receive(on: env.mainQueue)
-    .eraseToEffect()
-
-  case .authCallbacks(.handle(.reset(let contact, _, _, _))):
+  case .authHandler(.failureDismissed):
+    state.authFailure = nil
     return .none
 
   case .networkMonitor(.start):
