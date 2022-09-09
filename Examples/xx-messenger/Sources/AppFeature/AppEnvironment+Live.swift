@@ -18,7 +18,11 @@ extension AppEnvironment {
     let messenger = Messenger.live(messengerEnv)
     let authHandler = AuthCallbackHandler.live(
       messenger: messenger,
-      handleRequest: .live(db: dbManager.getDB, now: Date.init),
+      handleRequest: .live(
+        db: dbManager.getDB,
+        messenger: messenger,
+        now: Date.init
+      ),
       handleConfirm: .live(db: dbManager.getDB),
       handleReset: .live(db: dbManager.getDB)
     )
