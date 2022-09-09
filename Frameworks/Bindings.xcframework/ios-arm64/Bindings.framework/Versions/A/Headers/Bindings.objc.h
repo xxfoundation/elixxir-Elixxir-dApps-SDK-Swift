@@ -1432,6 +1432,7 @@ JSON example:
 @property (nonatomic) int64_t timestamp;
 @property (nonatomic) BOOL encrypted;
 @property (nonatomic) long roundId;
+@property (nonatomic) NSString* _Nonnull roundURL;
 @end
 
 /**
