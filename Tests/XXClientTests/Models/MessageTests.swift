@@ -13,6 +13,7 @@ final class MessageTests: XCTestCase {
     let timestamp: Int = 1_653_580_439_357_351_000
     let encrypted = false
     let roundId: Int = 19
+    let roundURL = "https://dashboard.xx.network/rounds/25?xxmessenger=true"
     let jsonString = """
     {
       "MessageType": \(type),
@@ -23,7 +24,8 @@ final class MessageTests: XCTestCase {
       "EphemeralID": \(ephemeralId),
       "Timestamp": \(timestamp),
       "Encrypted": \(encrypted),
-      "RoundId": \(roundId)
+      "RoundId": \(roundId),
+      "RoundURL": "\(roundURL)"
     }
     """
     let jsonData = jsonString.data(using: .utf8)!
@@ -38,7 +40,8 @@ final class MessageTests: XCTestCase {
       ephemeralId: ephemeralId,
       timestamp: timestamp,
       encrypted: encrypted,
-      roundId: roundId
+      roundId: roundId,
+      roundURL: roundURL
     ))
 
     let encodedModel = try model.encode()

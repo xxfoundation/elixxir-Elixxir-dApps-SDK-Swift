@@ -10,7 +10,8 @@ public struct Message: Equatable {
     ephemeralId: Int,
     timestamp: Int,
     encrypted: Bool,
-    roundId: Int
+    roundId: Int,
+    roundURL: String
   ) {
     self.messageType = messageType
     self.id = id
@@ -21,6 +22,7 @@ public struct Message: Equatable {
     self.timestamp = timestamp
     self.encrypted = encrypted
     self.roundId = roundId
+    self.roundURL = roundURL
   }
 
   public var messageType: Int
@@ -32,6 +34,7 @@ public struct Message: Equatable {
   public var timestamp: Int
   public var encrypted: Bool
   public var roundId: Int
+  public var roundURL: String
 }
 
 extension Message: Codable {
@@ -45,6 +48,7 @@ extension Message: Codable {
     case timestamp = "Timestamp"
     case encrypted = "Encrypted"
     case roundId = "RoundId"
+    case roundURL = "RoundURL"
   }
 
   public static func decode(_ data: Data) throws -> Self {
