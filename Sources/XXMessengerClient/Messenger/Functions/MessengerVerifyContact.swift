@@ -33,6 +33,7 @@ extension MessengerVerifyContact {
           e2eId: e2e.getId(),
           udContact: try ud.getContact(),
           lookupId: try contact.getId(),
+          singleRequestParamsJSON: env.getSingleUseParams(),
           callback: .init { result in
             lookupResult = result
             semaphore.signal()
