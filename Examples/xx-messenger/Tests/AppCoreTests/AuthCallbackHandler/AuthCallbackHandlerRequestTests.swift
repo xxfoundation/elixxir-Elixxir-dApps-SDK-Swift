@@ -14,6 +14,8 @@ final class AuthCallbackHandlerRequestTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     var messenger: Messenger = .unimplemented
+    messenger.waitForNetwork.run = { _ in }
+    messenger.waitForNodes.run = { _, _, _, _ in }
     messenger.verifyContact.run = { contact in
       didVerifyContact.append(contact)
       return true
@@ -91,6 +93,8 @@ final class AuthCallbackHandlerRequestTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     var messenger: Messenger = .unimplemented
+    messenger.waitForNetwork.run = { _ in }
+    messenger.waitForNodes.run = { _, _, _, _ in }
     messenger.verifyContact.run = { _ in false }
 
     let request = AuthCallbackHandlerRequest.live(
@@ -135,6 +139,8 @@ final class AuthCallbackHandlerRequestTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     var messenger: Messenger = .unimplemented
+    messenger.waitForNetwork.run = { _ in }
+    messenger.waitForNodes.run = { _, _, _, _ in }
     messenger.verifyContact.run = { _ in throw failure }
 
     let request = AuthCallbackHandlerRequest.live(

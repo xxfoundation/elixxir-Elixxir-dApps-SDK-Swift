@@ -33,6 +33,8 @@ extension AuthCallbackHandlerRequest {
       dbContact = try db().saveContact(dbContact)
 
       do {
+        try messenger.waitForNetwork()
+        try messenger.waitForNodes()
         let verified = try messenger.verifyContact(xxContact)
         dbContact.authStatus = verified ? .verified : .verificationFailed
         dbContact = try db().saveContact(dbContact)
