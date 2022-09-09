@@ -57,6 +57,7 @@ let package = Package(
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
         .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXDatabase", package: "client-ios-db"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXModels", package: "client-ios-db"),
       ],
       swiftSettings: swiftSettings

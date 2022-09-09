@@ -16,6 +16,16 @@ extension AppEnvironment {
     let dbManager = DBManager.live()
     let messengerEnv = MessengerEnvironment.live()
     let messenger = Messenger.live(messengerEnv)
+    let authHandler = AuthCallbackHandler.live(
+      messenger: messenger,
+      handleRequest: .live(
+        db: dbManager.getDB,
+        messenger: messenger,
+        now: Date.init
+      ),
+      handleConfirm: .live(db: dbManager.getDB),
+      handleReset: .live(db: dbManager.getDB)
+    )
     let mainQueue = DispatchQueue.main.eraseToAnyScheduler()
     let bgQueue = DispatchQueue.global(qos: .background).eraseToAnyScheduler()
 
@@ -53,6 +63,7 @@ extension AppEnvironment {
         HomeEnvironment(
           messenger: messenger,
           dbManager: dbManager,
+          authHandler: authHandler,
           mainQueue: mainQueue,
           bgQueue: bgQueue,
           register: {

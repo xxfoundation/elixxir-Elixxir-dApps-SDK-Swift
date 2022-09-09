@@ -6,12 +6,15 @@ import ContactsFeature
 import Foundation
 import RegisterFeature
 import UserSearchFeature
+import XCTestDynamicOverlay
 import XXClient
 import XXMessengerClient
+import XXModels
 
 public struct HomeState: Equatable {
   public init(
     failure: String? = nil,
+    authFailure: String? = nil,
     isNetworkHealthy: Bool? = nil,
     networkNodesReport: NodeRegistrationReport? = nil,
     isDeletingAccount: Bool = false,
@@ -21,6 +24,7 @@ public struct HomeState: Equatable {
     userSearch: UserSearchState? = nil
   ) {
     self.failure = failure
+    self.authFailure = authFailure
     self.isNetworkHealthy = isNetworkHealthy
     self.isDeletingAccount = isDeletingAccount
     self.alert = alert
@@ -30,6 +34,7 @@ public struct HomeState: Equatable {
   }
 
   public var failure: String?
+  public var authFailure: String?
   public var isNetworkHealthy: Bool?
   public var networkNodesReport: NodeRegistrationReport?
   public var isDeletingAccount: Bool
@@ -47,6 +52,13 @@ public enum HomeAction: Equatable {
     case failure(NSError)
   }
 
+  public enum AuthHandler: Equatable {
+    case start
+    case stop
+    case failure(NSError)
+    case failureDismissed
+  }
+
   public enum NetworkMonitor: Equatable {
     case start
     case stop
@@ -62,6 +74,7 @@ public enum HomeAction: Equatable {
   }
 
   case messenger(Messenger)
+  case authHandler(AuthHandler)
   case networkMonitor(NetworkMonitor)
   case deleteAccount(DeleteAccount)
   case didDismissAlert
@@ -79,6 +92,7 @@ public struct HomeEnvironment {
   public init(
     messenger: Messenger,
     dbManager: DBManager,
+    authHandler: AuthCallbackHandler,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
     register: @escaping () -> RegisterEnvironment,
@@ -87,6 +101,7 @@ public struct HomeEnvironment {
   ) {
     self.messenger = messenger
     self.dbManager = dbManager
+    self.authHandler = authHandler
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
     self.register = register
@@ -96,6 +111,7 @@ public struct HomeEnvironment {
 
   public var messenger: Messenger
   public var dbManager: DBManager
+  public var authHandler: AuthCallbackHandler
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var register: () -> RegisterEnvironment
@@ -107,6 +123,7 @@ extension HomeEnvironment {
   public static let unimplemented = HomeEnvironment(
     messenger: .unimplemented,
     dbManager: .unimplemented,
+    authHandler: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
     register: { .unimplemented },
@@ -119,10 +136,12 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 { state, action, env in
   enum NetworkHealthEffectId {}
   enum NetworkNodesEffectId {}
+  enum AuthCallbacksEffectId {}
 
   switch action {
   case .messenger(.start):
     return .merge(
+      Effect(value: .authHandler(.start)),
       Effect(value: .networkMonitor(.stop)),
       Effect.result {
         do {
@@ -158,6 +177,29 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 
   case .messenger(.failure(let error)):
     state.failure = error.localizedDescription
+    return .none
+
+  case .authHandler(.start):
+    return Effect.run { subscriber in
+      let cancellable = env.authHandler(onError: { error in
+        subscriber.send(.authHandler(.failure(error as NSError)))
+      })
+      return AnyCancellable { cancellable.cancel() }
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+    .cancellable(id: AuthCallbacksEffectId.self, cancelInFlight: true)
+
+  case .authHandler(.stop):
+    return .cancel(id: AuthCallbacksEffectId.self)
+
+  case .authHandler(.failure(let error)):
+    state.authFailure = error.localizedDescription
+    return .none
+
+  case .authHandler(.failureDismissed):
+    state.authFailure = nil
     return .none
 
   case .networkMonitor(.start):

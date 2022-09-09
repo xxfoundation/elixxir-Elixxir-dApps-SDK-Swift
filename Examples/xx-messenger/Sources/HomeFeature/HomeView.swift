@@ -15,12 +15,14 @@ public struct HomeView: View {
 
   struct ViewState: Equatable {
     var failure: String?
+    var authFailure: String?
     var isNetworkHealthy: Bool?
     var networkNodesReport: NodeRegistrationReport?
     var isDeletingAccount: Bool
 
     init(state: HomeState) {
       failure = state.failure
+      authFailure = state.authFailure
       isNetworkHealthy = state.isNetworkHealthy
       isDeletingAccount = state.isDeletingAccount
       networkNodesReport = state.networkNodesReport
@@ -31,18 +33,29 @@ public struct HomeView: View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       NavigationView {
         Form {
-          Section {
-            if let failure = viewStore.failure {
+          if let failure = viewStore.failure {
+            Section {
               Text(failure)
               Button {
                 viewStore.send(.messenger(.start))
               } label: {
                 Text("Retry")
               }
-            }
-          } header: {
-            if viewStore.failure != nil {
+            } header: {
               Text("Error")
+            }
+          }
+
+          if let authFailure = viewStore.authFailure {
+            Section {
+              Text(authFailure)
+              Button {
+                viewStore.send(.authHandler(.failureDismissed))
+              } label: {
+                Text("Dismiss")
+              }
+            } header: {
+              Text("Auth Error")
             }
           }
 
