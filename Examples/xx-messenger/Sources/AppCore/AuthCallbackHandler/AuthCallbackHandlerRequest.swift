@@ -15,7 +15,6 @@ public struct AuthCallbackHandlerRequest {
 extension AuthCallbackHandlerRequest {
   public static func live(
     db: DBManagerGetDB,
-    messenger: Messenger,
     now: @escaping () -> Date
   ) -> AuthCallbackHandlerRequest {
     AuthCallbackHandlerRequest { xxContact in
@@ -28,21 +27,9 @@ extension AuthCallbackHandlerRequest {
       dbContact.username = try xxContact.getFact(.username)?.value
       dbContact.email = try xxContact.getFact(.email)?.value
       dbContact.phone = try xxContact.getFact(.phone)?.value
-      dbContact.authStatus = .verificationInProgress
+      dbContact.authStatus = .stranger
       dbContact.createdAt = now()
       dbContact = try db().saveContact(dbContact)
-
-      do {
-        try messenger.waitForNetwork()
-        try messenger.waitForNodes()
-        let verified = try messenger.verifyContact(xxContact)
-        dbContact.authStatus = verified ? .verified : .verificationFailed
-        dbContact = try db().saveContact(dbContact)
-      } catch {
-        dbContact.authStatus = .verificationFailed
-        dbContact = try db().saveContact(dbContact)
-        throw error
-      }
     }
   }
 }
