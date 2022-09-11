@@ -1,19 +1,27 @@
 import ComposableArchitecture
+import CustomDump
 import XCTest
 import XXClient
+import XXModels
 @testable import VerifyContactFeature
 
 final class VerifyContactFeatureTests: XCTestCase {
   func testVerify() {
+    var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
+    let contactId = "contact-id".data(using: .utf8)!
+    contact.getIdFromContact.run = { _ in contactId }
+
     let store = TestStore(
       initialState: VerifyContactState(
-        contact: .unimplemented("contact-data".data(using: .utf8)!)
+        contact: contact
       ),
       reducer: verifyContactReducer,
       environment: .unimplemented
     )
 
-    var didVerifyContact: [Contact] = []
+    var didVerifyContact: [XXClient.Contact] = []
+    var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
+    var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
@@ -21,11 +29,24 @@ final class VerifyContactFeatureTests: XCTestCase {
       didVerifyContact.append(contact)
       return true
     }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.bulkUpdateContacts.run = { query, assignments in
+        didBulkUpdateContactsWithQuery.append(query)
+        didBulkUpdateContactsWithAssignments.append(assignments)
+        return 0
+      }
+      return db
+    }
 
     store.send(.verifyTapped) {
       $0.isVerifying = true
       $0.result = nil
     }
+
+    XCTAssertNoDifference(didVerifyContact, [contact])
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [.init(id: [contactId])])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [.init(authStatus: .verified)])
 
     store.receive(.didVerify(.success(true))) {
       $0.isVerifying = false
@@ -34,22 +55,46 @@ final class VerifyContactFeatureTests: XCTestCase {
   }
 
   func testVerifyNotVerified() {
+    var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
+    let contactId = "contact-id".data(using: .utf8)!
+    contact.getIdFromContact.run = { _ in contactId }
+
     let store = TestStore(
       initialState: VerifyContactState(
-        contact: .unimplemented("contact-data".data(using: .utf8)!)
+        contact: contact
       ),
       reducer: verifyContactReducer,
       environment: .unimplemented
     )
 
+    var didVerifyContact: [XXClient.Contact] = []
+    var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
+    var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
+
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
-    store.environment.messenger.verifyContact.run = { _ in false }
+    store.environment.messenger.verifyContact.run = { contact in
+      didVerifyContact.append(contact)
+      return false
+    }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.bulkUpdateContacts.run = { query, assignments in
+        didBulkUpdateContactsWithQuery.append(query)
+        didBulkUpdateContactsWithAssignments.append(assignments)
+        return 0
+      }
+      return db
+    }
 
     store.send(.verifyTapped) {
       $0.isVerifying = true
       $0.result = nil
     }
+
+    XCTAssertNoDifference(didVerifyContact, [contact])
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [.init(id: [contactId])])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [.init(authStatus: .verificationFailed)])
 
     store.receive(.didVerify(.success(false))) {
       $0.isVerifying = false

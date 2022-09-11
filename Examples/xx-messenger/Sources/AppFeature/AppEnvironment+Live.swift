@@ -47,6 +47,7 @@ extension AppEnvironment {
       verifyContact: {
         VerifyContactEnvironment(
           messenger: messenger,
+          db: dbManager.getDB,
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )
