@@ -1,6 +1,7 @@
 import CheckContactAuthFeature
 import Combine
 import ComposableArchitecture
+import ConfirmRequestFeature
 import CustomDump
 import SendRequestFeature
 import VerifyContactFeature
@@ -239,6 +240,44 @@ final class ContactFeatureTests: XCTestCase {
 
     store.send(.checkAuthDismissed) {
       $0.checkAuth = nil
+    }
+  }
+
+  func testConfirmRequestTapped() {
+    let contactData = "contact-data".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: Data(),
+        dbContact: XXModels.Contact(
+          id: Data(),
+          marshaled: contactData
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.confirmRequestTapped) {
+      $0.confirmRequest = ConfirmRequestState(
+        contact: .unimplemented(contactData)
+      )
+    }
+  }
+
+  func testConfirmRequestDismissed() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!,
+        confirmRequest: ConfirmRequestState(
+          contact: .unimplemented("contact-data".data(using: .utf8)!)
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.confirmRequestDismissed) {
+      $0.confirmRequest = nil
     }
   }
 }

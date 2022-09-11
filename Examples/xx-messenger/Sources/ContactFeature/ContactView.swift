@@ -2,6 +2,7 @@ import AppCore
 import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
+import ConfirmRequestFeature
 import SendRequestFeature
 import SwiftUI
 import VerifyContactFeature
@@ -126,6 +127,15 @@ public struct ContactView: View {
               }
             }
             Button {
+              viewStore.send(.confirmRequestTapped)
+            } label: {
+              HStack {
+                Text("Confirm request")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+            Button {
               viewStore.send(.checkAuthTapped)
             } label: {
               HStack {
@@ -158,6 +168,14 @@ public struct ContactView: View {
         ),
         onDeactivate: { viewStore.send(.verifyContactDismissed) },
         destination: VerifyContactView.init(store:)
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.confirmRequest,
+          action: ContactAction.confirmRequest
+        ),
+        onDeactivate: { viewStore.send(.confirmRequestDismissed) },
+        destination: ConfirmRequestView.init(store:)
       ))
       .background(NavigationLinkWithStore(
         store.scope(

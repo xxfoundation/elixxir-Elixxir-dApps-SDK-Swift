@@ -2,6 +2,7 @@ import AppCore
 import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
+import ConfirmRequestFeature
 import Foundation
 import SendRequestFeature
 import VerifyContactFeature
@@ -20,6 +21,7 @@ public struct ContactState: Equatable {
     importPhone: Bool = true,
     sendRequest: SendRequestState? = nil,
     verifyContact: VerifyContactState? = nil,
+    confirmRequest: ConfirmRequestState? = nil,
     checkAuth: CheckContactAuthState? = nil
   ) {
     self.id = id
@@ -30,6 +32,7 @@ public struct ContactState: Equatable {
     self.importPhone = importPhone
     self.sendRequest = sendRequest
     self.verifyContact = verifyContact
+    self.confirmRequest = confirmRequest
     self.checkAuth = checkAuth
   }
 
@@ -41,6 +44,7 @@ public struct ContactState: Equatable {
   @BindableState public var importPhone: Bool
   public var sendRequest: SendRequestState?
   public var verifyContact: VerifyContactState?
+  public var confirmRequest: ConfirmRequestState?
   public var checkAuth: CheckContactAuthState?
 }
 
@@ -57,6 +61,9 @@ public enum ContactAction: Equatable, BindableAction {
   case checkAuthTapped
   case checkAuthDismissed
   case checkAuth(CheckContactAuthAction)
+  case confirmRequestTapped
+  case confirmRequestDismissed
+  case confirmRequest(ConfirmRequestAction)
   case binding(BindingAction<ContactState>)
 }
 
@@ -68,6 +75,7 @@ public struct ContactEnvironment {
     bgQueue: AnySchedulerOf<DispatchQueue>,
     sendRequest: @escaping () -> SendRequestEnvironment,
     verifyContact: @escaping () -> VerifyContactEnvironment,
+    confirmRequest: @escaping () -> ConfirmRequestEnvironment,
     checkAuth: @escaping () -> CheckContactAuthEnvironment
   ) {
     self.messenger = messenger
@@ -76,6 +84,7 @@ public struct ContactEnvironment {
     self.bgQueue = bgQueue
     self.sendRequest = sendRequest
     self.verifyContact = verifyContact
+    self.confirmRequest = confirmRequest
     self.checkAuth = checkAuth
   }
 
@@ -85,6 +94,7 @@ public struct ContactEnvironment {
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var sendRequest: () -> SendRequestEnvironment
   public var verifyContact: () -> VerifyContactEnvironment
+  public var confirmRequest: () -> ConfirmRequestEnvironment
   public var checkAuth: () -> CheckContactAuthEnvironment
 }
 
@@ -97,6 +107,7 @@ extension ContactEnvironment {
     bgQueue: .unimplemented,
     sendRequest: { .unimplemented },
     verifyContact: { .unimplemented },
+    confirmRequest: { .unimplemented },
     checkAuth: { .unimplemented }
   )
 }
@@ -181,7 +192,19 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.checkAuth = nil
     return .none
 
-  case .binding(_), .sendRequest(_), .verifyContact(_), .checkAuth(_):
+  case .confirmRequestTapped:
+    if let marshaled = state.dbContact?.marshaled {
+      state.confirmRequest = ConfirmRequestState(
+        contact: .live(marshaled)
+      )
+    }
+    return .none
+
+  case .confirmRequestDismissed:
+    state.confirmRequest = nil
+    return .none
+
+  case .binding(_), .sendRequest(_), .verifyContact(_), .confirmRequest(_), .checkAuth(_):
     return .none
   }
 }
@@ -199,6 +222,13 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
   id: .notNil(),
   action: /ContactAction.verifyContact,
   environment: { $0.verifyContact() }
+)
+.presenting(
+  confirmRequestReducer,
+  state: .keyPath(\.confirmRequest),
+  id: .notNil(),
+  action: /ContactAction.confirmRequest,
+  environment: { $0.confirmRequest() }
 )
 .presenting(
   checkContactAuthReducer,

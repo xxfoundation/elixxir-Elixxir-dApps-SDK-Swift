@@ -1,5 +1,6 @@
 import AppCore
 import CheckContactAuthFeature
+import ConfirmRequestFeature
 import ContactFeature
 import ContactsFeature
 import Foundation
@@ -42,6 +43,14 @@ extension AppEnvironment {
       },
       verifyContact: {
         VerifyContactEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
+      confirmRequest: {
+        ConfirmRequestEnvironment(
           messenger: messenger,
           db: dbManager.getDB,
           mainQueue: mainQueue,

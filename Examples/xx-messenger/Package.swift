@@ -77,6 +77,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "CheckContactAuthFeature"),
+        .target(name: "ConfirmRequestFeature"),
         .target(name: "ContactFeature"),
         .target(name: "ContactsFeature"),
         .target(name: "HomeFeature"),
@@ -137,6 +138,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "CheckContactAuthFeature"),
+        .target(name: "ConfirmRequestFeature"),
         .target(name: "SendRequestFeature"),
         .target(name: "VerifyContactFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
