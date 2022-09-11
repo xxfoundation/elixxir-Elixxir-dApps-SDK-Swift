@@ -1,11 +1,13 @@
 import ComposableArchitecture
+import CustomDump
 import XCTest
 import XXClient
+import XXModels
 @testable import CheckContactAuthFeature
 
 final class CheckContactAuthFeatureTests: XCTestCase {
   func testCheck() {
-    var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
+    var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
     let contactId = "contact-id".data(using: .utf8)!
     contact.getIdFromContact.run = { _ in contactId }
 
@@ -18,6 +20,8 @@ final class CheckContactAuthFeatureTests: XCTestCase {
     )
 
     var didCheckPartnerId: [Data] = []
+    var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
+    var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
@@ -29,11 +33,24 @@ final class CheckContactAuthFeatureTests: XCTestCase {
       }
       return e2e
     }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.bulkUpdateContacts.run = { query, assignments in
+        didBulkUpdateContactsWithQuery.append(query)
+        didBulkUpdateContactsWithAssignments.append(assignments)
+        return 0
+      }
+      return db
+    }
 
     store.send(.checkTapped) {
       $0.isChecking = true
       $0.result = nil
     }
+
+    XCTAssertNoDifference(didCheckPartnerId, [contactId])
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [.init(id: [contactId])])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [.init(authStatus: .friend)])
 
     store.receive(.didCheck(.success(true))) {
       $0.isChecking = false
@@ -42,7 +59,7 @@ final class CheckContactAuthFeatureTests: XCTestCase {
   }
 
   func testCheckNoConnection() {
-    var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
+    var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
     let contactId = "contact-id".data(using: .utf8)!
     contact.getIdFromContact.run = { _ in contactId }
 
@@ -54,18 +71,38 @@ final class CheckContactAuthFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
+    var didCheckPartnerId: [Data] = []
+    var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
+    var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
+
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
-      e2e.hasAuthenticatedChannel.run = { _ in false }
+      e2e.hasAuthenticatedChannel.run = { partnerId in
+        didCheckPartnerId.append(partnerId)
+        return false
+      }
       return e2e
+    }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.bulkUpdateContacts.run = { query, assignments in
+        didBulkUpdateContactsWithQuery.append(query)
+        didBulkUpdateContactsWithAssignments.append(assignments)
+        return 0
+      }
+      return db
     }
 
     store.send(.checkTapped) {
       $0.isChecking = true
       $0.result = nil
     }
+
+    XCTAssertNoDifference(didCheckPartnerId, [contactId])
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [.init(id: [contactId])])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [.init(authStatus: .stranger)])
 
     store.receive(.didCheck(.success(false))) {
       $0.isChecking = false
@@ -74,7 +111,7 @@ final class CheckContactAuthFeatureTests: XCTestCase {
   }
 
   func testCheckFailure() {
-    var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
+    var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
     let contactId = "contact-id".data(using: .utf8)!
     contact.getIdFromContact.run = { _ in contactId }
 

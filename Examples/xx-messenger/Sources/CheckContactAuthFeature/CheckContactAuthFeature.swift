@@ -1,8 +1,10 @@
+import AppCore
 import ComposableArchitecture
 import Foundation
 import XCTestDynamicOverlay
 import XXClient
 import XXMessengerClient
+import XXModels
 
 public struct CheckContactAuthState: Equatable {
   public enum Result: Equatable {
@@ -11,7 +13,7 @@ public struct CheckContactAuthState: Equatable {
   }
 
   public init(
-    contact: Contact,
+    contact: XXClient.Contact,
     isChecking: Bool = false,
     result: Result? = nil
   ) {
@@ -20,7 +22,7 @@ public struct CheckContactAuthState: Equatable {
     self.result = result
   }
 
-  public var contact: Contact
+  public var contact: XXClient.Contact
   public var isChecking: Bool
   public var result: Result?
 }
@@ -33,15 +35,18 @@ public enum CheckContactAuthAction: Equatable {
 public struct CheckContactAuthEnvironment {
   public init(
     messenger: Messenger,
+    db: DBManagerGetDB,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>
   ) {
     self.messenger = messenger
+    self.db = db
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
   }
 
   public var messenger: Messenger
+  public var db: DBManagerGetDB
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
@@ -50,6 +55,7 @@ public struct CheckContactAuthEnvironment {
 extension CheckContactAuthEnvironment {
   public static let unimplemented = CheckContactAuthEnvironment(
     messenger: .unimplemented,
+    db: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented
   )
@@ -67,6 +73,10 @@ public let checkContactAuthReducer = Reducer<CheckContactAuthState, CheckContact
         let e2e = try env.messenger.e2e.tryGet()
         let contactId = try state.contact.getId()
         let result = try e2e.hasAuthenticatedChannel(partnerId: contactId)
+        try env.db().bulkUpdateContacts.callAsFunction(
+          .init(id: [contactId]),
+          .init(authStatus: result ? .friend : .stranger)
+        )
         return .success(.didCheck(.success(result)))
       } catch {
         return .success(.didCheck(.failure(error.localizedDescription)))
