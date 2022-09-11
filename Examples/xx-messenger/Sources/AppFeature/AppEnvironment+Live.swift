@@ -44,7 +44,11 @@ extension AppEnvironment {
         )
       },
       verifyContact: {
-        VerifyContactEnvironment()
+        VerifyContactEnvironment(
+          messenger: messenger,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
       }
     )
 

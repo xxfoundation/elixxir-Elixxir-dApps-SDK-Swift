@@ -149,7 +149,7 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
   case .verifyContactTapped:
     if let marshaled = state.dbContact?.marshaled {
       state.verifyContact = VerifyContactState(
-        xxContact: .live(marshaled)
+        contact: .live(marshaled)
       )
     }
     return .none

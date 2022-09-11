@@ -181,7 +181,7 @@ final class ContactFeatureTests: XCTestCase {
 
     store.send(.verifyContactTapped) {
       $0.verifyContact = VerifyContactState(
-        xxContact: .live(contactData)
+        contact: .unimplemented(contactData)
       )
     }
   }
@@ -191,7 +191,7 @@ final class ContactFeatureTests: XCTestCase {
       initialState: ContactState(
         id: "contact-id".data(using: .utf8)!,
         verifyContact: VerifyContactState(
-          xxContact: .unimplemented("contact-data".data(using: .utf8)!)
+          contact: .unimplemented("contact-data".data(using: .utf8)!)
         )
       ),
       reducer: contactReducer,
