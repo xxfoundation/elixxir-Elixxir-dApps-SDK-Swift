@@ -27,6 +27,7 @@ let package = Package(
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
     .library(name: "SendRequestFeature", targets: ["SendRequestFeature"]),
     .library(name: "UserSearchFeature", targets: ["UserSearchFeature"]),
+    .library(name: "VerifyContactFeature", targets: ["VerifyContactFeature"]),
     .library(name: "WelcomeFeature", targets: ["WelcomeFeature"]),
   ],
   dependencies: [
@@ -222,6 +223,18 @@ let package = Package(
         .target(name: "UserSearchFeature"),
       ],
       swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "VerifyContactFeature",
+      dependencies: [
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+      ]
+    ),
+    .testTarget(
+      name: "VerifyContactFeatureTests",
+      dependencies: [
+        .target(name: "VerifyContactFeature"),
+      ]
     ),
     .target(
       name: "WelcomeFeature",
