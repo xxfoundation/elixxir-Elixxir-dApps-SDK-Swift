@@ -7,6 +7,7 @@ import RegisterFeature
 import RestoreFeature
 import SendRequestFeature
 import UserSearchFeature
+import VerifyContactFeature
 import WelcomeFeature
 import XXMessengerClient
 import XXModels
@@ -41,6 +42,9 @@ extension AppEnvironment {
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )
+      },
+      verifyContact: {
+        VerifyContactEnvironment()
       }
     )
 

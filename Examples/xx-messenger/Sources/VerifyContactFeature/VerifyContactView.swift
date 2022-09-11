@@ -27,7 +27,9 @@ public struct VerifyContactView: View {
 public struct VerifyContactView_Previews: PreviewProvider {
   public static var previews: some View {
     VerifyContactView(store: Store(
-      initialState: VerifyContactState(),
+      initialState: VerifyContactState(
+        xxContact: .unimplemented("contact-data".data(using: .utf8)!)
+      ),
       reducer: .empty,
       environment: ()
     ))

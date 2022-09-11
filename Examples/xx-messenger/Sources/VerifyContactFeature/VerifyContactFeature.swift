@@ -1,8 +1,15 @@
 import ComposableArchitecture
 import XCTestDynamicOverlay
+import XXClient
 
 public struct VerifyContactState: Equatable {
-  public init() {}
+  public init(
+    xxContact: XXClient.Contact
+  ) {
+    self.xxContact = xxContact
+  }
+
+  public var xxContact: XXClient.Contact
 }
 
 public enum VerifyContactAction: Equatable {

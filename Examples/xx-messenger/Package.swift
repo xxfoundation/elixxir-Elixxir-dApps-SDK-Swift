@@ -81,6 +81,7 @@ let package = Package(
         .target(name: "RestoreFeature"),
         .target(name: "SendRequestFeature"),
         .target(name: "UserSearchFeature"),
+        .target(name: "VerifyContactFeature"),
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
@@ -101,6 +102,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "SendRequestFeature"),
+        .target(name: "VerifyContactFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
@@ -228,6 +230,7 @@ let package = Package(
       name: "VerifyContactFeature",
       dependencies: [
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
       ]
     ),
     .testTarget(

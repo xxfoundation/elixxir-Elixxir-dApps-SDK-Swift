@@ -3,6 +3,7 @@ import ComposableArchitecture
 import ComposablePresentation
 import SendRequestFeature
 import SwiftUI
+import VerifyContactFeature
 import XXClient
 import XXModels
 
@@ -114,6 +115,15 @@ public struct ContactView: View {
                 Image(systemName: "chevron.forward")
               }
             }
+            Button {
+              viewStore.send(.verifyContactTapped)
+            } label: {
+              HStack {
+                Text("Verify contact")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
           } header: {
             Text("Auth")
           }
@@ -130,6 +140,14 @@ public struct ContactView: View {
         mapState: replayNonNil(),
         onDeactivate: { viewStore.send(.sendRequestDismissed) },
         destination: SendRequestView.init(store:)
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.verifyContact,
+          action: ContactAction.verifyContact
+        ),
+        onDeactivate: { viewStore.send(.verifyContactDismissed) },
+        destination: VerifyContactView.init(store:)
       ))
     }
   }
