@@ -1,4 +1,5 @@
 import AppCore
+import CheckContactAuthFeature
 import ContactFeature
 import ContactsFeature
 import Foundation
@@ -45,6 +46,13 @@ extension AppEnvironment {
       },
       verifyContact: {
         VerifyContactEnvironment(
+          messenger: messenger,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
+      checkAuth: {
+        CheckContactAuthEnvironment(
           messenger: messenger,
           mainQueue: mainQueue,
           bgQueue: bgQueue
