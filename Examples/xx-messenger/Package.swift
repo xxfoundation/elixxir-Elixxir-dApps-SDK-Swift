@@ -20,6 +20,7 @@ let package = Package(
   products: [
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
+    .library(name: "CheckContactAuthFeature", targets: ["CheckContactAuthFeature"]),
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
     .library(name: "ContactsFeature", targets: ["ContactsFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
@@ -96,6 +97,21 @@ let package = Package(
         .target(name: "AppFeature"),
       ],
       swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "CheckContactAuthFeature",
+      dependencies: [
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ]
+    ),
+    .testTarget(
+      name: "CheckContactAuthFeatureTests",
+      dependencies: [
+        .target(name: "CheckContactAuthFeature"),
+      ]
     ),
     .target(
       name: "ContactFeature",
