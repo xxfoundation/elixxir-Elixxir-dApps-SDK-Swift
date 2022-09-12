@@ -1,8 +1,11 @@
 import AppCore
+import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
+import ConfirmRequestFeature
 import Foundation
 import SendRequestFeature
+import VerifyContactFeature
 import XCTestDynamicOverlay
 import XXClient
 import XXMessengerClient
@@ -16,7 +19,10 @@ public struct ContactState: Equatable {
     importUsername: Bool = true,
     importEmail: Bool = true,
     importPhone: Bool = true,
-    sendRequest: SendRequestState? = nil
+    sendRequest: SendRequestState? = nil,
+    verifyContact: VerifyContactState? = nil,
+    confirmRequest: ConfirmRequestState? = nil,
+    checkAuth: CheckContactAuthState? = nil
   ) {
     self.id = id
     self.dbContact = dbContact
@@ -25,6 +31,9 @@ public struct ContactState: Equatable {
     self.importEmail = importEmail
     self.importPhone = importPhone
     self.sendRequest = sendRequest
+    self.verifyContact = verifyContact
+    self.confirmRequest = confirmRequest
+    self.checkAuth = checkAuth
   }
 
   public var id: Data
@@ -34,6 +43,9 @@ public struct ContactState: Equatable {
   @BindableState public var importEmail: Bool
   @BindableState public var importPhone: Bool
   public var sendRequest: SendRequestState?
+  public var verifyContact: VerifyContactState?
+  public var confirmRequest: ConfirmRequestState?
+  public var checkAuth: CheckContactAuthState?
 }
 
 public enum ContactAction: Equatable, BindableAction {
@@ -43,6 +55,15 @@ public enum ContactAction: Equatable, BindableAction {
   case sendRequestTapped
   case sendRequestDismissed
   case sendRequest(SendRequestAction)
+  case verifyContactTapped
+  case verifyContactDismissed
+  case verifyContact(VerifyContactAction)
+  case checkAuthTapped
+  case checkAuthDismissed
+  case checkAuth(CheckContactAuthAction)
+  case confirmRequestTapped
+  case confirmRequestDismissed
+  case confirmRequest(ConfirmRequestAction)
   case binding(BindingAction<ContactState>)
 }
 
@@ -52,13 +73,19 @@ public struct ContactEnvironment {
     db: DBManagerGetDB,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
-    sendRequest: @escaping () -> SendRequestEnvironment
+    sendRequest: @escaping () -> SendRequestEnvironment,
+    verifyContact: @escaping () -> VerifyContactEnvironment,
+    confirmRequest: @escaping () -> ConfirmRequestEnvironment,
+    checkAuth: @escaping () -> CheckContactAuthEnvironment
   ) {
     self.messenger = messenger
     self.db = db
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
     self.sendRequest = sendRequest
+    self.verifyContact = verifyContact
+    self.confirmRequest = confirmRequest
+    self.checkAuth = checkAuth
   }
 
   public var messenger: Messenger
@@ -66,6 +93,9 @@ public struct ContactEnvironment {
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var sendRequest: () -> SendRequestEnvironment
+  public var verifyContact: () -> VerifyContactEnvironment
+  public var confirmRequest: () -> ConfirmRequestEnvironment
+  public var checkAuth: () -> CheckContactAuthEnvironment
 }
 
 #if DEBUG
@@ -75,7 +105,10 @@ extension ContactEnvironment {
     db: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
-    sendRequest: { .unimplemented }
+    sendRequest: { .unimplemented },
+    verifyContact: { .unimplemented },
+    confirmRequest: { .unimplemented },
+    checkAuth: { .unimplemented }
   )
 }
 #endif
@@ -135,10 +168,43 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.sendRequest = nil
     return .none
 
-  case .sendRequest(_):
+  case .verifyContactTapped:
+    if let marshaled = state.dbContact?.marshaled {
+      state.verifyContact = VerifyContactState(
+        contact: .live(marshaled)
+      )
+    }
     return .none
 
-  case .binding(_):
+  case .verifyContactDismissed:
+    state.verifyContact = nil
+    return .none
+
+  case .checkAuthTapped:
+    if let marshaled = state.dbContact?.marshaled {
+      state.checkAuth = CheckContactAuthState(
+        contact: .live(marshaled)
+      )
+    }
+    return .none
+
+  case .checkAuthDismissed:
+    state.checkAuth = nil
+    return .none
+
+  case .confirmRequestTapped:
+    if let marshaled = state.dbContact?.marshaled {
+      state.confirmRequest = ConfirmRequestState(
+        contact: .live(marshaled)
+      )
+    }
+    return .none
+
+  case .confirmRequestDismissed:
+    state.confirmRequest = nil
+    return .none
+
+  case .binding(_), .sendRequest(_), .verifyContact(_), .confirmRequest(_), .checkAuth(_):
     return .none
   }
 }
@@ -149,4 +215,25 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
   id: .notNil(),
   action: /ContactAction.sendRequest,
   environment: { $0.sendRequest() }
+)
+.presenting(
+  verifyContactReducer,
+  state: .keyPath(\.verifyContact),
+  id: .notNil(),
+  action: /ContactAction.verifyContact,
+  environment: { $0.verifyContact() }
+)
+.presenting(
+  confirmRequestReducer,
+  state: .keyPath(\.confirmRequest),
+  id: .notNil(),
+  action: /ContactAction.confirmRequest,
+  environment: { $0.confirmRequest() }
+)
+.presenting(
+  checkContactAuthReducer,
+  state: .keyPath(\.checkAuth),
+  id: .notNil(),
+  action: /ContactAction.checkAuth,
+  environment: { $0.checkAuth() }
 )

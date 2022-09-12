@@ -20,6 +20,8 @@ let package = Package(
   products: [
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
+    .library(name: "CheckContactAuthFeature", targets: ["CheckContactAuthFeature"]),
+    .library(name: "ConfirmRequestFeature", targets: ["ConfirmRequestFeature"]),
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
     .library(name: "ContactsFeature", targets: ["ContactsFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
@@ -27,6 +29,7 @@ let package = Package(
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
     .library(name: "SendRequestFeature", targets: ["SendRequestFeature"]),
     .library(name: "UserSearchFeature", targets: ["UserSearchFeature"]),
+    .library(name: "VerifyContactFeature", targets: ["VerifyContactFeature"]),
     .library(name: "WelcomeFeature", targets: ["WelcomeFeature"]),
   ],
   dependencies: [
@@ -73,6 +76,8 @@ let package = Package(
       name: "AppFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "CheckContactAuthFeature"),
+        .target(name: "ConfirmRequestFeature"),
         .target(name: "ContactFeature"),
         .target(name: "ContactsFeature"),
         .target(name: "HomeFeature"),
@@ -80,6 +85,7 @@ let package = Package(
         .target(name: "RestoreFeature"),
         .target(name: "SendRequestFeature"),
         .target(name: "UserSearchFeature"),
+        .target(name: "VerifyContactFeature"),
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
@@ -96,10 +102,45 @@ let package = Package(
       swiftSettings: swiftSettings
     ),
     .target(
+      name: "CheckContactAuthFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ]
+    ),
+    .testTarget(
+      name: "CheckContactAuthFeatureTests",
+      dependencies: [
+        .target(name: "CheckContactAuthFeature"),
+      ]
+    ),
+    .target(
+      name: "ConfirmRequestFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ]
+    ),
+    .testTarget(
+      name: "ConfirmRequestFeatureTests",
+      dependencies: [
+        .target(name: "ConfirmRequestFeature"),
+      ]
+    ),
+    .target(
       name: "ContactFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "CheckContactAuthFeature"),
+        .target(name: "ConfirmRequestFeature"),
         .target(name: "SendRequestFeature"),
+        .target(name: "VerifyContactFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
@@ -222,6 +263,22 @@ let package = Package(
         .target(name: "UserSearchFeature"),
       ],
       swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "VerifyContactFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ]
+    ),
+    .testTarget(
+      name: "VerifyContactFeatureTests",
+      dependencies: [
+        .target(name: "VerifyContactFeature"),
+      ]
     ),
     .target(
       name: "WelcomeFeature",

@@ -1,4 +1,6 @@
 import AppCore
+import CheckContactAuthFeature
+import ConfirmRequestFeature
 import ContactFeature
 import ContactsFeature
 import Foundation
@@ -7,6 +9,7 @@ import RegisterFeature
 import RestoreFeature
 import SendRequestFeature
 import UserSearchFeature
+import VerifyContactFeature
 import WelcomeFeature
 import XXMessengerClient
 import XXModels
@@ -18,11 +21,7 @@ extension AppEnvironment {
     let messenger = Messenger.live(messengerEnv)
     let authHandler = AuthCallbackHandler.live(
       messenger: messenger,
-      handleRequest: .live(
-        db: dbManager.getDB,
-        messenger: messenger,
-        now: Date.init
-      ),
+      handleRequest: .live(db: dbManager.getDB, now: Date.init),
       handleConfirm: .live(db: dbManager.getDB),
       handleReset: .live(db: dbManager.getDB)
     )
@@ -36,6 +35,30 @@ extension AppEnvironment {
       bgQueue: bgQueue,
       sendRequest: {
         SendRequestEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
+      verifyContact: {
+        VerifyContactEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
+      confirmRequest: {
+        ConfirmRequestEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
+      checkAuth: {
+        CheckContactAuthEnvironment(
           messenger: messenger,
           db: dbManager.getDB,
           mainQueue: mainQueue,

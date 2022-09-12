@@ -1,8 +1,11 @@
 import AppCore
+import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
+import ConfirmRequestFeature
 import SendRequestFeature
 import SwiftUI
+import VerifyContactFeature
 import XXClient
 import XXModels
 
@@ -114,6 +117,33 @@ public struct ContactView: View {
                 Image(systemName: "chevron.forward")
               }
             }
+            Button {
+              viewStore.send(.verifyContactTapped)
+            } label: {
+              HStack {
+                Text("Verify contact")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+            Button {
+              viewStore.send(.confirmRequestTapped)
+            } label: {
+              HStack {
+                Text("Confirm request")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+            Button {
+              viewStore.send(.checkAuthTapped)
+            } label: {
+              HStack {
+                Text("Check authorization")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
           } header: {
             Text("Auth")
           }
@@ -130,6 +160,30 @@ public struct ContactView: View {
         mapState: replayNonNil(),
         onDeactivate: { viewStore.send(.sendRequestDismissed) },
         destination: SendRequestView.init(store:)
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.verifyContact,
+          action: ContactAction.verifyContact
+        ),
+        onDeactivate: { viewStore.send(.verifyContactDismissed) },
+        destination: VerifyContactView.init(store:)
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.confirmRequest,
+          action: ContactAction.confirmRequest
+        ),
+        onDeactivate: { viewStore.send(.confirmRequestDismissed) },
+        destination: ConfirmRequestView.init(store:)
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.checkAuth,
+          action: ContactAction.checkAuth
+        ),
+        onDeactivate: { viewStore.send(.checkAuthDismissed) },
+        destination: CheckContactAuthView.init(store:)
       ))
     }
   }

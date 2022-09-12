@@ -1,7 +1,10 @@
+import CheckContactAuthFeature
 import Combine
 import ComposableArchitecture
+import ConfirmRequestFeature
 import CustomDump
 import SendRequestFeature
+import VerifyContactFeature
 import XCTest
 import XXClient
 import XXModels
@@ -161,6 +164,120 @@ final class ContactFeatureTests: XCTestCase {
 
     store.send(.sendRequest(.sendSucceeded)) {
       $0.sendRequest = nil
+    }
+  }
+
+  func testVerifyContactTapped() {
+    let contactData = "contact-data".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: Data(),
+        dbContact: XXModels.Contact(
+          id: Data(),
+          marshaled: contactData
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.verifyContactTapped) {
+      $0.verifyContact = VerifyContactState(
+        contact: .unimplemented(contactData)
+      )
+    }
+  }
+
+  func testVerifyContactDismissed() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!,
+        verifyContact: VerifyContactState(
+          contact: .unimplemented("contact-data".data(using: .utf8)!)
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.verifyContactDismissed) {
+      $0.verifyContact = nil
+    }
+  }
+
+  func testCheckAuthTapped() {
+    let contactData = "contact-data".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: Data(),
+        dbContact: XXModels.Contact(
+          id: Data(),
+          marshaled: contactData
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.checkAuthTapped) {
+      $0.checkAuth = CheckContactAuthState(
+        contact: .unimplemented(contactData)
+      )
+    }
+  }
+
+  func testCheckAuthDismissed() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!,
+        checkAuth: CheckContactAuthState(
+          contact: .unimplemented("contact-data".data(using: .utf8)!)
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.checkAuthDismissed) {
+      $0.checkAuth = nil
+    }
+  }
+
+  func testConfirmRequestTapped() {
+    let contactData = "contact-data".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: Data(),
+        dbContact: XXModels.Contact(
+          id: Data(),
+          marshaled: contactData
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.confirmRequestTapped) {
+      $0.confirmRequest = ConfirmRequestState(
+        contact: .unimplemented(contactData)
+      )
+    }
+  }
+
+  func testConfirmRequestDismissed() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!,
+        confirmRequest: ConfirmRequestState(
+          contact: .unimplemented("contact-data".data(using: .utf8)!)
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.confirmRequestDismissed) {
+      $0.confirmRequest = nil
     }
   }
 }

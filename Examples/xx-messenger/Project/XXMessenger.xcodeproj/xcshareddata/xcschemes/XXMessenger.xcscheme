@@ -53,6 +53,26 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "CheckContactAuthFeatureTests"
+               BuildableName = "CheckContactAuthFeatureTests"
+               BlueprintName = "CheckContactAuthFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ConfirmRequestFeatureTests"
+               BuildableName = "ConfirmRequestFeatureTests"
+               BlueprintName = "ConfirmRequestFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "ContactFeatureTests"
                BuildableName = "ContactFeatureTests"
                BlueprintName = "ContactFeatureTests"
@@ -116,6 +136,16 @@
                BlueprintIdentifier = "UserSearchFeatureTests"
                BuildableName = "UserSearchFeatureTests"
                BlueprintName = "UserSearchFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "VerifyContactFeatureTests"
+               BuildableName = "VerifyContactFeatureTests"
+               BlueprintName = "VerifyContactFeatureTests"
                ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>
