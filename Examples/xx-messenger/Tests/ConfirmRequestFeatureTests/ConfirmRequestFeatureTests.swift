@@ -49,8 +49,14 @@ final class ConfirmRequestFeatureTests: XCTestCase {
     }
 
     XCTAssertNoDifference(didConfirmRequestFromContact, [contact])
-    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [.init(id: [contactId])])
-    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [.init(authStatus: .friend)])
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [
+      .init(id: [contactId]),
+      .init(id: [contactId]),
+    ])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [
+      .init(authStatus: .confirming),
+      .init(authStatus: .friend),
+    ])
 
     store.receive(.didConfirm(.success)) {
       $0.isConfirming = false
@@ -74,6 +80,9 @@ final class ConfirmRequestFeatureTests: XCTestCase {
     struct Failure: Error {}
     let error = Failure()
 
+    var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
+    var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
+
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.messenger.e2e.get = {
@@ -81,11 +90,29 @@ final class ConfirmRequestFeatureTests: XCTestCase {
       e2e.confirmReceivedRequest.run = { _ in throw error }
       return e2e
     }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.bulkUpdateContacts.run = { query, assignments in
+        didBulkUpdateContactsWithQuery.append(query)
+        didBulkUpdateContactsWithAssignments.append(assignments)
+        return 0
+      }
+      return db
+    }
 
     store.send(.confirmTapped) {
       $0.isConfirming = true
       $0.result = nil
     }
+
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [
+      .init(id: [contactId]),
+      .init(id: [contactId]),
+    ])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [
+      .init(authStatus: .confirming),
+      .init(authStatus: .confirmationFailed),
+    ])
 
     store.receive(.didConfirm(.failure(error.localizedDescription))) {
       $0.isConfirming = false

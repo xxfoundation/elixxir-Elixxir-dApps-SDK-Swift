@@ -69,16 +69,20 @@ public let confirmRequestReducer = Reducer<ConfirmRequestState, ConfirmRequestAc
     state.isConfirming = true
     state.result = nil
     return Effect.result { [state] in
+      func updateStatus(_ status: XXModels.Contact.AuthStatus) throws {
+        try env.db().bulkUpdateContacts.callAsFunction(
+          .init(id: [try state.contact.getId()]),
+          .init(authStatus: status)
+        )
+      }
       do {
+        try updateStatus(.confirming)
         let e2e = try env.messenger.e2e.tryGet()
         _ = try e2e.confirmReceivedRequest(partner: state.contact)
-        let contactId = try state.contact.getId()
-        try env.db().bulkUpdateContacts.callAsFunction(
-          .init(id: [contactId]),
-          .init(authStatus: .friend)
-        )
+        try updateStatus(.friend)
         return .success(.didConfirm(.success))
       } catch {
+        try? updateStatus(.confirmationFailed)
         return .success(.didConfirm(.failure(error.localizedDescription)))
       }
     }
