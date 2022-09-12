@@ -45,8 +45,14 @@ final class VerifyContactFeatureTests: XCTestCase {
     }
 
     XCTAssertNoDifference(didVerifyContact, [contact])
-    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [.init(id: [contactId])])
-    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [.init(authStatus: .verified)])
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [
+      .init(id: [contactId]),
+      .init(id: [contactId]),
+    ])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [
+      .init(authStatus: .verificationInProgress),
+      .init(authStatus: .verified)
+    ])
 
     store.receive(.didVerify(.success(true))) {
       $0.isVerifying = false
@@ -93,8 +99,14 @@ final class VerifyContactFeatureTests: XCTestCase {
     }
 
     XCTAssertNoDifference(didVerifyContact, [contact])
-    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [.init(id: [contactId])])
-    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [.init(authStatus: .verificationFailed)])
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [
+      .init(id: [contactId]),
+      .init(id: [contactId]),
+    ])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [
+      .init(authStatus: .verificationInProgress),
+      .init(authStatus: .verificationFailed),
+    ])
 
     store.receive(.didVerify(.success(false))) {
       $0.isVerifying = false
@@ -103,9 +115,13 @@ final class VerifyContactFeatureTests: XCTestCase {
   }
 
   func testVerifyFailure() {
+    var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
+    let contactId = "contact-id".data(using: .utf8)!
+    contact.getIdFromContact.run = { _ in contactId }
+
     let store = TestStore(
       initialState: VerifyContactState(
-        contact: .unimplemented("contact-data".data(using: .utf8)!)
+        contact: contact
       ),
       reducer: verifyContactReducer,
       environment: .unimplemented
@@ -114,14 +130,35 @@ final class VerifyContactFeatureTests: XCTestCase {
     struct Failure: Error {}
     let error = Failure()
 
+    var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
+    var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
+
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.messenger.verifyContact.run = { _ in throw error }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.bulkUpdateContacts.run = { query, assignments in
+        didBulkUpdateContactsWithQuery.append(query)
+        didBulkUpdateContactsWithAssignments.append(assignments)
+        return 0
+      }
+      return db
+    }
 
     store.send(.verifyTapped) {
       $0.isVerifying = true
       $0.result = nil
     }
+
+    XCTAssertNoDifference(didBulkUpdateContactsWithQuery, [
+      .init(id: [contactId]),
+      .init(id: [contactId]),
+    ])
+    XCTAssertNoDifference(didBulkUpdateContactsWithAssignments, [
+      .init(authStatus: .verificationInProgress),
+      .init(authStatus: .verificationFailed),
+    ])
 
     store.receive(.didVerify(.failure(error.localizedDescription))) {
       $0.isVerifying = false

@@ -69,15 +69,19 @@ public let verifyContactReducer = Reducer<VerifyContactState, VerifyContactActio
     state.isVerifying = true
     state.result = nil
     return Effect.result { [state] in
-      do {
-        let result = try env.messenger.verifyContact(state.contact)
-        let contactId = try state.contact.getId()
+      func updateStatus(_ status: XXModels.Contact.AuthStatus) throws {
         try env.db().bulkUpdateContacts.callAsFunction(
-          .init(id: [contactId]),
-          .init(authStatus: result ? .verified : .verificationFailed)
+          .init(id: [try state.contact.getId()]),
+          .init(authStatus: status)
         )
+      }
+      do {
+        try updateStatus(.verificationInProgress)
+        let result = try env.messenger.verifyContact(state.contact)
+        try updateStatus(result ? .verified : .verificationFailed)
         return .success(.didVerify(.success(result)))
       } catch {
+        try? updateStatus(.verificationFailed)
         return .success(.didVerify(.failure(error.localizedDescription)))
       }
     }
