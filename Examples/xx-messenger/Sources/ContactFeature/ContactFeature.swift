@@ -1,4 +1,5 @@
 import AppCore
+import ChatFeature
 import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
@@ -22,7 +23,8 @@ public struct ContactState: Equatable {
     sendRequest: SendRequestState? = nil,
     verifyContact: VerifyContactState? = nil,
     confirmRequest: ConfirmRequestState? = nil,
-    checkAuth: CheckContactAuthState? = nil
+    checkAuth: CheckContactAuthState? = nil,
+    chat: ChatState? = nil
   ) {
     self.id = id
     self.dbContact = dbContact
@@ -34,6 +36,7 @@ public struct ContactState: Equatable {
     self.verifyContact = verifyContact
     self.confirmRequest = confirmRequest
     self.checkAuth = checkAuth
+    self.chat = chat
   }
 
   public var id: Data
@@ -46,6 +49,7 @@ public struct ContactState: Equatable {
   public var verifyContact: VerifyContactState?
   public var confirmRequest: ConfirmRequestState?
   public var checkAuth: CheckContactAuthState?
+  public var chat: ChatState?
 }
 
 public enum ContactAction: Equatable, BindableAction {
@@ -64,6 +68,9 @@ public enum ContactAction: Equatable, BindableAction {
   case confirmRequestTapped
   case confirmRequestDismissed
   case confirmRequest(ConfirmRequestAction)
+  case chatTapped
+  case chatDismissed
+  case chat(ChatAction)
   case binding(BindingAction<ContactState>)
 }
 
@@ -76,7 +83,8 @@ public struct ContactEnvironment {
     sendRequest: @escaping () -> SendRequestEnvironment,
     verifyContact: @escaping () -> VerifyContactEnvironment,
     confirmRequest: @escaping () -> ConfirmRequestEnvironment,
-    checkAuth: @escaping () -> CheckContactAuthEnvironment
+    checkAuth: @escaping () -> CheckContactAuthEnvironment,
+    chat: @escaping () -> ChatEnvironment
   ) {
     self.messenger = messenger
     self.db = db
@@ -86,6 +94,7 @@ public struct ContactEnvironment {
     self.verifyContact = verifyContact
     self.confirmRequest = confirmRequest
     self.checkAuth = checkAuth
+    self.chat = chat
   }
 
   public var messenger: Messenger
@@ -96,6 +105,7 @@ public struct ContactEnvironment {
   public var verifyContact: () -> VerifyContactEnvironment
   public var confirmRequest: () -> ConfirmRequestEnvironment
   public var checkAuth: () -> CheckContactAuthEnvironment
+  public var chat: () -> ChatEnvironment
 }
 
 #if DEBUG
@@ -108,7 +118,8 @@ extension ContactEnvironment {
     sendRequest: { .unimplemented },
     verifyContact: { .unimplemented },
     confirmRequest: { .unimplemented },
-    checkAuth: { .unimplemented }
+    checkAuth: { .unimplemented },
+    chat: { .unimplemented }
   )
 }
 #endif
@@ -204,7 +215,15 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.confirmRequest = nil
     return .none
 
-  case .binding(_), .sendRequest(_), .verifyContact(_), .confirmRequest(_), .checkAuth(_):
+  case .chatTapped:
+    state.chat = ChatState(id: .contact(state.id))
+    return .none
+
+  case .chatDismissed:
+    state.chat = nil
+    return .none
+
+  case .binding(_), .sendRequest(_), .verifyContact(_), .confirmRequest(_), .checkAuth(_), .chat(_):
     return .none
   }
 }
@@ -236,4 +255,11 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
   id: .notNil(),
   action: /ContactAction.checkAuth,
   environment: { $0.checkAuth() }
+)
+.presenting(
+  chatReducer,
+  state: .keyPath(\.chat),
+  id: .keyPath(\.?.id),
+  action: /ContactAction.chat,
+  environment: { $0.chat() }
 )

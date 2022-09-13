@@ -1,4 +1,5 @@
 import AppCore
+import ChatFeature
 import CheckContactAuthFeature
 import ConfirmRequestFeature
 import ContactFeature
@@ -64,6 +65,9 @@ extension AppEnvironment {
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )
+      },
+      chat: {
+        ChatEnvironment()
       }
     )
 

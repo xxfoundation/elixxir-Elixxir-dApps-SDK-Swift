@@ -1,4 +1,5 @@
 import AppCore
+import ChatFeature
 import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
@@ -148,6 +149,20 @@ public struct ContactView: View {
             Text("Auth")
           }
           .animation(.default, value: viewStore.dbContact?.authStatus)
+
+          Section {
+            Button {
+              viewStore.send(.chatTapped)
+            } label: {
+              HStack {
+                Text("Chat")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+          } header: {
+            Text("Chat")
+          }
         }
       }
       .navigationTitle("Contact")
@@ -184,6 +199,14 @@ public struct ContactView: View {
         ),
         onDeactivate: { viewStore.send(.checkAuthDismissed) },
         destination: CheckContactAuthView.init(store:)
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.chat,
+          action: ContactAction.chat
+        ),
+        onDeactivate: { viewStore.send(.chatDismissed) },
+        destination: ChatView.init(store:)
       ))
     }
   }

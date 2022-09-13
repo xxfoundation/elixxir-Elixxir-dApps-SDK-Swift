@@ -77,6 +77,7 @@ let package = Package(
       name: "AppFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "ChatFeature"),
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
         .target(name: "ContactFeature"),
@@ -152,6 +153,7 @@ let package = Package(
       name: "ContactFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "ChatFeature"),
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
         .target(name: "SendRequestFeature"),
