@@ -24,6 +24,7 @@ public struct Messenger {
   public var searchUsers: MessengerSearchUsers
   public var registerForNotifications: MessengerRegisterForNotifications
   public var verifyContact: MessengerVerifyContact
+  public var sendMessage: MessengerSendMessage
 }
 
 extension Messenger {
@@ -51,7 +52,8 @@ extension Messenger {
       destroy: .live(env),
       searchUsers: .live(env),
       registerForNotifications: .live(env),
-      verifyContact: .live(env)
+      verifyContact: .live(env),
+      sendMessage: .live(env)
     )
   }
 }
@@ -80,6 +82,7 @@ extension Messenger {
     destroy: .unimplemented,
     searchUsers: .unimplemented,
     registerForNotifications: .unimplemented,
-    verifyContact: .unimplemented
+    verifyContact: .unimplemented,
+    sendMessage: .unimplemented
   )
 }
