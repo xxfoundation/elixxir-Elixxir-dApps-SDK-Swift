@@ -1,7 +1,7 @@
+import CustomDump
 import XCTest
 import XXClient
 @testable import XXMessengerClient
-import CustomDump
 
 final class AuthCallbacksRegistryTests: XCTestCase {
   func testRegistry() {
