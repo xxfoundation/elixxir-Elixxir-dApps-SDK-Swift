@@ -659,12 +659,12 @@ parameters below.
 Parameters:
  - cmixId - a Cmix object ID in the tracker.
  - maxNumMessages - the upper bound of the random number of messages sent
-   each sending cycle.
+   each sending cycle.  Suggested value: 5.
  - avgSendDeltaMS - the average duration, in milliseconds, to wait between
-   sends.
+   sends.  Suggested value: 60000.
  - randomRangeMS - the upper bound of the interval between sending cycles, in
    milliseconds. Sends occur every avgSendDeltaMS +/- a random duration with
-   an upper bound of randomRangeMS.
+   an upper bound of randomRangeMS.  Suggested value: 1000.
  */
 - (nullable instancetype)initManager:(long)cmixId maxNumMessages:(long)maxNumMessages avgSendDeltaMS:(long)avgSendDeltaMS randomRangeMS:(long)randomRangeMS;
 /**
@@ -1141,9 +1141,11 @@ This should be done when a new transfer is received on the ReceiveCallback.
 Parameters:
  - tidBytes - file transfer ID
  - callback - callback that reports file reception progress
- - period - duration to wait between progress callbacks triggering
+ - period - Duration (in ms) to wait between progress callbacks triggering.
+            This value should depend on how frequently you want to receive
+            updates, and should be tuned to your implementation.
  */
-- (BOOL)registerReceivedProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferReceiveProgressCallback> _Nullable)callback period:(NSString* _Nullable)period error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)registerReceivedProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferReceiveProgressCallback> _Nullable)callback period:(long)period error:(NSError* _Nullable* _Nullable)error;
 /**
  * RegisterSentProgressCallback allows for the registration of a callback to
 track the progress of an individual sent file transfer.
@@ -1154,9 +1156,11 @@ called when resuming clients or registering extra callbacks.
 Parameters:
  - tidBytes - file transfer ID
  - callback - callback that reports file reception progress
- - period - duration to wait between progress callbacks triggering
+ - period - Duration (in ms) to wait between progress callbacks triggering.
+            This value should depend on how frequently you want to receive
+            updates, and should be tuned to your implementation.
  */
-- (BOOL)registerSentProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(NSString* _Nullable)period error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)registerSentProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(long)period error:(NSError* _Nullable* _Nullable)error;
 /**
  * Send is the bindings-level function for sending a file.
 
@@ -2155,12 +2159,12 @@ parameters below.
 Parameters:
  - cmixId - a Cmix object ID in the tracker.
  - maxNumMessages - the upper bound of the random number of messages sent
-   each sending cycle.
+   each sending cycle.  Suggested value: 5.
  - avgSendDeltaMS - the average duration, in milliseconds, to wait between
-   sends.
+   sends.  Suggested value: 60000.
  - randomRangeMS - the upper bound of the interval between sending cycles, in
    milliseconds. Sends occur every avgSendDeltaMS +/- a random duration with
-   an upper bound of randomRangeMS.
+   an upper bound of randomRangeMS.  Suggested value: 1000.
  */
 FOUNDATION_EXPORT BindingsDummyTraffic* _Nullable BindingsNewDummyTrafficManager(long cmixId, long maxNumMessages, long avgSendDeltaMS, long randomRangeMS, NSError* _Nullable* _Nullable error);
 
