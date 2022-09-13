@@ -106,6 +106,7 @@ let package = Package(
     .target(
       name: "ChatFeature",
       dependencies: [
+        .target(name: "AppCore"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
       ],
       swiftSettings: swiftSettings
