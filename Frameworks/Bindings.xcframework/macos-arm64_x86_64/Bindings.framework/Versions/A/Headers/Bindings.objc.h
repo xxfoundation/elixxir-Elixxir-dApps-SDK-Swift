@@ -29,6 +29,7 @@
 @class BindingsFileTransfer;
 @class BindingsGroup;
 @class BindingsGroupChat;
+@class BindingsGroupChatMessage;
 @class BindingsGroupReport;
 @class BindingsGroupSendReport;
 @class BindingsMessage;
@@ -1350,6 +1351,47 @@ Returns:
 @end
 
 /**
+ * GroupChatMessage is the bindings layer representation of the
+[groupChat.MessageReceive].
+
+GroupChatMessage Example JSON:
+ {
+   "GroupId": "AAAAAAAJlasAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE",
+   "SenderId": "AAAAAAAAB8gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+   "MessageId": "Zm9ydHkgZml2ZQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+   "Payload": "Zm9ydHkgZml2ZQ==",
+   "Timestamp": 1663009269474079000
+ }
+ */
+@interface BindingsGroupChatMessage : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+/**
+ * GroupId is the ID of the group that this message was sent on.
+ */
+@property (nonatomic) NSData* _Nullable groupId;
+/**
+ * SenderId is the ID of the sender of this message.
+ */
+@property (nonatomic) NSData* _Nullable senderId;
+/**
+ * MessageId is the ID of this group message.
+ */
+@property (nonatomic) NSData* _Nullable messageId;
+/**
+ * Payload is the content of the message.
+ */
+@property (nonatomic) NSData* _Nullable payload;
+/**
+ * Timestamp is the time this message was sent on.
+ */
+@property (nonatomic) int64_t timestamp;
+@end
+
+/**
  * GroupReport is returned when creating a new group and contains the ID of
 the group, a list of rounds that the group requests were sent on, and the
 status of the send operation.
@@ -2501,6 +2543,7 @@ Parameters:
 
 /**
  * GroupChatProcessor manages the handling of received group chat messages.
+The decryptedMessage field will be a JSON marshalled GroupChatMessage.
  */
 @interface BindingsGroupChatProcessor : NSObject <goSeqRefInterface, BindingsGroupChatProcessor> {
 }
