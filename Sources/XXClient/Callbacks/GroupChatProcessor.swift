@@ -4,7 +4,7 @@ import XCTestDynamicOverlay
 public struct GroupChatProcessor {
   public struct Callback: Equatable {
     public init(
-      decryptedMessage: Result<Data, NSError>,
+      decryptedMessage: GroupChatMessage,
       msg: Data,
       receptionId: Data,
       ephemeralId: Int64,
@@ -17,7 +17,7 @@ public struct GroupChatProcessor {
       self.roundId = roundId
     }
 
-    public var decryptedMessage: Result<Data, NSError>
+    public var decryptedMessage: GroupChatMessage
     public var msg: Data
     public var receptionId: Data
     public var ephemeralId: Int64
@@ -26,14 +26,14 @@ public struct GroupChatProcessor {
 
   public init(
     name: String = "GroupChatProcessor",
-    handle: @escaping (Callback) -> Void
+    handle: @escaping (Result<Callback, NSError>) -> Void
   ) {
     self.name = name
     self.handle = handle
   }
 
   public var name: String
-  public var handle: (Callback) -> Void
+  public var handle: (Result<Callback, NSError>) -> Void
 }
 
 extension GroupChatProcessor {
@@ -60,27 +60,30 @@ extension GroupChatProcessor {
         roundId: Int64,
         err: Error?
       ) {
+        if let err = err {
+          callback.handle(.failure(err as NSError))
+          return
+        }
+        guard let decryptedMessage = decryptedMessage else {
+          fatalError("BindingsGroupChatProcessor received `nil` decryptedMessage")
+        }
         guard let msg = msg else {
           fatalError("BindingsGroupChatProcessor received `nil` msg")
         }
         guard let receptionId = receptionId else {
           fatalError("BindingsGroupChatProcessor received `nil` receptionId")
         }
-        let decryptedMessageResult: Result<Data, NSError>
-        if let err = err {
-          decryptedMessageResult = .failure(err as NSError)
-        } else if let decryptedMessage = decryptedMessage {
-          decryptedMessageResult = .success(decryptedMessage)
-        } else {
-          fatalError("BindingsGroupChatProcessor received `nil` decryptedMessage and `nil` error")
+        do {
+          callback.handle(.success(.init(
+            decryptedMessage: try GroupChatMessage.decode(decryptedMessage),
+            msg: msg,
+            receptionId: receptionId,
+            ephemeralId: ephemeralId,
+            roundId: roundId
+          )))
+        } catch {
+          callback.handle(.failure(error as NSError))
         }
-        callback.handle(.init(
-          decryptedMessage: decryptedMessageResult,
-          msg: msg,
-          receptionId: receptionId,
-          ephemeralId: ephemeralId,
-          roundId: roundId
-        ))
       }
 
       func string() -> String {
