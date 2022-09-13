@@ -20,6 +20,7 @@ let package = Package(
   products: [
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
+    .library(name: "ChatFeature", targets: ["ChatFeature"]),
     .library(name: "CheckContactAuthFeature", targets: ["CheckContactAuthFeature"]),
     .library(name: "ConfirmRequestFeature", targets: ["ConfirmRequestFeature"]),
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
@@ -98,6 +99,20 @@ let package = Package(
       name: "AppFeatureTests",
       dependencies: [
         .target(name: "AppFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "ChatFeature",
+      dependencies: [
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ChatFeatureTests",
+      dependencies: [
+        .target(name: "ChatFeature"),
       ],
       swiftSettings: swiftSettings
     ),
