@@ -9,9 +9,11 @@ public struct Messenger {
   public var isLoaded: MessengerIsLoaded
   public var load: MessengerLoad
   public var registerAuthCallbacks: MessengerRegisterAuthCallbacks
+  public var registerMessageListener: MessengerRegisterMessageListener
   public var start: MessengerStart
   public var isConnected: MessengerIsConnected
   public var connect: MessengerConnect
+  public var listenForMessages: MessengerListenForMessages
   public var isRegistered: MessengerIsRegistered
   public var register: MessengerRegister
   public var isLoggedIn: MessengerIsLoggedIn
@@ -35,9 +37,11 @@ extension Messenger {
       isLoaded: .live(env),
       load: .live(env),
       registerAuthCallbacks: .live(env),
+      registerMessageListener: .live(env),
       start: .live(env),
       isConnected: .live(env),
       connect: .live(env),
+      listenForMessages: .live(env),
       isRegistered: .live(env),
       register: .live(env),
       isLoggedIn: .live(env),
@@ -62,9 +66,11 @@ extension Messenger {
     isLoaded: .unimplemented,
     load: .unimplemented,
     registerAuthCallbacks: .unimplemented,
+    registerMessageListener: .unimplemented,
     start: .unimplemented,
     isConnected: .unimplemented,
     connect: .unimplemented,
+    listenForMessages: .unimplemented,
     isRegistered: .unimplemented,
     register: .unimplemented,
     isLoggedIn: .unimplemented,
