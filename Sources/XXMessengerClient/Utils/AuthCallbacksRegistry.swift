@@ -1,6 +1,6 @@
-import XXClient
-import XCTestDynamicOverlay
 import Foundation
+import XCTestDynamicOverlay
+import XXClient
 
 public struct AuthCallbacksRegistry {
   public var register: (AuthCallbacks) -> Cancellable

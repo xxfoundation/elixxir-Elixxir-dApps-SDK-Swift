@@ -16,6 +16,7 @@ public struct MessengerEnvironment {
   public var loadCMix: LoadCMix
   public var login: Login
   public var lookupUD: LookupUD
+  public var messageListeners: ListenersRegistry
   public var ndfEnvironment: NDFEnvironment
   public var newCMix: NewCMix
   public var newOrLoadUd: NewOrLoadUd
@@ -52,6 +53,7 @@ extension MessengerEnvironment {
       loadCMix: .live,
       login: .live,
       lookupUD: .live,
+      messageListeners: .live(),
       ndfEnvironment: .mainnet,
       newCMix: .live,
       newOrLoadUd: .live,
@@ -83,6 +85,7 @@ extension MessengerEnvironment {
     loadCMix: .unimplemented,
     login: .unimplemented,
     lookupUD: .unimplemented,
+    messageListeners: .unimplemented,
     ndfEnvironment: .unimplemented,
     newCMix: .unimplemented,
     newOrLoadUd: .unimplemented,
