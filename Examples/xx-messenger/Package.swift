@@ -5,8 +5,8 @@ let swiftSettings: [SwiftSetting] = [
   .unsafeFlags(
     [
       // "-Xfrontend", "-warn-concurrency",
-      "-Xfrontend", "-debug-time-function-bodies",
-      "-Xfrontend", "-debug-time-expression-type-checking",
+      // "-Xfrontend", "-debug-time-function-bodies",
+      // "-Xfrontend", "-debug-time-expression-type-checking",
     ],
     .when(configuration: .debug)
   ),
