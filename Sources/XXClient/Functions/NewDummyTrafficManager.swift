@@ -6,9 +6,9 @@ public struct NewDummyTrafficManager {
 
   public func callAsFunction(
     cMixId: Int,
-    maxNumMessages: Int,
-    avgSendDeltaMS: Int,
-    randomRangeMS: Int
+    maxNumMessages: Int = 5,
+    avgSendDeltaMS: Int = 60_000,
+    randomRangeMS: Int = 1_000
   ) throws -> DummyTraffic {
     try run(cMixId, maxNumMessages, avgSendDeltaMS, randomRangeMS)
   }

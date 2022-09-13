@@ -2,11 +2,11 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct FileTransferRegisterReceivedProgressCallback {
-  public var run: (Data, String, FileTransferProgressCallback) throws -> Void
+  public var run: (Data, Int, FileTransferProgressCallback) throws -> Void
 
   public func callAsFunction(
     transferId: Data,
-    period: String,
+    period: Int,
     callback: FileTransferProgressCallback
   ) throws {
     try run(transferId, period, callback)
