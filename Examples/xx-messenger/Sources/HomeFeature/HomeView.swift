@@ -16,6 +16,7 @@ public struct HomeView: View {
   struct ViewState: Equatable {
     var failure: String?
     var authFailure: String?
+    var messageListenerFailure: String?
     var isNetworkHealthy: Bool?
     var networkNodesReport: NodeRegistrationReport?
     var isDeletingAccount: Bool
@@ -23,6 +24,7 @@ public struct HomeView: View {
     init(state: HomeState) {
       failure = state.failure
       authFailure = state.authFailure
+      messageListenerFailure = state.messageListenerFailure
       isNetworkHealthy = state.isNetworkHealthy
       isDeletingAccount = state.isDeletingAccount
       networkNodesReport = state.networkNodesReport
@@ -56,6 +58,19 @@ public struct HomeView: View {
               }
             } header: {
               Text("Auth Error")
+            }
+          }
+
+          if let messageListenerFailure = viewStore.messageListenerFailure {
+            Section {
+              Text(messageListenerFailure)
+              Button {
+                viewStore.send(.messageListener(.failureDismissed))
+              } label: {
+                Text("Dismiss")
+              }
+            } header: {
+              Text("Message Listener Error")
             }
           }
 
