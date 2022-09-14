@@ -17,18 +17,21 @@ public struct ChatState: Equatable, Identifiable {
       id: Int64,
       date: Date,
       senderId: Data,
-      text: String
+      text: String,
+      status: XXModels.Message.Status
     ) {
       self.id = id
       self.date = date
       self.senderId = senderId
       self.text = text
+      self.status = status
     }
 
     public var id: Int64
     public var date: Date
     public var senderId: Data
     public var text: String
+    public var status: XXModels.Message.Status
   }
 
   public init(
@@ -118,7 +121,8 @@ public let chatReducer = Reducer<ChatState, ChatAction, ChatEnvironment>
               id: id,
               date: message.date,
               senderId: message.senderId,
-              text: message.text
+              text: message.text,
+              status: message.status
             )
           }
         }

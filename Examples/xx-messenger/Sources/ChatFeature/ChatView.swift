@@ -95,7 +95,7 @@ public struct ChatView: View {
 
     var body: some View {
       VStack {
-        Text("\(message.date.formatted())")
+        Text("\(message.date.formatted()), \(statusText)")
           .foregroundColor(.secondary)
           .font(.footnote)
           .frame(maxWidth: .infinity, alignment: alignment)
@@ -111,6 +111,18 @@ public struct ChatView: View {
           .frame(maxWidth: .infinity, alignment: alignment)
       }
       .padding(.horizontal)
+    }
+
+    var statusText: String {
+      switch message.status {
+      case .sending: return "Sending"
+      case .sendingTimedOut: return "Sending timed out"
+      case .sendingFailed: return "Failed"
+      case .sent: return "Sent"
+      case .receiving: return "Receiving"
+      case .receivingFailed: return "Receiving failed"
+      case .received: return "Received"
+      }
     }
   }
 }
@@ -128,13 +140,15 @@ public struct ChatView_Previews: PreviewProvider {
               id: 1,
               date: Date(),
               senderId: "contact-id".data(using: .utf8)!,
-              text: "Hello!"
+              text: "Hello!",
+              status: .received
             ),
             .init(
               id: 2,
               date: Date(),
               senderId: "my-contact-id".data(using: .utf8)!,
-              text: "Hi!"
+              text: "Hi!",
+              status: .sent
             ),
           ]
         ),

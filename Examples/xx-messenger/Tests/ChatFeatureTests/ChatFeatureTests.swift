@@ -87,13 +87,15 @@ final class ChatFeatureTests: XCTestCase {
         id: 1,
         date: Date(timeIntervalSince1970: 1),
         senderId: contactId,
-        text: "Message 1"
+        text: "Message 1",
+        status: .received
       ),
       .init(
         id: 2,
         date: Date(timeIntervalSince1970: 2),
         senderId: myContactId,
-        text: "Message 2"
+        text: "Message 2",
+        status: .sent
       ),
     ])
 
