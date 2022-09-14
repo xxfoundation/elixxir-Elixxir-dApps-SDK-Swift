@@ -7,7 +7,7 @@ public struct FileTransferSend {
       payload: FileSend,
       recipientId: Data,
       retry: Float,
-      period: String
+      period: Int
     ) {
       self.payload = payload
       self.recipientId = recipientId
@@ -18,7 +18,7 @@ public struct FileTransferSend {
     public var payload: FileSend
     public var recipientId: Data
     public var retry: Float
-    public var period: String
+    public var period: Int
   }
 
   public var run: (Params, FileTransferProgressCallback) throws -> Data
