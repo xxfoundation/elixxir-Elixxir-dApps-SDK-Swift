@@ -12,10 +12,12 @@ public struct ChatView: View {
   struct ViewState: Equatable {
     var myContactId: Data?
     var messages: IdentifiedArrayOf<ChatState.Message>
+    var failure: String?
 
     init(state: ChatState) {
       myContactId = state.myContactId
       messages = state.messages
+      failure = state.failure
     }
   }
 
@@ -23,6 +25,17 @@ public struct ChatView: View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       ScrollView {
         LazyVStack {
+          if let failure = viewStore.failure {
+            Text(failure)
+              .frame(maxWidth: .infinity, alignment: .leading)
+              .padding()
+            Button {
+              viewStore.send(.start)
+            } label: {
+              Text("Retry")
+            }
+            .padding()
+          }
           ForEach(viewStore.messages) { message in
             MessageView(
               message: message,
@@ -107,13 +120,13 @@ public struct ChatView_Previews: PreviewProvider {
           myContactId: "my-contact-id".data(using: .utf8)!,
           messages: [
             .init(
-              id: "message-1-id".data(using: .utf8)!,
+              id: 1,
               date: Date(),
               senderId: "contact-id".data(using: .utf8)!,
               text: "Hello!"
             ),
             .init(
-              id: "message-2-id".data(using: .utf8)!,
+              id: 2,
               date: Date(),
               senderId: "my-contact-id".data(using: .utf8)!,
               text: "Hi!"

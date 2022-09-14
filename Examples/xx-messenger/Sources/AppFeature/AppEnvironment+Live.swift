@@ -67,7 +67,12 @@ extension AppEnvironment {
         )
       },
       chat: {
-        ChatEnvironment()
+        ChatEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
       }
     )
 
