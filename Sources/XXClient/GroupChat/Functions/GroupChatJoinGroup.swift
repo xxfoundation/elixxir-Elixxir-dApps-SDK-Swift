@@ -2,10 +2,10 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct GroupChatJoinGroup {
-  public var run: (Int) throws -> Void
+  public var run: (Data) throws -> Void
 
-  public func callAsFunction(trackedGroupId: Int) throws {
-    try run(trackedGroupId)
+  public func callAsFunction(serializedGroupData: Data) throws {
+    try run(serializedGroupData)
   }
 }
 

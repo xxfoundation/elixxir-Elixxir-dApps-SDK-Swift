@@ -1240,11 +1240,6 @@ Example JSON [group.Membership] return:
  */
 - (NSData* _Nullable)getName;
 /**
- * GetTrackedID returns the tracked ID of the Group object. This is used by the
-backend tracker.
- */
-- (long)getTrackedID;
-/**
  * Serialize serializes the Group.
  */
 - (NSData* _Nullable)serialize;
@@ -1291,10 +1286,10 @@ If an error is returned, handle it properly first; you may then retry later
 with the same trackedGroupId.
 
 Parameters:
- - trackedGroupId - the ID to retrieve the Group object within the backend's
-   tracking system. This is received by GroupRequest.Callback.
+ - serializedGroupData - the result of calling Group.Serialize() on
+   any Group object returned over the bindings
  */
-- (BOOL)joinGroup:(long)trackedGroupId error:(NSError* _Nullable* _Nullable)error;
+- (BOOL)joinGroup:(NSData* _Nullable)serializedGroupData error:(NSError* _Nullable* _Nullable)error;
 /**
  * LeaveGroup deletes a group so a user no longer has access.
 
@@ -1864,6 +1859,12 @@ Returns
    but still be meaningful for front-end or back-end teams.
  */
 FOUNDATION_EXPORT NSString* _Nonnull BindingsCreateUserFriendlyErrorMessage(NSString* _Nullable errStr);
+
+/**
+ * DeserializeGroup converts the results of Group.Serialize() into a Group
+so that its methods can be called.
+ */
+FOUNDATION_EXPORT BindingsGroup* _Nullable BindingsDeserializeGroup(NSData* _Nullable serializedGroupData, NSError* _Nullable* _Nullable error);
 
 /**
  * DownloadAndVerifySignedNdfWithUrl retrieves the NDF from a specified URL.
@@ -2564,7 +2565,7 @@ The decryptedMessage field will be a JSON marshalled GroupChatMessage.
  * GroupRequest is a bindings-layer interface that handles a group reception.
 
 Parameters:
- - trackedGroupId - a bindings layer Group object.
+ - g - a bindings layer Group object.
  */
 @interface BindingsGroupRequest : NSObject <goSeqRefInterface, BindingsGroupRequest> {
 }
