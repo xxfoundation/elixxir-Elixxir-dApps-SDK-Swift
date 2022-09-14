@@ -1,3 +1,4 @@
+import AppCore
 import Combine
 import ComposableArchitecture
 import CustomDump
@@ -139,6 +140,7 @@ final class ChatFeatureTests: XCTestCase {
       var recipientId: Data
     }
     var didSendMessageWithParams: [SendMessageParams] = []
+    var sendMessageCompletion: SendMessage.Completion?
 
     let store = TestStore(
       initialState: ChatState(id: .contact("contact-id".data(using: .utf8)!)),
@@ -148,8 +150,9 @@ final class ChatFeatureTests: XCTestCase {
 
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
-    store.environment.sendMessage.run = { text, recipientId, _ in
+    store.environment.sendMessage.run = { text, recipientId, _, completion in
       didSendMessageWithParams.append(.init(text: text, recipientId: recipientId))
+      sendMessageCompletion = completion
     }
 
     store.send(.set(\.$text, "Hello")) {
@@ -163,5 +166,7 @@ final class ChatFeatureTests: XCTestCase {
     XCTAssertNoDifference(didSendMessageWithParams, [
       .init(text: "Hello", recipientId: "contact-id".data(using: .utf8)!)
     ])
+
+    sendMessageCompletion?()
   }
 }

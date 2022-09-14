@@ -154,10 +154,12 @@ public let chatReducer = Reducer<ChatState, ChatAction, ChatEnvironment>
           onError: { error in
             // TODO: handle error
             print("^^^ ERROR: \(error)")
+          },
+          completion: {
+            subscriber.send(completion: .finished)
           }
         )
       }
-      subscriber.send(completion: .finished)
       return AnyCancellable {}
     }
     .subscribe(on: env.bgQueue)

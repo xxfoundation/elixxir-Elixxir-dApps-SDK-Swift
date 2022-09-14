@@ -6,15 +6,17 @@ import XXModels
 
 public struct SendMessage {
   public typealias OnError = (Error) -> Void
+  public typealias Completion = () -> Void
 
-  public var run: (String, Data, @escaping OnError) -> Void
+  public var run: (String, Data, @escaping OnError, @escaping Completion) -> Void
 
   public func callAsFunction(
     text: String,
     to recipientId: Data,
-    onError: @escaping OnError
+    onError: @escaping OnError,
+    completion: @escaping Completion
   ) {
-    run(text, recipientId, onError)
+    run(text, recipientId, onError, completion)
   }
 }
 
@@ -24,7 +26,7 @@ extension SendMessage {
     db: DBManagerGetDB,
     now: @escaping () -> Date
   ) -> SendMessage {
-    SendMessage { text, recipientId, onError in
+    SendMessage { text, recipientId, onError, completion in
       do {
         let myContactId = try messenger.e2e.tryGet().getContact().getId()
         let message = try db().saveMessage(.init(
@@ -59,6 +61,7 @@ extension SendMessage {
             } catch {
               onError(error)
             }
+            completion()
           }
         )
         if var message = try db().fetchMessages(.init(id: [message.id])).first {
@@ -68,6 +71,7 @@ extension SendMessage {
         }
       } catch {
         onError(error)
+        completion()
       }
     }
   }

@@ -23,6 +23,7 @@ final class SendMessageTests: XCTestCase {
     var dbDidFetchMessagesWithQuery: [XXModels.Message.Query] = []
     var dbDidBulkUpdateMessages: [MessageBulkUpdate] = []
     var didReceiveError: [Error] = []
+    var didComplete = 0
 
     let myContactId = "my-contact-id".data(using: .utf8)!
     let text = "Hello"
@@ -82,7 +83,8 @@ final class SendMessageTests: XCTestCase {
     send(
       text: text,
       to: recipientId,
-      onError: { error in didReceiveError.append(error) }
+      onError: { error in didReceiveError.append(error) },
+      completion: { didComplete += 1 }
     )
 
     XCTAssertNoDifference(dbDidSaveMessage, [
@@ -116,6 +118,7 @@ final class SendMessageTests: XCTestCase {
     ])
 
     dbDidBulkUpdateMessages = []
+    didComplete = 0
     messengerDidSendMessageWithDeliveryCallback.first??(.init(
       report: sendReport,
       result: .delivered
@@ -124,8 +127,10 @@ final class SendMessageTests: XCTestCase {
     XCTAssertNoDifference(dbDidBulkUpdateMessages, [
       .init(query: .init(id: [messageId]), assignments: .init(status: .sent))
     ])
+    XCTAssertNoDifference(didComplete, 1)
 
     dbDidBulkUpdateMessages = []
+    didComplete = 0
     messengerDidSendMessageWithDeliveryCallback.first??(.init(
       report: sendReport,
       result: .notDelivered(timedOut: true)
@@ -134,8 +139,10 @@ final class SendMessageTests: XCTestCase {
     XCTAssertNoDifference(dbDidBulkUpdateMessages, [
       .init(query: .init(id: [messageId]), assignments: .init(status: .sendingTimedOut))
     ])
+    XCTAssertNoDifference(didComplete, 1)
 
     dbDidBulkUpdateMessages = []
+    didComplete = 0
     messengerDidSendMessageWithDeliveryCallback.first??(.init(
       report: sendReport,
       result: .notDelivered(timedOut: false)
@@ -144,19 +151,23 @@ final class SendMessageTests: XCTestCase {
     XCTAssertNoDifference(dbDidBulkUpdateMessages, [
       .init(query: .init(id: [messageId]), assignments: .init(status: .sendingFailed))
     ])
+    XCTAssertNoDifference(didComplete, 1)
 
     dbDidBulkUpdateMessages = []
+    didComplete = 0
     let deliveryFailure = NSError(domain: "test", code: 123)
     messengerDidSendMessageWithDeliveryCallback.first??(.init(
       report: sendReport,
       result: .failure(deliveryFailure)
     ))
+    XCTAssertNoDifference(didComplete, 1)
 
     XCTAssertNoDifference(dbDidBulkUpdateMessages, [
       .init(query: .init(id: [messageId]), assignments: .init(status: .sendingFailed))
     ])
     XCTAssertNoDifference(didReceiveError.count, 1)
     XCTAssertNoDifference(didReceiveError.first as NSError?, deliveryFailure)
+    XCTAssertNoDifference(didComplete, 1)
   }
 
   func testSendDatabaseFailure() {
@@ -164,6 +175,7 @@ final class SendMessageTests: XCTestCase {
     let error = Failure()
 
     var didReceiveError: [Error] = []
+    var didComplete = 0
 
     var messenger: Messenger = .unimplemented
     messenger.e2e.get = {
@@ -186,11 +198,13 @@ final class SendMessageTests: XCTestCase {
     send(
       text: "Hello",
       to: "recipient-id".data(using: .utf8)!,
-      onError: { error in didReceiveError.append(error) }
+      onError: { error in didReceiveError.append(error) },
+      completion: { didComplete += 1 }
     )
 
     XCTAssertNoDifference(didReceiveError.count, 1)
     XCTAssertNoDifference(didReceiveError.first as? Failure, error)
+    XCTAssertNoDifference(didComplete, 1)
   }
 
   func testBulkUpdateOnDeliveryFailure() {
@@ -206,6 +220,7 @@ final class SendMessageTests: XCTestCase {
 
     var messengerDidSendMessageWithDeliveryCallback: [MessengerSendMessage.DeliveryCallback?] = []
     var didReceiveError: [Error] = []
+    var didComplete = 0
 
     var messenger: Messenger = .unimplemented
     messenger.e2e.get = {
@@ -238,7 +253,8 @@ final class SendMessageTests: XCTestCase {
     send(
       text: "Hello",
       to: "recipient-id".data(using: .utf8)!,
-      onError: { error in didReceiveError.append(error) }
+      onError: { error in didReceiveError.append(error) },
+      completion: { didComplete += 1 }
     )
 
     messengerDidSendMessageWithDeliveryCallback.first??(.init(
@@ -248,6 +264,7 @@ final class SendMessageTests: XCTestCase {
 
     XCTAssertNoDifference(didReceiveError.count, 1)
     XCTAssertNoDifference(didReceiveError.first as? Failure, error)
+    XCTAssertNoDifference(didComplete, 1)
   }
 }
 
