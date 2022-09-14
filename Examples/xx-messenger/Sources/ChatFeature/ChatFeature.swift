@@ -1,4 +1,5 @@
 import AppCore
+import Combine
 import ComposableArchitecture
 import Foundation
 import XCTestDynamicOverlay
@@ -34,40 +35,48 @@ public struct ChatState: Equatable, Identifiable {
     id: ID,
     myContactId: Data? = nil,
     messages: IdentifiedArrayOf<Message> = [],
-    failure: String? = nil
+    failure: String? = nil,
+    text: String = ""
   ) {
     self.id = id
     self.myContactId = myContactId
     self.messages = messages
     self.failure = failure
+    self.text = text
   }
 
   public var id: ID
   public var myContactId: Data?
   public var messages: IdentifiedArrayOf<Message>
   public var failure: String?
+  @BindableState public var text: String
 }
 
-public enum ChatAction: Equatable {
+public enum ChatAction: Equatable, BindableAction {
   case start
   case didFetchMessages(IdentifiedArrayOf<ChatState.Message>)
+  case sendTapped
+  case binding(BindingAction<ChatState>)
 }
 
 public struct ChatEnvironment {
   public init(
     messenger: Messenger,
     db: DBManagerGetDB,
+    sendMessage: SendMessage,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>
   ) {
     self.messenger = messenger
     self.db = db
+    self.sendMessage = sendMessage
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
   }
 
   public var messenger: Messenger
   public var db: DBManagerGetDB
+  public var sendMessage: SendMessage
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
@@ -77,6 +86,7 @@ extension ChatEnvironment {
   public static let unimplemented = ChatEnvironment(
     messenger: .unimplemented,
     db: .unimplemented,
+    sendMessage: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented
   )
@@ -126,5 +136,32 @@ public let chatReducer = Reducer<ChatState, ChatAction, ChatEnvironment>
   case .didFetchMessages(let messages):
     state.messages = messages
     return .none
+
+  case .sendTapped:
+    let text = state.text
+    let chatId = state.id
+    state.text = ""
+    return Effect.run { subscriber in
+      switch chatId {
+      case .contact(let recipientId):
+        env.sendMessage(
+          text: text,
+          to: recipientId,
+          onError: { error in
+            // TODO: handle error
+            print("^^^ ERROR: \(error)")
+          }
+        )
+      }
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+
+  case .binding(_):
+    return .none
   }
 }
+.binding()

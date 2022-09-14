@@ -130,4 +130,36 @@ final class ChatFeatureTests: XCTestCase {
       $0.failure = error.localizedDescription
     }
   }
+
+  func testSend() {
+    struct SendMessageParams: Equatable {
+      var text: String
+      var recipientId: Data
+    }
+    var didSendMessageWithParams: [SendMessageParams] = []
+
+    let store = TestStore(
+      initialState: ChatState(id: .contact("contact-id".data(using: .utf8)!)),
+      reducer: chatReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.sendMessage.run = { text, recipientId, _ in
+      didSendMessageWithParams.append(.init(text: text, recipientId: recipientId))
+    }
+
+    store.send(.set(\.$text, "Hello")) {
+      $0.text = "Hello"
+    }
+
+    store.send(.sendTapped) {
+      $0.text = ""
+    }
+
+    XCTAssertNoDifference(didSendMessageWithParams, [
+      .init(text: "Hello", recipientId: "contact-id".data(using: .utf8)!)
+    ])
+  }
 }

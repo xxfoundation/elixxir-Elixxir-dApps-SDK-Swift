@@ -70,6 +70,11 @@ extension AppEnvironment {
         ChatEnvironment(
           messenger: messenger,
           db: dbManager.getDB,
+          sendMessage: .live(
+            messenger: messenger,
+            db: dbManager.getDB,
+            now: Date.init
+          ),
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )

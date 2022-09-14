@@ -13,11 +13,13 @@ public struct ChatView: View {
     var myContactId: Data?
     var messages: IdentifiedArrayOf<ChatState.Message>
     var failure: String?
+    var text: String
 
     init(state: ChatState) {
       myContactId = state.myContactId
       messages = state.messages
       failure = state.failure
+      text = state.text
     }
   }
 
@@ -52,11 +54,14 @@ public struct ChatView: View {
         VStack(spacing: 0) {
           Divider()
           HStack {
-            TextField("Text", text: .constant(""))
-              .textFieldStyle(.roundedBorder)
+            TextField("Text", text: viewStore.binding(
+              get: \.text,
+              send: { ChatAction.set(\.$text, $0) }
+            ))
+            .textFieldStyle(.roundedBorder)
 
             Button {
-
+              viewStore.send(.sendTapped)
             } label: {
               Image(systemName: "paperplane.fill")
             }
