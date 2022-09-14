@@ -1169,12 +1169,14 @@ Parameters:
  - recipientID - marshalled recipient id.ID
  - retry - number of retries allowed
  - callback - callback that reports file sending progress
- - period - duration to wait between progress callbacks triggering
+ - period - Duration (in ms) to wait between progress callbacks triggering.
+            This value should depend on how frequently you want to receive
+            updates, and should be tuned to your implementation.
 
 Returns:
  - []byte - unique file transfer ID
  */
-- (NSData* _Nullable)send:(NSData* _Nullable)payload recipientID:(NSData* _Nullable)recipientID retry:(float)retry callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(NSString* _Nullable)period error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)send:(NSData* _Nullable)payload recipientID:(NSData* _Nullable)recipientID retry:(float)retry callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(long)period error:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
