@@ -41,7 +41,9 @@ final class ChatFeatureTests: XCTestCase {
       return db
     }
 
-    store.send(.start)
+    store.send(.start) {
+      $0.myContactId = myContactId
+    }
 
     XCTAssertNoDifference(didFetchMessagesWithQuery, [
       .init(chat: .direct(myContactId, contactId))

@@ -92,6 +92,7 @@ public let chatReducer = Reducer<ChatState, ChatAction, ChatEnvironment>
     state.failure = nil
     do {
       let myContactId = try env.messenger.e2e.tryGet().getContact().getId()
+      state.myContactId = myContactId
       let queryChat: XXModels.Message.Query.Chat
       switch state.id {
       case .contact(let contactId):
