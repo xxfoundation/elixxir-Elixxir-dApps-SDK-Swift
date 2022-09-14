@@ -7,7 +7,6 @@ public struct Group {
   public var getInitMessage: GroupGetInitMessage
   public var getMembership: GroupGetMembership
   public var getName: GroupGetName
-  public var getTrackedID: GroupGetTrackedId
   public var serialize: GroupSerialize
 }
 
@@ -20,7 +19,6 @@ extension Group {
       getInitMessage: .live(bindingsGroup),
       getMembership: .live(bindingsGroup),
       getName: .live(bindingsGroup),
-      getTrackedID: .live(bindingsGroup),
       serialize: .live(bindingsGroup)
     )
   }
@@ -34,7 +32,6 @@ extension Group {
     getInitMessage: .unimplemented,
     getMembership: .unimplemented,
     getName: .unimplemented,
-    getTrackedID: .unimplemented,
     serialize: .unimplemented
   )
 }
