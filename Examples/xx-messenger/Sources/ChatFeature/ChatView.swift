@@ -13,12 +13,14 @@ public struct ChatView: View {
     var myContactId: Data?
     var messages: IdentifiedArrayOf<ChatState.Message>
     var failure: String?
+    var sendFailure: String?
     var text: String
 
     init(state: ChatState) {
       myContactId = state.myContactId
       messages = state.messages
       failure = state.failure
+      sendFailure = state.sendFailure
       text = state.text
     }
   }
@@ -28,21 +30,46 @@ public struct ChatView: View {
       ScrollView {
         LazyVStack {
           if let failure = viewStore.failure {
-            Text(failure)
-              .frame(maxWidth: .infinity, alignment: .leading)
-              .padding()
-            Button {
-              viewStore.send(.start)
-            } label: {
-              Text("Retry")
+            VStack {
+              Text(failure)
+                .frame(maxWidth: .infinity, alignment: .leading)
+              Button {
+                viewStore.send(.start)
+              } label: {
+                Text("Retry").padding()
+              }
+            }
+            .padding()
+            .background {
+              RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Material.ultraThick)
             }
             .padding()
           }
+
           ForEach(viewStore.messages) { message in
             MessageView(
               message: message,
               myContactId: viewStore.myContactId
             )
+          }
+
+          if let sendFailure = viewStore.sendFailure {
+            VStack {
+              Text(sendFailure)
+                .frame(maxWidth: .infinity, alignment: .leading)
+              Button {
+                viewStore.send(.dismissSendFailureTapped)
+              } label: {
+                Text("Dismiss").padding()
+              }
+            }
+            .padding()
+            .background {
+              RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Material.ultraThick)
+            }
+            .padding()
           }
         }
       }
@@ -69,7 +96,7 @@ public struct ChatView: View {
           }
           .padding()
         }
-        .background(Material.regularMaterial)
+        .background(Material.bar)
       }
       .navigationTitle("Chat")
       .task { viewStore.send(.start) }
@@ -83,10 +110,6 @@ public struct ChatView: View {
 
     var alignment: Alignment {
       message.senderId == myContactId ? .trailing : .leading
-    }
-
-    var backgroundColor: Color {
-      message.senderId == myContactId ? Color.blue : Color.gray.opacity(0.5)
     }
 
     var textColor: Color? {
@@ -105,8 +128,13 @@ public struct ChatView: View {
           .padding(.horizontal, 16)
           .padding(.vertical, 8)
           .background {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-              .fill(backgroundColor)
+            if message.senderId == myContactId {
+              RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.blue)
+            } else {
+              RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Material.ultraThick)
+            }
           }
           .frame(maxWidth: .infinity, alignment: alignment)
       }
@@ -150,7 +178,9 @@ public struct ChatView_Previews: PreviewProvider {
               text: "Hi!",
               status: .sent
             ),
-          ]
+          ],
+          failure: "Something went wrong when fetching messages from database.",
+          sendFailure: "Something went wrong when sending message."
         ),
         reducer: .empty,
         environment: ()
