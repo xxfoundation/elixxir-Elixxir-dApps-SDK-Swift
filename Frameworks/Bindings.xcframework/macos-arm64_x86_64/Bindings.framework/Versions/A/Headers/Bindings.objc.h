@@ -84,6 +84,8 @@
 @class BindingsTrackServicesCallback;
 @protocol BindingsUdLookupCallback;
 @class BindingsUdLookupCallback;
+@protocol BindingsUdMultiLookupCallback;
+@class BindingsUdMultiLookupCallback;
 @protocol BindingsUdNetworkStatus;
 @class BindingsUdNetworkStatus;
 @protocol BindingsUdSearchCallback;
@@ -206,6 +208,10 @@ Parameters:
 
 @protocol BindingsUdLookupCallback <NSObject>
 - (void)callback:(NSData* _Nullable)contactBytes err:(NSError* _Nullable)err;
+@end
+
+@protocol BindingsUdMultiLookupCallback <NSObject>
+- (void)callback:(NSData* _Nullable)contactListJSON failedIDs:(NSData* _Nullable)failedIDs err:(NSError* _Nullable)err;
 @end
 
 @protocol BindingsUdNetworkStatus <NSObject>
@@ -2115,6 +2121,24 @@ Returns:
 FOUNDATION_EXPORT NSData* _Nullable BindingsLookupUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdLookupCallback> _Nullable cb, NSData* _Nullable lookupId, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
+ * MultiLookupUD returns the public key of all passed in IDs as known by the
+user discovery system or returns by the timeout.
+
+Parameters:
+ - e2eID - e2e object ID in the tracker
+ - udContact - the marshalled bytes of the contact.Contact object
+ - lookupIds - JSON marshalled list of []*id.ID object for the users that
+   MultiLookupUD will look up.
+ - singleRequestParams - the JSON marshalled bytes of single.RequestParams
+
+Returns:
+ - []byte - the JSON marshalled bytes of the SingleUseSendReport object,
+   which can be passed into Cmix.WaitForRoundResult to see if the send
+   succeeded.
+ */
+FOUNDATION_EXPORT BOOL BindingsMultiLookupUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdMultiLookupCallback> _Nullable cb, NSData* _Nullable lookupIds, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
+
+/**
  * NewBroadcastChannel creates a bindings-layer broadcast channel and starts
 listening for new messages.
 
@@ -2465,6 +2489,8 @@ FOUNDATION_EXPORT BOOL BindingsUpdateCommonErrors(NSString* _Nullable jsonFile, 
 
 @class BindingsUdLookupCallback;
 
+@class BindingsUdMultiLookupCallback;
+
 @class BindingsUdNetworkStatus;
 
 @class BindingsUdSearchCallback;
@@ -2803,6 +2829,31 @@ Parameters:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (void)callback:(NSData* _Nullable)contactBytes err:(NSError* _Nullable)err;
+@end
+
+/**
+ * UdMultiLookupCallback contains the callback called by MultiLookupUD that returns the
+contacts which match the passed in IDs.
+
+Parameters:
+ - contactListJSON - the JSON marshalled bytes of []contact.Contact, or nil
+   if an error occurs.
+
+  JSON Example:
+  {
+ 	"<xxc(2)F8dL9EC6gy+RMJuk3R+Au6eGExo02Wfio5cacjBcJRwDEgB7Ugdw/BAr6RkCABkWAFV1c2VybmFtZTA7c4LzV05sG+DMt+rFB0NIJg==xxc>",
+ 	"<xxc(2)eMhAi/pYkW5jCmvKE5ZaTglQb+fTo1D8NxVitr5CCFADEgB7Ugdw/BAr6RoCABkWAFV1c2VybmFtZTE7fElAa7z3IcrYrrkwNjMS2w==xxc>",
+ 	"<xxc(2)d7RJTu61Vy1lDThDMn8rYIiKSe1uXA/RCvvcIhq5Yg4DEgB7Ugdw/BAr6RsCABkWAFV1c2VybmFtZTI7N3XWrxIUpR29atpFMkcR6A==xxc>"
+	}
+ - failedIDs - JSON marshalled list of []*id.ID objects which failed lookup
+ - err - any errors that occurred in the multilookup.
+ */
+@interface BindingsUdMultiLookupCallback : NSObject <goSeqRefInterface, BindingsUdMultiLookupCallback> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (void)callback:(NSData* _Nullable)contactListJSON failedIDs:(NSData* _Nullable)failedIDs err:(NSError* _Nullable)err;
 @end
 
 /**
