@@ -39,12 +39,14 @@ public struct ChatState: Equatable, Identifiable {
     myContactId: Data? = nil,
     messages: IdentifiedArrayOf<Message> = [],
     failure: String? = nil,
+    sendFailure: String? = nil,
     text: String = ""
   ) {
     self.id = id
     self.myContactId = myContactId
     self.messages = messages
     self.failure = failure
+    self.sendFailure = sendFailure
     self.text = text
   }
 
@@ -52,6 +54,7 @@ public struct ChatState: Equatable, Identifiable {
   public var myContactId: Data?
   public var messages: IdentifiedArrayOf<Message>
   public var failure: String?
+  public var sendFailure: String?
   @BindableState public var text: String
 }
 
@@ -59,6 +62,8 @@ public enum ChatAction: Equatable, BindableAction {
   case start
   case didFetchMessages(IdentifiedArrayOf<ChatState.Message>)
   case sendTapped
+  case sendFailed(String)
+  case dismissSendFailureTapped
   case binding(BindingAction<ChatState>)
 }
 
@@ -152,8 +157,7 @@ public let chatReducer = Reducer<ChatState, ChatAction, ChatEnvironment>
           text: text,
           to: recipientId,
           onError: { error in
-            // TODO: handle error
-            print("^^^ ERROR: \(error)")
+            subscriber.send(.sendFailed(error.localizedDescription))
           },
           completion: {
             subscriber.send(completion: .finished)
@@ -165,6 +169,14 @@ public let chatReducer = Reducer<ChatState, ChatAction, ChatEnvironment>
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
+
+  case .sendFailed(let failure):
+    state.sendFailure = failure
+    return .none
+
+  case .dismissSendFailureTapped:
+    state.sendFailure = nil
+    return .none
 
   case .binding(_):
     return .none

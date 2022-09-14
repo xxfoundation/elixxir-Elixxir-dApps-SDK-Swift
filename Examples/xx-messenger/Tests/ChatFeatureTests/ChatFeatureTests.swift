@@ -169,4 +169,42 @@ final class ChatFeatureTests: XCTestCase {
 
     sendMessageCompletion?()
   }
+
+  func testSendFailure() {
+    var sendMessageOnError: SendMessage.OnError?
+    var sendMessageCompletion: SendMessage.Completion?
+
+    let store = TestStore(
+      initialState: ChatState(
+        id: .contact("contact-id".data(using: .utf8)!),
+        text: "Hello"
+      ),
+      reducer: chatReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.sendMessage.run = { _, _, onError, completion in
+      sendMessageOnError = onError
+      sendMessageCompletion = completion
+    }
+
+    store.send(.sendTapped) {
+      $0.text = ""
+    }
+
+    let error = NSError(domain: "test", code: 123)
+    sendMessageOnError?(error)
+
+    store.receive(.sendFailed(error.localizedDescription)) {
+      $0.sendFailure = error.localizedDescription
+    }
+
+    sendMessageCompletion?()
+
+    store.send(.dismissSendFailureTapped) {
+      $0.sendFailure = nil
+    }
+  }
 }
