@@ -1,3 +1,4 @@
+import ChatFeature
 import CheckContactAuthFeature
 import Combine
 import ComposableArchitecture
@@ -278,6 +279,36 @@ final class ContactFeatureTests: XCTestCase {
 
     store.send(.confirmRequestDismissed) {
       $0.confirmRequest = nil
+    }
+  }
+
+  func testChatTapped() {
+    let contactId = "contact-id".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: contactId
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.chatTapped) {
+      $0.chat = ChatState(id: .contact(contactId))
+    }
+  }
+
+  func testChatDismissed() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: "contact-id".data(using: .utf8)!,
+        chat: ChatState(id: .contact("contact-id".data(using: .utf8)!))
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.chatDismissed) {
+      $0.chat = nil
     }
   }
 }

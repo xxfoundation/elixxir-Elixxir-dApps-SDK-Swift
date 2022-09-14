@@ -5,8 +5,8 @@ let swiftSettings: [SwiftSetting] = [
   .unsafeFlags(
     [
       // "-Xfrontend", "-warn-concurrency",
-      "-Xfrontend", "-debug-time-function-bodies",
-      "-Xfrontend", "-debug-time-expression-type-checking",
+      // "-Xfrontend", "-debug-time-function-bodies",
+      // "-Xfrontend", "-debug-time-expression-type-checking",
     ],
     .when(configuration: .debug)
   ),
@@ -20,6 +20,7 @@ let package = Package(
   products: [
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
+    .library(name: "ChatFeature", targets: ["ChatFeature"]),
     .library(name: "CheckContactAuthFeature", targets: ["CheckContactAuthFeature"]),
     .library(name: "ConfirmRequestFeature", targets: ["ConfirmRequestFeature"]),
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
@@ -76,6 +77,7 @@ let package = Package(
       name: "AppFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "ChatFeature"),
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
         .target(name: "ContactFeature"),
@@ -98,6 +100,24 @@ let package = Package(
       name: "AppFeatureTests",
       dependencies: [
         .target(name: "AppFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "ChatFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ChatFeatureTests",
+      dependencies: [
+        .target(name: "ChatFeature"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -137,6 +157,7 @@ let package = Package(
       name: "ContactFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "ChatFeature"),
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
         .target(name: "SendRequestFeature"),

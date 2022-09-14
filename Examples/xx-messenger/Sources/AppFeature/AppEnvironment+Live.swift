@@ -1,4 +1,5 @@
 import AppCore
+import ChatFeature
 import CheckContactAuthFeature
 import ConfirmRequestFeature
 import ContactFeature
@@ -64,6 +65,19 @@ extension AppEnvironment {
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )
+      },
+      chat: {
+        ChatEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          sendMessage: .live(
+            messenger: messenger,
+            db: dbManager.getDB,
+            now: Date.init
+          ),
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
       }
     )
 
@@ -87,6 +101,10 @@ extension AppEnvironment {
           messenger: messenger,
           dbManager: dbManager,
           authHandler: authHandler,
+          messageListener: .live(
+            messenger: messenger,
+            db: dbManager.getDB
+          ),
           mainQueue: mainQueue,
           bgQueue: bgQueue,
           register: {

@@ -19,13 +19,16 @@ final class HomeFeatureTests: XCTestCase {
 
     var messengerDidStartWithTimeout: [Int] = []
     var messengerDidConnect = 0
+    var messengerDidListenForMessages = 0
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
     store.environment.authHandler.run = { _ in Cancellable {} }
+    store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { messengerDidConnect += 1 }
+    store.environment.messenger.listenForMessages.run = { messengerDidListenForMessages += 1 }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { false }
 
@@ -33,14 +36,17 @@ final class HomeFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(messengerDidStartWithTimeout, [30_000])
     XCTAssertNoDifference(messengerDidConnect, 1)
+    XCTAssertNoDifference(messengerDidListenForMessages, 1)
 
     store.receive(.authHandler(.start))
+    store.receive(.messageListener(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartUnregistered)) {
       $0.register = RegisterState()
     }
 
     store.send(.authHandler(.stop))
+    store.send(.messageListener(.stop))
   }
 
   func testMessengerStartRegistered() {
@@ -52,14 +58,17 @@ final class HomeFeatureTests: XCTestCase {
 
     var messengerDidStartWithTimeout: [Int] = []
     var messengerDidConnect = 0
+    var messengerDidListenForMessages = 0
     var messengerDidLogIn = 0
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
     store.environment.authHandler.run = { _ in Cancellable {} }
+    store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { messengerDidConnect += 1 }
+    store.environment.messenger.listenForMessages.run = { messengerDidListenForMessages += 1 }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
@@ -77,15 +86,18 @@ final class HomeFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(messengerDidStartWithTimeout, [30_000])
     XCTAssertNoDifference(messengerDidConnect, 1)
+    XCTAssertNoDifference(messengerDidListenForMessages, 1)
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
     store.receive(.authHandler(.start))
+    store.receive(.messageListener(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartRegistered))
     store.receive(.networkMonitor(.start))
 
     store.send(.networkMonitor(.stop))
     store.send(.authHandler(.stop))
+    store.send(.messageListener(.stop))
   }
 
   func testRegisterFinished() {
@@ -103,6 +115,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
     store.environment.authHandler.run = { _ in Cancellable {} }
+    store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
@@ -128,12 +141,14 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidLogIn, 1)
 
     store.receive(.authHandler(.start))
+    store.receive(.messageListener(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartRegistered))
     store.receive(.networkMonitor(.start))
 
     store.send(.networkMonitor(.stop))
     store.send(.authHandler(.stop))
+    store.send(.messageListener(.stop))
   }
 
   func testMessengerStartFailure() {
@@ -149,17 +164,20 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
     store.environment.authHandler.run = { _ in Cancellable {} }
+    store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in throw error }
 
     store.send(.messenger(.start))
 
     store.receive(.authHandler(.start))
+    store.receive(.messageListener(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
 
     store.send(.authHandler(.stop))
+    store.send(.messageListener(.stop))
   }
 
   func testMessengerStartConnectFailure() {
@@ -175,6 +193,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
     store.environment.authHandler.run = { _ in Cancellable {} }
+    store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { throw error }
@@ -182,12 +201,14 @@ final class HomeFeatureTests: XCTestCase {
     store.send(.messenger(.start))
 
     store.receive(.authHandler(.start))
+    store.receive(.messageListener(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
 
     store.send(.authHandler(.stop))
+    store.send(.messageListener(.stop))
   }
 
   func testMessengerStartIsRegisteredFailure() {
@@ -203,6 +224,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
     store.environment.authHandler.run = { _ in Cancellable {} }
+    store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in }
     store.environment.messenger.isConnected.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
@@ -211,12 +233,14 @@ final class HomeFeatureTests: XCTestCase {
     store.send(.messenger(.start))
 
     store.receive(.authHandler(.start))
+    store.receive(.messageListener(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
 
     store.send(.authHandler(.stop))
+    store.send(.messageListener(.stop))
   }
 
   func testMessengerStartLogInFailure() {
@@ -232,6 +256,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
     store.environment.authHandler.run = { _ in Cancellable {} }
+    store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in }
     store.environment.messenger.isConnected.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
@@ -241,12 +266,14 @@ final class HomeFeatureTests: XCTestCase {
     store.send(.messenger(.start))
 
     store.receive(.authHandler(.start))
+    store.receive(.messageListener(.start))
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.failure(error as NSError))) {
       $0.failure = error.localizedDescription
     }
 
     store.send(.authHandler(.stop))
+    store.send(.messageListener(.stop))
   }
 
   func testNetworkMonitorStart() {
@@ -558,5 +585,46 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(didCancelAuthHandler, 1)
 
     authHandlerOnError.first?(AuthHandlerError(id: 2))
+  }
+
+  func testMessageListener() {
+    let store = TestStore(
+      initialState: HomeState(),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    var didRunMessageListener = 0
+    var didCancelMessageListener = 0
+    var messageListenerOnError: [MessageListenerHandler.OnError] = []
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messageListener.run = { onError in
+      didRunMessageListener += 1
+      messageListenerOnError.append(onError)
+      return Cancellable { didCancelMessageListener += 1 }
+    }
+
+    store.send(.messageListener(.start))
+
+    XCTAssertNoDifference(didRunMessageListener, 1)
+
+    struct MessageListenerError: Error { var id: Int }
+    messageListenerOnError.first?(MessageListenerError(id: 1))
+
+    store.receive(.messageListener(.failure(MessageListenerError(id: 1) as NSError))) {
+      $0.messageListenerFailure = MessageListenerError(id: 1).localizedDescription
+    }
+
+    store.send(.messageListener(.failureDismissed)) {
+      $0.messageListenerFailure = nil
+    }
+
+    store.send(.messageListener(.stop))
+
+    XCTAssertNoDifference(didCancelMessageListener, 1)
+
+    messageListenerOnError.first?(MessageListenerError(id: 2))
   }
 }
