@@ -484,6 +484,21 @@ the xx network.
  */
 - (NSData* _Nullable)getReceptionRegistrationValidationSignature;
 /**
+ * GetRunningProcesses returns the names of all running processes at the time
+of this call. Note that this list may change and is subject to race
+conditions if multiple threads are in the process of starting or stopping.
+
+Returns:
+ - []byte - A JSON marshalled list of all running processes.
+
+JSON Example:
+ {
+  "FileTransfer{BatchBuilderThread, FilePartSendingThread#0, FilePartSendingThread#1, FilePartSendingThread#2, FilePartSendingThread#3}",
+  "MessageReception Worker 0"
+ }
+ */
+- (NSData* _Nullable)getRunningProcesses:(NSError* _Nullable* _Nullable)error;
+/**
  * HasRunningProcessies checks if any background threads are running and returns
 true if one or more are.
 
