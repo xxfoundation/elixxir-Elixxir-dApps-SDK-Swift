@@ -47,11 +47,13 @@ extension MessengerVerifyContact {
         var searchResult: Result<[Contact], NSError>!
         let semaphore = DispatchSemaphore(value: 0)
         _ = try env.searchUD(
-          e2eId: e2e.getId(),
-          udContact: try ud.getContact(),
-          facts: facts,
-          singleRequestParamsJSON: env.getSingleUseParams(),
-          callback: .init { result in
+          params: SearchUD.Params(
+            e2eId: e2e.getId(),
+            udContact: try ud.getContact(),
+            facts: facts,
+            singleRequestParamsJSON: env.getSingleUseParams()
+          ),
+          callback: UdSearchCallback { result in
             searchResult = result
             semaphore.signal()
           }

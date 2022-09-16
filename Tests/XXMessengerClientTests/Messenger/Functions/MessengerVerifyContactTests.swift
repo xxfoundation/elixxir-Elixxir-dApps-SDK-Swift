@@ -28,12 +28,6 @@ final class MessengerVerifyContactTests: XCTestCase {
   }
 
   func testVerifyContactWithoutFacts() throws {
-    struct LookupUDParams: Equatable {
-      var e2eId: Int
-      var udContact: Contact
-      var lookupId: Data
-      var singleRequestParamsJSON: Data
-    }
     struct VerifyOwnershipParams: Equatable {
       var received: Contact
       var verified: Contact
@@ -124,18 +118,12 @@ final class MessengerVerifyContactTests: XCTestCase {
   }
 
   func testVerifyContactWithFacts() throws {
-    struct SearchUDParams: Equatable {
-      var e2eId: Int
-      var udContact: Contact
-      var facts: [Fact]
-      var singleRequestParamsJSON: Data
-    }
     struct VerifyOwnershipParams: Equatable {
       var received: Contact
       var verified: Contact
       var e2eId: Int
     }
-    var didSearchUDWithParams: [SearchUDParams] = []
+    var didSearchUDWithParams: [SearchUD.Params] = []
     var didVerifyOwnershipWithParams: [VerifyOwnershipParams] = []
 
     var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
@@ -169,13 +157,8 @@ final class MessengerVerifyContactTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { "single-use-params".data(using: .utf8)! }
-    env.searchUD.run = { e2eId, udContact, facts, singleRequestParamsJSON, callback in
-      didSearchUDWithParams.append(.init(
-        e2eId: e2eId,
-        udContact: udContact,
-        facts: facts,
-        singleRequestParamsJSON: singleRequestParamsJSON
-      ))
+    env.searchUD.run = { params, callback in
+      didSearchUDWithParams.append(params)
       callback.handle(.success([foundContact]))
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
@@ -221,7 +204,7 @@ final class MessengerVerifyContactTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { "single-use-params".data(using: .utf8)! }
-    env.searchUD.run = { e2eId, udContact, facts, singleRequestParamsJSON, callback in
+    env.searchUD.run = { _, callback in
       callback.handle(.success([]))
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
@@ -257,7 +240,7 @@ final class MessengerVerifyContactTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { "single-use-params".data(using: .utf8)! }
-    env.searchUD.run = { _, _, _, _, callback in
+    env.searchUD.run = { _, callback in
       callback.handle(.failure(searchFailure))
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
@@ -291,7 +274,7 @@ final class MessengerVerifyContactTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { "single-use-params".data(using: .utf8)! }
-    env.searchUD.run = { _, _, _, _, callback in
+    env.searchUD.run = { _, callback in
       callback.handle(.success([.unimplemented("found-contact-data".data(using: .utf8)!)]))
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
@@ -330,7 +313,7 @@ final class MessengerVerifyContactTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { "single-use-params".data(using: .utf8)! }
-    env.searchUD.run = { _, _, _, _, callback in
+    env.searchUD.run = { _, callback in
       callback.handle(.success([.unimplemented("found-contact-data".data(using: .utf8)!)]))
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }

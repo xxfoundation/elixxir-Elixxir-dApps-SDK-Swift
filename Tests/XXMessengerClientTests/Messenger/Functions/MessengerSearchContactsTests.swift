@@ -5,14 +5,7 @@ import XXClient
 
 final class MessengerSearchContactsTests: XCTestCase {
   func testSearch() throws {
-    struct SearchUdParams: Equatable {
-      var e2eId: Int
-      var udContact: Contact
-      var facts: [Fact]
-      var singleRequestParamsJSON: Data
-    }
-
-    var didSearchUdWithParams: [SearchUdParams] = []
+    var didSearchUdWithParams: [SearchUD.Params] = []
 
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = {
@@ -26,13 +19,8 @@ final class MessengerSearchContactsTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { "single-use-params".data(using: .utf8)! }
-    env.searchUD.run = { e2eId, udContact, facts, singleRequestParamsJSON, callback in
-      didSearchUdWithParams.append(.init(
-        e2eId: e2eId,
-        udContact: udContact,
-        facts: facts,
-        singleRequestParamsJSON: singleRequestParamsJSON
-      ))
+    env.searchUD.run = { params, callback in
+      didSearchUdWithParams.append(params)
       callback.handle(.success([
         .unimplemented("contact-1".data(using: .utf8)!),
         .unimplemented("contact-2".data(using: .utf8)!),
@@ -101,7 +89,7 @@ final class MessengerSearchContactsTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { Data() }
-    env.searchUD.run = { _, _, _, _, _ in throw error }
+    env.searchUD.run = { _, _ in throw error }
 
     let search: MessengerSearchContacts = .live(env)
 
@@ -126,7 +114,7 @@ final class MessengerSearchContactsTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { Data() }
-    env.searchUD.run = { _, _, _, _, callback in
+    env.searchUD.run = { _, callback in
       callback.handle(.failure(error as NSError))
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }

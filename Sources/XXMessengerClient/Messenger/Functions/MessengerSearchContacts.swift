@@ -43,11 +43,13 @@ extension MessengerSearchContacts {
       var result: Result<[Contact], Swift.Error>!
       let semaphore = DispatchSemaphore(value: 0)
       _ = try env.searchUD(
-        e2eId: e2e.getId(),
-        udContact: try ud.getContact(),
-        facts: query.facts,
-        singleRequestParamsJSON: env.getSingleUseParams(),
-        callback: .init { searchResult in
+        params: SearchUD.Params(
+          e2eId: e2e.getId(),
+          udContact: try ud.getContact(),
+          facts: query.facts,
+          singleRequestParamsJSON: env.getSingleUseParams()
+        ),
+        callback: UdSearchCallback { searchResult in
           switch searchResult {
           case .success(let contacts):
             result = .success(contacts)
