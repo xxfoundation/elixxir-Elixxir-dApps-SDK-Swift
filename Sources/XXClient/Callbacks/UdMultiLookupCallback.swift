@@ -2,9 +2,20 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct UdMultiLookupCallback {
-  public enum Result: Equatable {
-    case success([Contact])
-    case failure(error: NSError, failedIDs: [Data])
+  public struct Result: Equatable {
+    public init(
+      contacts: [Contact],
+      failedIds: [Data],
+      errors: [NSError]
+    ) {
+      self.contacts = contacts
+      self.failedIds = failedIds
+      self.errors = errors
+    }
+
+    public var contacts: [Contact]
+    public var failedIds: [Data]
+    public var errors: [NSError]
   }
 
   public init(handle: @escaping (Result) -> Void) {
@@ -30,23 +41,31 @@ extension UdMultiLookupCallback {
       let callback: UdMultiLookupCallback
 
       func callback(_ contactListJSON: Data?, failedIDs: Data?, err: Error?) {
+        var result = UdMultiLookupCallback.Result(
+          contacts: [],
+          failedIds: [],
+          errors: []
+        )
         if let err = err {
-          callback.handle(.failure(
-            error: err as NSError,
-            failedIDs: failedIDs
-              .map { (try? JSONDecoder().decode([Data].self, from: $0)) ?? [] } ?? []
-          ))
-        } else if let contactListJSON = contactListJSON {
-          do {
-            let contactsData = try JSONDecoder().decode([Data].self, from: contactListJSON)
-            let contacts: [Contact] = contactsData.map { Contact.live($0) }
-            callback.handle(.success(contacts))
-          } catch {
-            callback.handle(.failure(error: error as NSError, failedIDs: []))
-          }
-        } else {
-          fatalError("BindingsUdMultiLookupCallbackProtocol received `nil` contactListJSON and `nil` error")
+          result.errors.append(err as NSError)
         }
+        if let contactListJSON = contactListJSON {
+          do {
+            result.contacts = try JSONDecoder()
+              .decode([Data].self, from: contactListJSON)
+              .map { Contact.live($0) }
+          } catch {
+            result.errors.append(error as NSError)
+          }
+        }
+        if let failedIDs = failedIDs {
+          do {
+            result.failedIds = try JSONDecoder().decode([Data].self, from: failedIDs)
+          } catch {
+            result.errors.append(error as NSError)
+          }
+        }
+        callback.handle(result)
       }
     }
 
