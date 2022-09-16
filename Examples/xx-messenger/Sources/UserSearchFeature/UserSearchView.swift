@@ -14,7 +14,7 @@ public struct UserSearchView: View {
 
   struct ViewState: Equatable {
     var focusedField: UserSearchState.Field?
-    var query: MessengerSearchUsers.Query
+    var query: MessengerSearchContacts.Query
     var isSearching: Bool
     var failure: String?
     var results: IdentifiedArrayOf<UserSearchState.Result>
