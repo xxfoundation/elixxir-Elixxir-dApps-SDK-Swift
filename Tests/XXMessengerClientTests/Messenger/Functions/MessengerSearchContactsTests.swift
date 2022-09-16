@@ -3,7 +3,7 @@ import XCTest
 import XXClient
 @testable import XXMessengerClient
 
-final class MessengerSearchUsersTests: XCTestCase {
+final class MessengerSearchContactsTests: XCTestCase {
   func testSearch() throws {
     struct SearchUdParams: Equatable {
       var e2eId: Int
@@ -41,8 +41,8 @@ final class MessengerSearchUsersTests: XCTestCase {
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
 
-    let search: MessengerSearchUsers = .live(env)
-    let query = MessengerSearchUsers.Query(
+    let search: MessengerSearchContacts = .live(env)
+    let query = MessengerSearchContacts.Query(
       username: "Username",
       email: "Email",
       phone: "Phone"
@@ -67,10 +67,10 @@ final class MessengerSearchUsersTests: XCTestCase {
   func testSearchNotConnected() {
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = { nil }
-    let search: MessengerSearchUsers = .live(env)
+    let search: MessengerSearchContacts = .live(env)
 
     XCTAssertThrowsError(try search(query: .init())) { error in
-      XCTAssertNoDifference(error as? MessengerSearchUsers.Error, .notConnected)
+      XCTAssertNoDifference(error as? MessengerSearchContacts.Error, .notConnected)
     }
   }
 
@@ -78,10 +78,10 @@ final class MessengerSearchUsersTests: XCTestCase {
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = { .unimplemented }
     env.ud.get = { nil }
-    let search: MessengerSearchUsers = .live(env)
+    let search: MessengerSearchContacts = .live(env)
 
     XCTAssertThrowsError(try search(query: .init())) { error in
-      XCTAssertNoDifference(error as? MessengerSearchUsers.Error, .notLoggedIn)
+      XCTAssertNoDifference(error as? MessengerSearchContacts.Error, .notLoggedIn)
     }
   }
 
@@ -103,7 +103,7 @@ final class MessengerSearchUsersTests: XCTestCase {
     env.getSingleUseParams.run = { Data() }
     env.searchUD.run = { _, _, _, _, _ in throw error }
 
-    let search: MessengerSearchUsers = .live(env)
+    let search: MessengerSearchContacts = .live(env)
 
     XCTAssertThrowsError(try search(query: .init())) { err in
       XCTAssertNoDifference(err as? Failure, error)
@@ -131,7 +131,7 @@ final class MessengerSearchUsersTests: XCTestCase {
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
 
-    let search: MessengerSearchUsers = .live(env)
+    let search: MessengerSearchContacts = .live(env)
 
     XCTAssertThrowsError(try search(query: .init())) { err in
       XCTAssertNoDifference(err as? Failure, error)
@@ -139,7 +139,7 @@ final class MessengerSearchUsersTests: XCTestCase {
   }
 
   func testQueryIsEmpty() {
-    let emptyQueries: [MessengerSearchUsers.Query] = [
+    let emptyQueries: [MessengerSearchContacts.Query] = [
       .init(username: nil, email: nil, phone: nil),
       .init(username: "", email: nil, phone: nil),
       .init(username: nil, email: "", phone: nil),
@@ -151,7 +151,7 @@ final class MessengerSearchUsersTests: XCTestCase {
       XCTAssertTrue(query.isEmpty, "\(query) should be empty")
     }
 
-    let nonEmptyQueries: [MessengerSearchUsers.Query] = [
+    let nonEmptyQueries: [MessengerSearchContacts.Query] = [
       .init(username: "test", email: nil, phone: nil),
       .init(username: nil, email: "test", phone: nil),
       .init(username: nil, email: nil, phone: "test"),
@@ -165,17 +165,17 @@ final class MessengerSearchUsersTests: XCTestCase {
 
   func testQueryFacts() {
     XCTAssertNoDifference(
-      MessengerSearchUsers.Query(username: nil, email: nil, phone: nil).facts,
+      MessengerSearchContacts.Query(username: nil, email: nil, phone: nil).facts,
       []
     )
 
     XCTAssertNoDifference(
-      MessengerSearchUsers.Query(username: "", email: "", phone: "").facts,
+      MessengerSearchContacts.Query(username: "", email: "", phone: "").facts,
       []
     )
 
     XCTAssertNoDifference(
-      MessengerSearchUsers.Query(
+      MessengerSearchContacts.Query(
         username: "username",
         email: "email",
         phone: "phone"
@@ -188,7 +188,7 @@ final class MessengerSearchUsersTests: XCTestCase {
     )
 
     XCTAssertNoDifference(
-      MessengerSearchUsers.Query(
+      MessengerSearchContacts.Query(
         username: "username",
         email: "",
         phone: nil
