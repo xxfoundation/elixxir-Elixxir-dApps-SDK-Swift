@@ -39,7 +39,7 @@ final class MessengerVerifyContactTests: XCTestCase {
       var verified: Contact
       var e2eId: Int
     }
-    var didLookupUDWithParams: [LookupUDParams] = []
+    var didLookupUDWithParams: [LookupUD.Params] = []
     var didVerifyOwnershipWithParams: [VerifyOwnershipParams] = []
 
     var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
@@ -68,13 +68,8 @@ final class MessengerVerifyContactTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { "single-use-params".data(using: .utf8)! }
-    env.lookupUD.run = { e2eId, udContact, lookupId, singleRequestParamsJSON, callback in
-      didLookupUDWithParams.append(.init(
-        e2eId: e2eId,
-        udContact: udContact,
-        lookupId: lookupId,
-        singleRequestParamsJSON: singleRequestParamsJSON
-      ))
+    env.lookupUD.run = { params, callback in
+      didLookupUDWithParams.append(params)
       callback.handle(.success(lookedUpContact))
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }
@@ -117,7 +112,7 @@ final class MessengerVerifyContactTests: XCTestCase {
       return ud
     }
     env.getSingleUseParams.run = { "single-use-params".data(using: .utf8)! }
-    env.lookupUD.run = { _, _, _, _, callback in
+    env.lookupUD.run = { _, callback in
       callback.handle(.failure(lookupFailure))
       return SingleUseSendReport(rounds: [], roundURL: "", ephId: 0, receptionId: Data())
     }

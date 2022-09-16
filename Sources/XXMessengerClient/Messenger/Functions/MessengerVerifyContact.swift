@@ -30,11 +30,13 @@ extension MessengerVerifyContact {
         var lookupResult: Result<Contact, NSError>!
         let semaphore = DispatchSemaphore(value: 0)
         _ = try env.lookupUD(
-          e2eId: e2e.getId(),
-          udContact: try ud.getContact(),
-          lookupId: try contact.getId(),
-          singleRequestParamsJSON: env.getSingleUseParams(),
-          callback: .init { result in
+          params: LookupUD.Params(
+            e2eId: e2e.getId(),
+            udContact: try ud.getContact(),
+            lookupId: try contact.getId(),
+            singleRequestParamsJSON: env.getSingleUseParams()
+          ),
+          callback: UdLookupCallback { result in
             lookupResult = result
             semaphore.signal()
           }
