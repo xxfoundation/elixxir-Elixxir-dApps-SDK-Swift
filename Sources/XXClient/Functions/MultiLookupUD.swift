@@ -5,7 +5,7 @@ public struct MultiLookupUD {
   public struct Params: Equatable {
     public init(
       e2eId: Int,
-      udContact: Data,
+      udContact: Contact,
       lookupIds: [Data],
       singleRequestParams: Data = GetSingleUseParams.liveDefault()
     ) {
@@ -16,7 +16,7 @@ public struct MultiLookupUD {
     }
 
     public var e2eId: Int
-    public var udContact: Data
+    public var udContact: Contact
     public var lookupIds: [Data]
     public var singleRequestParams: Data
   }
@@ -34,7 +34,7 @@ extension MultiLookupUD {
       var error: NSError?
       let result = BindingsMultiLookupUD(
         params.e2eId,
-        params.udContact,
+        params.udContact.data,
         callback.makeBindingsUdMultiLookupCallback(),
         try JSONEncoder().encode(params.lookupIds),
         params.singleRequestParams,
