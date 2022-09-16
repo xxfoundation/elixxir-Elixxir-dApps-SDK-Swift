@@ -22,6 +22,7 @@ public struct Messenger {
   public var waitForNodes: MessengerWaitForNodes
   public var destroy: MessengerDestroy
   public var searchContacts: MessengerSearchContacts
+  public var lookupContact: MessengerLookupContact
   public var registerForNotifications: MessengerRegisterForNotifications
   public var verifyContact: MessengerVerifyContact
   public var sendMessage: MessengerSendMessage
@@ -51,6 +52,7 @@ extension Messenger {
       waitForNodes: .live(env),
       destroy: .live(env),
       searchContacts: .live(env),
+      lookupContact: .live(env),
       registerForNotifications: .live(env),
       verifyContact: .live(env),
       sendMessage: .live(env)
@@ -81,6 +83,7 @@ extension Messenger {
     waitForNodes: .unimplemented,
     destroy: .unimplemented,
     searchContacts: .unimplemented,
+    lookupContact: .unimplemented,
     registerForNotifications: .unimplemented,
     verifyContact: .unimplemented,
     sendMessage: .unimplemented
