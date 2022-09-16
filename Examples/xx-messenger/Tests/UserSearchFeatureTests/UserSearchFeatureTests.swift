@@ -13,7 +13,7 @@ final class UserSearchFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    var didSearchWithQuery: [MessengerSearchUsers.Query] = []
+    var didSearchWithQuery: [MessengerSearchContacts.Query] = []
 
     struct GetIdFromContactError: Error {}
     struct GetFactsFromContactError: Error {}
@@ -44,7 +44,7 @@ final class UserSearchFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.searchUsers.run = { query in
+    store.environment.messenger.searchContacts.run = { query in
       didSearchWithQuery.append(query)
       return contacts
     }
@@ -100,7 +100,7 @@ final class UserSearchFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.searchUsers.run = { _ in throw failure }
+    store.environment.messenger.searchContacts.run = { _ in throw failure }
 
     store.send(.searchTapped) {
       $0.focusedField = nil

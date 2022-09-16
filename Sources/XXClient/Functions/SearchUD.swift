@@ -2,30 +2,44 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct SearchUD {
-  public var run: (Int, Contact, [Fact], Data, UdSearchCallback) throws -> SingleUseSendReport
+  public struct Params: Equatable {
+    public init(
+      e2eId: Int,
+      udContact: Contact,
+      facts: [Fact],
+      singleRequestParamsJSON: Data = GetSingleUseParams.liveDefault()
+    ) {
+      self.e2eId = e2eId
+      self.udContact = udContact
+      self.facts = facts
+      self.singleRequestParamsJSON = singleRequestParamsJSON
+    }
+
+    public var e2eId: Int
+    public var udContact: Contact
+    public var facts: [Fact]
+    public var singleRequestParamsJSON: Data
+  }
+
+  public var run: (Params, UdSearchCallback) throws -> SingleUseSendReport
 
   public func callAsFunction(
-    e2eId: Int,
-    udContact: Contact,
-    facts: [Fact],
-    singleRequestParamsJSON: Data = GetSingleUseParams.liveDefault(),
+    params: Params,
     callback: UdSearchCallback
   ) throws -> SingleUseSendReport {
-    try run(e2eId, udContact, facts, singleRequestParamsJSON, callback)
+    try run(params, callback)
   }
 }
 
 extension SearchUD {
-  public static let live = SearchUD {
-    e2eId, udContact, facts, singleRequestParamsJSON, callback in
-
+  public static let live = SearchUD { params, callback in
     var error: NSError?
     let reportData = BindingsSearchUD(
-      e2eId,
-      udContact.data,
+      params.e2eId,
+      params.udContact.data,
       callback.makeBindingsUdSearchCallback(),
-      try facts.encode(),
-      singleRequestParamsJSON,
+      try params.facts.encode(),
+      params.singleRequestParamsJSON,
       &error
     )
     if let error = error {

@@ -2,7 +2,7 @@ import Foundation
 import XCTestDynamicOverlay
 import XXClient
 
-public struct MessengerSearchUsers {
+public struct MessengerSearchContacts {
   public struct Query: Equatable {
     public init(
       username: String? = nil,
@@ -31,9 +31,9 @@ public struct MessengerSearchUsers {
   }
 }
 
-extension MessengerSearchUsers {
-  public static func live(_ env: MessengerEnvironment) -> MessengerSearchUsers {
-    MessengerSearchUsers { query in
+extension MessengerSearchContacts {
+  public static func live(_ env: MessengerEnvironment) -> MessengerSearchContacts {
+    MessengerSearchContacts { query in
       guard let e2e = env.e2e() else {
         throw Error.notConnected
       }
@@ -43,11 +43,13 @@ extension MessengerSearchUsers {
       var result: Result<[Contact], Swift.Error>!
       let semaphore = DispatchSemaphore(value: 0)
       _ = try env.searchUD(
-        e2eId: e2e.getId(),
-        udContact: try ud.getContact(),
-        facts: query.facts,
-        singleRequestParamsJSON: env.getSingleUseParams(),
-        callback: .init { searchResult in
+        params: SearchUD.Params(
+          e2eId: e2e.getId(),
+          udContact: try ud.getContact(),
+          facts: query.facts,
+          singleRequestParamsJSON: env.getSingleUseParams()
+        ),
+        callback: UdSearchCallback { searchResult in
           switch searchResult {
           case .success(let contacts):
             result = .success(contacts)
@@ -63,7 +65,7 @@ extension MessengerSearchUsers {
   }
 }
 
-extension MessengerSearchUsers.Query {
+extension MessengerSearchContacts.Query {
   public var isEmpty: Bool {
     [username, email, phone]
       .compactMap { $0 }
@@ -86,8 +88,8 @@ extension MessengerSearchUsers.Query {
   }
 }
 
-extension MessengerSearchUsers {
-  public static let unimplemented = MessengerSearchUsers(
+extension MessengerSearchContacts {
+  public static let unimplemented = MessengerSearchContacts(
     run: XCTUnimplemented("\(Self.self)")
   )
 }

@@ -2,30 +2,45 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct LookupUD {
-  public var run: (Int, Contact, Data, Data, UdLookupCallback) throws -> SingleUseSendReport
+  public struct Params: Equatable {
+    public init(
+      e2eId: Int,
+      udContact: Contact,
+      lookupId: Data,
+      singleRequestParamsJSON: Data = GetSingleUseParams.liveDefault()
+    ) {
+      self.e2eId = e2eId
+      self.udContact = udContact
+      self.lookupId = lookupId
+      self.singleRequestParamsJSON = singleRequestParamsJSON
+    }
+
+    public var e2eId: Int
+    public var udContact: Contact
+    public var lookupId: Data
+    public var singleRequestParamsJSON: Data
+  }
+
+  public var run: (Params, UdLookupCallback) throws -> SingleUseSendReport
 
   public func callAsFunction(
-    e2eId: Int,
-    udContact: Contact,
-    lookupId: Data,
-    singleRequestParamsJSON: Data = GetSingleUseParams.liveDefault(),
+    params: Params,
     callback: UdLookupCallback
   ) throws -> SingleUseSendReport {
-    try run(e2eId, udContact, lookupId, singleRequestParamsJSON, callback)
+    try run(params, callback)
   }
 }
 
 extension LookupUD {
-  public static let live = LookupUD {
-    e2eId, udContact, lookupId, singleRequestParamsJSON, callback in
+  public static let live = LookupUD { params, callback in
 
     var error: NSError?
     let reportData = BindingsLookupUD(
-      e2eId,
-      udContact.data,
+      params.e2eId,
+      params.udContact.data,
       callback.makeBindingsUdLookupCallback(),
-      lookupId,
-      singleRequestParamsJSON,
+      params.lookupId,
+      params.singleRequestParamsJSON,
       &error
     )
     if let error = error {

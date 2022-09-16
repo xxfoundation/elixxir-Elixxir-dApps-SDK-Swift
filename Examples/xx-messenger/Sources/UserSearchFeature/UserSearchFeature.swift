@@ -41,7 +41,7 @@ public struct UserSearchState: Equatable {
 
   public init(
     focusedField: Field? = nil,
-    query: MessengerSearchUsers.Query = .init(),
+    query: MessengerSearchContacts.Query = .init(),
     isSearching: Bool = false,
     failure: String? = nil,
     results: IdentifiedArrayOf<Result> = [],
@@ -56,7 +56,7 @@ public struct UserSearchState: Equatable {
   }
 
   @BindableState public var focusedField: Field?
-  @BindableState public var query: MessengerSearchUsers.Query
+  @BindableState public var query: MessengerSearchContacts.Query
   public var isSearching: Bool
   public var failure: String?
   public var results: IdentifiedArrayOf<Result>
@@ -113,7 +113,7 @@ public let userSearchReducer = Reducer<UserSearchState, UserSearchAction, UserSe
     state.failure = nil
     return .result { [query = state.query] in
       do {
-        return .success(.didSucceed(try env.messenger.searchUsers(query: query)))
+        return .success(.didSucceed(try env.messenger.searchContacts(query: query)))
       } catch {
         return .success(.didFail(error.localizedDescription))
       }
