@@ -37,4 +37,32 @@ final class ReceivedFileTests: XCTestCase {
 
     XCTAssertNoDifference(decodedModel, model)
   }
+
+  func testDecodingWithoutPreview() throws {
+    let transferIdB64 = "B4Z9cwU18beRoGbk5xBjbcd5Ryi9ZUFA2UBvi8FOHWo="
+    let senderIdB64 = "emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD"
+    let name = "testfile.txt"
+    let type = "text file"
+    let size: Int = 2048
+    let jsonString = """
+    {
+      "TransferID": "\(transferIdB64)",
+      "SenderID": "\(senderIdB64)",
+      "Name": "\(name)",
+      "Type": "\(type)",
+      "Size": \(size)
+    }
+    """
+    let jsonData = jsonString.data(using: .utf8)!
+    let model = try ReceivedFile.decode(jsonData)
+
+    XCTAssertNoDifference(model, ReceivedFile(
+      transferId: Data(base64Encoded: transferIdB64)!,
+      senderId: Data(base64Encoded: senderIdB64)!,
+      preview: nil,
+      name: name,
+      type: type,
+      size: size
+    ))
+  }
 }

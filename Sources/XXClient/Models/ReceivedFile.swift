@@ -4,7 +4,7 @@ public struct ReceivedFile: Equatable {
   public init(
     transferId: Data,
     senderId: Data,
-    preview: Data,
+    preview: Data?,
     name: String,
     type: String,
     size: Int
@@ -19,7 +19,7 @@ public struct ReceivedFile: Equatable {
 
   public var transferId: Data
   public var senderId: Data
-  public var preview: Data
+  public var preview: Data?
   public var name: String
   public var type: String
   public var size: Int
