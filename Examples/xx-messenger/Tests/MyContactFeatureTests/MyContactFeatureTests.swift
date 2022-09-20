@@ -257,13 +257,97 @@ final class MyContactFeatureTests: XCTestCase {
   }
 
   func testUnregisterEmail() {
+    let contactID = "contact-id".data(using: .utf8)!
+    let email = "test@email.com"
+    let dbContact = XXModels.Contact(id: contactID, email: email)
+
+    var didRemoveFact: [Fact] = []
+    var didFetchContacts: [XXModels.Contact.Query] = []
+    var didSaveContact: [XXModels.Contact] = []
+
     let store = TestStore(
-      initialState: MyContactState(),
+      initialState: MyContactState(
+        contact: dbContact
+      ),
       reducer: myContactReducer,
       environment: .unimplemented
     )
 
-    store.send(.unregisterEmailTapped)
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.removeFact.run = { didRemoveFact.append($0) }
+      return ud
+    }
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in contactID }
+        return contact
+      }
+      return e2e
+    }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.fetchContacts.run = { query in
+        didFetchContacts.append(query)
+        return [dbContact]
+      }
+      db.saveContact.run = { contact in
+        didSaveContact.append(contact)
+        return contact
+      }
+      return db
+    }
+
+    store.send(.unregisterEmailTapped) {
+      $0.isUnregisteringEmail = true
+    }
+
+    XCTAssertNoDifference(didRemoveFact, [.init(type: .email, value: email)])
+    XCTAssertNoDifference(didFetchContacts, [.init(id: [contactID])])
+    var expectedSavedContact = dbContact
+    expectedSavedContact.email = nil
+    XCTAssertNoDifference(didSaveContact, [expectedSavedContact])
+
+    store.receive(.set(\.$isUnregisteringEmail, false)) {
+      $0.isUnregisteringEmail = false
+    }
+  }
+
+  func testUnregisterEmailFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: MyContactState(
+        contact: .init(id: Data(), email: "test@email.com")
+      ),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.removeFact.run = { _ in throw failure }
+      return ud
+    }
+
+    store.send(.unregisterEmailTapped) {
+      $0.isUnregisteringEmail = true
+    }
+
+    store.receive(.didFail(failure.localizedDescription)) {
+      $0.alert = .error(failure.localizedDescription)
+    }
+
+    store.receive(.set(\.$isUnregisteringEmail, false)) {
+      $0.isUnregisteringEmail = false
+    }
   }
 
   func testRegisterPhone() {
@@ -465,13 +549,97 @@ final class MyContactFeatureTests: XCTestCase {
   }
   
   func testUnregisterPhone() {
+    let contactID = "contact-id".data(using: .utf8)!
+    let phone = "+123456789"
+    let dbContact = XXModels.Contact(id: contactID, phone: phone)
+
+    var didRemoveFact: [Fact] = []
+    var didFetchContacts: [XXModels.Contact.Query] = []
+    var didSaveContact: [XXModels.Contact] = []
+
     let store = TestStore(
-      initialState: MyContactState(),
+      initialState: MyContactState(
+        contact: dbContact
+      ),
       reducer: myContactReducer,
       environment: .unimplemented
     )
 
-    store.send(.unregisterPhoneTapped)
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.removeFact.run = { didRemoveFact.append($0) }
+      return ud
+    }
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in contactID }
+        return contact
+      }
+      return e2e
+    }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.fetchContacts.run = { query in
+        didFetchContacts.append(query)
+        return [dbContact]
+      }
+      db.saveContact.run = { contact in
+        didSaveContact.append(contact)
+        return contact
+      }
+      return db
+    }
+
+    store.send(.unregisterPhoneTapped) {
+      $0.isUnregisteringPhone = true
+    }
+
+    XCTAssertNoDifference(didRemoveFact, [.init(type: .phone, value: phone)])
+    XCTAssertNoDifference(didFetchContacts, [.init(id: [contactID])])
+    var expectedSavedContact = dbContact
+    expectedSavedContact.phone = nil
+    XCTAssertNoDifference(didSaveContact, [expectedSavedContact])
+
+    store.receive(.set(\.$isUnregisteringPhone, false)) {
+      $0.isUnregisteringPhone = false
+    }
+  }
+
+  func testUnregisterPhoneFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: MyContactState(
+        contact: .init(id: Data(), phone: "+123456789")
+      ),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.removeFact.run = { _ in throw failure }
+      return ud
+    }
+
+    store.send(.unregisterPhoneTapped) {
+      $0.isUnregisteringPhone = true
+    }
+
+    store.receive(.didFail(failure.localizedDescription)) {
+      $0.alert = .error(failure.localizedDescription)
+    }
+
+    store.receive(.set(\.$isUnregisteringPhone, false)) {
+      $0.isUnregisteringPhone = false
+    }
   }
 
   func testLoadFactsFromClient() {

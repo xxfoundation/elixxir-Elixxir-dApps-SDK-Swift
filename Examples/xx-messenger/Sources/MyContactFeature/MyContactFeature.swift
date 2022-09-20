@@ -23,11 +23,13 @@ public struct MyContactState: Equatable {
     emailConfirmationCode: String = "",
     isRegisteringEmail: Bool = false,
     isConfirmingEmail: Bool = false,
+    isUnregisteringEmail: Bool = false,
     phone: String = "",
     phoneConfirmationID: String? = nil,
     phoneConfirmationCode: String = "",
     isRegisteringPhone: Bool = false,
     isConfirmingPhone: Bool = false,
+    isUnregisteringPhone: Bool = false,
     isLoadingFacts: Bool = false,
     alert: AlertState<MyContactAction>? = nil
   ) {
@@ -38,11 +40,13 @@ public struct MyContactState: Equatable {
     self.emailConfirmationCode = emailConfirmationCode
     self.isRegisteringEmail = isRegisteringEmail
     self.isConfirmingEmail = isConfirmingEmail
+    self.isUnregisteringEmail = isUnregisteringEmail
     self.phone = phone
     self.phoneConfirmationID = phoneConfirmationID
     self.phoneConfirmationCode = phoneConfirmationCode
     self.isRegisteringPhone = isRegisteringPhone
     self.isConfirmingPhone = isConfirmingPhone
+    self.isUnregisteringPhone = isUnregisteringPhone
     self.isLoadingFacts = isLoadingFacts
     self.alert = alert
   }
@@ -54,11 +58,13 @@ public struct MyContactState: Equatable {
   @BindableState public var emailConfirmationCode: String
   @BindableState public var isRegisteringEmail: Bool
   @BindableState public var isConfirmingEmail: Bool
+  @BindableState public var isUnregisteringEmail: Bool
   @BindableState public var phone: String
   @BindableState public var phoneConfirmationID: String?
   @BindableState public var phoneConfirmationCode: String
   @BindableState public var isRegisteringPhone: Bool
   @BindableState public var isConfirmingPhone: Bool
+  @BindableState public var isUnregisteringPhone: Bool
   @BindableState public var isLoadingFacts: Bool
   public var alert: AlertState<MyContactAction>?
 }
@@ -178,7 +184,28 @@ public let myContactReducer = Reducer<MyContactState, MyContactAction, MyContact
     .eraseToEffect()
 
   case .unregisterEmailTapped:
-    return .none
+    guard let email = state.contact?.email else { return .none }
+    state.isUnregisteringEmail = true
+    return Effect.run { [state] subscriber in
+      do {
+        let ud: UserDiscovery = try env.messenger.ud.tryGet()
+        let fact = Fact(type: .email, value: email)
+        try ud.removeFact(fact)
+        let contactId = try env.messenger.e2e.tryGet().getContact().getId()
+        if var dbContact = try env.db().fetchContacts(.init(id: [contactId])).first {
+          dbContact.email = nil
+          try env.db().saveContact(dbContact)
+        }
+      } catch {
+        subscriber.send(.didFail(error.localizedDescription))
+      }
+      subscriber.send(.set(\.$isUnregisteringEmail, false))
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
 
   case .registerPhoneTapped:
     state.focusedField = nil
@@ -228,7 +255,28 @@ public let myContactReducer = Reducer<MyContactState, MyContactAction, MyContact
     .eraseToEffect()
 
   case .unregisterPhoneTapped:
-    return .none
+    guard let phone = state.contact?.phone else { return .none }
+    state.isUnregisteringPhone = true
+    return Effect.run { [state] subscriber in
+      do {
+        let ud: UserDiscovery = try env.messenger.ud.tryGet()
+        let fact = Fact(type: .phone, value: phone)
+        try ud.removeFact(fact)
+        let contactId = try env.messenger.e2e.tryGet().getContact().getId()
+        if var dbContact = try env.db().fetchContacts(.init(id: [contactId])).first {
+          dbContact.phone = nil
+          try env.db().saveContact(dbContact)
+        }
+      } catch {
+        subscriber.send(.didFail(error.localizedDescription))
+      }
+      subscriber.send(.set(\.$isUnregisteringPhone, false))
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
 
   case .loadFactsTapped:
     state.isLoadingFacts = true

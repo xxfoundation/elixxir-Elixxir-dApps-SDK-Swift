@@ -19,11 +19,13 @@ public struct MyContactView: View {
       emailCode = state.emailConfirmationCode
       isRegisteringEmail = state.isRegisteringEmail
       isConfirmingEmail = state.isConfirmingEmail
+      isUnregisteringEmail = state.isUnregisteringEmail
       phone = state.phone
       phoneConfirmation = state.phoneConfirmationID != nil
       phoneCode = state.phoneConfirmationCode
       isRegisteringPhone = state.isRegisteringPhone
       isConfirmingPhone = state.isConfirmingPhone
+      isUnregisteringPhone = state.isUnregisteringPhone
       isLoadingFacts = state.isLoadingFacts
     }
 
@@ -34,11 +36,13 @@ public struct MyContactView: View {
     var emailCode: String
     var isRegisteringEmail: Bool
     var isConfirmingEmail: Bool
+    var isUnregisteringEmail: Bool
     var phone: String
     var phoneConfirmation: Bool
     var phoneCode: String
     var isRegisteringPhone: Bool
     var isConfirmingPhone: Bool
+    var isUnregisteringPhone: Bool
     var isLoadingFacts: Bool
   }
 
@@ -58,8 +62,15 @@ public struct MyContactView: View {
               Button(role: .destructive) {
                 viewStore.send(.unregisterEmailTapped)
               } label: {
-                Text("Unregister")
+                HStack {
+                  Text("Unregister")
+                  Spacer()
+                  if viewStore.isUnregisteringEmail {
+                    ProgressView()
+                  }
+                }
               }
+              .disabled(viewStore.isUnregisteringEmail)
             } else {
               TextField(
                 text: viewStore.binding(
@@ -127,8 +138,15 @@ public struct MyContactView: View {
               Button(role: .destructive) {
                 viewStore.send(.unregisterPhoneTapped)
               } label: {
-                Text("Unregister")
+                HStack {
+                  Text("Unregister")
+                  Spacer()
+                  if viewStore.isUnregisteringPhone {
+                    ProgressView()
+                  }
+                }
               }
+              .disabled(viewStore.isUnregisteringPhone)
             } else {
               TextField(
                 text: viewStore.binding(
