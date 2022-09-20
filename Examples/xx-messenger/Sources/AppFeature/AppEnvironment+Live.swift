@@ -125,7 +125,12 @@ extension AppEnvironment {
               bgQueue: bgQueue,
               contact: { contactEnvironment },
               myContact: {
-                MyContactEnvironment()
+                MyContactEnvironment(
+                  messenger: messenger,
+                  db: dbManager.getDB,
+                  mainQueue: mainQueue,
+                  bgQueue: bgQueue
+                )
               }
             )
           },
