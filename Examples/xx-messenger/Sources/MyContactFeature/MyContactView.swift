@@ -115,6 +115,7 @@ public struct MyContactView: View {
       .task { viewStore.send(.start) }
       .onChange(of: viewStore.focusedField) { focusedField = $0 }
       .onChange(of: focusedField) { viewStore.send(.set(\.$focusedField, $0)) }
+      .alert(store.scope(state: \.alert), dismiss: .alertDismissed)
     }
   }
 }

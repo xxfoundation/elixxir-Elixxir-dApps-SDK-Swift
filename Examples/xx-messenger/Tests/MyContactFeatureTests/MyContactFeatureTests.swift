@@ -119,4 +119,22 @@ final class MyContactFeatureTests: XCTestCase {
 
     store.send(.loadFactsTapped)
   }
+
+  func testErrorAlert() {
+    let store = TestStore(
+      initialState: MyContactState(),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    let failure = "Something went wrong"
+
+    store.send(.didFail(failure)) {
+      $0.alert = .error(failure)
+    }
+
+    store.send(.alertDismissed) {
+      $0.alert = nil
+    }
+  }
 }

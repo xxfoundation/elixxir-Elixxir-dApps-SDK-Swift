@@ -16,18 +16,21 @@ public struct MyContactState: Equatable {
     contact: XXModels.Contact? = nil,
     focusedField: Field? = nil,
     email: String = "",
-    phone: String = ""
+    phone: String = "",
+    alert: AlertState<MyContactAction>? = nil
   ) {
     self.contact = contact
     self.focusedField = focusedField
     self.email = email
     self.phone = phone
+    self.alert = alert
   }
 
   public var contact: XXModels.Contact?
   @BindableState public var focusedField: Field?
   @BindableState public var email: String
   @BindableState public var phone: String
+  public var alert: AlertState<MyContactAction>?
 }
 
 public enum MyContactAction: Equatable, BindableAction {
@@ -38,6 +41,8 @@ public enum MyContactAction: Equatable, BindableAction {
   case registerPhoneTapped
   case unregisterPhoneTapped
   case loadFactsTapped
+  case didFail(String)
+  case alertDismissed
   case binding(BindingAction<MyContactState>)
 }
 
@@ -106,6 +111,14 @@ public let myContactReducer = Reducer<MyContactState, MyContactAction, MyContact
     return .none
 
   case .loadFactsTapped:
+    return .none
+
+  case .didFail(let failure):
+    state.alert = .error(failure)
+    return .none
+
+  case .alertDismissed:
+    state.alert = nil
     return .none
 
   case .binding(_):
