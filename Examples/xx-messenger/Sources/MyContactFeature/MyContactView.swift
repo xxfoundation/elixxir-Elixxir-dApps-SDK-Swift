@@ -15,14 +15,30 @@ public struct MyContactView: View {
       contact = state.contact
       focusedField = state.focusedField
       email = state.email
+      emailConfirmation = state.emailConfirmationID != nil
+      emailCode = state.emailConfirmationCode
+      isRegisteringEmail = state.isRegisteringEmail
+      isConfirmingEmail = state.isConfirmingEmail
       phone = state.phone
+      phoneConfirmation = state.phoneConfirmationID != nil
+      phoneCode = state.phoneConfirmationCode
+      isRegisteringPhone = state.isRegisteringPhone
+      isConfirmingPhone = state.isConfirmingPhone
       isLoadingFacts = state.isLoadingFacts
     }
 
     var contact: XXModels.Contact?
     var focusedField: MyContactState.Field?
     var email: String
+    var emailConfirmation: Bool
+    var emailCode: String
+    var isRegisteringEmail: Bool
+    var isConfirmingEmail: Bool
     var phone: String
+    var phoneConfirmation: Bool
+    var phoneCode: String
+    var isRegisteringPhone: Bool
+    var isConfirmingPhone: Bool
     var isLoadingFacts: Bool
   }
 
@@ -56,10 +72,45 @@ public struct MyContactView: View {
               .focused($focusedField, equals: .email)
               .textInputAutocapitalization(.never)
               .disableAutocorrection(true)
-              Button {
-                viewStore.send(.registerEmailTapped)
-              } label: {
-                Text("Register")
+              .disabled(viewStore.isRegisteringEmail || viewStore.emailConfirmation)
+              if viewStore.emailConfirmation {
+                TextField(
+                  text: viewStore.binding(
+                    get: \.emailCode,
+                    send: { MyContactAction.set(\.$emailConfirmationCode, $0) }
+                  ),
+                  prompt: Text("Enter confirmation code"),
+                  label: { Text("Confirmation code") }
+                )
+                .focused($focusedField, equals: .emailCode)
+                .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
+                .disabled(viewStore.isConfirmingEmail)
+                Button {
+                  viewStore.send(.confirmEmailTapped)
+                } label: {
+                  HStack {
+                    Text("Confirm")
+                    Spacer()
+                    if viewStore.isConfirmingEmail {
+                      ProgressView()
+                    }
+                  }
+                }
+                .disabled(viewStore.isConfirmingEmail)
+              } else {
+                Button {
+                  viewStore.send(.registerEmailTapped)
+                } label: {
+                  HStack {
+                    Text("Register")
+                    Spacer()
+                    if viewStore.isRegisteringEmail {
+                      ProgressView()
+                    }
+                  }
+                }
+                .disabled(viewStore.isRegisteringEmail)
               }
             }
           } else {
@@ -90,10 +141,45 @@ public struct MyContactView: View {
               .focused($focusedField, equals: .phone)
               .textInputAutocapitalization(.never)
               .disableAutocorrection(true)
-              Button {
-                viewStore.send(.registerPhoneTapped)
-              } label: {
-                Text("Register")
+              .disabled(viewStore.isRegisteringPhone || viewStore.phoneConfirmation)
+              if viewStore.phoneConfirmation {
+                TextField(
+                  text: viewStore.binding(
+                    get: \.phoneCode,
+                    send: { MyContactAction.set(\.$phoneConfirmationCode, $0) }
+                  ),
+                  prompt: Text("Enter confirmation code"),
+                  label: { Text("Confirmation code") }
+                )
+                .focused($focusedField, equals: .phoneCode)
+                .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
+                .disabled(viewStore.isConfirmingPhone)
+                Button {
+                  viewStore.send(.confirmPhoneTapped)
+                } label: {
+                  HStack {
+                    Text("Confirm")
+                    Spacer()
+                    if viewStore.isConfirmingPhone {
+                      ProgressView()
+                    }
+                  }
+                }
+                .disabled(viewStore.isConfirmingPhone)
+              } else {
+                Button {
+                  viewStore.send(.registerPhoneTapped)
+                } label: {
+                  HStack {
+                    Text("Register")
+                    Spacer()
+                    if viewStore.isRegisteringPhone {
+                      ProgressView()
+                    }
+                  }
+                }
+                .disabled(viewStore.isRegisteringPhone)
               }
             }
           } else {

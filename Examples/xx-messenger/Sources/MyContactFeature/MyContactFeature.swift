@@ -10,21 +10,39 @@ import XXModels
 public struct MyContactState: Equatable {
   public enum Field: String, Hashable {
     case email
+    case emailCode
     case phone
+    case phoneCode
   }
 
   public init(
     contact: XXModels.Contact? = nil,
     focusedField: Field? = nil,
     email: String = "",
+    emailConfirmationID: String? = nil,
+    emailConfirmationCode: String = "",
+    isRegisteringEmail: Bool = false,
+    isConfirmingEmail: Bool = false,
     phone: String = "",
+    phoneConfirmationID: String? = nil,
+    phoneConfirmationCode: String = "",
+    isRegisteringPhone: Bool = false,
+    isConfirmingPhone: Bool = false,
     isLoadingFacts: Bool = false,
     alert: AlertState<MyContactAction>? = nil
   ) {
     self.contact = contact
     self.focusedField = focusedField
     self.email = email
+    self.emailConfirmationID = emailConfirmationID
+    self.emailConfirmationCode = emailConfirmationCode
+    self.isRegisteringEmail = isRegisteringEmail
+    self.isConfirmingEmail = isConfirmingEmail
     self.phone = phone
+    self.phoneConfirmationID = phoneConfirmationID
+    self.phoneConfirmationCode = phoneConfirmationCode
+    self.isRegisteringPhone = isRegisteringPhone
+    self.isConfirmingPhone = isConfirmingPhone
     self.isLoadingFacts = isLoadingFacts
     self.alert = alert
   }
@@ -32,7 +50,15 @@ public struct MyContactState: Equatable {
   public var contact: XXModels.Contact?
   @BindableState public var focusedField: Field?
   @BindableState public var email: String
+  @BindableState public var emailConfirmationID: String?
+  @BindableState public var emailConfirmationCode: String
+  @BindableState public var isRegisteringEmail: Bool
+  @BindableState public var isConfirmingEmail: Bool
   @BindableState public var phone: String
+  @BindableState public var phoneConfirmationID: String?
+  @BindableState public var phoneConfirmationCode: String
+  @BindableState public var isRegisteringPhone: Bool
+  @BindableState public var isConfirmingPhone: Bool
   @BindableState public var isLoadingFacts: Bool
   public var alert: AlertState<MyContactAction>?
 }
@@ -41,8 +67,10 @@ public enum MyContactAction: Equatable, BindableAction {
   case start
   case contactFetched(XXModels.Contact?)
   case registerEmailTapped
+  case confirmEmailTapped
   case unregisterEmailTapped
   case registerPhoneTapped
+  case confirmPhoneTapped
   case unregisterPhoneTapped
   case loadFactsTapped
   case didFail(String)
@@ -103,13 +131,101 @@ public let myContactReducer = Reducer<MyContactState, MyContactAction, MyContact
     return .none
 
   case .registerEmailTapped:
-    return .none
+    state.focusedField = nil
+    state.isRegisteringEmail = true
+    return Effect.run { [state] subscriber in
+      do {
+        let ud = try env.messenger.ud.tryGet()
+        let fact = Fact(type: .email, value: state.email)
+        let confirmationID = try ud.sendRegisterFact(fact)
+        subscriber.send(.set(\.$emailConfirmationID, confirmationID))
+      } catch {
+        subscriber.send(.didFail(error.localizedDescription))
+      }
+      subscriber.send(.set(\.$isRegisteringEmail, false))
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+
+  case .confirmEmailTapped:
+    guard let confirmationID = state.emailConfirmationID else { return .none }
+    state.focusedField = nil
+    state.isConfirmingEmail = true
+    return Effect.run { [state] subscriber in
+      do {
+        let ud = try env.messenger.ud.tryGet()
+        try ud.confirmFact(confirmationId: confirmationID, code: state.emailConfirmationCode)
+        let contactId = try env.messenger.e2e.tryGet().getContact().getId()
+        if var dbContact = try env.db().fetchContacts(.init(id: [contactId])).first {
+          dbContact.email = state.email
+          try env.db().saveContact(dbContact)
+        }
+        subscriber.send(.set(\.$email, ""))
+        subscriber.send(.set(\.$emailConfirmationID, nil))
+        subscriber.send(.set(\.$emailConfirmationCode, ""))
+      } catch {
+        subscriber.send(.didFail(error.localizedDescription))
+      }
+      subscriber.send(.set(\.$isConfirmingEmail, false))
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
 
   case .unregisterEmailTapped:
     return .none
 
   case .registerPhoneTapped:
-    return .none
+    state.focusedField = nil
+    state.isRegisteringPhone = true
+    return Effect.run { [state] subscriber in
+      do {
+        let ud = try env.messenger.ud.tryGet()
+        let fact = Fact(type: .phone, value: state.phone)
+        let confirmationID = try ud.sendRegisterFact(fact)
+        subscriber.send(.set(\.$phoneConfirmationID, confirmationID))
+      } catch {
+        subscriber.send(.didFail(error.localizedDescription))
+      }
+      subscriber.send(.set(\.$isRegisteringPhone, false))
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
+
+  case .confirmPhoneTapped:
+    guard let confirmationID = state.phoneConfirmationID else { return .none }
+    state.focusedField = nil
+    state.isConfirmingPhone = true
+    return Effect.run { [state] subscriber in
+      do {
+        let ud = try env.messenger.ud.tryGet()
+        try ud.confirmFact(confirmationId: confirmationID, code: state.phoneConfirmationCode)
+        let contactId = try env.messenger.e2e.tryGet().getContact().getId()
+        if var dbContact = try env.db().fetchContacts(.init(id: [contactId])).first {
+          dbContact.phone = state.phone
+          try env.db().saveContact(dbContact)
+        }
+        subscriber.send(.set(\.$phone, ""))
+        subscriber.send(.set(\.$phoneConfirmationID, nil))
+        subscriber.send(.set(\.$phoneConfirmationCode, ""))
+      } catch {
+        subscriber.send(.didFail(error.localizedDescription))
+      }
+      subscriber.send(.set(\.$isConfirmingPhone, false))
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
 
   case .unregisterPhoneTapped:
     return .none

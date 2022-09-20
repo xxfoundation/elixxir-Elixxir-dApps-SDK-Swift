@@ -60,6 +60,9 @@ final class MyContactFeatureTests: XCTestCase {
 
   func testRegisterEmail() {
     let email = "test@email.com"
+    let confirmationID = "123"
+
+    var didSendRegisterFact: [Fact] = []
 
     let store = TestStore(
       initialState: MyContactState(),
@@ -67,11 +70,190 @@ final class MyContactFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.sendRegisterFact.run = { fact in
+        didSendRegisterFact.append(fact)
+        return confirmationID
+      }
+      return ud
+    }
+
+    store.send(.set(\.$focusedField, .email)) {
+      $0.focusedField = .email
+    }
+
     store.send(.set(\.$email, email)) {
       $0.email = email
     }
 
-    store.send(.registerEmailTapped)
+    store.send(.registerEmailTapped) {
+      $0.focusedField = nil
+      $0.isRegisteringEmail = true
+    }
+
+    XCTAssertNoDifference(didSendRegisterFact, [.init(type: .email, value: email)])
+
+    store.receive(.set(\.$emailConfirmationID, confirmationID)) {
+      $0.emailConfirmationID = confirmationID
+    }
+
+    store.receive(.set(\.$isRegisteringEmail, false)) {
+      $0.isRegisteringEmail = false
+    }
+  }
+
+  func testRegisterEmailFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: MyContactState(),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.sendRegisterFact.run = { _ in throw failure }
+      return ud
+    }
+
+    store.send(.registerEmailTapped) {
+      $0.isRegisteringEmail = true
+    }
+
+    store.receive(.didFail(failure.localizedDescription)) {
+      $0.alert = .error(failure.localizedDescription)
+    }
+
+    store.receive(.set(\.$isRegisteringEmail, false)) {
+      $0.isRegisteringEmail = false
+    }
+  }
+
+  func testConfirmEmail() {
+    let contactID = "contact-id".data(using: .utf8)!
+    let email = "test@email.com"
+    let confirmationID = "123"
+    let confirmationCode = "321"
+    let dbContact = XXModels.Contact(id: contactID)
+
+    var didConfirmWithID: [String] = []
+    var didConfirmWithCode: [String] = []
+    var didFetchContacts: [XXModels.Contact.Query] = []
+    var didSaveContact: [XXModels.Contact] = []
+
+    let store = TestStore(
+      initialState: MyContactState(
+        email: email,
+        emailConfirmationID: confirmationID
+      ),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.confirmFact.run = { id, code in
+        didConfirmWithID.append(id)
+        didConfirmWithCode.append(code)
+      }
+      return ud
+    }
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in contactID }
+        return contact
+      }
+      return e2e
+    }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.fetchContacts.run = { query in
+        didFetchContacts.append(query)
+        return [dbContact]
+      }
+      db.saveContact.run = { contact in
+        didSaveContact.append(contact)
+        return contact
+      }
+      return db
+    }
+
+    store.send(.set(\.$focusedField, .emailCode)) {
+      $0.focusedField = .emailCode
+    }
+
+    store.send(.set(\.$emailConfirmationCode, confirmationCode)) {
+      $0.emailConfirmationCode = confirmationCode
+    }
+
+    store.send(.confirmEmailTapped) {
+      $0.focusedField = nil
+      $0.isConfirmingEmail = true
+    }
+
+    XCTAssertNoDifference(didConfirmWithID, [confirmationID])
+    XCTAssertNoDifference(didConfirmWithCode, [confirmationCode])
+    XCTAssertNoDifference(didFetchContacts, [.init(id: [contactID])])
+    var expectedSavedContact = dbContact
+    expectedSavedContact.email = email
+    XCTAssertNoDifference(didSaveContact, [expectedSavedContact])
+
+    store.receive(.set(\.$email, "")) {
+      $0.email = ""
+    }
+    store.receive(.set(\.$emailConfirmationID, nil)) {
+      $0.emailConfirmationID = nil
+    }
+    store.receive(.set(\.$emailConfirmationCode, "")) {
+      $0.emailConfirmationCode = ""
+    }
+    store.receive(.set(\.$isConfirmingEmail, false)) {
+      $0.isConfirmingEmail = false
+    }
+  }
+
+  func testConfirmEmailFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: MyContactState(
+        emailConfirmationID: "123"
+      ),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.confirmFact.run = { _, _ in throw failure }
+      return ud
+    }
+
+    store.send(.confirmEmailTapped) {
+      $0.isConfirmingEmail = true
+    }
+
+    store.receive(.didFail(failure.localizedDescription)) {
+      $0.alert = .error(failure.localizedDescription)
+    }
+
+    store.receive(.set(\.$isConfirmingEmail, false)) {
+      $0.isConfirmingEmail = false
+    }
   }
 
   func testUnregisterEmail() {
@@ -85,7 +267,10 @@ final class MyContactFeatureTests: XCTestCase {
   }
 
   func testRegisterPhone() {
-    let phone = "123456789"
+    let phone = "+123456789"
+    let confirmationID = "123"
+
+    var didSendRegisterFact: [Fact] = []
 
     let store = TestStore(
       initialState: MyContactState(),
@@ -93,13 +278,192 @@ final class MyContactFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.sendRegisterFact.run = { fact in
+        didSendRegisterFact.append(fact)
+        return confirmationID
+      }
+      return ud
+    }
+
+    store.send(.set(\.$focusedField, .phone)) {
+      $0.focusedField = .phone
+    }
+
     store.send(.set(\.$phone, phone)) {
       $0.phone = phone
     }
 
-    store.send(.registerPhoneTapped)
+    store.send(.registerPhoneTapped) {
+      $0.focusedField = nil
+      $0.isRegisteringPhone = true
+    }
+
+    XCTAssertNoDifference(didSendRegisterFact, [.init(type: .phone, value: phone)])
+
+    store.receive(.set(\.$phoneConfirmationID, confirmationID)) {
+      $0.phoneConfirmationID = confirmationID
+    }
+
+    store.receive(.set(\.$isRegisteringPhone, false)) {
+      $0.isRegisteringPhone = false
+    }
   }
 
+  func testRegisterPhoneFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: MyContactState(),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.sendRegisterFact.run = { _ in throw failure }
+      return ud
+    }
+
+    store.send(.registerPhoneTapped) {
+      $0.isRegisteringPhone = true
+    }
+
+    store.receive(.didFail(failure.localizedDescription)) {
+      $0.alert = .error(failure.localizedDescription)
+    }
+
+    store.receive(.set(\.$isRegisteringPhone, false)) {
+      $0.isRegisteringPhone = false
+    }
+  }
+
+  func testConfirmPhone() {
+    let contactID = "contact-id".data(using: .utf8)!
+    let phone = "+123456789"
+    let confirmationID = "123"
+    let confirmationCode = "321"
+    let dbContact = XXModels.Contact(id: contactID)
+
+    var didConfirmWithID: [String] = []
+    var didConfirmWithCode: [String] = []
+    var didFetchContacts: [XXModels.Contact.Query] = []
+    var didSaveContact: [XXModels.Contact] = []
+
+    let store = TestStore(
+      initialState: MyContactState(
+        phone: phone,
+        phoneConfirmationID: confirmationID
+      ),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.confirmFact.run = { id, code in
+        didConfirmWithID.append(id)
+        didConfirmWithCode.append(code)
+      }
+      return ud
+    }
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in contactID }
+        return contact
+      }
+      return e2e
+    }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.fetchContacts.run = { query in
+        didFetchContacts.append(query)
+        return [dbContact]
+      }
+      db.saveContact.run = { contact in
+        didSaveContact.append(contact)
+        return contact
+      }
+      return db
+    }
+
+    store.send(.set(\.$focusedField, .phoneCode)) {
+      $0.focusedField = .phoneCode
+    }
+
+    store.send(.set(\.$phoneConfirmationCode, confirmationCode)) {
+      $0.phoneConfirmationCode = confirmationCode
+    }
+
+    store.send(.confirmPhoneTapped) {
+      $0.focusedField = nil
+      $0.isConfirmingPhone = true
+    }
+
+    XCTAssertNoDifference(didConfirmWithID, [confirmationID])
+    XCTAssertNoDifference(didConfirmWithCode, [confirmationCode])
+    XCTAssertNoDifference(didFetchContacts, [.init(id: [contactID])])
+    var expectedSavedContact = dbContact
+    expectedSavedContact.phone = phone
+    XCTAssertNoDifference(didSaveContact, [expectedSavedContact])
+
+    store.receive(.set(\.$phone, "")) {
+      $0.phone = ""
+    }
+    store.receive(.set(\.$phoneConfirmationID, nil)) {
+      $0.phoneConfirmationID = nil
+    }
+    store.receive(.set(\.$phoneConfirmationCode, "")) {
+      $0.phoneConfirmationCode = ""
+    }
+    store.receive(.set(\.$isConfirmingPhone, false)) {
+      $0.isConfirmingPhone = false
+    }
+  }
+
+  func testConfirmPhoneFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: MyContactState(
+        phoneConfirmationID: "123"
+      ),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.confirmFact.run = { _, _ in throw failure }
+      return ud
+    }
+
+    store.send(.confirmPhoneTapped) {
+      $0.isConfirmingPhone = true
+    }
+
+    store.receive(.didFail(failure.localizedDescription)) {
+      $0.alert = .error(failure.localizedDescription)
+    }
+
+    store.receive(.set(\.$isConfirmingPhone, false)) {
+      $0.isConfirmingPhone = false
+    }
+  }
+  
   func testUnregisterPhone() {
     let store = TestStore(
       initialState: MyContactState(),
