@@ -84,6 +84,7 @@ let package = Package(
         .target(name: "ContactFeature"),
         .target(name: "ContactsFeature"),
         .target(name: "HomeFeature"),
+        .target(name: "MyContactFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "RestoreFeature"),
         .target(name: "SendRequestFeature"),
@@ -182,6 +183,7 @@ let package = Package(
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "ContactFeature"),
+        .target(name: "MyContactFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),

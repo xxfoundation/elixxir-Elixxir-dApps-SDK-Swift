@@ -6,6 +6,7 @@ import ContactFeature
 import ContactsFeature
 import Foundation
 import HomeFeature
+import MyContactFeature
 import RegisterFeature
 import RestoreFeature
 import SendRequestFeature
@@ -122,7 +123,10 @@ extension AppEnvironment {
               db: dbManager.getDB,
               mainQueue: mainQueue,
               bgQueue: bgQueue,
-              contact: { contactEnvironment }
+              contact: { contactEnvironment },
+              myContact: {
+                MyContactEnvironment()
+              }
             )
           },
           userSearch: {

@@ -2,6 +2,7 @@ import AppCore
 import ComposableArchitecture
 import ComposablePresentation
 import ContactFeature
+import MyContactFeature
 import SwiftUI
 import XXModels
 
@@ -28,13 +29,21 @@ public struct ContactsView: View {
         ForEach(viewStore.contacts) { contact in
           if contact.id == viewStore.myId {
             Section {
-              VStack(alignment: .leading, spacing: 8) {
-                Label(contact.username ?? "", systemImage: "person")
-                Label(contact.email ?? "", systemImage: "envelope")
-                Label(contact.phone ?? "", systemImage: "phone")
+              Button {
+                viewStore.send(.myContactSelected)
+              } label: {
+                HStack {
+                  VStack(alignment: .leading, spacing: 8) {
+                    Label(contact.username ?? "", systemImage: "person")
+                    Label(contact.email ?? "", systemImage: "envelope")
+                    Label(contact.phone ?? "", systemImage: "phone")
+                  }
+                  .font(.callout)
+                  .tint(Color.primary)
+                  Spacer()
+                  Image(systemName: "chevron.forward")
+                }
               }
-              .font(.callout)
-              .tint(Color.primary)
             } header: {
               Text("My contact")
             }
@@ -69,6 +78,14 @@ public struct ContactsView: View {
         ),
         onDeactivate: { viewStore.send(.contactDismissed) },
         destination: ContactView.init(store:)
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.myContact,
+          action: ContactsAction.myContact
+        ),
+        onDeactivate: { viewStore.send(.myContactDismissed) },
+        destination: MyContactView.init(store:)
       ))
     }
   }
