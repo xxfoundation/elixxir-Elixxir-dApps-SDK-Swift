@@ -54,6 +54,10 @@ let package = Package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
       .upToNextMajor(from: "0.4.1")
     ),
+    .package(
+      url: "https://github.com/pointfreeco/swift-custom-dump.git",
+      .upToNextMajor(from: "0.5.2")
+    ),
   ],
   targets: [
     .target(
@@ -70,7 +74,8 @@ let package = Package(
     .testTarget(
       name: "AppCoreTests",
       dependencies: [
-        .target(name: "AppCore")
+        .target(name: "AppCore"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -102,6 +107,7 @@ let package = Package(
       name: "AppFeatureTests",
       dependencies: [
         .target(name: "AppFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -120,6 +126,7 @@ let package = Package(
       name: "ChatFeatureTests",
       dependencies: [
         .target(name: "ChatFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -137,6 +144,7 @@ let package = Package(
       name: "CheckContactAuthFeatureTests",
       dependencies: [
         .target(name: "CheckContactAuthFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ]
     ),
     .target(
@@ -153,6 +161,7 @@ let package = Package(
       name: "ConfirmRequestFeatureTests",
       dependencies: [
         .target(name: "ConfirmRequestFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ]
     ),
     .target(
@@ -175,6 +184,7 @@ let package = Package(
       name: "ContactFeatureTests",
       dependencies: [
         .target(name: "ContactFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -196,6 +206,7 @@ let package = Package(
       name: "ContactsFeatureTests",
       dependencies: [
         .target(name: "ContactsFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -216,6 +227,7 @@ let package = Package(
       name: "HomeFeatureTests",
       dependencies: [
         .target(name: "HomeFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -234,6 +246,7 @@ let package = Package(
       name: "MyContactFeatureTests",
       dependencies: [
         .target(name: "MyContactFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -252,6 +265,7 @@ let package = Package(
       name: "RegisterFeatureTests",
       dependencies: [
         .target(name: "RegisterFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -266,6 +280,7 @@ let package = Package(
       name: "RestoreFeatureTests",
       dependencies: [
         .target(name: "RestoreFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -284,6 +299,7 @@ let package = Package(
       name: "SendRequestFeatureTests",
       dependencies: [
         .target(name: "SendRequestFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -303,6 +319,7 @@ let package = Package(
       name: "UserSearchFeatureTests",
       dependencies: [
         .target(name: "UserSearchFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -320,6 +337,7 @@ let package = Package(
       name: "VerifyContactFeatureTests",
       dependencies: [
         .target(name: "VerifyContactFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ]
     ),
     .target(
@@ -334,6 +352,7 @@ let package = Package(
       name: "WelcomeFeatureTests",
       dependencies: [
         .target(name: "WelcomeFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
     ),
