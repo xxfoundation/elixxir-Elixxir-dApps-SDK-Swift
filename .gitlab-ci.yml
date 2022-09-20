@@ -27,6 +27,5 @@ test-examples-ios:
   tags: 
     - ios
   script:
-    - ./xcode-remove-caches.sh
     - ./run-tests.sh examples-ios
   retry: 1
