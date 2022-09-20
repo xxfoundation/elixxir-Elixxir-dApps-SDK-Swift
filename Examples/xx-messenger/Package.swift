@@ -40,7 +40,7 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-      .upToNextMajor(from: "0.40.1")
+      .upToNextMajor(from: "0.40.2")
     ),
     .package(
       url: "https://git.xx.network/elixxir/client-ios-db.git",
@@ -52,7 +52,7 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
-      .upToNextMajor(from: "0.4.0")
+      .upToNextMajor(from: "0.4.1")
     ),
   ],
   targets: [
