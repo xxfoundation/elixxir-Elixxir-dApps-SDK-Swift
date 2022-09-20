@@ -1,6 +1,7 @@
 import AppCore
 import ComposableArchitecture
 import ContactsFeature
+import CustomDump
 import RegisterFeature
 import UserSearchFeature
 import XCTest

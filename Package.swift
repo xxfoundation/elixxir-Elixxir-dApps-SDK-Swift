@@ -26,11 +26,11 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/pointfreeco/swift-custom-dump.git",
-      .upToNextMajor(from: "0.5.0")
+      .upToNextMajor(from: "0.5.2")
     ),
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
-      .upToNextMajor(from: "0.4.0")
+      .upToNextMajor(from: "0.4.1")
     ),
     .package(
       url: "https://github.com/kishikawakatsumi/KeychainAccess.git",

@@ -2,6 +2,7 @@ import Combine
 import ComposableArchitecture
 import ContactFeature
 import CustomDump
+import MyContactFeature
 import XCTest
 import XXClient
 import XXMessengerClient
@@ -92,6 +93,32 @@ final class ContactsFeatureTests: XCTestCase {
 
     store.send(.contactDismissed) {
       $0.contact = nil
+    }
+  }
+
+  func testSelectMyContact() {
+    let store = TestStore(
+      initialState: ContactsState(),
+      reducer: contactsReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.myContactSelected) {
+      $0.myContact = MyContactState()
+    }
+  }
+
+  func testDismissMyContact() {
+    let store = TestStore(
+      initialState: ContactsState(
+        myContact: MyContactState()
+      ),
+      reducer: contactsReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.myContactDismissed) {
+      $0.myContact = nil
     }
   }
 }
