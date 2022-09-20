@@ -159,13 +159,19 @@ final class MyContactFeatureTests: XCTestCase {
       return db
     }
 
-    store.send(.loadFactsTapped)
+    store.send(.loadFactsTapped) {
+      $0.isLoadingFacts = true
+    }
 
     XCTAssertNoDifference(didFetchContacts, [.init(id: [contactId])])
     var expectedSavedContact = dbContact
     expectedSavedContact.email = email
     expectedSavedContact.phone = phone
     XCTAssertNoDifference(didSaveContact, [expectedSavedContact])
+
+    store.receive(.set(\.$isLoadingFacts, false)) {
+      $0.isLoadingFacts = false
+    }
   }
 
   func testErrorAlert() {

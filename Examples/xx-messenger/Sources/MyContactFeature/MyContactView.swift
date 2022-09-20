@@ -16,12 +16,14 @@ public struct MyContactView: View {
       focusedField = state.focusedField
       email = state.email
       phone = state.phone
+      isLoadingFacts = state.isLoadingFacts
     }
 
     var contact: XXModels.Contact?
     var focusedField: MyContactState.Field?
     var email: String
     var phone: String
+    var isLoadingFacts: Bool
   }
 
   public var body: some View {
@@ -105,8 +107,15 @@ public struct MyContactView: View {
           Button {
             viewStore.send(.loadFactsTapped)
           } label: {
-            Text("Load facts from client")
+            HStack {
+              Text("Reload facts")
+              Spacer()
+              if viewStore.isLoadingFacts {
+                ProgressView()
+              }
+            }
           }
+          .disabled(viewStore.isLoadingFacts)
         } header: {
           Text("Actions")
         }

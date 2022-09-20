@@ -18,12 +18,14 @@ public struct MyContactState: Equatable {
     focusedField: Field? = nil,
     email: String = "",
     phone: String = "",
+    isLoadingFacts: Bool = false,
     alert: AlertState<MyContactAction>? = nil
   ) {
     self.contact = contact
     self.focusedField = focusedField
     self.email = email
     self.phone = phone
+    self.isLoadingFacts = isLoadingFacts
     self.alert = alert
   }
 
@@ -31,6 +33,7 @@ public struct MyContactState: Equatable {
   @BindableState public var focusedField: Field?
   @BindableState public var email: String
   @BindableState public var phone: String
+  @BindableState public var isLoadingFacts: Bool
   public var alert: AlertState<MyContactAction>?
 }
 
@@ -112,6 +115,7 @@ public let myContactReducer = Reducer<MyContactState, MyContactAction, MyContact
     return .none
 
   case .loadFactsTapped:
+    state.isLoadingFacts = true
     return Effect.run { subscriber in
       do {
         let contactId = try env.messenger.e2e.tryGet().getContact().getId()
@@ -124,6 +128,7 @@ public let myContactReducer = Reducer<MyContactState, MyContactAction, MyContact
       } catch {
         subscriber.send(.didFail(error.localizedDescription))
       }
+      subscriber.send(.set(\.$isLoadingFacts, false))
       subscriber.send(completion: .finished)
       return AnyCancellable {}
     }
