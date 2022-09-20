@@ -26,6 +26,7 @@ let package = Package(
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
     .library(name: "ContactsFeature", targets: ["ContactsFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
+    .library(name: "MyContactFeature", targets: ["MyContactFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
     .library(name: "SendRequestFeature", targets: ["SendRequestFeature"]),
@@ -213,6 +214,24 @@ let package = Package(
       name: "HomeFeatureTests",
       dependencies: [
         .target(name: "HomeFeature"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "MyContactFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "MyContactFeatureTests",
+      dependencies: [
+        .target(name: "MyContactFeature"),
       ],
       swiftSettings: swiftSettings
     ),
