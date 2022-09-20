@@ -1,4 +1,5 @@
 import AppCore
+import Combine
 import ComposableArchitecture
 import Foundation
 import XCTestDynamicOverlay
@@ -111,7 +112,24 @@ public let myContactReducer = Reducer<MyContactState, MyContactAction, MyContact
     return .none
 
   case .loadFactsTapped:
-    return .none
+    return Effect.run { subscriber in
+      do {
+        let contactId = try env.messenger.e2e.tryGet().getContact().getId()
+        if var dbContact = try env.db().fetchContacts(.init(id: [contactId])).first {
+          let facts = try env.messenger.ud.tryGet().getFacts()
+          dbContact.email = facts.get(.email)?.value
+          dbContact.phone = facts.get(.phone)?.value
+          try env.db().saveContact(dbContact)
+        }
+      } catch {
+        subscriber.send(.didFail(error.localizedDescription))
+      }
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
 
   case .didFail(let failure):
     state.alert = .error(failure)

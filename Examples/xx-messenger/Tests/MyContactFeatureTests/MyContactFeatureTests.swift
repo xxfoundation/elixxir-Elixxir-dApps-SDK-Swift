@@ -111,13 +111,61 @@ final class MyContactFeatureTests: XCTestCase {
   }
 
   func testLoadFactsFromClient() {
+    let contactId = "contact-id".data(using: .utf8)!
+    let dbContact = XXModels.Contact(id: contactId)
+    let email = "test@email.com"
+    let phone = "123456789"
+
+    var didFetchContacts: [XXModels.Contact.Query] = []
+    var didSaveContact: [XXModels.Contact] = []
+
     let store = TestStore(
       initialState: MyContactState(),
       reducer: myContactReducer,
       environment: .unimplemented
     )
 
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in contactId }
+        return contact
+      }
+      return e2e
+    }
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.getFacts.run = {
+        [
+          Fact(type: .email, value: email),
+          Fact(type: .phone, value: phone),
+        ]
+      }
+      return ud
+    }
+    store.environment.db.run = {
+      var db: Database = .failing
+      db.fetchContacts.run = { query in
+        didFetchContacts.append(query)
+        return [dbContact]
+      }
+      db.saveContact.run = { contact in
+        didSaveContact.append(contact)
+        return contact
+      }
+      return db
+    }
+
     store.send(.loadFactsTapped)
+
+    XCTAssertNoDifference(didFetchContacts, [.init(id: [contactId])])
+    var expectedSavedContact = dbContact
+    expectedSavedContact.email = email
+    expectedSavedContact.phone = phone
+    XCTAssertNoDifference(didSaveContact, [expectedSavedContact])
   }
 
   func testErrorAlert() {
