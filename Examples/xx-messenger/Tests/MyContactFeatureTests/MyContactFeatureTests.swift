@@ -174,6 +174,41 @@ final class MyContactFeatureTests: XCTestCase {
     }
   }
 
+  func testLoadFactsFromClientFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: MyContactState(),
+      reducer: myContactReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in throw failure }
+        return contact
+      }
+      return e2e
+    }
+
+    store.send(.loadFactsTapped) {
+      $0.isLoadingFacts = true
+    }
+
+    store.receive(.didFail(failure.localizedDescription)) {
+      $0.alert = .error(failure.localizedDescription)
+    }
+
+    store.receive(.set(\.$isLoadingFacts, false)) {
+      $0.isLoadingFacts = false
+    }
+  }
+
   func testErrorAlert() {
     let store = TestStore(
       initialState: MyContactState(),
