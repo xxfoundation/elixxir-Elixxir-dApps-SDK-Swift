@@ -9,13 +9,14 @@ final class MessengerRestoreBackupTests: XCTestCase {
     let backupPassphrase = "backup-passphrase"
     let ndfData = "ndf-data".data(using: .utf8)!
     let password = "password".data(using: .utf8)!
+    let backupContacts: [Data] = (1...3).map { "contact-\($0)" }.map { $0.data(using: .utf8)! }
     let backupParams = BackupParams(
       username: "backup-username",
       email: "backup-email",
       phone: "backup-phone"
     )
     let backupReport = BackupReport(
-      restoredContacts: [],
+      restoredContacts: backupContacts,
       params: String(data: try! JSONEncoder().encode(backupParams), encoding: .utf8)!
     )
     let cMixParams = "cmix-params".data(using: .utf8)!
@@ -152,7 +153,10 @@ final class MessengerRestoreBackupTests: XCTestCase {
       .didSetUD,
     ])
 
-    XCTAssertNoDifference(result, backupParams)
+    XCTAssertNoDifference(result, MessengerRestoreBackup.Result(
+      restoredParams: backupParams,
+      restoredContacts: backupContacts
+    ))
   }
 
   func testDownloadNdfFailure() {

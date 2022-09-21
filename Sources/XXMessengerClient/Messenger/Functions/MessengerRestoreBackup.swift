@@ -3,12 +3,25 @@ import XXClient
 import XCTestDynamicOverlay
 
 public struct MessengerRestoreBackup {
-  public var run: (Data, String) throws -> BackupParams
+  public struct Result: Equatable {
+    public init(
+      restoredParams: BackupParams,
+      restoredContacts: [Data]
+    ) {
+      self.restoredParams = restoredParams
+      self.restoredContacts = restoredContacts
+    }
+
+    public var restoredParams: BackupParams
+    public var restoredContacts: [Data]
+  }
+
+  public var run: (Data, String) throws -> Result
 
   public func callAsFunction(
     backupData: Data,
     backupPassphrase: String
-  ) throws -> BackupParams {
+  ) throws -> Result {
     try run(backupData, backupPassphrase)
   }
 }
@@ -59,7 +72,10 @@ extension MessengerRestoreBackup {
         env.cMix.set(cMix)
         env.e2e.set(e2e)
         env.ud.set(ud)
-        return params
+        return Result(
+          restoredParams: params,
+          restoredContacts: report.restoredContacts
+        )
       } catch {
         try? env.fileManager.removeDirectory(storageDir)
         throw error
