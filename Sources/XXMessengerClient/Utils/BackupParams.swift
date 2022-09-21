@@ -1,6 +1,6 @@
 import Foundation
 
-public struct BackupParams: Codable {
+public struct BackupParams: Equatable, Codable {
   public init(
     username: String,
     email: String?,
