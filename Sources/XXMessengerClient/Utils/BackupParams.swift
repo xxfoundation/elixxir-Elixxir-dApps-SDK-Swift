@@ -2,16 +2,16 @@ import Foundation
 
 public struct BackupParams: Codable {
   public init(
+    username: String,
     email: String?,
-    phone: String?,
-    username: String
+    phone: String?
   ) {
+    self.username = username
     self.email = email
     self.phone = phone
-    self.username = username
   }
 
+  public var username: String
   public var email: String?
   public var phone: String?
-  public var username: String
 }
