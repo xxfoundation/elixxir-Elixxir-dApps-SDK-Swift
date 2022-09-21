@@ -20,7 +20,9 @@ public struct MessengerEnvironment {
   public var multiLookupUD: MultiLookupUD
   public var ndfEnvironment: NDFEnvironment
   public var newCMix: NewCMix
+  public var newCMixFromBackup: NewCMixFromBackup
   public var newOrLoadUd: NewOrLoadUd
+  public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
   public var registerForNotifications: RegisterForNotifications
   public var searchUD: SearchUD
@@ -58,7 +60,9 @@ extension MessengerEnvironment {
       multiLookupUD: .live(),
       ndfEnvironment: .mainnet,
       newCMix: .live,
+      newCMixFromBackup: .live,
       newOrLoadUd: .live,
+      newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
       registerForNotifications: .live,
       searchUD: .live,
@@ -91,7 +95,9 @@ extension MessengerEnvironment {
     multiLookupUD: .unimplemented,
     ndfEnvironment: .unimplemented,
     newCMix: .unimplemented,
+    newCMixFromBackup: .unimplemented,
     newOrLoadUd: .unimplemented,
+    newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
     registerForNotifications: .unimplemented,
     searchUD: .unimplemented,
