@@ -71,6 +71,9 @@ final class MessengerRestoreBackupTests: XCTestCase {
         caughtActions.append(.cMixDidMakeReceptionIdentity(legacy: legacy))
         return receptionIdentity
       }
+      cMix.startNetworkFollower.run = { timeoutMS in
+        caughtActions.append(.cMixDidStartNetworkFollower(timeoutMS: timeoutMS))
+      }
       return cMix
     }
     env.login.run = { ephemeral, cMixId, _, identity, e2eParams in
@@ -129,6 +132,9 @@ final class MessengerRestoreBackupTests: XCTestCase {
         storageDir: env.storageDir,
         password: password,
         cMixParams: cMixParams
+      ),
+      .cMixDidStartNetworkFollower(
+        timeoutMS: 30_000
       ),
       .cMixDidMakeReceptionIdentity(
         legacy: true
@@ -212,6 +218,9 @@ private enum CaughtAction: Equatable {
   )
   case cMixDidMakeReceptionIdentity(
     legacy: Bool
+  )
+  case cMixDidStartNetworkFollower(
+    timeoutMS: Int
   )
   case didNewUdManagerFromBackup(
     params: NewUdManagerFromBackup.Params

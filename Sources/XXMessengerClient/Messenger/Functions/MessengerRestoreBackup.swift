@@ -48,6 +48,7 @@ extension MessengerRestoreBackup {
           password: password,
           cMixParamsJSON: env.getCMixParams()
         )
+        try cMix.startNetworkFollower(timeoutMS: 30_000)
         let e2e = try env.login(
           cMixId: cMix.getId(),
           authCallbacks: env.authCallbacks.registered(),
