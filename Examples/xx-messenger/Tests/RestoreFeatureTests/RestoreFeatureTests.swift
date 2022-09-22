@@ -88,7 +88,6 @@ final class RestoreFeatureTests: XCTestCase {
 
     var didRestoreWithData: [Data] = []
     var didRestoreWithPassphrase: [String] = []
-    var didListenForMessages = 0
 
     let store = TestStore(
       initialState: RestoreState(
@@ -105,9 +104,6 @@ final class RestoreFeatureTests: XCTestCase {
       didRestoreWithPassphrase.append(passphrase)
       return restoreResult
     }
-    store.environment.messenger.listenForMessages.run = {
-      didListenForMessages += 1
-    }
 
     store.send(.set(\.$passphrase, backupPassphrase)) {
       $0.passphrase = backupPassphrase
@@ -119,7 +115,6 @@ final class RestoreFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(didRestoreWithData, [backupData])
     XCTAssertNoDifference(didRestoreWithPassphrase, [backupPassphrase])
-    XCTAssertNoDifference(didListenForMessages, 1)
 
     store.receive(.finished) {
       $0.isRestoring = false

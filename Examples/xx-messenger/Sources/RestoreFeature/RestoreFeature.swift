@@ -122,7 +122,6 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
           backupData: backupData,
           backupPassphrase: backupPassphrase
         )
-        try env.messenger.listenForMessages()
         return .success(.finished)
       } catch {
         return .success(.failed(error as NSError))
