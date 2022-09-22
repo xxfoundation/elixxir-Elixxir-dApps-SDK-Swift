@@ -90,7 +90,6 @@ extension AppEnvironment {
       welcome: {
         WelcomeEnvironment(
           messenger: messenger,
-          dbManager: dbManager,
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )

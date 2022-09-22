@@ -5,25 +5,20 @@ import XCTest
 @MainActor
 final class WelcomeFeatureTests: XCTestCase {
   func testNewAccountTapped() {
+    let mainQueue = DispatchQueue.test
+    let bgQueue = DispatchQueue.test
+
+    var didCreateMessenger = 0
+
     let store = TestStore(
       initialState: WelcomeState(),
       reducer: welcomeReducer,
       environment: .unimplemented
     )
 
-    let mainQueue = DispatchQueue.test
-    let bgQueue = DispatchQueue.test
-
-    enum Action: Equatable {
-      case didCreateMessenger
-      case didRemoveDB
-    }
-    var actions: [Action] = []
-
     store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
     store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.messenger.create.run = { actions.append(.didCreateMessenger) }
-    store.environment.dbManager.removeDB.run = { actions.append(.didRemoveDB) }
+    store.environment.messenger.create.run = { didCreateMessenger += 1 }
 
     store.send(.newAccountTapped) {
       $0.isCreatingAccount = true
@@ -32,10 +27,7 @@ final class WelcomeFeatureTests: XCTestCase {
 
     bgQueue.advance()
 
-    XCTAssertNoDifference(actions, [
-      .didRemoveDB,
-      .didCreateMessenger
-    ])
+    XCTAssertNoDifference(didCreateMessenger, 1)
 
     mainQueue.advance()
 
@@ -60,38 +52,6 @@ final class WelcomeFeatureTests: XCTestCase {
     store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
     store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
     store.environment.messenger.create.run = { throw failure }
-    store.environment.dbManager.removeDB.run = {}
-
-    store.send(.newAccountTapped) {
-      $0.isCreatingAccount = true
-      $0.failure = nil
-    }
-
-    bgQueue.advance()
-    mainQueue.advance()
-
-    store.receive(.failed(failure.localizedDescription)) {
-      $0.isCreatingAccount = false
-      $0.failure = failure.localizedDescription
-    }
-  }
-
-  func testNewAccountTappedRemoveDBFailure() {
-    struct Failure: Error, Equatable {}
-    let failure = Failure()
-    let mainQueue = DispatchQueue.test
-    let bgQueue = DispatchQueue.test
-
-    let store = TestStore(
-      initialState: WelcomeState(),
-      reducer: welcomeReducer,
-      environment: .unimplemented
-    )
-
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.messenger.create.run = {}
-    store.environment.dbManager.removeDB.run = { throw failure }
 
     store.send(.newAccountTapped) {
       $0.isCreatingAccount = true
