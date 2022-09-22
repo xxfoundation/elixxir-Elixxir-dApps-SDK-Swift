@@ -50,6 +50,7 @@ struct AppEnvironment {
   var messenger: Messenger
   var authHandler: AuthCallbackHandler
   var messageListener: MessageListenerHandler
+  var log: Logger
   var mainQueue: AnySchedulerOf<DispatchQueue>
   var bgQueue: AnySchedulerOf<DispatchQueue>
   var welcome: () -> WelcomeEnvironment
@@ -63,6 +64,7 @@ extension AppEnvironment {
     messenger: .unimplemented,
     authHandler: .unimplemented,
     messageListener: .unimplemented,
+    log: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
     welcome: { .unimplemented },
@@ -87,10 +89,10 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
         }
 
         cancellables.append(env.authHandler(onError: { error in
-          // TODO: handle error
+          env.log(.error(error as NSError))
         }))
         cancellables.append(env.messageListener(onError: { error in
-          // TODO: handle error
+          env.log(.error(error as NSError))
         }))
 
         let isLoaded = env.messenger.isLoaded()

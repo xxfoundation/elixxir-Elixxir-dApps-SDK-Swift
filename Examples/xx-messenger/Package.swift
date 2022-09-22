@@ -58,11 +58,16 @@ let package = Package(
       url: "https://github.com/pointfreeco/swift-custom-dump.git",
       .upToNextMajor(from: "0.5.2")
     ),
+    .package(
+      url: "https://github.com/kean/Pulse.git",
+      .upToNextMajor(from: "2.1.2")
+    ),
   ],
   targets: [
     .target(
       name: "AppCore",
       dependencies: [
+        .product(name: "Pulse", package: "Pulse"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
         .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXDatabase", package: "client-ios-db"),
@@ -98,6 +103,7 @@ let package = Package(
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "PulseUI", package: "Pulse"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXModels", package: "client-ios-db"),
       ],
