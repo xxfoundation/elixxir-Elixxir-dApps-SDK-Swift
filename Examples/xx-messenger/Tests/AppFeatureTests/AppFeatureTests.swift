@@ -1,78 +1,103 @@
+import AppCore
 import ComposableArchitecture
 import CustomDump
 import HomeFeature
 import RestoreFeature
 import WelcomeFeature
 import XCTest
+import XXClient
 @testable import AppFeature
 
 final class AppFeatureTests: XCTestCase {
   func testStartWithoutMessengerCreated() {
+    var actions: [Action] = []
+
     let store = TestStore(
       initialState: AppState(),
       reducer: appReducer,
       environment: .unimplemented
     )
 
-    let mainQueue = DispatchQueue.test
-    let bgQueue = DispatchQueue.test
-    var didMakeDB = 0
-
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
     store.environment.dbManager.hasDB.run = { false }
-    store.environment.dbManager.makeDB.run = { didMakeDB += 1 }
     store.environment.messenger.isLoaded.run = { false }
     store.environment.messenger.isCreated.run = { false }
+    store.environment.dbManager.makeDB.run = {
+      actions.append(.didMakeDB)
+    }
+    store.environment.authHandler.run = { _ in
+      actions.append(.didStartAuthHandler)
+      return Cancellable {}
+    }
+    store.environment.messageListener.run = { _ in
+      actions.append(.didStartMessageListener)
+      return Cancellable {}
+    }
 
     store.send(.start)
-
-    bgQueue.advance()
-
-    XCTAssertNoDifference(didMakeDB, 1)
-
-    mainQueue.advance()
 
     store.receive(.set(\.$screen, .welcome(WelcomeState()))) {
       $0.screen = .welcome(WelcomeState())
     }
+
+    XCTAssertNoDifference(actions, [
+      .didMakeDB,
+      .didStartAuthHandler,
+      .didStartMessageListener,
+    ])
+
+    store.send(.stop)
   }
 
   func testStartWithMessengerCreated() {
+    var actions: [Action] = []
+
     let store = TestStore(
       initialState: AppState(),
       reducer: appReducer,
       environment: .unimplemented
     )
 
-    let mainQueue = DispatchQueue.test
-    let bgQueue = DispatchQueue.test
-    var didMakeDB = 0
-    var messengerDidLoad = 0
-
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
     store.environment.dbManager.hasDB.run = { false }
-    store.environment.dbManager.makeDB.run = { didMakeDB += 1 }
     store.environment.messenger.isLoaded.run = { false }
     store.environment.messenger.isCreated.run = { true }
-    store.environment.messenger.load.run = { messengerDidLoad += 1 }
+    store.environment.dbManager.makeDB.run = {
+      actions.append(.didMakeDB)
+    }
+    store.environment.messenger.load.run = {
+      actions.append(.didLoadMessenger)
+    }
+    store.environment.authHandler.run = { _ in
+      actions.append(.didStartAuthHandler)
+      return Cancellable {}
+    }
+    store.environment.messageListener.run = { _ in
+      actions.append(.didStartMessageListener)
+      return Cancellable {}
+    }
 
     store.send(.start)
-
-    bgQueue.advance()
-
-    XCTAssertNoDifference(didMakeDB, 1)
-    XCTAssertNoDifference(messengerDidLoad, 1)
-
-    mainQueue.advance()
 
     store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
     }
+
+    XCTAssertNoDifference(actions, [
+      .didMakeDB,
+      .didStartAuthHandler,
+      .didStartMessageListener,
+      .didLoadMessenger,
+    ])
+
+    store.send(.stop)
   }
 
   func testWelcomeFinished() {
+    var actions: [Action] = []
+
     let store = TestStore(
       initialState: AppState(
         screen: .welcome(WelcomeState())
@@ -81,33 +106,43 @@ final class AppFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let mainQueue = DispatchQueue.test
-    let bgQueue = DispatchQueue.test
-    var messengerDidLoad = 0
-
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
     store.environment.dbManager.hasDB.run = { true }
     store.environment.messenger.isLoaded.run = { false }
     store.environment.messenger.isCreated.run = { true }
-    store.environment.messenger.load.run = { messengerDidLoad += 1 }
+    store.environment.messenger.load.run = {
+      actions.append(.didLoadMessenger)
+    }
+    store.environment.authHandler.run = { _ in
+      actions.append(.didStartAuthHandler)
+      return Cancellable {}
+    }
+    store.environment.messageListener.run = { _ in
+      actions.append(.didStartMessageListener)
+      return Cancellable {}
+    }
 
     store.send(.welcome(.finished)) {
       $0.screen = .loading
     }
 
-    bgQueue.advance()
-
-    XCTAssertNoDifference(messengerDidLoad, 1)
-
-    mainQueue.advance()
-
     store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
     }
+
+    XCTAssertNoDifference(actions, [
+      .didStartAuthHandler,
+      .didStartMessageListener,
+      .didLoadMessenger,
+    ])
+
+    store.send(.stop)
   }
 
   func testRestoreFinished() {
+    var actions: [Action] = []
+
     let store = TestStore(
       initialState: AppState(
         screen: .restore(RestoreState())
@@ -116,33 +151,43 @@ final class AppFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let mainQueue = DispatchQueue.test
-    let bgQueue = DispatchQueue.test
-    var messengerDidLoad = 0
-
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
     store.environment.dbManager.hasDB.run = { true }
     store.environment.messenger.isLoaded.run = { false }
     store.environment.messenger.isCreated.run = { true }
-    store.environment.messenger.load.run = { messengerDidLoad += 1 }
+    store.environment.messenger.load.run = {
+      actions.append(.didLoadMessenger)
+    }
+    store.environment.authHandler.run = { _ in
+      actions.append(.didStartAuthHandler)
+      return Cancellable {}
+    }
+    store.environment.messageListener.run = { _ in
+      actions.append(.didStartMessageListener)
+      return Cancellable {}
+    }
 
     store.send(.restore(.finished)) {
       $0.screen = .loading
     }
 
-    bgQueue.advance()
-
-    XCTAssertNoDifference(messengerDidLoad, 1)
-
-    mainQueue.advance()
-
     store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
     }
+
+    XCTAssertNoDifference(actions, [
+      .didStartAuthHandler,
+      .didStartMessageListener,
+      .didLoadMessenger,
+    ])
+
+    store.send(.stop)
   }
 
   func testHomeDidDeleteAccount() {
+    var actions: [Action] = []
+
     let store = TestStore(
       initialState: AppState(
         screen: .home(HomeState())
@@ -151,25 +196,34 @@ final class AppFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let mainQueue = DispatchQueue.test
-    let bgQueue = DispatchQueue.test
-
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
     store.environment.dbManager.hasDB.run = { true }
     store.environment.messenger.isLoaded.run = { false }
     store.environment.messenger.isCreated.run = { false }
+    store.environment.authHandler.run = { _ in
+      actions.append(.didStartAuthHandler)
+      return Cancellable {}
+    }
+    store.environment.messageListener.run = { _ in
+      actions.append(.didStartMessageListener)
+      return Cancellable {}
+    }
 
     store.send(.home(.deleteAccount(.success))) {
       $0.screen = .loading
     }
 
-    bgQueue.advance()
-    mainQueue.advance()
-
     store.receive(.set(\.$screen, .welcome(WelcomeState()))) {
       $0.screen = .welcome(WelcomeState())
     }
+
+    XCTAssertNoDifference(actions, [
+      .didStartAuthHandler,
+      .didStartMessageListener,
+    ])
+
+    store.send(.stop)
   }
 
   func testWelcomeRestoreTapped() {
@@ -187,6 +241,8 @@ final class AppFeatureTests: XCTestCase {
   }
 
   func testWelcomeFailed() {
+    let failure = "Something went wrong"
+
     let store = TestStore(
       initialState: AppState(
         screen: .welcome(WelcomeState())
@@ -195,22 +251,20 @@ final class AppFeatureTests: XCTestCase {
       environment: .unimplemented
     )
 
-    let failure = "Something went wrong"
-
     store.send(.welcome(.failed(failure))) {
       $0.screen = .failure(failure)
     }
   }
 
   func testStartDatabaseMakeFailure() {
+    struct Failure: Error {}
+    let error = Failure()
+
     let store = TestStore(
       initialState: AppState(),
       reducer: appReducer,
       environment: .unimplemented
     )
-
-    struct Failure: Error {}
-    let error = Failure()
 
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
@@ -222,17 +276,21 @@ final class AppFeatureTests: XCTestCase {
     store.receive(.set(\.$screen, .failure(error.localizedDescription))) {
       $0.screen = .failure(error.localizedDescription)
     }
+
+    store.send(.stop)
   }
 
   func testStartMessengerLoadFailure() {
+    struct Failure: Error {}
+    let error = Failure()
+
+    var actions: [Action] = []
+
     let store = TestStore(
       initialState: AppState(),
       reducer: appReducer,
       environment: .unimplemented
     )
-
-    struct Failure: Error {}
-    let error = Failure()
 
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
@@ -240,11 +298,114 @@ final class AppFeatureTests: XCTestCase {
     store.environment.messenger.isLoaded.run = { false }
     store.environment.messenger.isCreated.run = { true }
     store.environment.messenger.load.run = { throw error }
+    store.environment.authHandler.run = { _ in
+      actions.append(.didStartAuthHandler)
+      return Cancellable {}
+    }
+    store.environment.messageListener.run = { _ in
+      actions.append(.didStartMessageListener)
+      return Cancellable {}
+    }
 
     store.send(.start)
 
     store.receive(.set(\.$screen, .failure(error.localizedDescription))) {
       $0.screen = .failure(error.localizedDescription)
     }
+
+    XCTAssertNoDifference(actions, [
+      .didStartAuthHandler,
+      .didStartMessageListener,
+    ])
+
+    store.send(.stop)
   }
+
+  func testStartHandlersAndListeners() {
+    var actions: [Action] = []
+    var authHandlerOnError: [AuthCallbackHandler.OnError] = []
+    var messageListenerOnError: [MessageListenerHandler.OnError] = []
+
+    let store = TestStore(
+      initialState: AppState(),
+      reducer: appReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.dbManager.hasDB.run = { true }
+    store.environment.messenger.isLoaded.run = { true }
+    store.environment.messenger.isCreated.run = { true }
+    store.environment.authHandler.run = { onError in
+      authHandlerOnError.append(onError)
+      actions.append(.didStartAuthHandler)
+      return Cancellable {
+        actions.append(.didCancelAuthHandler)
+      }
+    }
+    store.environment.messageListener.run = { onError in
+      messageListenerOnError.append(onError)
+      actions.append(.didStartMessageListener)
+      return Cancellable {
+        actions.append(.didCancelMessageListener)
+      }
+    }
+
+    store.send(.start)
+
+    store.receive(.set(\.$screen, .home(HomeState()))) {
+      $0.screen = .home(HomeState())
+    }
+
+    XCTAssertNoDifference(actions, [
+      .didStartAuthHandler,
+      .didStartMessageListener,
+    ])
+    actions = []
+
+    store.send(.start) {
+      $0.screen = .loading
+    }
+
+    store.receive(.set(\.$screen, .home(HomeState()))) {
+      $0.screen = .home(HomeState())
+    }
+
+    XCTAssertNoDifference(actions, [
+      .didCancelAuthHandler,
+      .didCancelMessageListener,
+      .didStartAuthHandler,
+      .didStartMessageListener,
+    ])
+    actions = []
+
+    struct AuthError: Error {}
+    authHandlerOnError.first?(AuthError())
+
+    XCTAssertNoDifference(actions, [])
+    actions = []
+
+    struct MessageError: Error {}
+    messageListenerOnError.first?(MessageError())
+
+    XCTAssertNoDifference(actions, [])
+    actions = []
+
+    store.send(.stop)
+
+    XCTAssertNoDifference(actions, [
+      .didCancelAuthHandler,
+      .didCancelMessageListener,
+    ])
+  }
+}
+
+private enum Action: Equatable {
+  case didMakeDB
+  case didStartAuthHandler
+  case didStartMessageListener
+  case didLoadMessenger
+  case didCancelAuthHandler
+  case didCancelMessageListener
 }

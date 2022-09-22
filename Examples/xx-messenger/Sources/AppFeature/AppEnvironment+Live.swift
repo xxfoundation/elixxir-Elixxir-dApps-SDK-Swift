@@ -85,6 +85,11 @@ extension AppEnvironment {
     return AppEnvironment(
       dbManager: dbManager,
       messenger: messenger,
+      authHandler: authHandler,
+      messageListener: .live(
+        messenger: messenger,
+        db: dbManager.getDB
+      ),
       mainQueue: mainQueue,
       bgQueue: bgQueue,
       welcome: {
