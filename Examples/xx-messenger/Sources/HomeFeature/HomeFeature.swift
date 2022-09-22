@@ -166,6 +166,9 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 
           if env.messenger.isConnected() == false {
             try env.messenger.connect()
+          }
+
+          if env.messenger.isListeningForMessages() == false {
             try env.messenger.listenForMessages()
           }
 

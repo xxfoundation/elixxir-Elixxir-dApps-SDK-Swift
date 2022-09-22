@@ -29,6 +29,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { messengerDidConnect += 1 }
+    store.environment.messenger.isListeningForMessages.run = { false }
     store.environment.messenger.listenForMessages.run = { messengerDidListenForMessages += 1 }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { false }
@@ -69,6 +70,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { false }
     store.environment.messenger.connect.run = { messengerDidConnect += 1 }
+    store.environment.messenger.isListeningForMessages.run = { false }
     store.environment.messenger.listenForMessages.run = { messengerDidListenForMessages += 1 }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
@@ -119,6 +121,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
     store.environment.messenger.isConnected.run = { true }
+    store.environment.messenger.isListeningForMessages.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
@@ -228,6 +231,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in }
     store.environment.messenger.isConnected.run = { true }
+    store.environment.messenger.isListeningForMessages.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { throw error }
 
@@ -260,6 +264,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messageListener.run = { _ in Cancellable {} }
     store.environment.messenger.start.run = { _ in }
     store.environment.messenger.isConnected.run = { true }
+    store.environment.messenger.isListeningForMessages.run = { true }
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { throw error }

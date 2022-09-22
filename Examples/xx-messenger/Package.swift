@@ -219,6 +219,7 @@ let package = Package(
         .target(name: "UserSearchFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
       ],
       swiftSettings: swiftSettings
