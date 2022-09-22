@@ -95,7 +95,12 @@ extension AppEnvironment {
         )
       },
       restore: {
-        RestoreEnvironment()
+        RestoreEnvironment(
+          messenger: messenger,
+          loadData: .live,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
       },
       home: {
         HomeEnvironment(

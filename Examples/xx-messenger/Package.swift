@@ -273,6 +273,7 @@ let package = Package(
       name: "RestoreFeature",
       dependencies: [
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
       ],
       swiftSettings: swiftSettings
     ),
