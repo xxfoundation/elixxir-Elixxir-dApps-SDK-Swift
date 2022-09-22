@@ -13,18 +13,14 @@ public struct DBManagerMakeDB {
 
 extension DBManagerMakeDB {
   public static func live(
+    url: URL,
     setDB: @escaping (Database) -> Void
   ) -> DBManagerMakeDB {
     DBManagerMakeDB {
-      let dbDirectoryURL = FileManager.default
-        .urls(for: .applicationSupportDirectory, in: .userDomainMask)
-        .first!
-        .appendingPathComponent("database")
-
       try? FileManager.default
-        .createDirectory(at: dbDirectoryURL, withIntermediateDirectories: true)
+        .createDirectory(at: url, withIntermediateDirectories: true)
 
-      let dbFilePath = dbDirectoryURL
+      let dbFilePath = url
         .appendingPathComponent("db")
         .appendingPathExtension("sqlite")
         .path

@@ -1,3 +1,4 @@
+import Foundation
 import XXModels
 
 public struct DBManager {
@@ -8,7 +9,12 @@ public struct DBManager {
 }
 
 extension DBManager {
-  public static func live() -> DBManager {
+  public static func live(
+    url: URL = FileManager.default
+      .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+      .first!
+      .appendingPathComponent("database")
+  ) -> DBManager {
     class Container {
       var db: Database?
     }
@@ -17,9 +23,9 @@ extension DBManager {
 
     return DBManager(
       hasDB: .init { container.db != nil },
-      makeDB: .live(setDB: { container.db = $0 }),
+      makeDB: .live(url: url, setDB: { container.db = $0 }),
       getDB: .live(getDB: { container.db }),
-      removeDB: .live(getDB: { container.db }, unsetDB: { container.db = nil })
+      removeDB: .live(url: url, getDB: { container.db }, unsetDB: { container.db = nil })
     )
   }
 }
