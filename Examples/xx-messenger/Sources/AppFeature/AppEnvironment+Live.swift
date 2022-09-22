@@ -111,11 +111,6 @@ extension AppEnvironment {
         HomeEnvironment(
           messenger: messenger,
           dbManager: dbManager,
-          authHandler: authHandler,
-          messageListener: .live(
-            messenger: messenger,
-            db: dbManager.getDB
-          ),
           mainQueue: mainQueue,
           bgQueue: bgQueue,
           register: {
