@@ -90,6 +90,7 @@ extension AppEnvironment {
         messenger: messenger,
         db: dbManager.getDB
       ),
+      log: .live(),
       mainQueue: mainQueue,
       bgQueue: bgQueue,
       welcome: {

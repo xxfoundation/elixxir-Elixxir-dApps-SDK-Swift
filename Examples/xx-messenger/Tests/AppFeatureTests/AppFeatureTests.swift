@@ -351,6 +351,9 @@ final class AppFeatureTests: XCTestCase {
         actions.append(.didCancelMessageListener)
       }
     }
+    store.environment.log.run = { msg, _, _, _ in
+      actions.append(.didLog(msg))
+    }
 
     store.send(.start)
 
@@ -381,15 +384,21 @@ final class AppFeatureTests: XCTestCase {
     actions = []
 
     struct AuthError: Error {}
-    authHandlerOnError.first?(AuthError())
+    let authError = AuthError()
+    authHandlerOnError.first?(authError)
 
-    XCTAssertNoDifference(actions, [])
+    XCTAssertNoDifference(actions, [
+      .didLog(.error(authError as NSError))
+    ])
     actions = []
 
     struct MessageError: Error {}
-    messageListenerOnError.first?(MessageError())
+    let messageError = MessageError()
+    messageListenerOnError.first?(messageError)
 
-    XCTAssertNoDifference(actions, [])
+    XCTAssertNoDifference(actions, [
+      .didLog(.error(messageError as NSError))
+    ])
     actions = []
 
     store.send(.stop)
@@ -408,4 +417,5 @@ private enum Action: Equatable {
   case didLoadMessenger
   case didCancelAuthHandler
   case didCancelMessageListener
+  case didLog(Logger.Message)
 }
