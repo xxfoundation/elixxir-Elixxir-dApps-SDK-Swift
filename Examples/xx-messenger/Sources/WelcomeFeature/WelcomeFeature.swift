@@ -1,15 +1,19 @@
+import AppCore
 import ComposableArchitecture
 import SwiftUI
 import XXMessengerClient
 
 public struct WelcomeState: Equatable {
   public init(
-    isCreatingCMix: Bool = false
+    isCreatingCMix: Bool = false,
+    failure: String? = nil
   ) {
     self.isCreatingAccount = isCreatingCMix
+    self.failure = failure
   }
 
   public var isCreatingAccount: Bool
+  public var failure: String?
 }
 
 public enum WelcomeAction: Equatable {
@@ -22,15 +26,18 @@ public enum WelcomeAction: Equatable {
 public struct WelcomeEnvironment {
   public init(
     messenger: Messenger,
+    dbManager: DBManager,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>
   ) {
     self.messenger = messenger
+    self.dbManager = dbManager
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
   }
 
   public var messenger: Messenger
+  public var dbManager: DBManager
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
@@ -38,6 +45,7 @@ public struct WelcomeEnvironment {
 extension WelcomeEnvironment {
   public static let unimplemented = WelcomeEnvironment(
     messenger: .unimplemented,
+    dbManager: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented
   )
@@ -48,8 +56,10 @@ public let welcomeReducer = Reducer<WelcomeState, WelcomeAction, WelcomeEnvironm
   switch action {
   case .newAccountTapped:
     state.isCreatingAccount = true
+    state.failure = nil
     return .future { fulfill in
       do {
+        try env.dbManager.removeDB()
         try env.messenger.create()
         fulfill(.success(.finished))
       }
@@ -66,10 +76,12 @@ public let welcomeReducer = Reducer<WelcomeState, WelcomeAction, WelcomeEnvironm
 
   case .finished:
     state.isCreatingAccount = false
+    state.failure = nil
     return .none
 
-  case .failed(_):
+  case .failed(let failure):
     state.isCreatingAccount = false
+    state.failure = failure
     return .none
   }
 }
