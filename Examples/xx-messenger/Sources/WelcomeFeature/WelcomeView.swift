@@ -11,9 +11,11 @@ public struct WelcomeView: View {
   struct ViewState: Equatable {
     init(_ state: WelcomeState) {
       isCreatingAccount = state.isCreatingAccount
+      failure = state.failure
     }
 
     var isCreatingAccount: Bool
+    var failure: String?
   }
 
   public var body: some View {
@@ -22,6 +24,14 @@ public struct WelcomeView: View {
         Form {
           Section {
             Text("xx messenger")
+          }
+
+          if let failure = viewStore.failure {
+            Section {
+              Text(failure)
+            } header: {
+              Text("Error")
+            }
           }
 
           Section {

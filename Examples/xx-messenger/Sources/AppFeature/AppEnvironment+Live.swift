@@ -85,6 +85,11 @@ extension AppEnvironment {
     return AppEnvironment(
       dbManager: dbManager,
       messenger: messenger,
+      authHandler: authHandler,
+      messageListener: .live(
+        messenger: messenger,
+        db: dbManager.getDB
+      ),
       mainQueue: mainQueue,
       bgQueue: bgQueue,
       welcome: {
@@ -95,17 +100,17 @@ extension AppEnvironment {
         )
       },
       restore: {
-        RestoreEnvironment()
+        RestoreEnvironment(
+          messenger: messenger,
+          loadData: .live,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
       },
       home: {
         HomeEnvironment(
           messenger: messenger,
           dbManager: dbManager,
-          authHandler: authHandler,
-          messageListener: .live(
-            messenger: messenger,
-            db: dbManager.getDB
-          ),
           mainQueue: mainQueue,
           bgQueue: bgQueue,
           register: {

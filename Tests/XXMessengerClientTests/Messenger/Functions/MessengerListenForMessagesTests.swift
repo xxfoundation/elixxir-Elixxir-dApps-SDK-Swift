@@ -12,6 +12,7 @@ final class MessengerListenForMessagesTests: XCTestCase {
     var didRegisterListenerWithParams: [RegisterListenerParams] = []
     var didRegisterListenerWithCallback: [Listener] = []
     var didHandleMessage: [Message] = []
+    var didSetIsListeningForMessages: [Bool] = []
 
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = {
@@ -25,6 +26,9 @@ final class MessengerListenForMessagesTests: XCTestCase {
     env.messageListeners.registered = {
       Listener { message in didHandleMessage.append(message) }
     }
+    env.isListeningForMessages.set = {
+      didSetIsListeningForMessages.append($0)
+    }
     let listen: MessengerListenForMessages = .live(env)
 
     try listen()
@@ -32,6 +36,7 @@ final class MessengerListenForMessagesTests: XCTestCase {
     XCTAssertNoDifference(didRegisterListenerWithParams, [
       .init(senderId: nil, messageType: 2)
     ])
+    XCTAssertNoDifference(didSetIsListeningForMessages, [true])
 
     let message = Message.stub(123)
     didRegisterListenerWithCallback.first?.handle(message)
@@ -40,18 +45,25 @@ final class MessengerListenForMessagesTests: XCTestCase {
   }
 
   func testListenWhenNotLoggedIn() {
+    var didSetIsListeningForMessages: [Bool] = []
+
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = { nil }
+    env.isListeningForMessages.set = { didSetIsListeningForMessages.append($0) }
     let listen: MessengerListenForMessages = .live(env)
 
     XCTAssertThrowsError(try listen()) { error in
       XCTAssertNoDifference(error as? MessengerListenForMessages.Error, .notConnected)
     }
+
+    XCTAssertNoDifference(didSetIsListeningForMessages, [false])
   }
 
   func testListenFailure() {
     struct Failure: Error, Equatable {}
     let error = Failure()
+
+    var didSetIsListeningForMessages: [Bool] = []
 
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = {
@@ -60,10 +72,13 @@ final class MessengerListenForMessagesTests: XCTestCase {
       return e2e
     }
     env.messageListeners.registered = { Listener.unimplemented }
+    env.isListeningForMessages.set = { didSetIsListeningForMessages.append($0) }
     let listen: MessengerListenForMessages = .live(env)
 
     XCTAssertThrowsError(try listen()) { err in
       XCTAssertNoDifference(err as? Failure, error)
     }
+
+    XCTAssertNoDifference(didSetIsListeningForMessages, [false])
   }
 }

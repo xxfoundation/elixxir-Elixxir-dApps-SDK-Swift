@@ -12,6 +12,7 @@ public struct MessengerEnvironment {
   public var getCMixParams: GetCMixParams
   public var getE2EParams: GetE2EParams
   public var getSingleUseParams: GetSingleUseParams
+  public var isListeningForMessages: Stored<Bool>
   public var isRegisteredWithUD: IsRegisteredWithUD
   public var loadCMix: LoadCMix
   public var login: Login
@@ -20,7 +21,9 @@ public struct MessengerEnvironment {
   public var multiLookupUD: MultiLookupUD
   public var ndfEnvironment: NDFEnvironment
   public var newCMix: NewCMix
+  public var newCMixFromBackup: NewCMixFromBackup
   public var newOrLoadUd: NewOrLoadUd
+  public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
   public var registerForNotifications: RegisterForNotifications
   public var searchUD: SearchUD
@@ -50,6 +53,7 @@ extension MessengerEnvironment {
       getCMixParams: .liveDefault,
       getE2EParams: .liveDefault,
       getSingleUseParams: .liveDefault,
+      isListeningForMessages: .inMemory(false),
       isRegisteredWithUD: .live,
       loadCMix: .live,
       login: .live,
@@ -58,7 +62,9 @@ extension MessengerEnvironment {
       multiLookupUD: .live(),
       ndfEnvironment: .mainnet,
       newCMix: .live,
+      newCMixFromBackup: .live,
       newOrLoadUd: .live,
+      newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
       registerForNotifications: .live,
       searchUD: .live,
@@ -83,6 +89,7 @@ extension MessengerEnvironment {
     getCMixParams: .unimplemented,
     getE2EParams: .unimplemented,
     getSingleUseParams: .unimplemented,
+    isListeningForMessages: .unimplemented(placeholder: false),
     isRegisteredWithUD: .unimplemented,
     loadCMix: .unimplemented,
     login: .unimplemented,
@@ -91,7 +98,9 @@ extension MessengerEnvironment {
     multiLookupUD: .unimplemented,
     ndfEnvironment: .unimplemented,
     newCMix: .unimplemented,
+    newCMixFromBackup: .unimplemented,
     newOrLoadUd: .unimplemented,
+    newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
     registerForNotifications: .unimplemented,
     searchUD: .unimplemented,

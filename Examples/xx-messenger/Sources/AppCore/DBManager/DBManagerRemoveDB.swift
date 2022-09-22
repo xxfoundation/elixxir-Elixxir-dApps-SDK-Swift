@@ -13,12 +13,18 @@ public struct DBManagerRemoveDB {
 
 extension DBManagerRemoveDB {
   public static func live(
+    url: URL,
     getDB: @escaping () -> Database?,
     unsetDB: @escaping () -> Void
   ) -> DBManagerRemoveDB {
     DBManagerRemoveDB {
-      try getDB()?.drop()
+      let db = getDB()
       unsetDB()
+      try db?.drop()
+      let fm = FileManager.default
+      if fm.fileExists(atPath: url.path) {
+        try fm.removeItem(atPath: url.path)
+      }
     }
   }
 }

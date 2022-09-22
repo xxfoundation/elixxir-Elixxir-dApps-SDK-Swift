@@ -6,6 +6,7 @@ public struct Messenger {
   public var ud: Stored<UserDiscovery?>
   public var isCreated: MessengerIsCreated
   public var create: MessengerCreate
+  public var restoreBackup: MessengerRestoreBackup
   public var isLoaded: MessengerIsLoaded
   public var load: MessengerLoad
   public var registerAuthCallbacks: MessengerRegisterAuthCallbacks
@@ -13,6 +14,7 @@ public struct Messenger {
   public var start: MessengerStart
   public var isConnected: MessengerIsConnected
   public var connect: MessengerConnect
+  public var isListeningForMessages: MessengerIsListeningForMessages
   public var listenForMessages: MessengerListenForMessages
   public var isRegistered: MessengerIsRegistered
   public var register: MessengerRegister
@@ -37,6 +39,7 @@ extension Messenger {
       ud: env.ud,
       isCreated: .live(env),
       create: .live(env),
+      restoreBackup: .live(env),
       isLoaded: .live(env),
       load: .live(env),
       registerAuthCallbacks: .live(env),
@@ -44,6 +47,7 @@ extension Messenger {
       start: .live(env),
       isConnected: .live(env),
       connect: .live(env),
+      isListeningForMessages: .live(env),
       listenForMessages: .live(env),
       isRegistered: .live(env),
       register: .live(env),
@@ -69,6 +73,7 @@ extension Messenger {
     ud: .unimplemented(),
     isCreated: .unimplemented,
     create: .unimplemented,
+    restoreBackup: .unimplemented,
     isLoaded: .unimplemented,
     load: .unimplemented,
     registerAuthCallbacks: .unimplemented,
@@ -76,6 +81,7 @@ extension Messenger {
     start: .unimplemented,
     isConnected: .unimplemented,
     connect: .unimplemented,
+    isListeningForMessages: .unimplemented,
     listenForMessages: .unimplemented,
     isRegistered: .unimplemented,
     register: .unimplemented,
