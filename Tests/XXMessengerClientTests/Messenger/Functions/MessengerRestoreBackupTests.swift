@@ -100,6 +100,9 @@ final class MessengerRestoreBackupTests: XCTestCase {
     env.cMix.set = { _ in caughtActions.append(.didSetCMix) }
     env.e2e.set = { _ in caughtActions.append(.didSetE2E) }
     env.ud.set = { _ in caughtActions.append(.didSetUD) }
+    env.isListeningForMessages.set = {
+      caughtActions.append(.didSetIsListeningForMessages(isListening: $0))
+    }
 
     let restore: MessengerRestoreBackup = .live(env)
 
@@ -157,6 +160,9 @@ final class MessengerRestoreBackupTests: XCTestCase {
       .didSetCMix,
       .didSetE2E,
       .didSetUD,
+      .didSetIsListeningForMessages(
+        isListening: false
+      ),
     ])
 
     XCTAssertNoDifference(result, MessengerRestoreBackup.Result(
@@ -228,4 +234,7 @@ private enum CaughtAction: Equatable {
   case didSetCMix
   case didSetE2E
   case didSetUD
+  case didSetIsListeningForMessages(
+    isListening: Bool
+  )
 }

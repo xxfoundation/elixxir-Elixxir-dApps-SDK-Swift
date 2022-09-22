@@ -73,6 +73,7 @@ extension MessengerRestoreBackup {
         env.cMix.set(cMix)
         env.e2e.set(e2e)
         env.ud.set(ud)
+        env.isListeningForMessages.set(false)
         return Result(
           restoredParams: params,
           restoredContacts: report.restoredContacts

@@ -14,6 +14,7 @@ public struct Messenger {
   public var start: MessengerStart
   public var isConnected: MessengerIsConnected
   public var connect: MessengerConnect
+  public var isListeningForMessages: MessengerIsListeningForMessages
   public var listenForMessages: MessengerListenForMessages
   public var isRegistered: MessengerIsRegistered
   public var register: MessengerRegister
@@ -46,6 +47,7 @@ extension Messenger {
       start: .live(env),
       isConnected: .live(env),
       connect: .live(env),
+      isListeningForMessages: .live(env),
       listenForMessages: .live(env),
       isRegistered: .live(env),
       register: .live(env),
@@ -79,6 +81,7 @@ extension Messenger {
     start: .unimplemented,
     isConnected: .unimplemented,
     connect: .unimplemented,
+    isListeningForMessages: .unimplemented,
     listenForMessages: .unimplemented,
     isRegistered: .unimplemented,
     register: .unimplemented,

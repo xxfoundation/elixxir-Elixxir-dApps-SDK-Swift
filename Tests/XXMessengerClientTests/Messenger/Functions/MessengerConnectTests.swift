@@ -17,12 +17,14 @@ final class MessengerConnectTests: XCTestCase {
     var didLogInWithAuthCallbacks: [AuthCallbacks?] = []
     var didSetE2E: [E2E?] = []
     var didHandleAuthCallbacks: [AuthCallbacks.Callback] = []
+    var didSetIsListeningForMessages: [Bool] = []
 
     let cMixId = 1234
     let receptionId = ReceptionIdentity.stub
     let e2eParams = "e2e-params".data(using: .utf8)!
 
     var env: MessengerEnvironment = .unimplemented
+    env.isListeningForMessages.set = { didSetIsListeningForMessages.append($0) }
     env.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.getId.run = { cMixId }
@@ -62,6 +64,7 @@ final class MessengerConnectTests: XCTestCase {
         e2eParamsJSON: e2eParams
       )
     ])
+    XCTAssertNoDifference(didSetIsListeningForMessages, [false])
     XCTAssertEqual(didLogInWithAuthCallbacks.compactMap { $0 }.count, 1)
     XCTAssertEqual(didSetE2E.compactMap { $0 }.count, 1)
 
