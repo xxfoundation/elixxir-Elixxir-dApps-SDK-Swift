@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://git.xx.network/elixxir/client-ios-db.git",
       "state" : {
-        "revision" : "f8e3e0088de8301d6c4816e12f0aca1d6f02a280",
-        "version" : "1.1.0"
+        "revision" : "16480177beaa6bc80a1c6be25812abd9bcb850ea",
+        "version" : "1.2.0"
       }
     },
     {
@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/groue/GRDB.swift",
       "state" : {
-        "revision" : "dd7e7f39e8e4d7a22d258d9809a882f914690b01",
-        "version" : "5.26.1"
+        "revision" : "0ac435744a4c67c4ec23a4a671c0d53ce1fee7c6",
+        "version" : "6.0.0"
       }
     },
     {

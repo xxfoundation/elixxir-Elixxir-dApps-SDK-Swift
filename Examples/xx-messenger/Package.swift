@@ -39,7 +39,7 @@ let package = Package(
     ),
     .package(
       url: "https://git.xx.network/elixxir/client-ios-db.git",
-      .upToNextMajor(from: "1.1.0")
+      .upToNextMajor(from: "1.2.0")
     ),
     .package(
       url: "https://github.com/darrarski/swift-composable-presentation.git",
