@@ -1,8 +1,10 @@
-import CustomDump
 import ComposableArchitecture
+import CustomDump
 import XCTest
-@testable import RestoreFeature
+import XXClient
 import XXMessengerClient
+import XXModels
+@testable import RestoreFeature
 
 final class RestoreFeatureTests: XCTestCase {
   func testFileImport() {
@@ -79,15 +81,18 @@ final class RestoreFeatureTests: XCTestCase {
     let backupPassphrase = "backup-passphrase"
     let restoreResult = MessengerRestoreBackup.Result(
       restoredParams: BackupParams.init(
-        username: "",
-        email: nil,
-        phone: nil
+        username: "restored-username",
+        email: "restored-email",
+        phone: "restored-phone"
       ),
       restoredContacts: []
     )
+    let now = Date()
+    let contactId = "contact-id".data(using: .utf8)!
 
     var didRestoreWithData: [Data] = []
     var didRestoreWithPassphrase: [String] = []
+    var didSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
       initialState: RestoreState(
@@ -99,10 +104,28 @@ final class RestoreFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
+    store.environment.now = { now }
     store.environment.messenger.restoreBackup.run = { data, passphrase in
       didRestoreWithData.append(data)
       didRestoreWithPassphrase.append(passphrase)
       return restoreResult
+    }
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in contactId }
+        return contact
+      }
+      return e2e
+    }
+    store.environment.db.run = {
+      var db: Database = .unimplemented
+      db.saveContact.run = { contact in
+        didSaveContact.append(contact)
+        return contact
+      }
+      return db
     }
 
     store.send(.set(\.$passphrase, backupPassphrase)) {
@@ -115,6 +138,13 @@ final class RestoreFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(didRestoreWithData, [backupData])
     XCTAssertNoDifference(didRestoreWithPassphrase, [backupPassphrase])
+    XCTAssertNoDifference(didSaveContact, [Contact(
+      id: contactId,
+      username: restoreResult.restoredParams.username,
+      email: restoreResult.restoredParams.email,
+      phone: restoreResult.restoredParams.phone,
+      createdAt: now
+    )])
 
     store.receive(.finished) {
       $0.isRestoring = false

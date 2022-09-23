@@ -1,8 +1,10 @@
+import AppCore
 import Combine
 import ComposableArchitecture
 import Foundation
 import XCTestDynamicOverlay
 import XXMessengerClient
+import XXModels
 
 public struct RestoreState: Equatable {
   public enum Field: String, Hashable {
@@ -58,18 +60,24 @@ public enum RestoreAction: Equatable, BindableAction {
 public struct RestoreEnvironment {
   public init(
     messenger: Messenger,
+    db: DBManagerGetDB,
     loadData: URLDataLoader,
+    now: @escaping () -> Date,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>
   ) {
     self.messenger = messenger
+    self.db = db
     self.loadData = loadData
+    self.now = now
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
   }
 
   public var messenger: Messenger
+  public var db: DBManagerGetDB
   public var loadData: URLDataLoader
+  public var now: () -> Date
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
@@ -77,7 +85,9 @@ public struct RestoreEnvironment {
 extension RestoreEnvironment {
   public static let unimplemented = RestoreEnvironment(
     messenger: .unimplemented,
+    db: .unimplemented,
     loadData: .unimplemented,
+    now: XCTUnimplemented("\(Self.self).now"),
     mainQueue: .unimplemented,
     bgQueue: .unimplemented
   )
@@ -118,10 +128,17 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
     state.restoreFailure = nil
     return Effect.result {
       do {
-        _ = try env.messenger.restoreBackup(
+        let result = try env.messenger.restoreBackup(
           backupData: backupData,
           backupPassphrase: backupPassphrase
         )
+        try env.db().saveContact(Contact(
+          id: try env.messenger.e2e.tryGet().getContact().getId(),
+          username: result.restoredParams.username,
+          email: result.restoredParams.email,
+          phone: result.restoredParams.phone,
+          createdAt: env.now()
+        ))
         return .success(.finished)
       } catch {
         return .success(.failed(error as NSError))
