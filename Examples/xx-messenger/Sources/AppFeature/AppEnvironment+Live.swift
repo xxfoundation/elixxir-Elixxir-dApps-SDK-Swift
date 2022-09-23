@@ -103,7 +103,9 @@ extension AppEnvironment {
       restore: {
         RestoreEnvironment(
           messenger: messenger,
+          db: dbManager.getDB,
           loadData: .live,
+          now: Date.init,
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )
