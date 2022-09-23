@@ -2,14 +2,9 @@
 import PackageDescription
 
 let swiftSettings: [SwiftSetting] = [
-  .unsafeFlags(
-    [
-      // "-Xfrontend", "-warn-concurrency",
-      // "-Xfrontend", "-debug-time-function-bodies",
-      // "-Xfrontend", "-debug-time-expression-type-checking",
-    ],
-    .when(configuration: .debug)
-  ),
+  //.unsafeFlags(["-Xfrontend", "-warn-concurrency"], .when(configuration: .debug)),
+  //.unsafeFlags(["-Xfrontend", "-debug-time-function-bodies"], .when(configuration: .debug)),
+  //.unsafeFlags(["-Xfrontend", "-debug-time-expression-type-checking"], .when(configuration: .debug)),
 ]
 
 let package = Package(
