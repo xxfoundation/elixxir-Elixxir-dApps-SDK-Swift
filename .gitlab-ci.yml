@@ -1,6 +1,7 @@
 before_script:
   - for ip in $(dig @8.8.8.8 github.com +short); do ssh-keyscan github.com,$ip; ssh-keyscan $ip; done 2>/dev/null >> ~/.ssh/known_hosts
   - for ip in $(dig @8.8.8.8 git.xx.network +short); do ssh-keyscan git.xx.network,$ip; ssh-keyscan $ip; done 2>/dev/null >> ~/.ssh/known_hosts
+  - swift --version
   - xcodebuild -version
 
 stages:
