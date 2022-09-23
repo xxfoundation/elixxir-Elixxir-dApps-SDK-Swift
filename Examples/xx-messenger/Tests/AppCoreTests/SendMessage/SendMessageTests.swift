@@ -55,7 +55,7 @@ final class SendMessageTests: XCTestCase {
     }
     var db: DBManagerGetDB = .unimplemented
     db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.saveMessage.run = { message in
         dbDidSaveMessage.append(message)
         var message = message
@@ -238,7 +238,7 @@ final class SendMessageTests: XCTestCase {
     }
     var db: DBManagerGetDB = .unimplemented
     db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.saveMessage.run = { $0 }
       db.fetchMessages.run = { _ in [] }
       db.bulkUpdateMessages.run = { _, _ in throw error }

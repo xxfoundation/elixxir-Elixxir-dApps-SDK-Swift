@@ -18,7 +18,7 @@ final class MessageListenerHandlerTests: XCTestCase {
     }
     var db: DBManagerGetDB = .unimplemented
     db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.saveMessage.run = { message in
         didSaveMessage.append(message)
         return message

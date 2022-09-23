@@ -1,8 +1,14 @@
 before_script:
-  - for ip in $(dig @8.8.8.8 github.com +short); do ssh-keyscan github.com,$ip; ssh-keyscan $ip; done 2>/dev/null >> ~/.ssh/known_hosts
-  - for ip in $(dig @8.8.8.8 git.xx.network +short); do ssh-keyscan git.xx.network,$ip; ssh-keyscan $ip; done 2>/dev/null >> ~/.ssh/known_hosts
+  - echo $CI_BUILD_REF
+  - echo $CI_PROJECT_DIR
+  - echo $PWD
   - swift --version
   - xcodebuild -version
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - ssh-keyscan -t rsa $GITLAB_SERVER > ~/.ssh/known_hosts
 
 stages:
   - test

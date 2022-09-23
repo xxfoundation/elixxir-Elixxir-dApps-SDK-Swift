@@ -30,7 +30,7 @@ final class VerifyContactFeatureTests: XCTestCase {
       return true
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
         didBulkUpdateContactsWithAssignments.append(assignments)
@@ -84,7 +84,7 @@ final class VerifyContactFeatureTests: XCTestCase {
       return false
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
         didBulkUpdateContactsWithAssignments.append(assignments)
@@ -137,7 +137,7 @@ final class VerifyContactFeatureTests: XCTestCase {
     store.environment.bgQueue = .immediate
     store.environment.messenger.verifyContact.run = { _ in throw error }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
         didBulkUpdateContactsWithAssignments.append(assignments)

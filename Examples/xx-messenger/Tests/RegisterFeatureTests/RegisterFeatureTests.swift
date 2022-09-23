@@ -42,7 +42,7 @@ final class RegisterFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.saveContact.run = { contact in
         dbDidSaveContact.append(contact)
         return contact
@@ -124,7 +124,7 @@ final class RegisterFeatureTests: XCTestCase {
 
     store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
     store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.db.run = { .failing }
+    store.environment.db.run = { .unimplemented }
     store.environment.messenger.register.run = { _ in throw error }
 
     store.send(.registerTapped) {

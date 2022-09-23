@@ -31,7 +31,7 @@ final class SendRequestFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContactsPublisher.run = { query in
         dbDidFetchContacts.append(query)
         return dbContactsPublisher.eraseToAnyPublisher()
@@ -94,7 +94,7 @@ final class SendRequestFeatureTests: XCTestCase {
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContacts.append(.init(query: query, assignments: assignments))
         return 0
@@ -164,7 +164,7 @@ final class SendRequestFeatureTests: XCTestCase {
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { _, _ in return 0 }
       return db
     }

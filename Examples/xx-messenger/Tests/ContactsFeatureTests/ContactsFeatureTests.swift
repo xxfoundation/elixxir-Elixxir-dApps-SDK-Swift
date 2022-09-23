@@ -33,7 +33,7 @@ final class ContactsFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContactsPublisher.run = { query in
         didFetchContacts.append(query)
         return contactsPublisher.eraseToAnyPublisher()

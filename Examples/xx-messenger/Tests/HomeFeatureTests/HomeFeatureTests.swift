@@ -344,7 +344,7 @@ final class HomeFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.dbManager.getDB.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         dbDidFetchContacts.append(query)
         return [

@@ -15,7 +15,7 @@ final class AuthCallbackHandlerResetTests: XCTestCase {
     )
     let reset = AuthCallbackHandlerReset.live(
       db: .init {
-        var db: Database = .failing
+        var db: Database = .unimplemented
         db.fetchContacts.run = { query in
           didFetchContacts.append(query)
           return [dbContact]
@@ -41,7 +41,7 @@ final class AuthCallbackHandlerResetTests: XCTestCase {
   func testResetWhenContactNotInDatabase() throws {
     let reset = AuthCallbackHandlerReset.live(
       db: .init {
-        var db: Database = .failing
+        var db: Database = .unimplemented
         db.fetchContacts.run = { _ in [] }
         return db
       }

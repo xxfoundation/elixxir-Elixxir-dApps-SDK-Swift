@@ -2,14 +2,9 @@
 import PackageDescription
 
 let swiftSettings: [SwiftSetting] = [
-  .unsafeFlags(
-    [
-      // "-Xfrontend", "-warn-concurrency",
-      // "-Xfrontend", "-debug-time-function-bodies",
-      // "-Xfrontend", "-debug-time-expression-type-checking",
-    ],
-    .when(configuration: .debug)
-  ),
+  //.unsafeFlags(["-Xfrontend", "-warn-concurrency"], .when(configuration: .debug)),
+  //.unsafeFlags(["-Xfrontend", "-debug-time-function-bodies"], .when(configuration: .debug)),
+  //.unsafeFlags(["-Xfrontend", "-debug-time-expression-type-checking"], .when(configuration: .debug)),
 ]
 
 let package = Package(
@@ -44,7 +39,7 @@ let package = Package(
     ),
     .package(
       url: "https://git.xx.network/elixxir/client-ios-db.git",
-      .upToNextMajor(from: "1.1.0")
+      .upToNextMajor(from: "1.2.0")
     ),
     .package(
       url: "https://github.com/darrarski/swift-composable-presentation.git",
