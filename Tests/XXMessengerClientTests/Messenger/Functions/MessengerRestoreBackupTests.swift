@@ -136,6 +136,7 @@ final class MessengerRestoreBackupTests: XCTestCase {
         password: password,
         cMixParams: cMixParams
       ),
+      .didSetCMix,
       .cMixDidStartNetworkFollower(
         timeoutMS: 30_000
       ),
@@ -148,6 +149,10 @@ final class MessengerRestoreBackupTests: XCTestCase {
         identity: receptionIdentity,
         e2eParamsJSON: e2eParams
       ),
+      .didSetE2E,
+      .didSetIsListeningForMessages(
+        isListening: false
+      ),
       .didNewUdManagerFromBackup(params: .init(
         e2eId: e2eId,
         username: Fact(type: .username, value: backupParams.username),
@@ -157,12 +162,7 @@ final class MessengerRestoreBackupTests: XCTestCase {
         contact: udContactFromNdf,
         address: udAddressFromNdf
       )),
-      .didSetCMix,
-      .didSetE2E,
       .didSetUD,
-      .didSetIsListeningForMessages(
-        isListening: false
-      ),
     ])
 
     XCTAssertNoDifference(result, MessengerRestoreBackup.Result(
@@ -175,19 +175,13 @@ final class MessengerRestoreBackupTests: XCTestCase {
     struct Failure: Error, Equatable {}
     let failure = Failure()
 
-    var actions: [CaughtAction] = []
-
     var env: MessengerEnvironment = .unimplemented
     env.downloadNDF.run = { _ in throw failure }
-    env.fileManager.removeDirectory = { actions.append(.didRemoveDirectory(path: $0)) }
     let restore: MessengerRestoreBackup = .live(env)
 
     XCTAssertThrowsError(try restore(backupData: Data(), backupPassphrase: "")) { error in
       XCTAssertNoDifference(error as? Failure, failure)
     }
-    XCTAssertNoDifference(actions, [
-      .didRemoveDirectory(path: env.storageDir)
-    ])
   }
 }
 
