@@ -14,7 +14,7 @@ final class AuthCallbackHandlerRequestTests: XCTestCase {
 
     let request = AuthCallbackHandlerRequest.live(
       db: .init {
-        var db: Database = .failing
+        var db: Database = .unimplemented
         db.fetchContacts.run = { query in
           didFetchContacts.append(query)
           return []
@@ -54,7 +54,7 @@ final class AuthCallbackHandlerRequestTests: XCTestCase {
   func testRequestWhenContactInDatabase() throws {
     let request = AuthCallbackHandlerRequest.live(
       db: .init {
-        var db: Database = .failing
+        var db: Database = .unimplemented
         db.fetchContacts.run = { _ in [.init(id: "id".data(using: .utf8)!)] }
         return db
       },

@@ -27,7 +27,7 @@ final class ContactFeatureTests: XCTestCase {
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContactsPublisher.run = { query in
         dbDidFetchContacts.append(query)
         return dbContactsPublisher.eraseToAnyPublisher()
@@ -80,7 +80,7 @@ final class ContactFeatureTests: XCTestCase {
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.saveContact.run = { contact in
         dbDidSaveContact.append(contact)
         return contact

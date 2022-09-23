@@ -32,7 +32,7 @@ final class MyContactFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContactsPublisher.run = { query in
         dbDidFetchContacts.append(query)
         return dbContactsPublisher.eraseToAnyPublisher()
@@ -177,7 +177,7 @@ final class MyContactFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
         return [dbContact]
@@ -290,7 +290,7 @@ final class MyContactFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
         return [dbContact]
@@ -469,7 +469,7 @@ final class MyContactFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
         return [dbContact]
@@ -582,7 +582,7 @@ final class MyContactFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
         return [dbContact]
@@ -679,7 +679,7 @@ final class MyContactFeatureTests: XCTestCase {
       return ud
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
         return [dbContact]
