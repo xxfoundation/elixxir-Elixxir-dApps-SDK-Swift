@@ -141,6 +141,7 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
         ))
         return .success(.finished)
       } catch {
+        try? env.messenger.destroy()
         return .success(.failed(error as NSError))
       }
     }

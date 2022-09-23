@@ -167,6 +167,8 @@ final class RestoreFeatureTests: XCTestCase {
     struct Failure: Error {}
     let failure = Failure()
 
+    var didDestroyMessenger = 0
+
     let store = TestStore(
       initialState: RestoreState(
         file: .init(name: "name", data: "data".data(using: .utf8)!)
@@ -178,10 +180,13 @@ final class RestoreFeatureTests: XCTestCase {
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
     store.environment.messenger.restoreBackup.run = { _, _ in throw failure }
+    store.environment.messenger.destroy.run = { didDestroyMessenger += 1 }
 
     store.send(.restoreTapped) {
       $0.isRestoring = true
     }
+
+    XCTAssertEqual(didDestroyMessenger, 1)
 
     store.receive(.failed(failure as NSError)) {
       $0.isRestoring = false
