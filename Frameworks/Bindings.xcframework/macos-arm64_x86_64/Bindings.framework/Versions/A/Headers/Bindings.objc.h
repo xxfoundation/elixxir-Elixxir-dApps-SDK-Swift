@@ -2272,29 +2272,24 @@ FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewOrLoadUd(long e2eI
 
 /**
  * NewUdManagerFromBackup builds a new user discover manager from a backup. It
-will construct a manager that is already registered and restore already
-registered facts into store.
+will construct a manager that is already registered. Confirmed facts have
+already been restored via the call NewCmixFromBackup.
 
 Parameters:
  - e2eID - e2e object ID in the tracker
  - follower - network follower func wrapped in UdNetworkStatus
- - username - The username this user registered with initially. This should
-              not be nullable, and be JSON marshalled as retrieved from
-              UserDiscovery.GetFacts().
- - emailFactJson - nullable JSON marshalled email [fact.Fact]
- - phoneFactJson - nullable JSON marshalled phone [fact.Fact]
  - cert - the TLS certificate for the UD server this call will connect with.
    You may use the UD server run by the xx network team by using
-   E2e.GetUdCertFromNdf.
- - contactFile - the data within a marshalled contact.Contact. This
+   [E2e.GetUdCertFromNdf].
+ - contactFile - the data within a marshalled [contact.Contact]. This
    represents the contact file of the server this call will connect with. You
    may use the UD server run by the xx network team by using
-   E2e.GetUdContactFromNdf.
+   [E2e.GetUdContactFromNdf].
  - address - the IP address of the UD server this call will connect with. You
    may use the UD server run by the xx network team by using
-   E2e.GetUdAddressFromNdf.
+   [E2e.GetUdAddressFromNdf].
  */
-FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable usernameJson, NSData* _Nullable emailFactJson, NSData* _Nullable phoneFactJson, NSData* _Nullable cert, NSData* _Nullable contactFile, NSString* _Nullable address, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsUserDiscovery* _Nullable BindingsNewUdManagerFromBackup(long e2eID, id<BindingsUdNetworkStatus> _Nullable follower, NSData* _Nullable cert, NSData* _Nullable contactFile, NSString* _Nullable address, NSError* _Nullable* _Nullable error);
 
 /**
  * RegisterForNotifications allows a client to register for push notifications.
