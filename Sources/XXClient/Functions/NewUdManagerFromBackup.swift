@@ -5,26 +5,17 @@ public struct NewUdManagerFromBackup {
   public struct Params: Equatable {
     public init(
       e2eId: Int,
-      username: Fact,
-      email: Fact?,
-      phone: Fact?,
       cert: Data,
       contact: Data,
       address: String
     ) {
       self.e2eId = e2eId
-      self.username = username
-      self.email = email
-      self.phone = phone
       self.cert = cert
       self.contact = contact
       self.address = address
     }
 
     public var e2eId: Int
-    public var username: Fact
-    public var email: Fact?
-    public var phone: Fact?
     public var cert: Data
     public var contact: Data
     public var address: String
@@ -46,9 +37,6 @@ extension NewUdManagerFromBackup {
     let bindingsUD = BindingsNewUdManagerFromBackup(
       params.e2eId,
       follower.makeBindingsUdNetworkStatus(),
-      try params.username.encode(),
-      try params.email?.encode(),
-      try params.phone?.encode(),
       params.cert,
       params.contact,
       params.address,

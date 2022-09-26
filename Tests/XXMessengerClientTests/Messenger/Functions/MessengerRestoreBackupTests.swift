@@ -155,9 +155,6 @@ final class MessengerRestoreBackupTests: XCTestCase {
       ),
       .didNewUdManagerFromBackup(params: .init(
         e2eId: e2eId,
-        username: Fact(type: .username, value: backupParams.username),
-        email: Fact(type: .email, value: backupParams.email!),
-        phone: Fact(type: .phone, value: backupParams.phone!),
         cert: udCertFromNdf,
         contact: udContactFromNdf,
         address: udAddressFromNdf

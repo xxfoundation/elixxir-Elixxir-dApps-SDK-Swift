@@ -42,6 +42,9 @@ extension MessengerRestoreBackup {
         sessionPassword: password,
         backupFileContents: backupData
       )
+      let decoder = JSONDecoder()
+      let paramsData = report.params.data(using: .utf8)!
+      let params = try decoder.decode(BackupParams.self, from: paramsData)
       let cMix = try env.loadCMix(
         storageDir: storageDir,
         password: password,
@@ -57,15 +60,9 @@ extension MessengerRestoreBackup {
       )
       env.e2e.set(e2e)
       env.isListeningForMessages.set(false)
-      let decoder = JSONDecoder()
-      let paramsData = report.params.data(using: .utf8)!
-      let params = try decoder.decode(BackupParams.self, from: paramsData)
       let ud = try env.newUdManagerFromBackup(
         params: NewUdManagerFromBackup.Params(
           e2eId: e2e.getId(),
-          username: Fact(type: .username, value: params.username),
-          email: params.email.map { Fact(type: .email, value: $0) },
-          phone: params.phone.map { Fact(type: .phone, value: $0) },
           cert: env.udCert ?? e2e.getUdCertFromNdf(),
           contact: env.udContact ?? (try e2e.getUdContactFromNdf()),
           address: env.udAddress ?? e2e.getUdAddressFromNdf()
