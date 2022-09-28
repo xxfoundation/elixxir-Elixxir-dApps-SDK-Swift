@@ -30,6 +30,7 @@ public struct Messenger {
   public var verifyContact: MessengerVerifyContact
   public var sendMessage: MessengerSendMessage
   public var registerBackupCallback: MessengerRegisterBackupCallback
+  public var isBackupRunning: MessengerIsBackupRunning
 }
 
 extension Messenger {
@@ -63,7 +64,8 @@ extension Messenger {
       registerForNotifications: .live(env),
       verifyContact: .live(env),
       sendMessage: .live(env),
-      registerBackupCallback: .live(env)
+      registerBackupCallback: .live(env),
+      isBackupRunning: .live(env)
     )
   }
 }
@@ -98,6 +100,7 @@ extension Messenger {
     registerForNotifications: .unimplemented,
     verifyContact: .unimplemented,
     sendMessage: .unimplemented,
-    registerBackupCallback: .unimplemented
+    registerBackupCallback: .unimplemented,
+    isBackupRunning: .unimplemented
   )
 }

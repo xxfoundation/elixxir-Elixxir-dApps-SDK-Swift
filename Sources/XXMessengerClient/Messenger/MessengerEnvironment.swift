@@ -4,6 +4,7 @@ import XCTestDynamicOverlay
 
 public struct MessengerEnvironment {
   public var authCallbacks: AuthCallbacksRegistry
+  public var backup: Stored<Backup?>
   public var backupCallbacks: BackupCallbacksRegistry
   public var cMix: Stored<CMix?>
   public var downloadNDF: DownloadAndVerifySignedNdf
@@ -46,6 +47,7 @@ extension MessengerEnvironment {
   public static func live() -> MessengerEnvironment {
     MessengerEnvironment(
       authCallbacks: .live(),
+      backup: .inMemory(),
       backupCallbacks: .live(),
       cMix: .inMemory(),
       downloadNDF: .live,
@@ -83,6 +85,7 @@ extension MessengerEnvironment {
 extension MessengerEnvironment {
   public static let unimplemented = MessengerEnvironment(
     authCallbacks: .unimplemented,
+    backup: .unimplemented(),
     backupCallbacks: .unimplemented,
     cMix: .unimplemented(),
     downloadNDF: .unimplemented,
