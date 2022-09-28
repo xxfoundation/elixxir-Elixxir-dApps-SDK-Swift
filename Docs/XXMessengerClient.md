@@ -4,7 +4,7 @@
 
 ## ▶️ Instantiate messenger
 
-Example:
+### Example
 
 ```swift
 // setup environment:
@@ -24,7 +24,7 @@ let messenger: Messenger = .live(environment)
 
 ## 🚀 Start messenger
 
-Example:
+### Example
 
 ```swift
 // allow cancellation of callbacks:
@@ -84,7 +84,7 @@ func start(messenger: Messenger) throws {
 
 ## 🛠 Use client components directly
 
-Example:
+### Example
 
 ```swift
 // get cMix:
@@ -102,7 +102,7 @@ let backup = messenger.backup()
 
 ## 💾 Backup
 
-Make backup:
+### Make backup
 
 ```swift
 // start receiving backup data before starting or resuming backup:
@@ -140,7 +140,7 @@ When starting a new backup you must provide `BackupParams` to prevent creating b
 
 The registered backup callback can be reused later when a new backup is started. There is no need to cancel it and register a new callback in such a case.
 
-Restore from backup:
+### Restore from backup
 
 ```swift
 let result = try messenger.restoreBackup(
