@@ -14,6 +14,7 @@ public struct MessengerEnvironment {
   public var getCMixParams: GetCMixParams
   public var getE2EParams: GetE2EParams
   public var getSingleUseParams: GetSingleUseParams
+  public var initializeBackup: InitializeBackup
   public var isListeningForMessages: Stored<Bool>
   public var isRegisteredWithUD: IsRegisteredWithUD
   public var loadCMix: LoadCMix
@@ -57,6 +58,7 @@ extension MessengerEnvironment {
       getCMixParams: .liveDefault,
       getE2EParams: .liveDefault,
       getSingleUseParams: .liveDefault,
+      initializeBackup: .live,
       isListeningForMessages: .inMemory(false),
       isRegisteredWithUD: .live,
       loadCMix: .live,
@@ -95,6 +97,7 @@ extension MessengerEnvironment {
     getCMixParams: .unimplemented,
     getE2EParams: .unimplemented,
     getSingleUseParams: .unimplemented,
+    initializeBackup: .unimplemented,
     isListeningForMessages: .unimplemented(placeholder: false),
     isRegisteredWithUD: .unimplemented,
     loadCMix: .unimplemented,
