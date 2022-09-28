@@ -142,7 +142,7 @@ let result = try messenger.restoreBackup(
   backupPassphrase: "backup-passphrase"
 )
 
-// handle restore result
+// handle restoration result
 ```
 
 If no error was thrown during restoration, the `Messenger` is already loaded, started, connected, and logged in.
