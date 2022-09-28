@@ -10,11 +10,7 @@ final class MessengerRestoreBackupTests: XCTestCase {
     let ndfData = "ndf-data".data(using: .utf8)!
     let password = "password".data(using: .utf8)!
     let backupContacts: [Data] = (1...3).map { "contact-\($0)" }.map { $0.data(using: .utf8)! }
-    let backupParams = BackupParams(
-      username: "backup-username",
-      email: "backup-email",
-      phone: "backup-phone"
-    )
+    let backupParams = BackupParams.stub
     let backupReport = BackupReport(
       restoredContacts: backupContacts,
       params: String(data: try! JSONEncoder().encode(backupParams), encoding: .utf8)!

@@ -15,16 +15,11 @@ final class MessengerBackupParamsTests: XCTestCase {
       return backup
     }
     let backup: MessengerBackupParams = .live(env)
-    let params = BackupParams(
-      username: "test-username",
-      email: "test-email",
-      phone: "test-phone"
-    )
 
-    try backup(params)
+    try backup(.stub)
 
     XCTAssertNoDifference(didAddJSON, [
-      String(data: try params.encode(), encoding: .utf8)!
+      String(data: try BackupParams.stub.encode(), encoding: .utf8)!
     ])
   }
 
@@ -32,9 +27,8 @@ final class MessengerBackupParamsTests: XCTestCase {
     var env: MessengerEnvironment = .unimplemented
     env.backup.get = { nil }
     let backup: MessengerBackupParams = .live(env)
-    let params = BackupParams(username: "test", email: nil, phone: nil)
 
-    XCTAssertThrowsError(try backup(params)) { error in
+    XCTAssertThrowsError(try backup(.stub)) { error in
       XCTAssertNoDifference(
         error as NSError,
         MessengerBackupParams.Error.notRunning as NSError
@@ -50,9 +44,8 @@ final class MessengerBackupParamsTests: XCTestCase {
       return backup
     }
     let backup: MessengerBackupParams = .live(env)
-    let params = BackupParams(username: "test", email: nil, phone: nil)
 
-    XCTAssertThrowsError(try backup(params)) { error in
+    XCTAssertThrowsError(try backup(.stub)) { error in
       XCTAssertNoDifference(
         error as NSError,
         MessengerBackupParams.Error.notRunning as NSError
