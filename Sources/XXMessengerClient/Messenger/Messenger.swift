@@ -4,6 +4,7 @@ public struct Messenger {
   public var cMix: Stored<CMix?>
   public var e2e: Stored<E2E?>
   public var ud: Stored<UserDiscovery?>
+  public var backup: Stored<Backup?>
   public var isCreated: MessengerIsCreated
   public var create: MessengerCreate
   public var restoreBackup: MessengerRestoreBackup
@@ -43,6 +44,7 @@ extension Messenger {
       cMix: env.cMix,
       e2e: env.e2e,
       ud: env.ud,
+      backup: env.backup,
       isCreated: .live(env),
       create: .live(env),
       restoreBackup: .live(env),
@@ -83,6 +85,7 @@ extension Messenger {
     cMix: .unimplemented(),
     e2e: .unimplemented(),
     ud: .unimplemented(),
+    backup: .unimplemented(),
     isCreated: .unimplemented,
     create: .unimplemented,
     restoreBackup: .unimplemented,
