@@ -32,6 +32,7 @@ public struct Messenger {
   public var registerBackupCallback: MessengerRegisterBackupCallback
   public var isBackupRunning: MessengerIsBackupRunning
   public var startBackup: MessengerStartBackup
+  public var resumeBackup: MessengerResumeBackup
   public var stopBackup: MessengerStopBackup
 }
 
@@ -69,6 +70,7 @@ extension Messenger {
       registerBackupCallback: .live(env),
       isBackupRunning: .live(env),
       startBackup: .live(env),
+      resumeBackup: .live(env),
       stopBackup: .live(env)
     )
   }
@@ -107,6 +109,7 @@ extension Messenger {
     registerBackupCallback: .unimplemented,
     isBackupRunning: .unimplemented,
     startBackup: .unimplemented,
+    resumeBackup: .unimplemented,
     stopBackup: .unimplemented
   )
 }

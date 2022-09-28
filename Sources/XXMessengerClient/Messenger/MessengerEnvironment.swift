@@ -29,6 +29,7 @@ public struct MessengerEnvironment {
   public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
   public var registerForNotifications: RegisterForNotifications
+  public var resumeBackup: ResumeBackup
   public var searchUD: SearchUD
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
@@ -73,6 +74,7 @@ extension MessengerEnvironment {
       newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
       registerForNotifications: .live,
+      resumeBackup: .live,
       searchUD: .live,
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
@@ -112,6 +114,7 @@ extension MessengerEnvironment {
     newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
     registerForNotifications: .unimplemented,
+    resumeBackup: .unimplemented,
     searchUD: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
