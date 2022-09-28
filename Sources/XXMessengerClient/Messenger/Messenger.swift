@@ -4,6 +4,7 @@ public struct Messenger {
   public var cMix: Stored<CMix?>
   public var e2e: Stored<E2E?>
   public var ud: Stored<UserDiscovery?>
+  public var backup: Stored<Backup?>
   public var isCreated: MessengerIsCreated
   public var create: MessengerCreate
   public var restoreBackup: MessengerRestoreBackup
@@ -29,6 +30,12 @@ public struct Messenger {
   public var registerForNotifications: MessengerRegisterForNotifications
   public var verifyContact: MessengerVerifyContact
   public var sendMessage: MessengerSendMessage
+  public var registerBackupCallback: MessengerRegisterBackupCallback
+  public var isBackupRunning: MessengerIsBackupRunning
+  public var startBackup: MessengerStartBackup
+  public var resumeBackup: MessengerResumeBackup
+  public var backupParams: MessengerBackupParams
+  public var stopBackup: MessengerStopBackup
 }
 
 extension Messenger {
@@ -37,6 +44,7 @@ extension Messenger {
       cMix: env.cMix,
       e2e: env.e2e,
       ud: env.ud,
+      backup: env.backup,
       isCreated: .live(env),
       create: .live(env),
       restoreBackup: .live(env),
@@ -61,7 +69,13 @@ extension Messenger {
       lookupContacts: .live(env),
       registerForNotifications: .live(env),
       verifyContact: .live(env),
-      sendMessage: .live(env)
+      sendMessage: .live(env),
+      registerBackupCallback: .live(env),
+      isBackupRunning: .live(env),
+      startBackup: .live(env),
+      resumeBackup: .live(env),
+      backupParams: .live(env),
+      stopBackup: .live(env)
     )
   }
 }
@@ -71,6 +85,7 @@ extension Messenger {
     cMix: .unimplemented(),
     e2e: .unimplemented(),
     ud: .unimplemented(),
+    backup: .unimplemented(),
     isCreated: .unimplemented,
     create: .unimplemented,
     restoreBackup: .unimplemented,
@@ -95,6 +110,12 @@ extension Messenger {
     lookupContacts: .unimplemented,
     registerForNotifications: .unimplemented,
     verifyContact: .unimplemented,
-    sendMessage: .unimplemented
+    sendMessage: .unimplemented,
+    registerBackupCallback: .unimplemented,
+    isBackupRunning: .unimplemented,
+    startBackup: .unimplemented,
+    resumeBackup: .unimplemented,
+    backupParams: .unimplemented,
+    stopBackup: .unimplemented
   )
 }

@@ -4,7 +4,7 @@
 
 ## ▶️ Instantiate messenger
 
-Example:
+### Example
 
 ```swift
 // setup environment:
@@ -24,7 +24,7 @@ let messenger: Messenger = .live(environment)
 
 ## 🚀 Start messenger
 
-Example:
+### Example
 
 ```swift
 // allow cancellation of callbacks:
@@ -84,7 +84,7 @@ func start(messenger: Messenger) throws {
 
 ## 🛠 Use client components directly
 
-Example:
+### Example
 
 ```swift
 // get cMix:
@@ -95,4 +95,60 @@ let e2e = messenger.e2e()
 
 // get UserDicovery:
 let ud = messenger.ud()
+
+// get Backup:
+let backup = messenger.backup()
 ```
+
+## 💾 Backup
+
+### Make backup
+
+```swift
+// start receiving backup data before starting or resuming backup:
+let cancellable = messenger.registerBackupCallback(.init { data in
+  // handle backup data, save on disk, upload to cloud, etc.
+})
+
+// check if backup is already running:
+if messenger.isBackupRunning() == false {
+  do {
+    // try to resume previous backup:
+    try messenger.resumeBackup()
+  } catch {
+    // try to start a new backup:
+    let params: BackupParams = ...
+    try messenger.startBackup(
+      password: "backup-passphrase",
+      params: params
+    )
+  }
+}
+
+// update params in the backup:
+let params: BackupParams = ...
+try messenger.backupParams(params)
+
+// stop the backup:
+try messenger.stopBackup()
+
+// optionally stop receiving backup data
+cancellable.cancel()
+```
+
+When starting a new backup you must provide `BackupParams` to prevent creating backups that does not contain it.
+
+The registered backup callback can be reused later when a new backup is started. There is no need to cancel it and register a new callback in such a case.
+
+### Restore from backup
+
+```swift
+let result = try messenger.restoreBackup(
+  backupData: ...,
+  backupPassphrase: "backup-passphrase"
+)
+
+// handle restoration result
+```
+
+If no error was thrown during restoration, the `Messenger` is already loaded, started, connected, and logged in.

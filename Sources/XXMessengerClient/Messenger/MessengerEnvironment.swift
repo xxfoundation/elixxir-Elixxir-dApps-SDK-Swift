@@ -4,6 +4,8 @@ import XCTestDynamicOverlay
 
 public struct MessengerEnvironment {
   public var authCallbacks: AuthCallbacksRegistry
+  public var backup: Stored<Backup?>
+  public var backupCallbacks: BackupCallbacksRegistry
   public var cMix: Stored<CMix?>
   public var downloadNDF: DownloadAndVerifySignedNdf
   public var e2e: Stored<E2E?>
@@ -12,6 +14,7 @@ public struct MessengerEnvironment {
   public var getCMixParams: GetCMixParams
   public var getE2EParams: GetE2EParams
   public var getSingleUseParams: GetSingleUseParams
+  public var initializeBackup: InitializeBackup
   public var isListeningForMessages: Stored<Bool>
   public var isRegisteredWithUD: IsRegisteredWithUD
   public var loadCMix: LoadCMix
@@ -26,6 +29,7 @@ public struct MessengerEnvironment {
   public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
   public var registerForNotifications: RegisterForNotifications
+  public var resumeBackup: ResumeBackup
   public var searchUD: SearchUD
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
@@ -45,6 +49,8 @@ extension MessengerEnvironment {
   public static func live() -> MessengerEnvironment {
     MessengerEnvironment(
       authCallbacks: .live(),
+      backup: .inMemory(),
+      backupCallbacks: .live(),
       cMix: .inMemory(),
       downloadNDF: .live,
       e2e: .inMemory(),
@@ -53,6 +59,7 @@ extension MessengerEnvironment {
       getCMixParams: .liveDefault,
       getE2EParams: .liveDefault,
       getSingleUseParams: .liveDefault,
+      initializeBackup: .live,
       isListeningForMessages: .inMemory(false),
       isRegisteredWithUD: .live,
       loadCMix: .live,
@@ -67,6 +74,7 @@ extension MessengerEnvironment {
       newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
       registerForNotifications: .live,
+      resumeBackup: .live,
       searchUD: .live,
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
@@ -81,6 +89,8 @@ extension MessengerEnvironment {
 extension MessengerEnvironment {
   public static let unimplemented = MessengerEnvironment(
     authCallbacks: .unimplemented,
+    backup: .unimplemented(),
+    backupCallbacks: .unimplemented,
     cMix: .unimplemented(),
     downloadNDF: .unimplemented,
     e2e: .unimplemented(),
@@ -89,6 +99,7 @@ extension MessengerEnvironment {
     getCMixParams: .unimplemented,
     getE2EParams: .unimplemented,
     getSingleUseParams: .unimplemented,
+    initializeBackup: .unimplemented,
     isListeningForMessages: .unimplemented(placeholder: false),
     isRegisteredWithUD: .unimplemented,
     loadCMix: .unimplemented,
@@ -103,6 +114,7 @@ extension MessengerEnvironment {
     newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
     registerForNotifications: .unimplemented,
+    resumeBackup: .unimplemented,
     searchUD: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
