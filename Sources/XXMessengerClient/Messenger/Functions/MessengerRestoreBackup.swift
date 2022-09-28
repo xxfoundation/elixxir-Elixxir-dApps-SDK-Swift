@@ -42,9 +42,8 @@ extension MessengerRestoreBackup {
         sessionPassword: password,
         backupFileContents: backupData
       )
-      let decoder = JSONDecoder()
       let paramsData = report.params.data(using: .utf8)!
-      let params = try decoder.decode(BackupParams.self, from: paramsData)
+      let params = try BackupParams.decode(paramsData)
       let cMix = try env.loadCMix(
         storageDir: storageDir,
         password: password,

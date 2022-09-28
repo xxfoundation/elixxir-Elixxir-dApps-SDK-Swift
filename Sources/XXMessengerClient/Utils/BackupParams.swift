@@ -1,6 +1,6 @@
 import Foundation
 
-public struct BackupParams: Equatable, Codable {
+public struct BackupParams: Equatable {
   public init(
     username: String,
     email: String?,
@@ -14,4 +14,14 @@ public struct BackupParams: Equatable, Codable {
   public var username: String
   public var email: String?
   public var phone: String?
+}
+
+extension BackupParams: Codable {
+  public static func decode(_ data: Data) throws -> Self {
+    try JSONDecoder().decode(Self.self, from: data)
+  }
+
+  public func encode() throws -> Data {
+    try JSONEncoder().encode(self)
+  }
 }
