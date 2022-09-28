@@ -2,18 +2,12 @@ import Foundation
 
 public struct BackupParams: Equatable {
   public init(
-    username: String,
-    email: String?,
-    phone: String?
+    username: String
   ) {
     self.username = username
-    self.email = email
-    self.phone = phone
   }
 
   public var username: String
-  public var email: String?
-  public var phone: String?
 }
 
 extension BackupParams: Codable {

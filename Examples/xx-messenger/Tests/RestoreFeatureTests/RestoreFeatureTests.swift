@@ -79,17 +79,18 @@ final class RestoreFeatureTests: XCTestCase {
   func testRestore() {
     let backupData = "backup-data".data(using: .utf8)!
     let backupPassphrase = "backup-passphrase"
+    let restoredFacts = [
+      Fact(type: .email, value: "restored-email"),
+      Fact(type: .phone, value: "restored-phone"),
+    ]
     let restoreResult = MessengerRestoreBackup.Result(
-      restoredParams: BackupParams.init(
-        username: "restored-username",
-        email: "restored-email",
-        phone: "restored-phone"
-      ),
+      restoredParams: BackupParams(username: "restored-username"),
       restoredContacts: []
     )
     let now = Date()
     let contactId = "contact-id".data(using: .utf8)!
 
+    var udFacts: [Fact] = []
     var didRestoreWithData: [Data] = []
     var didRestoreWithPassphrase: [String] = []
     var didSaveContact: [XXModels.Contact] = []
@@ -108,6 +109,7 @@ final class RestoreFeatureTests: XCTestCase {
     store.environment.messenger.restoreBackup.run = { data, passphrase in
       didRestoreWithData.append(data)
       didRestoreWithPassphrase.append(passphrase)
+      udFacts = restoredFacts
       return restoreResult
     }
     store.environment.messenger.e2e.get = {
@@ -118,6 +120,11 @@ final class RestoreFeatureTests: XCTestCase {
         return contact
       }
       return e2e
+    }
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.getFacts.run = { udFacts }
+      return ud
     }
     store.environment.db.run = {
       var db: Database = .unimplemented
@@ -141,8 +148,8 @@ final class RestoreFeatureTests: XCTestCase {
     XCTAssertNoDifference(didSaveContact, [Contact(
       id: contactId,
       username: restoreResult.restoredParams.username,
-      email: restoreResult.restoredParams.email,
-      phone: restoreResult.restoredParams.phone,
+      email: restoredFacts.get(.email)?.value,
+      phone: restoredFacts.get(.phone)?.value,
       createdAt: now
     )])
 

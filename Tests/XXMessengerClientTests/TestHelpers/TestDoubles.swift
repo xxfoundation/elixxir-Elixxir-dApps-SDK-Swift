@@ -20,8 +20,6 @@ extension Message {
 
 extension BackupParams {
   static let stub = BackupParams(
-    username: "stub-username",
-    email: "stub-email",
-    phone: "stub-phone"
+    username: "stub-username"
   )
 }

@@ -148,7 +148,11 @@ let result = try messenger.restoreBackup(
   backupPassphrase: "backup-passphrase"
 )
 
-// handle restoration result
+// handle restoration result:
+let restoredUsername = result.restoredParams.username
+let facts = try messenger.ud.tryGet().getFacts()
+let restoredEmail = facts.get(.email)?.value
+let restoredPhone = facts.get(.phone)?.value
 ```
 
 If no error was thrown during restoration, the `Messenger` is already loaded, started, connected, and logged in.
