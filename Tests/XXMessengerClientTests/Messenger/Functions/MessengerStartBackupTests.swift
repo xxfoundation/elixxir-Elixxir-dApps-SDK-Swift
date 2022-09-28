@@ -14,14 +14,16 @@ final class MessengerStartBackupTests: XCTestCase {
     var backupCallbacks: [UpdateBackupFunc] = []
     var didHandleCallback: [Data] = []
     var didSetBackup: [Backup?] = []
+    var didAddJSON: [String] = []
 
     let password = "test-password"
     let e2eId = 123
     let udId = 321
-    let data = "test-data".data(using: .utf8)!
+    let dataWithoutParams = "backup-without-params".data(using: .utf8)!
+    let dataWithParams = "backup-with-params".data(using: .utf8)!
 
     var env: MessengerEnvironment = .unimplemented
-    env.backup.get = { nil }
+    env.backup.get = { didSetBackup.last as? Backup }
     env.backup.set = { didSetBackup.append($0) }
     env.e2e.get = {
       var e2e: E2E = .unimplemented
@@ -39,20 +41,37 @@ final class MessengerStartBackupTests: XCTestCase {
     env.initializeBackup.run = { e2eId, udId, password, callback in
       didInitializeBackup.append(.init(e2eId: e2eId, udId: udId, password: password))
       backupCallbacks.append(callback)
-      return .unimplemented
+      var backup: Backup = .unimplemented
+      backup.addJSON.run = { string in
+        didAddJSON.append(string)
+      }
+      return backup
     }
     let start: MessengerStartBackup = .live(env)
 
-    try start(password: password)
+    try start(password: password, params: .stub)
 
     XCTAssertNoDifference(didInitializeBackup, [
       .init(e2eId: e2eId, udId: udId, password: password)
     ])
     XCTAssertNoDifference(didSetBackup.map { $0 != nil }, [true])
 
-    backupCallbacks.forEach { $0.handle(data) }
+    backupCallbacks.forEach { $0.handle(dataWithoutParams) }
 
-    XCTAssertNoDifference(didHandleCallback, [data])
+    XCTAssertNoDifference(
+      didHandleCallback.map(StringData.init),
+      [].map(StringData.init)
+    )
+    XCTAssertNoDifference(didAddJSON, [
+      String(data: try BackupParams.stub.encode(), encoding: .utf8)!
+    ])
+
+    backupCallbacks.forEach { $0.handle(dataWithParams) }
+
+    XCTAssertNoDifference(
+      didHandleCallback.map(StringData.init),
+      [dataWithParams].map(StringData.init)
+    )
   }
 
   func testStartWhenRunning() {
@@ -64,7 +83,7 @@ final class MessengerStartBackupTests: XCTestCase {
     }
     let start: MessengerStartBackup = .live(env)
 
-    XCTAssertThrowsError(try start(password: "")) { error in
+    XCTAssertThrowsError(try start(password: "", params: .stub)) { error in
       XCTAssertNoDifference(
         error as NSError,
         MessengerStartBackup.Error.isRunning as NSError
@@ -78,7 +97,7 @@ final class MessengerStartBackupTests: XCTestCase {
     env.e2e.get = { nil }
     let start: MessengerStartBackup = .live(env)
 
-    XCTAssertThrowsError(try start(password: "")) { error in
+    XCTAssertThrowsError(try start(password: "", params: .stub)) { error in
       XCTAssertNoDifference(
         error as NSError,
         MessengerStartBackup.Error.notConnected as NSError
@@ -93,7 +112,7 @@ final class MessengerStartBackupTests: XCTestCase {
     env.ud.get = { nil }
     let start: MessengerStartBackup = .live(env)
 
-    XCTAssertThrowsError(try start(password: "")) { error in
+    XCTAssertThrowsError(try start(password: "", params: .stub)) { error in
       XCTAssertNoDifference(
         error as NSError,
         MessengerStartBackup.Error.notLoggedIn as NSError
@@ -121,7 +140,7 @@ final class MessengerStartBackupTests: XCTestCase {
     env.initializeBackup.run = { _, _, _, _ in throw failure }
     let start: MessengerStartBackup = .live(env)
 
-    XCTAssertThrowsError(try start(password: "abcd")) { error in
+    XCTAssertThrowsError(try start(password: "", params: .stub)) { error in
       XCTAssertNoDifference(error as NSError, failure as NSError)
     }
   }

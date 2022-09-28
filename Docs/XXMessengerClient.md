@@ -117,11 +117,15 @@ if messenger.isBackupRunning() == false {
     try messenger.resumeBackup()
   } catch {
     // try to start a new backup:
-    try messenger.startBackup(password: "backup-passphrase")
+    let params: BackupParams = ...
+    try messenger.startBackup(
+      password: "backup-passphrase",
+      params: params
+    )
   }
 }
 
-// add backup params to the backup:
+// update params in the backup:
 let params: BackupParams = ...
 try messenger.backupParams(params)
 
@@ -131,6 +135,8 @@ try messenger.stopBackup()
 // optionally stop receiving backup data
 cancellable.cancel()
 ```
+
+When starting a new backup you must provide `BackupParams` to prevent creating backups that does not contain it.
 
 The registered backup callback can be reused later when a new backup is started. There is no need to cancel it and register a new callback in such a case.
 
