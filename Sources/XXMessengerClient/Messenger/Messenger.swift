@@ -13,6 +13,7 @@ public struct Messenger {
   public var registerAuthCallbacks: MessengerRegisterAuthCallbacks
   public var registerMessageListener: MessengerRegisterMessageListener
   public var start: MessengerStart
+  public var stop: MessengerStop
   public var isConnected: MessengerIsConnected
   public var connect: MessengerConnect
   public var isListeningForMessages: MessengerIsListeningForMessages
@@ -53,6 +54,7 @@ extension Messenger {
       registerAuthCallbacks: .live(env),
       registerMessageListener: .live(env),
       start: .live(env),
+      stop: .live(env),
       isConnected: .live(env),
       connect: .live(env),
       isListeningForMessages: .live(env),
@@ -94,6 +96,7 @@ extension Messenger {
     registerAuthCallbacks: .unimplemented,
     registerMessageListener: .unimplemented,
     start: .unimplemented,
+    stop: .unimplemented,
     isConnected: .unimplemented,
     connect: .unimplemented,
     isListeningForMessages: .unimplemented,
