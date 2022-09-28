@@ -95,4 +95,54 @@ let e2e = messenger.e2e()
 
 // get UserDicovery:
 let ud = messenger.ud()
+
+// get Backup:
+let backup = messenger.backup()
 ```
+
+## 💾 Backup
+
+Make backup:
+
+```swift
+// start receiving backup data before starting or resuming backup:
+let cancellable = messenger.registerBackupCallback(.init { data in
+  // handle backup data, save on disk, upload to cloud, etc.
+})
+
+// check if backup is already running:
+if messenger.isBackupRunning() == false {
+  do {
+    // try to resume previous backup:
+    try messenger.resumeBackup()
+  } catch {
+    // try to start a new backup:
+    try messenger.startBackup(password: "backup-passphrase")
+  }
+}
+
+// add backup params to the backup:
+let params: BackupParams = ...
+try messenger.backupParams(params)
+
+// stop the backup:
+try messenger.stopBackup()
+
+// optionally stop receiving backup data
+cancellable.cancel()
+```
+
+The registered backup callback can be reused later when a new backup is started. There is no need to cancel it and register a new callback in such a case.
+
+Restore from backup:
+
+```swift
+let result = try messenger.restoreBackup(
+  backupData: ...,
+  backupPassphrase: "backup-passphrase"
+)
+
+// handle restore result
+```
+
+If no error was thrown during restoration, the `Messenger` is already loaded, started, connected, and logged in.
