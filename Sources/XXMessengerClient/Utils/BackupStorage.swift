@@ -18,6 +18,7 @@ public struct BackupStorage {
 
   public typealias Observer = (Backup?) -> Void
 
+  public var stored: () -> Backup?
   public var store: (Data) throws -> Void
   public var observe: (@escaping Observer) -> Cancellable
   public var remove: () throws -> Void
@@ -43,6 +44,9 @@ extension BackupStorage {
       backup = Backup(date: fileDate, data: fileData)
     }
     return BackupStorage(
+      stored: {
+        backup
+      },
       store: { data in
         let newBackup = Backup(
           date: now(),
@@ -55,7 +59,6 @@ extension BackupStorage {
       observe: { observer in
         let id = UUID()
         observers[id] = observer
-        defer { observers[id]?(backup) }
         return Cancellable {
           observers[id] = nil
         }
@@ -71,6 +74,7 @@ extension BackupStorage {
 
 extension BackupStorage {
   public static let unimplemented = BackupStorage(
+    stored: XCTUnimplemented("\(Self.self).stored"),
     store: XCTUnimplemented("\(Self.self).store"),
     observe: XCTUnimplemented("\(Self.self).observe", placeholder: Cancellable {}),
     remove: XCTUnimplemented("\(Self.self).remove")
