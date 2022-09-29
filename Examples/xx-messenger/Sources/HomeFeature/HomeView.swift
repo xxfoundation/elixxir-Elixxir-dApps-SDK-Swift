@@ -1,3 +1,4 @@
+import BackupFeature
 import ComposableArchitecture
 import ComposablePresentation
 import ContactsFeature
@@ -111,6 +112,16 @@ public struct HomeView: View {
           }
 
           Section {
+            Button {
+              viewStore.send(.backupButtonTapped)
+            } label: {
+              HStack {
+                Text("Backup")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+
             Button(role: .destructive) {
               viewStore.send(.deleteAccount(.buttonTapped))
             } label: {
@@ -151,6 +162,16 @@ public struct HomeView: View {
             viewStore.send(.didDismissUserSearch)
           },
           destination: UserSearchView.init(store:)
+        ))
+        .background(NavigationLinkWithStore(
+          store.scope(
+            state: \.backup,
+            action: HomeAction.backup
+          ),
+          onDeactivate: {
+            viewStore.send(.didDismissBackup)
+          },
+          destination: BackupView.init(store:)
         ))
       }
       .navigationViewStyle(.stack)

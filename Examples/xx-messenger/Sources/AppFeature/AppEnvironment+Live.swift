@@ -1,4 +1,5 @@
 import AppCore
+import BackupFeature
 import ChatFeature
 import CheckContactAuthFeature
 import ConfirmRequestFeature
@@ -149,6 +150,9 @@ extension AppEnvironment {
               bgQueue: bgQueue,
               contact: { contactEnvironment }
             )
+          },
+          backup: {
+            BackupEnvironment()
           }
         )
       }

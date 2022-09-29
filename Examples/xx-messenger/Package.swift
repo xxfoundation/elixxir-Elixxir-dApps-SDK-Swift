@@ -84,6 +84,7 @@ let package = Package(
       name: "AppFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "BackupFeature"),
         .target(name: "ChatFeature"),
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
@@ -231,6 +232,7 @@ let package = Package(
       name: "HomeFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "BackupFeature"),
         .target(name: "ContactsFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "UserSearchFeature"),

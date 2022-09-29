@@ -1,4 +1,5 @@
 import AppCore
+import BackupFeature
 import ComposableArchitecture
 import ContactsFeature
 import CustomDump
@@ -502,6 +503,32 @@ final class HomeFeatureTests: XCTestCase {
 
     store.send(.didDismissContacts) {
       $0.contacts = nil
+    }
+  }
+
+  func testBackupButtonTapped() {
+    let store = TestStore(
+      initialState: HomeState(),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.backupButtonTapped) {
+      $0.backup = BackupState()
+    }
+  }
+
+  func testDidDismissBackup() {
+    let store = TestStore(
+      initialState: HomeState(
+        backup: BackupState()
+      ),
+      reducer: homeReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.didDismissBackup) {
+      $0.backup = nil
     }
   }
 }

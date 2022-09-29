@@ -1,4 +1,5 @@
 import AppCore
+import BackupFeature
 import Combine
 import ComposableArchitecture
 import ComposablePresentation
@@ -20,7 +21,8 @@ public struct HomeState: Equatable {
     alert: AlertState<HomeAction>? = nil,
     register: RegisterState? = nil,
     contacts: ContactsState? = nil,
-    userSearch: UserSearchState? = nil
+    userSearch: UserSearchState? = nil,
+    backup: BackupState? = nil
   ) {
     self.failure = failure
     self.isNetworkHealthy = isNetworkHealthy
@@ -29,6 +31,7 @@ public struct HomeState: Equatable {
     self.register = register
     self.contacts = contacts
     self.userSearch = userSearch
+    self.backup = backup
   }
 
   public var failure: String?
@@ -39,6 +42,7 @@ public struct HomeState: Equatable {
   public var register: RegisterState?
   public var contacts: ContactsState?
   public var userSearch: UserSearchState?
+  public var backup: BackupState?
 }
 
 public enum HomeAction: Equatable {
@@ -72,9 +76,12 @@ public enum HomeAction: Equatable {
   case didDismissUserSearch
   case contactsButtonTapped
   case didDismissContacts
+  case backupButtonTapped
+  case didDismissBackup
   case register(RegisterAction)
   case contacts(ContactsAction)
   case userSearch(UserSearchAction)
+  case backup(BackupAction)
 }
 
 public struct HomeEnvironment {
@@ -85,7 +92,8 @@ public struct HomeEnvironment {
     bgQueue: AnySchedulerOf<DispatchQueue>,
     register: @escaping () -> RegisterEnvironment,
     contacts: @escaping () -> ContactsEnvironment,
-    userSearch: @escaping () -> UserSearchEnvironment
+    userSearch: @escaping () -> UserSearchEnvironment,
+    backup: @escaping () -> BackupEnvironment
   ) {
     self.messenger = messenger
     self.dbManager = dbManager
@@ -94,6 +102,7 @@ public struct HomeEnvironment {
     self.register = register
     self.contacts = contacts
     self.userSearch = userSearch
+    self.backup = backup
   }
 
   public var messenger: Messenger
@@ -103,6 +112,7 @@ public struct HomeEnvironment {
   public var register: () -> RegisterEnvironment
   public var contacts: () -> ContactsEnvironment
   public var userSearch: () -> UserSearchEnvironment
+  public var backup: () -> BackupEnvironment
 }
 
 extension HomeEnvironment {
@@ -113,7 +123,8 @@ extension HomeEnvironment {
     bgQueue: .unimplemented,
     register: { .unimplemented },
     contacts: { .unimplemented },
-    userSearch: { .unimplemented }
+    userSearch: { .unimplemented },
+    backup: { .unimplemented }
   )
 }
 
@@ -267,7 +278,15 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     state.register = nil
     return Effect(value: .messenger(.start))
 
-  case .register(_), .contacts(_), .userSearch(_):
+  case .backupButtonTapped:
+    state.backup = BackupState()
+    return .none
+
+  case .didDismissBackup:
+    state.backup = nil
+    return .none
+
+  case .register(_), .contacts(_), .userSearch(_), .backup(_):
     return .none
   }
 }
@@ -291,4 +310,11 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
   id: .notNil(),
   action: /HomeAction.userSearch,
   environment: { $0.userSearch() }
+)
+.presenting(
+  backupReducer,
+  state: .keyPath(\.backup),
+  id: .notNil(),
+  action: /HomeAction.backup,
+  environment: { $0.backup() }
 )
