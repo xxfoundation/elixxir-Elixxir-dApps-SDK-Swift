@@ -33,7 +33,7 @@ extension MessengerRestoreBackup {
       let ndfData = try env.downloadNDF(env.ndfEnvironment)
       let password = env.generateSecret()
       try env.passwordStorage.save(password)
-      try env.fileManager.removeDirectory(storageDir)
+      try env.fileManager.removeItem(storageDir)
       try env.fileManager.createDirectory(storageDir)
       let report = try env.newCMixFromBackup(
         ndfJSON: String(data: ndfData, encoding: .utf8)!,

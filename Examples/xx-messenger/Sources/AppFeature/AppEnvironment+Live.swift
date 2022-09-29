@@ -1,4 +1,5 @@
 import AppCore
+import BackupFeature
 import ChatFeature
 import CheckContactAuthFeature
 import ConfirmRequestFeature
@@ -27,6 +28,7 @@ extension AppEnvironment {
       handleConfirm: .live(db: dbManager.getDB),
       handleReset: .live(db: dbManager.getDB)
     )
+    let backupStorage = BackupStorage.onDisk()
     let mainQueue = DispatchQueue.main.eraseToAnyScheduler()
     let bgQueue = DispatchQueue.global(qos: .background).eraseToAnyScheduler()
 
@@ -90,6 +92,7 @@ extension AppEnvironment {
         messenger: messenger,
         db: dbManager.getDB
       ),
+      backupStorage: backupStorage,
       log: .live(),
       mainQueue: mainQueue,
       bgQueue: bgQueue,
@@ -148,6 +151,15 @@ extension AppEnvironment {
               mainQueue: mainQueue,
               bgQueue: bgQueue,
               contact: { contactEnvironment }
+            )
+          },
+          backup: {
+            BackupEnvironment(
+              messenger: messenger,
+              db: dbManager.getDB,
+              backupStorage: backupStorage,
+              mainQueue: mainQueue,
+              bgQueue: bgQueue
             )
           }
         )

@@ -1,3 +1,4 @@
+import Foundation
 import XCTestDynamicOverlay
 import XXClient
 
@@ -33,24 +34,26 @@ extension MessengerStartBackup {
       let paramsData = try params.encode()
       let paramsString = String(data: paramsData, encoding: .utf8)!
       var didAddParams = false
-      func addParams() {
-        guard let backup = env.backup() else { return }
-        backup.addJSON(paramsString)
-        didAddParams = true
-      }
+      var semaphore: DispatchSemaphore? = .init(value: 0)
       let backup = try env.initializeBackup(
         e2eId: e2e.getId(),
         udId: ud.getId(),
         password: password,
         callback: .init { data in
+          semaphore?.wait()
           if !didAddParams {
-            addParams()
+            if let backup = env.backup() {
+              backup.addJSON(paramsString)
+              didAddParams = true
+            }
           } else {
             env.backupCallbacks.registered().handle(data)
           }
         }
       )
       env.backup.set(backup)
+      semaphore?.signal()
+      semaphore = nil
     }
   }
 }

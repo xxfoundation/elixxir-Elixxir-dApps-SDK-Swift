@@ -10,7 +10,7 @@ import XXClient
 
 final class AppFeatureTests: XCTestCase {
   func testStartWithoutMessengerCreated() {
-    var actions: [Action] = []
+    var actions: [Action]!
 
     let store = TestStore(
       initialState: AppState(),
@@ -34,24 +34,29 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.messenger.registerBackupCallback.run = { _ in
+      actions.append(.didRegisterBackupCallback)
+      return Cancellable {}
+    }
 
+    actions = []
     store.send(.start)
 
     store.receive(.set(\.$screen, .welcome(WelcomeState()))) {
       $0.screen = .welcome(WelcomeState())
     }
-
     XCTAssertNoDifference(actions, [
       .didMakeDB,
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didRegisterBackupCallback,
     ])
 
     store.send(.stop)
   }
 
   func testStartWithMessengerCreated() {
-    var actions: [Action] = []
+    var actions: [Action]!
 
     let store = TestStore(
       initialState: AppState(),
@@ -78,17 +83,22 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.messenger.registerBackupCallback.run = { _ in
+      actions.append(.didRegisterBackupCallback)
+      return Cancellable {}
+    }
 
+    actions = []
     store.send(.start)
 
     store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
     }
-
     XCTAssertNoDifference(actions, [
       .didMakeDB,
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
 
@@ -96,7 +106,7 @@ final class AppFeatureTests: XCTestCase {
   }
 
   func testWelcomeFinished() {
-    var actions: [Action] = []
+    var actions: [Action]!
 
     let store = TestStore(
       initialState: AppState(
@@ -122,7 +132,12 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.messenger.registerBackupCallback.run = { _ in
+      actions.append(.didRegisterBackupCallback)
+      return Cancellable {}
+    }
 
+    actions = []
     store.send(.welcome(.finished)) {
       $0.screen = .loading
     }
@@ -130,10 +145,10 @@ final class AppFeatureTests: XCTestCase {
     store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
     }
-
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
 
@@ -141,7 +156,7 @@ final class AppFeatureTests: XCTestCase {
   }
 
   func testRestoreFinished() {
-    var actions: [Action] = []
+    var actions: [Action]!
 
     let store = TestStore(
       initialState: AppState(
@@ -167,7 +182,12 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.messenger.registerBackupCallback.run = { _ in
+      actions.append(.didRegisterBackupCallback)
+      return Cancellable {}
+    }
 
+    actions = []
     store.send(.restore(.finished)) {
       $0.screen = .loading
     }
@@ -175,10 +195,10 @@ final class AppFeatureTests: XCTestCase {
     store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
     }
-
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
 
@@ -186,7 +206,7 @@ final class AppFeatureTests: XCTestCase {
   }
 
   func testHomeDidDeleteAccount() {
-    var actions: [Action] = []
+    var actions: [Action]!
 
     let store = TestStore(
       initialState: AppState(
@@ -209,7 +229,12 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.messenger.registerBackupCallback.run = { _ in
+      actions.append(.didRegisterBackupCallback)
+      return Cancellable {}
+    }
 
+    actions = []
     store.send(.home(.deleteAccount(.success))) {
       $0.screen = .loading
     }
@@ -217,10 +242,10 @@ final class AppFeatureTests: XCTestCase {
     store.receive(.set(\.$screen, .welcome(WelcomeState()))) {
       $0.screen = .welcome(WelcomeState())
     }
-
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didRegisterBackupCallback,
     ])
 
     store.send(.stop)
@@ -284,7 +309,7 @@ final class AppFeatureTests: XCTestCase {
     struct Failure: Error {}
     let error = Failure()
 
-    var actions: [Action] = []
+    var actions: [Action]!
 
     let store = TestStore(
       initialState: AppState(),
@@ -306,7 +331,12 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.messenger.registerBackupCallback.run = { _ in
+      actions.append(.didRegisterBackupCallback)
+      return Cancellable {}
+    }
 
+    actions = []
     store.send(.start)
 
     store.receive(.set(\.$screen, .failure(error.localizedDescription))) {
@@ -316,15 +346,17 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didRegisterBackupCallback,
     ])
 
     store.send(.stop)
   }
 
   func testStartHandlersAndListeners() {
-    var actions: [Action] = []
+    var actions: [Action]!
     var authHandlerOnError: [AuthCallbackHandler.OnError] = []
     var messageListenerOnError: [MessageListenerHandler.OnError] = []
+    var backupCallback: [UpdateBackupFunc] = []
 
     let store = TestStore(
       initialState: AppState(),
@@ -351,22 +383,33 @@ final class AppFeatureTests: XCTestCase {
         actions.append(.didCancelMessageListener)
       }
     }
+    store.environment.messenger.registerBackupCallback.run = { callback in
+      backupCallback.append(callback)
+      actions.append(.didRegisterBackupCallback)
+      return Cancellable {
+        actions.append(.didCancelBackupCallback)
+      }
+    }
     store.environment.log.run = { msg, _, _, _ in
       actions.append(.didLog(msg))
     }
+    store.environment.backupStorage.store = { data in
+      actions.append(.didStoreBackup(data))
+    }
 
+    actions = []
     store.send(.start)
 
     store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
     }
-
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didRegisterBackupCallback,
     ])
-    actions = []
 
+    actions = []
     store.send(.start) {
       $0.screen = .loading
     }
@@ -374,15 +417,16 @@ final class AppFeatureTests: XCTestCase {
     store.receive(.set(\.$screen, .home(HomeState()))) {
       $0.screen = .home(HomeState())
     }
-
     XCTAssertNoDifference(actions, [
       .didCancelAuthHandler,
       .didCancelMessageListener,
+      .didCancelBackupCallback,
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didRegisterBackupCallback,
     ])
-    actions = []
 
+    actions = []
     struct AuthError: Error {}
     let authError = AuthError()
     authHandlerOnError.first?(authError)
@@ -390,8 +434,8 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didLog(.error(authError as NSError))
     ])
-    actions = []
 
+    actions = []
     struct MessageError: Error {}
     let messageError = MessageError()
     messageListenerOnError.first?(messageError)
@@ -399,13 +443,22 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didLog(.error(messageError as NSError))
     ])
-    actions = []
 
+    actions = []
+    let backupData = "backup".data(using: .utf8)!
+    backupCallback.first?.handle(backupData)
+
+    XCTAssertNoDifference(actions, [
+      .didStoreBackup(backupData),
+    ])
+
+    actions = []
     store.send(.stop)
 
     XCTAssertNoDifference(actions, [
       .didCancelAuthHandler,
       .didCancelMessageListener,
+      .didCancelBackupCallback,
     ])
   }
 }
@@ -414,8 +467,11 @@ private enum Action: Equatable {
   case didMakeDB
   case didStartAuthHandler
   case didStartMessageListener
+  case didRegisterBackupCallback
   case didLoadMessenger
   case didCancelAuthHandler
   case didCancelMessageListener
+  case didCancelBackupCallback
   case didLog(Logger.Message)
+  case didStoreBackup(Data)
 }

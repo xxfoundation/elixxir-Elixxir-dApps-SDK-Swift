@@ -40,7 +40,7 @@ final class MessengerRestoreBackupTests: XCTestCase {
     env.generateSecret.run = { _ in password }
     env.passwordStorage.save = { caughtActions.append(.didSavePassword(password: $0)) }
     env.passwordStorage.load = { password }
-    env.fileManager.removeDirectory = { caughtActions.append(.didRemoveDirectory(path: $0)) }
+    env.fileManager.removeItem = { caughtActions.append(.didRemoveItem(path: $0)) }
     env.fileManager.createDirectory = { caughtActions.append(.didCreateDirectory(path: $0)) }
     env.newCMixFromBackup.run = {
       ndfJSON, storageDir, backupPassphrase, sessionPassword, backupFileContents in
@@ -114,7 +114,7 @@ final class MessengerRestoreBackupTests: XCTestCase {
       .didSavePassword(
         password: password
       ),
-      .didRemoveDirectory(
+      .didRemoveItem(
         path: env.storageDir
       ),
       .didCreateDirectory(
@@ -185,7 +185,7 @@ private enum CaughtAction: Equatable {
   case didSavePassword(
     password: Data
   )
-  case didRemoveDirectory(
+  case didRemoveItem(
     path: String
   )
   case didCreateDirectory(

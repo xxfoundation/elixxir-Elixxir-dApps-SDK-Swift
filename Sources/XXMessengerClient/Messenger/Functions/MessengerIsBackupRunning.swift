@@ -19,6 +19,6 @@ extension MessengerIsBackupRunning {
 
 extension MessengerIsBackupRunning {
   public static let unimplemented = MessengerIsBackupRunning(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }

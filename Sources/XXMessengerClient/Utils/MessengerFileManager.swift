@@ -3,8 +3,11 @@ import XCTestDynamicOverlay
 
 public struct MessengerFileManager {
   public var isDirectoryEmpty: (String) -> Bool
-  public var removeDirectory: (String) throws -> Void
+  public var removeItem: (String) throws -> Void
   public var createDirectory: (String) throws -> Void
+  public var saveFile: (String, Data) throws -> Void
+  public var loadFile: (String) throws -> Data?
+  public var modifiedTime: (String) throws -> Date?
 }
 
 extension MessengerFileManager {
@@ -16,7 +19,7 @@ extension MessengerFileManager {
         let contents = try? fileManager.contentsOfDirectory(atPath: path)
         return contents?.isEmpty ?? true
       },
-      removeDirectory: { path in
+      removeItem: { path in
         if fileManager.fileExists(atPath: path) {
           try fileManager.removeItem(atPath: path)
         }
@@ -26,6 +29,16 @@ extension MessengerFileManager {
           atPath: path,
           withIntermediateDirectories: true
         )
+      },
+      saveFile: { path, data in
+        try data.write(to: URL(fileURLWithPath: path))
+      },
+      loadFile: { path in
+        try Data(contentsOf: URL(fileURLWithPath: path))
+      },
+      modifiedTime: { path in
+        let attributes = try fileManager.attributesOfItem(atPath: path)
+        return attributes[.modificationDate] as? Date
       }
     )
   }
@@ -34,7 +47,10 @@ extension MessengerFileManager {
 extension MessengerFileManager {
   public static let unimplemented = MessengerFileManager(
     isDirectoryEmpty: XCTUnimplemented("\(Self.self).isDirectoryEmpty", placeholder: false),
-    removeDirectory: XCTUnimplemented("\(Self.self).removeDirectory"),
-    createDirectory: XCTUnimplemented("\(Self.self).createDirectory")
+    removeItem: XCTUnimplemented("\(Self.self).removeItem"),
+    createDirectory: XCTUnimplemented("\(Self.self).createDirectory"),
+    saveFile: XCTUnimplemented("\(Self.self).saveFile"),
+    loadFile: XCTUnimplemented("\(Self.self).loadFile"),
+    modifiedTime: XCTUnimplemented("\(Self.self).modifiedTime")
   )
 }

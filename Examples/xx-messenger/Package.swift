@@ -15,6 +15,7 @@ let package = Package(
   products: [
     .library(name: "AppCore", targets: ["AppCore"]),
     .library(name: "AppFeature", targets: ["AppFeature"]),
+    .library(name: "BackupFeature", targets: ["BackupFeature"]),
     .library(name: "ChatFeature", targets: ["ChatFeature"]),
     .library(name: "CheckContactAuthFeature", targets: ["CheckContactAuthFeature"]),
     .library(name: "ConfirmRequestFeature", targets: ["ConfirmRequestFeature"]),
@@ -83,6 +84,7 @@ let package = Package(
       name: "AppFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "BackupFeature"),
         .target(name: "ChatFeature"),
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
@@ -109,6 +111,23 @@ let package = Package(
       dependencies: [
         .target(name: "AppFeature"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "BackupFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "BackupFeatureTests",
+      dependencies: [
+        .target(name: "BackupFeature"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -215,6 +234,7 @@ let package = Package(
       name: "HomeFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "BackupFeature"),
         .target(name: "ContactsFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "UserSearchFeature"),
