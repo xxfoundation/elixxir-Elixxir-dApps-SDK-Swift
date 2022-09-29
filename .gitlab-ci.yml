@@ -13,26 +13,10 @@ before_script:
 stages:
   - test
 
-test-package-macos:
-  stage: test
-  tags: 
-    - ios
-  script:
-    - ./run-tests.sh macos
-  retry: 1
-
 test-package-ios:
   stage: test
   tags: 
     - ios
   script:
+    - ./xcode-remove-caches.sh
     - ./run-tests.sh ios
-  retry: 1
-
-test-examples-ios:
-  stage: test
-  tags: 
-    - ios
-  script:
-    - ./run-tests.sh examples-ios
-  retry: 1
