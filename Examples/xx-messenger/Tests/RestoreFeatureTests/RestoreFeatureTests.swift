@@ -85,15 +85,22 @@ final class RestoreFeatureTests: XCTestCase {
     ]
     let restoreResult = MessengerRestoreBackup.Result(
       restoredParams: BackupParams(username: "restored-username"),
-      restoredContacts: []
+      restoredContacts: [
+        "contact-1-id".data(using: .utf8)!,
+        "contact-2-id".data(using: .utf8)!,
+        "contact-3-id".data(using: .utf8)!,
+      ]
     )
+    let lookedUpContacts = [XXClient.Contact.stub(1), .stub(2), .stub(3)]
     let now = Date()
     let contactId = "contact-id".data(using: .utf8)!
+
 
     var udFacts: [Fact] = []
     var didRestoreWithData: [Data] = []
     var didRestoreWithPassphrase: [String] = []
     var didSaveContact: [XXModels.Contact] = []
+    var didLookupContactIds: [[Data]] = []
 
     let store = TestStore(
       initialState: RestoreState(
@@ -126,6 +133,14 @@ final class RestoreFeatureTests: XCTestCase {
       ud.getFacts.run = { udFacts }
       return ud
     }
+    store.environment.messenger.lookupContacts.run = { contactIds in
+      didLookupContactIds.append(contactIds)
+      return .init(
+        contacts: lookedUpContacts,
+        failedIds: [],
+        errors: []
+      )
+    }
     store.environment.db.run = {
       var db: Database = .unimplemented
       db.saveContact.run = { contact in
@@ -145,13 +160,43 @@ final class RestoreFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(didRestoreWithData, [backupData])
     XCTAssertNoDifference(didRestoreWithPassphrase, [backupPassphrase])
-    XCTAssertNoDifference(didSaveContact, [Contact(
-      id: contactId,
-      username: restoreResult.restoredParams.username,
-      email: restoredFacts.get(.email)?.value,
-      phone: restoredFacts.get(.phone)?.value,
-      createdAt: now
-    )])
+    XCTAssertNoDifference(didLookupContactIds, [restoreResult.restoredContacts])
+    XCTAssertNoDifference(didSaveContact, [
+      Contact(
+        id: contactId,
+        username: restoreResult.restoredParams.username,
+        email: restoredFacts.get(.email)?.value,
+        phone: restoredFacts.get(.phone)?.value,
+        createdAt: now
+      ),
+      Contact(
+        id: "contact-\(1)-id".data(using: .utf8)!,
+        marshaled: "contact-\(1)-data".data(using: .utf8)!,
+        username: "contact-\(1)-username",
+        email: "contact-\(1)-email",
+        phone: "contact-\(1)-phone",
+        authStatus: .friend,
+        createdAt: now
+      ),
+      Contact(
+        id: "contact-\(2)-id".data(using: .utf8)!,
+        marshaled: "contact-\(2)-data".data(using: .utf8)!,
+        username: "contact-\(2)-username",
+        email: "contact-\(2)-email",
+        phone: "contact-\(2)-phone",
+        authStatus: .friend,
+        createdAt: now
+      ),
+      Contact(
+        id: "contact-\(3)-id".data(using: .utf8)!,
+        marshaled: "contact-\(3)-data".data(using: .utf8)!,
+        username: "contact-\(3)-username",
+        email: "contact-\(3)-email",
+        phone: "contact-\(3)-phone",
+        authStatus: .friend,
+        createdAt: now
+      ),
+    ])
 
     store.receive(.finished) {
       $0.isRestoring = false
@@ -195,9 +240,28 @@ final class RestoreFeatureTests: XCTestCase {
 
     XCTAssertEqual(didDestroyMessenger, 1)
 
-    store.receive(.failed(failure as NSError)) {
+    store.receive(.failed([failure as NSError])) {
       $0.isRestoring = false
-      $0.restoreFailure = failure.localizedDescription
+      $0.restoreFailures = [failure.localizedDescription]
     }
+  }
+}
+
+private extension XXClient.Contact {
+  static func stub(_ id: Int) -> XXClient.Contact {
+    var contact = XXClient.Contact.unimplemented(
+      "contact-\(id)-data".data(using: .utf8)!
+    )
+    contact.getIdFromContact.run = { _ in
+      "contact-\(id)-id".data(using: .utf8)!
+    }
+    contact.getFactsFromContact.run = { _ in
+      [
+        Fact(type: .username, value: "contact-\(id)-username"),
+        Fact(type: .email, value: "contact-\(id)-email"),
+        Fact(type: .phone, value: "contact-\(id)-phone"),
+      ]
+    }
+    return contact
   }
 }
