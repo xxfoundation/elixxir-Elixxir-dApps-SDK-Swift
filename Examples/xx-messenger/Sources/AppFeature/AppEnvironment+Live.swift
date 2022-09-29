@@ -154,7 +154,13 @@ extension AppEnvironment {
             )
           },
           backup: {
-            BackupEnvironment()
+            BackupEnvironment(
+              messenger: messenger,
+              db: dbManager.getDB,
+              backupStorage: backupStorage,
+              mainQueue: mainQueue,
+              bgQueue: bgQueue
+            )
           }
         )
       }

@@ -117,8 +117,10 @@ let package = Package(
     .target(
       name: "BackupFeature",
       dependencies: [
+        .target(name: "AppCore"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
       ],
       swiftSettings: swiftSettings
     ),
