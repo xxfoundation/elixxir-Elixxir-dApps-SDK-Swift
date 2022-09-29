@@ -56,6 +56,7 @@ final class HomeFeatureTests: XCTestCase {
     var messengerDidConnect = 0
     var messengerDidListenForMessages = 0
     var messengerDidLogIn = 0
+    var messengerDidResumeBackup = 0
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
@@ -67,6 +68,8 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
+    store.environment.messenger.isBackupRunning.run = { false }
+    store.environment.messenger.resumeBackup.run = { messengerDidResumeBackup += 1 }
     store.environment.messenger.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.addHealthCallback.run = { _ in Cancellable {} }
@@ -83,6 +86,7 @@ final class HomeFeatureTests: XCTestCase {
     XCTAssertNoDifference(messengerDidConnect, 1)
     XCTAssertNoDifference(messengerDidListenForMessages, 1)
     XCTAssertNoDifference(messengerDidLogIn, 1)
+    XCTAssertNoDifference(messengerDidResumeBackup, 1)
 
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartRegistered))
@@ -111,6 +115,7 @@ final class HomeFeatureTests: XCTestCase {
     store.environment.messenger.isLoggedIn.run = { false }
     store.environment.messenger.isRegistered.run = { true }
     store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
+    store.environment.messenger.isBackupRunning.run = { true }
     store.environment.messenger.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.addHealthCallback.run = { _ in Cancellable {} }

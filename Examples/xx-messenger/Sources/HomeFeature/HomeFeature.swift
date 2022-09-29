@@ -156,6 +156,10 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
             try env.messenger.logIn()
           }
 
+          if !env.messenger.isBackupRunning() {
+            try? env.messenger.resumeBackup()
+          }
+
           return .success(.messenger(.didStartRegistered))
         } catch {
           return .success(.messenger(.failure(error as NSError)))
