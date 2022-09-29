@@ -91,15 +91,14 @@ final class RestoreFeatureTests: XCTestCase {
         "contact-3-id".data(using: .utf8)!,
       ]
     )
-    let lookedUpContacts = [XXClient.Contact.stub(1), .stub(2), .stub(3)]
     let now = Date()
     let contactId = "contact-id".data(using: .utf8)!
 
     var udFacts: [Fact] = []
     var didRestoreWithData: [Data] = []
     var didRestoreWithPassphrase: [String] = []
+    var didFetchContacts: [XXModels.Contact.Query] = []
     var didSaveContact: [XXModels.Contact] = []
-    var didLookupContactIds: [[Data]] = []
 
     let store = TestStore(
       initialState: RestoreState(
@@ -132,16 +131,12 @@ final class RestoreFeatureTests: XCTestCase {
       ud.getFacts.run = { udFacts }
       return ud
     }
-    store.environment.messenger.lookupContacts.run = { contactIds in
-      didLookupContactIds.append(contactIds)
-      return .init(
-        contacts: lookedUpContacts,
-        failedIds: [],
-        errors: []
-      )
-    }
     store.environment.db.run = {
       var db: Database = .unimplemented
+      db.fetchContacts.run = { query in
+        didFetchContacts.append(query)
+        return []
+      }
       db.saveContact.run = { contact in
         didSaveContact.append(contact)
         return contact
@@ -159,7 +154,11 @@ final class RestoreFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(didRestoreWithData, [backupData])
     XCTAssertNoDifference(didRestoreWithPassphrase, [backupPassphrase])
-    XCTAssertNoDifference(didLookupContactIds, [restoreResult.restoredContacts])
+    XCTAssertNoDifference(didFetchContacts, [
+      .init(id: [restoreResult.restoredContacts[0]]),
+      .init(id: [restoreResult.restoredContacts[1]]),
+      .init(id: [restoreResult.restoredContacts[2]]),
+    ])
     XCTAssertNoDifference(didSaveContact, [
       Contact(
         id: contactId,
@@ -169,115 +168,21 @@ final class RestoreFeatureTests: XCTestCase {
         createdAt: now
       ),
       Contact(
-        id: "contact-\(1)-id".data(using: .utf8)!,
-        marshaled: "contact-\(1)-data".data(using: .utf8)!,
-        username: "contact-\(1)-username",
-        email: "contact-\(1)-email",
-        phone: "contact-\(1)-phone",
-        authStatus: .friend,
+        id: restoreResult.restoredContacts[0],
         createdAt: now
       ),
       Contact(
-        id: "contact-\(2)-id".data(using: .utf8)!,
-        marshaled: "contact-\(2)-data".data(using: .utf8)!,
-        username: "contact-\(2)-username",
-        email: "contact-\(2)-email",
-        phone: "contact-\(2)-phone",
-        authStatus: .friend,
+        id: restoreResult.restoredContacts[1],
         createdAt: now
       ),
       Contact(
-        id: "contact-\(3)-id".data(using: .utf8)!,
-        marshaled: "contact-\(3)-data".data(using: .utf8)!,
-        username: "contact-\(3)-username",
-        email: "contact-\(3)-email",
-        phone: "contact-\(3)-phone",
-        authStatus: .friend,
+        id: restoreResult.restoredContacts[2],
         createdAt: now
       ),
     ])
 
     store.receive(.finished) {
       $0.isRestoring = false
-    }
-  }
-
-  func testRestoreLookupFailure() {
-    struct FailureA: Error {}
-    struct FailureB: Error {}
-    struct DestroyFailure: Error {}
-
-    let restoreResult = MessengerRestoreBackup.Result(
-      restoredParams: BackupParams(username: "restored-username"),
-      restoredContacts: [
-        "contact-1-id".data(using: .utf8)!,
-        "contact-2-id".data(using: .utf8)!,
-        "contact-3-id".data(using: .utf8)!,
-      ]
-    )
-    let now = Date()
-    let contactId = "contact-id".data(using: .utf8)!
-
-    let store = TestStore(
-      initialState: RestoreState(
-        file: .init(name: "name", data: "data".data(using: .utf8)!)
-      ),
-      reducer: restoreReducer,
-      environment: .unimplemented
-    )
-
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.now = { now }
-    store.environment.messenger.restoreBackup.run = { _, _ in restoreResult }
-    store.environment.messenger.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getContact.run = {
-        var contact: XXClient.Contact = .unimplemented(Data())
-        contact.getIdFromContact.run = { _ in contactId }
-        return contact
-      }
-      return e2e
-    }
-    store.environment.messenger.ud.get = {
-      var ud: UserDiscovery = .unimplemented
-      ud.getFacts.run = { [] }
-      return ud
-    }
-    store.environment.messenger.lookupContacts.run = { contactIds in
-      .init(
-        contacts: [],
-        failedIds: [],
-        errors: [
-          FailureA() as NSError,
-          FailureB() as NSError,
-        ]
-      )
-    }
-    store.environment.messenger.destroy.run = {
-      throw DestroyFailure()
-    }
-    store.environment.db.run = {
-      var db: Database = .unimplemented
-      db.saveContact.run = { $0 }
-      return db
-    }
-
-    store.send(.restoreTapped) {
-      $0.isRestoring = true
-    }
-
-    store.receive(.failed([
-      FailureA() as NSError,
-      FailureB() as NSError,
-      DestroyFailure() as NSError
-    ])) {
-      $0.isRestoring = false
-      $0.restoreFailures = [
-        FailureA().localizedDescription,
-        FailureB().localizedDescription,
-        DestroyFailure().localizedDescription,
-      ]
     }
   }
 
@@ -323,24 +228,5 @@ final class RestoreFeatureTests: XCTestCase {
         Failure.destroy.localizedDescription,
       ]
     }
-  }
-}
-
-private extension XXClient.Contact {
-  static func stub(_ id: Int) -> XXClient.Contact {
-    var contact = XXClient.Contact.unimplemented(
-      "contact-\(id)-data".data(using: .utf8)!
-    )
-    contact.getIdFromContact.run = { _ in
-      "contact-\(id)-id".data(using: .utf8)!
-    }
-    contact.getFactsFromContact.run = { _ in
-      [
-        Fact(type: .username, value: "contact-\(id)-username"),
-        Fact(type: .email, value: "contact-\(id)-email"),
-        Fact(type: .phone, value: "contact-\(id)-phone"),
-      ]
-    }
-    return contact
   }
 }

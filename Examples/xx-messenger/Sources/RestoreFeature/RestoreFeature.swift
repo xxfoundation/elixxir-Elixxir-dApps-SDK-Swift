@@ -140,29 +140,13 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
           phone: facts.get(.phone)?.value,
           createdAt: env.now()
         ))
-        let lookupResult = try env.messenger.lookupContacts.callAsFunction(
-          ids: result.restoredContacts
-        )
-        try lookupResult.contacts.forEach { contact in
-          let facts = try contact.getFacts()
-          try env.db().saveContact(XXModels.Contact(
-            id: try contact.getId(),
-            marshaled: contact.data,
-            username: facts.get(.username)?.value,
-            email: facts.get(.email)?.value,
-            phone: facts.get(.phone)?.value,
-            authStatus: .friend,
-            createdAt: env.now()
-          ))
-        }
-        guard lookupResult.errors.isEmpty else {
-          var errors = lookupResult.errors
-          do {
-            try env.messenger.destroy()
-          } catch {
-            errors.append(error as NSError)
+        try result.restoredContacts.forEach { contactId in
+          if try env.db().fetchContacts(.init(id: [contactId])).isEmpty {
+            try env.db().saveContact(Contact(
+              id: contactId,
+              createdAt: env.now()
+            ))
           }
-          return .success(.failed(errors))
         }
         return .success(.finished)
       } catch {
