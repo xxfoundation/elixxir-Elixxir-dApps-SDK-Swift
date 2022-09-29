@@ -9,6 +9,10 @@ final class BackupFeatureTests: XCTestCase {
   func testTask() {
     var isBackupRunning: [Bool] = [false]
     var observers: [UUID: BackupStorage.Observer] = [:]
+    let storedBackup = BackupStorage.Backup(
+      date: .init(timeIntervalSince1970: 1),
+      data: "stored".data(using: .utf8)!
+    )
 
     let store = TestStore(
       initialState: BackupState(),
@@ -20,6 +24,9 @@ final class BackupFeatureTests: XCTestCase {
     store.environment.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
+    store.environment.backupStorage.stored = {
+      storedBackup
+    }
     store.environment.backupStorage.observe = {
       let id = UUID()
       observers[id] = $0
@@ -30,14 +37,18 @@ final class BackupFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(observers.count, 1)
 
-    let backup = BackupStorage.Backup(
-      date: .init(timeIntervalSince1970: 1),
-      data: "backup".data(using: .utf8)!
-    )
-    observers.values.forEach { $0(backup) }
+    store.receive(.backupUpdated(storedBackup)) {
+      $0.backup = storedBackup
+    }
 
-    store.receive(.backupUpdated(backup)) {
-      $0.backup = backup
+    let observedBackup = BackupStorage.Backup(
+      date: .init(timeIntervalSince1970: 2),
+      data: "observed".data(using: .utf8)!
+    )
+    observers.values.forEach { $0(observedBackup) }
+
+    store.receive(.backupUpdated(observedBackup)) {
+      $0.backup = observedBackup
     }
 
     observers.values.forEach { $0(nil) }

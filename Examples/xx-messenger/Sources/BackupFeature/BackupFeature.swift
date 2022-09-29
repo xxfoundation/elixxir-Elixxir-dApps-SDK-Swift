@@ -103,6 +103,7 @@ public let backupReducer = Reducer<BackupState, BackupAction, BackupEnvironment>
   case .task:
     state.isRunning = env.messenger.isBackupRunning()
     return Effect.run { subscriber in
+      subscriber.send(.backupUpdated(env.backupStorage.stored()))
       let cancellable = env.backupStorage.observe { backup in
         subscriber.send(.backupUpdated(backup))
       }
