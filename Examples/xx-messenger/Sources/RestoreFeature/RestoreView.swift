@@ -126,6 +126,7 @@ public struct RestoreView: View {
     } header: {
       Text("Restore")
     }
+    .disabled(viewStore.isRestoring)
 
     if !viewStore.restoreFailures.isEmpty {
       Section {
@@ -162,7 +163,7 @@ public struct RestoreView_Previews: PreviewProvider {
         focusedField: nil,
         isImportingFile: false,
         passphrase: "",
-        isRestoring: false
+        isRestoring: true
       ),
       reducer: .empty,
       environment: ()
