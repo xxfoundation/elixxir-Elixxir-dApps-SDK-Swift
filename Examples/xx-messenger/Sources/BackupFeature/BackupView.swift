@@ -43,11 +43,11 @@ public struct BackupView: View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
         Group {
-          if !viewStore.isRunning {
-            newBackupSection(viewStore)
-          }
           if viewStore.isRunning || viewStore.backup != nil {
             backupSection(viewStore)
+          }
+          if !viewStore.isRunning {
+            newBackupSection(viewStore)
           }
         }
         .disabled(viewStore.isLoading)
