@@ -95,7 +95,6 @@ final class RestoreFeatureTests: XCTestCase {
     let now = Date()
     let contactId = "contact-id".data(using: .utf8)!
 
-
     var udFacts: [Fact] = []
     var didRestoreWithData: [Data] = []
     var didRestoreWithPassphrase: [String] = []
@@ -203,6 +202,85 @@ final class RestoreFeatureTests: XCTestCase {
     }
   }
 
+  func testRestoreLookupFailure() {
+    struct FailureA: Error {}
+    struct FailureB: Error {}
+    struct DestroyFailure: Error {}
+
+    let restoreResult = MessengerRestoreBackup.Result(
+      restoredParams: BackupParams(username: "restored-username"),
+      restoredContacts: [
+        "contact-1-id".data(using: .utf8)!,
+        "contact-2-id".data(using: .utf8)!,
+        "contact-3-id".data(using: .utf8)!,
+      ]
+    )
+    let now = Date()
+    let contactId = "contact-id".data(using: .utf8)!
+
+    let store = TestStore(
+      initialState: RestoreState(
+        file: .init(name: "name", data: "data".data(using: .utf8)!)
+      ),
+      reducer: restoreReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.bgQueue = .immediate
+    store.environment.mainQueue = .immediate
+    store.environment.now = { now }
+    store.environment.messenger.restoreBackup.run = { _, _ in restoreResult }
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in contactId }
+        return contact
+      }
+      return e2e
+    }
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.getFacts.run = { [] }
+      return ud
+    }
+    store.environment.messenger.lookupContacts.run = { contactIds in
+      .init(
+        contacts: [],
+        failedIds: [],
+        errors: [
+          FailureA() as NSError,
+          FailureB() as NSError,
+        ]
+      )
+    }
+    store.environment.messenger.destroy.run = {
+      throw DestroyFailure()
+    }
+    store.environment.db.run = {
+      var db: Database = .unimplemented
+      db.saveContact.run = { $0 }
+      return db
+    }
+
+    store.send(.restoreTapped) {
+      $0.isRestoring = true
+    }
+
+    store.receive(.failed([
+      FailureA() as NSError,
+      FailureB() as NSError,
+      DestroyFailure() as NSError
+    ])) {
+      $0.isRestoring = false
+      $0.restoreFailures = [
+        FailureA().localizedDescription,
+        FailureB().localizedDescription,
+        DestroyFailure().localizedDescription,
+      ]
+    }
+  }
+
   func testRestoreWithoutFile() {
     let store = TestStore(
       initialState: RestoreState(
@@ -216,10 +294,10 @@ final class RestoreFeatureTests: XCTestCase {
   }
 
   func testRestoreFailure() {
-    struct Failure: Error {}
-    let failure = Failure()
-
-    var didDestroyMessenger = 0
+    enum Failure: Error {
+      case restore
+      case destroy
+    }
 
     let store = TestStore(
       initialState: RestoreState(
@@ -231,18 +309,19 @@ final class RestoreFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.restoreBackup.run = { _, _ in throw failure }
-    store.environment.messenger.destroy.run = { didDestroyMessenger += 1 }
+    store.environment.messenger.restoreBackup.run = { _, _ in throw Failure.restore }
+    store.environment.messenger.destroy.run = { throw Failure.destroy }
 
     store.send(.restoreTapped) {
       $0.isRestoring = true
     }
 
-    XCTAssertEqual(didDestroyMessenger, 1)
-
-    store.receive(.failed([failure as NSError])) {
+    store.receive(.failed([Failure.restore as NSError, Failure.destroy as NSError])) {
       $0.isRestoring = false
-      $0.restoreFailures = [failure.localizedDescription]
+      $0.restoreFailures = [
+        Failure.restore.localizedDescription,
+        Failure.destroy.localizedDescription,
+      ]
     }
   }
 }

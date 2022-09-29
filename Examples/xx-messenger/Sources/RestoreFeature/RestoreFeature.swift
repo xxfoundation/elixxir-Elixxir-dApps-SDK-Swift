@@ -156,7 +156,13 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
           ))
         }
         guard lookupResult.errors.isEmpty else {
-          return .success(.failed(lookupResult.errors))
+          var errors = lookupResult.errors
+          do {
+            try env.messenger.destroy()
+          } catch {
+            errors.append(error as NSError)
+          }
+          return .success(.failed(errors))
         }
         return .success(.finished)
       } catch {
