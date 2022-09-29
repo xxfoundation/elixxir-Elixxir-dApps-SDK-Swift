@@ -9,7 +9,7 @@ final class MessengerDestroyTests: XCTestCase {
     var hasRunningProcesses: [Bool] = [true, true, false]
     var didStopNetworkFollower = 0
     var didSleep: [TimeInterval] = []
-    var didRemoveDirectory: [String] = []
+    var didRemoveItem: [String] = []
     var didSetUD: [UserDiscovery?] = []
     var didSetE2E: [E2E?] = []
     var didSetCMix: [CMix?] = []
@@ -30,7 +30,7 @@ final class MessengerDestroyTests: XCTestCase {
     env.e2e.set = { didSetE2E.append($0) }
     env.cMix.set = { didSetCMix.append($0) }
     env.isListeningForMessages.set = { didSetIsListeningForMessages.append($0) }
-    env.fileManager.removeDirectory = { didRemoveDirectory.append($0) }
+    env.fileManager.removeItem = { didRemoveItem.append($0) }
     env.passwordStorage.remove = { didRemovePassword += 1 }
     let destroy: MessengerDestroy = .live(env)
 
@@ -42,7 +42,7 @@ final class MessengerDestroyTests: XCTestCase {
     XCTAssertNoDifference(didSetE2E.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetCMix.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetIsListeningForMessages, [false])
-    XCTAssertNoDifference(didRemoveDirectory, [storageDir])
+    XCTAssertNoDifference(didRemoveItem, [storageDir])
     XCTAssertNoDifference(didRemovePassword, 1)
   }
 
@@ -78,7 +78,7 @@ final class MessengerDestroyTests: XCTestCase {
     env.e2e.set = { didSetE2E.append($0) }
     env.cMix.set = { didSetCMix.append($0) }
     env.isListeningForMessages.set = { didSetIsListeningForMessages.append($0) }
-    env.fileManager.removeDirectory = { _ in throw error }
+    env.fileManager.removeItem = { _ in throw error }
     let destroy: MessengerDestroy = .live(env)
 
     XCTAssertThrowsError(try destroy()) { err in
@@ -94,7 +94,7 @@ final class MessengerDestroyTests: XCTestCase {
     struct Error: Swift.Error, Equatable {}
     let error = Error()
     let storageDir = "test-storage-dir"
-    var didRemoveDirectory: [String] = []
+    var didRemoveItem: [String] = []
     var didSetUD: [UserDiscovery?] = []
     var didSetE2E: [E2E?] = []
     var didSetCMix: [CMix?] = []
@@ -107,7 +107,7 @@ final class MessengerDestroyTests: XCTestCase {
     env.cMix.set = { didSetCMix.append($0) }
     env.isListeningForMessages.set = { didSetIsListeningForMessages.append($0) }
     env.storageDir = storageDir
-    env.fileManager.removeDirectory = { didRemoveDirectory.append($0) }
+    env.fileManager.removeItem = { didRemoveItem.append($0) }
     env.passwordStorage.remove = { throw error }
     let destroy: MessengerDestroy = .live(env)
 
@@ -118,6 +118,6 @@ final class MessengerDestroyTests: XCTestCase {
     XCTAssertNoDifference(didSetE2E.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetCMix.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetIsListeningForMessages, [false])
-    XCTAssertNoDifference(didRemoveDirectory, [storageDir])
+    XCTAssertNoDifference(didRemoveItem, [storageDir])
   }
 }

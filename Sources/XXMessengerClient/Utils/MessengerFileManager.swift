@@ -3,7 +3,7 @@ import XCTestDynamicOverlay
 
 public struct MessengerFileManager {
   public var isDirectoryEmpty: (String) -> Bool
-  public var removeDirectory: (String) throws -> Void
+  public var removeItem: (String) throws -> Void
   public var createDirectory: (String) throws -> Void
 }
 
@@ -16,7 +16,7 @@ extension MessengerFileManager {
         let contents = try? fileManager.contentsOfDirectory(atPath: path)
         return contents?.isEmpty ?? true
       },
-      removeDirectory: { path in
+      removeItem: { path in
         if fileManager.fileExists(atPath: path) {
           try fileManager.removeItem(atPath: path)
         }
@@ -34,7 +34,7 @@ extension MessengerFileManager {
 extension MessengerFileManager {
   public static let unimplemented = MessengerFileManager(
     isDirectoryEmpty: XCTUnimplemented("\(Self.self).isDirectoryEmpty", placeholder: false),
-    removeDirectory: XCTUnimplemented("\(Self.self).removeDirectory"),
+    removeItem: XCTUnimplemented("\(Self.self).removeItem"),
     createDirectory: XCTUnimplemented("\(Self.self).createDirectory")
   )
 }
