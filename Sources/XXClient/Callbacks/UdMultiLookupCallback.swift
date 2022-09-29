@@ -49,21 +49,21 @@ extension UdMultiLookupCallback {
         if let err = err {
           result.errors.append(err as NSError)
         }
-        if let contactListJSON = contactListJSON {
-          do {
-            result.contacts = try JSONDecoder()
-              .decode([Data].self, from: contactListJSON)
-              .map { Contact.live($0) }
-          } catch {
-            result.errors.append(error as NSError)
+        do {
+          if let data = contactListJSON,
+             let contactListJSON = try JSONDecoder().decode([Data]?.self, from: data) {
+            result.contacts = contactListJSON.map { Contact.live($0) }
           }
+        } catch {
+          result.errors.append(error as NSError)
         }
-        if let failedIDs = failedIDs {
-          do {
-            result.failedIds = try JSONDecoder().decode([Data].self, from: failedIDs)
-          } catch {
-            result.errors.append(error as NSError)
+        do {
+          if let data = failedIDs,
+             let failedIDs = try JSONDecoder().decode([Data]?.self, from: data) {
+            result.failedIds = failedIDs
           }
+        } catch {
+            result.errors.append(error as NSError)
         }
         callback.handle(result)
       }
