@@ -97,7 +97,7 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
           env.log(.error(error as NSError))
         }))
         cancellables.append(env.messenger.registerBackupCallback(.init { data in
-          env.backupStorage.store(data)
+          try? env.backupStorage.store(data)
         }))
 
         let isLoaded = env.messenger.isLoaded()

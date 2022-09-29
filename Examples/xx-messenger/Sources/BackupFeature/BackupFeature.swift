@@ -166,7 +166,7 @@ public let backupReducer = Reducer<BackupState, BackupAction, BackupEnvironment>
     return Effect.run { subscriber in
       do {
         try env.messenger.stopBackup()
-        env.backupStorage.remove()
+        try env.backupStorage.remove()
         subscriber.send(.didStop(failure: nil))
       } catch {
         subscriber.send(.didStop(failure: error as NSError))

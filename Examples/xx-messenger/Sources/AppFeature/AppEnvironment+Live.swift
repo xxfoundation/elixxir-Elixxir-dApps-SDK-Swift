@@ -28,7 +28,7 @@ extension AppEnvironment {
       handleConfirm: .live(db: dbManager.getDB),
       handleReset: .live(db: dbManager.getDB)
     )
-    let backupStorage = BackupStorage.live(now: Date.init)
+    let backupStorage = BackupStorage.onDisk()
     let mainQueue = DispatchQueue.main.eraseToAnyScheduler()
     let bgQueue = DispatchQueue.global(qos: .background).eraseToAnyScheduler()
 
