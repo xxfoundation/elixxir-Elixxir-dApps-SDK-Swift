@@ -18,28 +18,39 @@ public struct BackupStorage {
 
   public typealias Observer = (Backup?) -> Void
 
-  public var store: (Data) -> Void
+  public var store: (Data) throws -> Void
   public var observe: (@escaping Observer) -> Cancellable
-  public var remove: () -> Void
+  public var remove: () throws -> Void
 }
 
 extension BackupStorage {
-  public static func live(
-    now: @escaping () -> Date
+  public static func onDisk(
+    now: @escaping () -> Date = Date.init,
+    fileManager: MessengerFileManager = .live(),
+    path: String = FileManager.default
+      .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+      .first!
+      .appendingPathComponent("backup.xxm")
+      .path
   ) -> BackupStorage {
     var observers: [UUID: Observer] = [:]
     var backup: Backup?
     func notifyObservers() {
       observers.values.forEach { $0(backup) }
     }
-
+    if let fileData = try? fileManager.loadFile(path),
+       let fileDate = try? fileManager.modifiedTime(path) {
+      backup = Backup(date: fileDate, data: fileData)
+    }
     return BackupStorage(
       store: { data in
-        backup = Backup(
+        let newBackup = Backup(
           date: now(),
           data: data
         )
+        backup = newBackup
         notifyObservers()
+        try fileManager.saveFile(path, newBackup.data)
       },
       observe: { observer in
         let id = UUID()
@@ -52,6 +63,7 @@ extension BackupStorage {
       remove: {
         backup = nil
         notifyObservers()
+        try fileManager.removeItem(path)
       }
     )
   }
