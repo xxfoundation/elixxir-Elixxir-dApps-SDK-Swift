@@ -32,6 +32,10 @@ final class BackupStorageTests: XCTestCase {
       path: path
     )
 
+    XCTAssertNoDifference(
+      storage.stored(),
+      BackupStorage.Backup(date: fileDate, data: fileData)
+    )
     XCTAssertNoDifference(actions, [
       .didLoadFile(path),
       .didGetModifiedTime(path),
@@ -42,43 +46,46 @@ final class BackupStorageTests: XCTestCase {
       actions.append(.didObserve("A", backup))
     }
 
-    XCTAssertNoDifference(actions, [
-      .didObserve("A", .init(date: fileDate, data: fileData))
-    ])
+    XCTAssertNoDifference(actions, [])
+    XCTAssertNoDifference(
+      storage.stored(),
+      BackupStorage.Backup(date: fileDate, data: fileData)
+    )
 
     actions = []
     now = .init(1)
     let data1 = "data-1".data(using: .utf8)!
     try storage.store(data1)
 
+    XCTAssertNoDifference(
+      storage.stored(),
+      BackupStorage.Backup(date: .init(1), data: data1)
+    )
     XCTAssertNoDifference(actions, [
       .didObserve("A", .init(date: .init(1), data: data1)),
       .didSaveFile(path, data1),
     ])
 
     actions = []
-    now = .init(2)
     let observerB = storage.observe { backup in
       actions.append(.didObserve("B", backup))
     }
 
-    XCTAssertNoDifference(actions, [
-      .didObserve("B", .init(date: .init(1), data: data1))
-    ])
+    XCTAssertNoDifference(actions, [])
 
     actions = []
-    now = .init(3)
+    now = .init(2)
     observerA.cancel()
     let data2 = "data-2".data(using: .utf8)!
     try storage.store(data2)
 
     XCTAssertNoDifference(actions, [
-      .didObserve("B", .init(date: .init(3), data: data2)),
+      .didObserve("B", .init(date: .init(2), data: data2)),
       .didSaveFile(path, data2),
     ])
 
     actions = []
-    now = .init(4)
+    now = .init(3)
     try storage.remove()
 
     XCTAssertNoDifference(actions, [
@@ -87,7 +94,7 @@ final class BackupStorageTests: XCTestCase {
     ])
 
     actions = []
-    now = .init(5)
+    now = .init(4)
     observerB.cancel()
     let data3 = "data-3".data(using: .utf8)!
     try storage.store(data3)
