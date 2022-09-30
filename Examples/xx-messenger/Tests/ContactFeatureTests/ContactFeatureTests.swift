@@ -131,6 +131,23 @@ final class ContactFeatureTests: XCTestCase {
     }
   }
 
+  func testLookupDidLookup() {
+    let contactId = "contact-id".data(using: .utf8)!
+    let contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
+    let store = TestStore(
+      initialState: ContactState(
+        id: contactId,
+        lookup: ContactLookupState(id: contactId)
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.lookup(.didLookup(contact))) {
+      $0.xxContact = contact
+    }
+  }
+
   func testSendRequestWithDBContact() {
     var dbContact = XXModels.Contact(id: "contact-id".data(using: .utf8)!)
     dbContact.marshaled = "contact-data".data(using: .utf8)!

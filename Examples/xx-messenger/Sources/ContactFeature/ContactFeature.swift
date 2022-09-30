@@ -182,6 +182,10 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.lookup = nil
     return .none
 
+  case .lookup(.didLookup(let xxContact)):
+    state.xxContact = xxContact
+    return .none
+
   case .sendRequestTapped:
     if let xxContact = state.xxContact {
       state.sendRequest = SendRequestState(contact: xxContact)
