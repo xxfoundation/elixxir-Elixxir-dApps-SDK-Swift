@@ -7,6 +7,10 @@ import XXMessengerClient
 import XXModels
 
 public struct BackupState: Equatable {
+  public enum Field: String, Hashable {
+    case passphrase
+  }
+
   public enum Error: String, Swift.Error, Equatable {
     case dbContactNotFound
     case dbContactUsernameMissing
@@ -19,6 +23,7 @@ public struct BackupState: Equatable {
     isStopping: Bool = false,
     backup: BackupStorage.Backup? = nil,
     alert: AlertState<BackupAction>? = nil,
+    focusedField: Field? = nil,
     passphrase: String = "",
     isExporting: Bool = false,
     exportData: Data? = nil
@@ -29,6 +34,7 @@ public struct BackupState: Equatable {
     self.isStopping = isStopping
     self.backup = backup
     self.alert = alert
+    self.focusedField = focusedField
     self.passphrase = passphrase
     self.isExporting = isExporting
     self.exportData = exportData
@@ -40,6 +46,7 @@ public struct BackupState: Equatable {
   public var isStopping: Bool
   public var backup: BackupStorage.Backup?
   public var alert: AlertState<BackupAction>?
+  @BindableState public var focusedField: Field?
   @BindableState public var passphrase: String
   @BindableState public var isExporting: Bool
   public var exportData: Data?
@@ -119,6 +126,7 @@ public let backupReducer = Reducer<BackupState, BackupAction, BackupEnvironment>
 
   case .startTapped:
     state.isStarting = true
+    state.focusedField = nil
     return Effect.run { [state] subscriber in
       do {
         let e2e: E2E = try env.messenger.e2e.tryGet()

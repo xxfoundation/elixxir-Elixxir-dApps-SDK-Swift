@@ -101,6 +101,9 @@ final class BackupFeatureTests: XCTestCase {
     }
 
     actions = []
+    store.send(.set(\.$focusedField, .passphrase)) {
+      $0.focusedField = .passphrase
+    }
     store.send(.set(\.$passphrase, passphrase)) {
       $0.passphrase = passphrase
     }
@@ -110,6 +113,7 @@ final class BackupFeatureTests: XCTestCase {
     actions = []
     store.send(.startTapped) {
       $0.isStarting = true
+      $0.focusedField = nil
     }
 
     XCTAssertNoDifference(actions, [
