@@ -135,7 +135,7 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
         let facts = try env.messenger.ud.tryGet().getFacts()
         try env.db().saveContact(Contact(
           id: try env.messenger.e2e.tryGet().getContact().getId(),
-          username: result.restoredParams.username,
+          username: facts.get(.username)?.value,
           email: facts.get(.email)?.value,
           phone: facts.get(.phone)?.value,
           createdAt: env.now()

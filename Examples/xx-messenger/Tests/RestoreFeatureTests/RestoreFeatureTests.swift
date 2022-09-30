@@ -80,11 +80,12 @@ final class RestoreFeatureTests: XCTestCase {
     let backupData = "backup-data".data(using: .utf8)!
     let backupPassphrase = "backup-passphrase"
     let restoredFacts = [
-      Fact(type: .email, value: "restored-email"),
-      Fact(type: .phone, value: "restored-phone"),
+      Fact(type: .username, value: "restored-fact-username"),
+      Fact(type: .email, value: "restored-fact-email"),
+      Fact(type: .phone, value: "restored-fact-phone"),
     ]
     let restoreResult = MessengerRestoreBackup.Result(
-      restoredParams: BackupParams(username: "restored-username"),
+      restoredParams: BackupParams(username: "restored-param-username"),
       restoredContacts: [
         "contact-1-id".data(using: .utf8)!,
         "contact-2-id".data(using: .utf8)!,
@@ -162,7 +163,7 @@ final class RestoreFeatureTests: XCTestCase {
     XCTAssertNoDifference(didSaveContact, [
       Contact(
         id: contactId,
-        username: restoreResult.restoredParams.username,
+        username: restoredFacts.get(.username)?.value,
         email: restoredFacts.get(.email)?.value,
         phone: restoredFacts.get(.phone)?.value,
         createdAt: now
