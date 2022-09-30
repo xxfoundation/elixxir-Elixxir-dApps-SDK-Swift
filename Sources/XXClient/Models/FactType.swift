@@ -1,6 +1,6 @@
 import Foundation
 
-public enum FactType: Equatable {
+public enum FactType: Equatable, Hashable {
   public static let knownTypes: [FactType] = [.username, .email, .phone]
 
   case username
