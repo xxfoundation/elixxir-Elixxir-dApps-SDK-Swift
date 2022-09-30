@@ -4,6 +4,7 @@ import ChatFeature
 import CheckContactAuthFeature
 import ConfirmRequestFeature
 import ContactFeature
+import ContactLookupFeature
 import ContactsFeature
 import Foundation
 import HomeFeature
@@ -38,7 +39,11 @@ extension AppEnvironment {
       mainQueue: mainQueue,
       bgQueue: bgQueue,
       lookup: {
-        ContactLookupEnvironment()
+        ContactLookupEnvironment(
+          messenger: messenger,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
       },
       sendRequest: {
         SendRequestEnvironment(

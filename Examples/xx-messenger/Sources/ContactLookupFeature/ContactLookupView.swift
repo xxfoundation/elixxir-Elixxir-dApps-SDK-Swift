@@ -45,9 +45,6 @@ public struct ContactLookupView: View {
         }
       }
       .navigationTitle("Lookup")
-      .task {
-        await viewStore.send(.task).finish()
-      }
     }
   }
 }
