@@ -116,6 +116,7 @@ public struct ContactView: View {
           } header: {
             Text("Contact")
           }
+          .textSelection(.enabled)
 
           Section {
             ContactAuthStatusView(dbContact.authStatus)
