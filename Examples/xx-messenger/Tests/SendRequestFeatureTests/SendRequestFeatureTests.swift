@@ -3,27 +3,16 @@ import ComposableArchitecture
 import CustomDump
 import XCTest
 import XXClient
+import XXMessengerClient
 import XXModels
 @testable import SendRequestFeature
 
 final class SendRequestFeatureTests: XCTestCase {
   func testStart() {
-    var didSetFactsOnE2EContact: [[Fact]] = []
-    let e2eContactData = "e2e-contact-data".data(using: .utf8)!
-    let e2eContactDataWithFacts = "e2e-contact-data-with-facts".data(using: .utf8)!
-    let e2eContact: XXClient.Contact = {
-      var contact = XXClient.Contact.unimplemented(e2eContactData)
-      contact.setFactsOnContact.run = { data, facts in
-        didSetFactsOnE2EContact.append(facts)
-        return e2eContactDataWithFacts
-      }
-      return contact
-    }()
-    let udFacts = [
-      Fact(type: .username, value: "ud-username"),
-      Fact(type: .email, value: "ud-email"),
-      Fact(type: .phone, value: "ud-phone"),
-    ]
+    let myContact = XXClient.Contact.unimplemented("my-contact-data".data(using: .utf8)!)
+
+    var didGetMyContact: [MessengerMyContact.IncludeFacts?] = []
+
     let store = TestStore(
       initialState: SendRequestState(
         contact: .unimplemented("contact-data".data(using: .utf8)!)
@@ -33,21 +22,15 @@ final class SendRequestFeatureTests: XCTestCase {
     )
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getContact.run = { e2eContact }
-      return e2e
-    }
-    store.environment.messenger.ud.get = {
-      var ud: UserDiscovery = .unimplemented
-      ud.getFacts.run = { udFacts }
-      return ud
+    store.environment.messenger.myContact.run = { includeFacts in
+      didGetMyContact.append(includeFacts)
+      return myContact
     }
 
     store.send(.start)
 
-    store.receive(.myContactFetched(.unimplemented(e2eContactDataWithFacts))) {
-      $0.myContact = .unimplemented(e2eContactDataWithFacts)
+    store.receive(.myContactFetched(myContact)) {
+      $0.myContact = myContact
     }
   }
 
@@ -64,16 +47,7 @@ final class SendRequestFeatureTests: XCTestCase {
     )
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getContact.run = { .unimplemented(Data()) }
-      return e2e
-    }
-    store.environment.messenger.ud.get = {
-      var ud: UserDiscovery = .unimplemented
-      ud.getFacts.run = { throw failure }
-      return ud
-    }
+    store.environment.messenger.myContact.run = { _ in throw failure }
 
     store.send(.start)
 

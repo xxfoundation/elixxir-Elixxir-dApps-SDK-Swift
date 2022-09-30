@@ -81,9 +81,7 @@ public let sendRequestReducer = Reducer<SendRequestState, SendRequestAction, Sen
   case .start:
     return Effect.run { subscriber in
       do {
-        var contact = try env.messenger.e2e.tryGet().getContact()
-        let facts = try env.messenger.ud.tryGet().getFacts()
-        try contact.setFacts(facts)
+        let contact = try env.messenger.myContact()
         subscriber.send(.myContactFetched(contact))
       } catch {
         subscriber.send(.myContactFetchFailed(error as NSError))
