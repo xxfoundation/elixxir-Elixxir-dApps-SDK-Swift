@@ -111,7 +111,7 @@ public struct ContactView: View {
 
         if let dbContact = viewStore.dbContact {
           Section {
-            Label(dbContact.id.hexString, systemImage: "number")
+            Label(dbContact.id.hexString(), systemImage: "number")
               .font(.footnote.monospaced())
             Label(dbContact.username ?? "", systemImage: "person")
             Label(dbContact.email ?? "", systemImage: "envelope")

@@ -25,7 +25,7 @@ public struct ContactLookupView: View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
         Section {
-          Label(viewStore.id.hexString, systemImage: "number")
+          Label(viewStore.id.hexString(), systemImage: "number")
             .font(.footnote.monospaced())
 
           Button {

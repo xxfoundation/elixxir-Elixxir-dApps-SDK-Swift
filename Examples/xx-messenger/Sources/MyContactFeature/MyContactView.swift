@@ -51,7 +51,7 @@ public struct MyContactView: View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
         Section {
-          Text(viewStore.contact?.id.hexString ?? "")
+          Text(viewStore.contact?.id.hexString() ?? "")
             .font(.footnote.monospaced())
             .textSelection(.enabled)
         } header: {
