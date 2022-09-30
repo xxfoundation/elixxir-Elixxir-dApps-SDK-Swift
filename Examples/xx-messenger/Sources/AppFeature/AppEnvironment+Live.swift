@@ -164,7 +164,6 @@ extension AppEnvironment {
           backup: {
             BackupEnvironment(
               messenger: messenger,
-              db: dbManager.getDB,
               backupStorage: backupStorage,
               mainQueue: mainQueue,
               bgQueue: bgQueue

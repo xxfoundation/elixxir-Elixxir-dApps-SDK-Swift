@@ -2,7 +2,6 @@ import ComposableArchitecture
 import XCTest
 import XXClient
 import XXMessengerClient
-import XXModels
 @testable import BackupFeature
 
 final class BackupFeatureTests: XCTestCase {
@@ -65,11 +64,7 @@ final class BackupFeatureTests: XCTestCase {
   func testStartBackup() {
     var actions: [Action]!
     var isBackupRunning: [Bool] = [true]
-    let contactID = "contact-id".data(using: .utf8)!
-    let dbContact = XXModels.Contact(
-      id: contactID,
-      username: "db-contact-username"
-    )
+    let username = "test-username"
     let passphrase = "backup-password"
 
     let store = TestStore(
@@ -79,25 +74,17 @@ final class BackupFeatureTests: XCTestCase {
     )
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
+    store.environment.messenger.myContact.run = { includeFacts in
+      actions.append(.didGetMyContact(includingFacts: includeFacts))
+      var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
+      contact.getFactsFromContact.run = { _ in [Fact(type: .username, value: username)] }
+      return contact
+    }
     store.environment.messenger.startBackup.run = { passphrase, params in
       actions.append(.didStartBackup(passphrase: passphrase, params: params))
     }
     store.environment.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
-    }
-    store.environment.messenger.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getContact.run = {
-        var contact: XXClient.Contact = .unimplemented(Data())
-        contact.getIdFromContact.run = { _ in contactID }
-        return contact
-      }
-      return e2e
-    }
-    store.environment.db.run = {
-      var db: Database = .unimplemented
-      db.fetchContacts.run = { _ in return [dbContact] }
-      return db
     }
 
     actions = []
@@ -117,9 +104,12 @@ final class BackupFeatureTests: XCTestCase {
     }
 
     XCTAssertNoDifference(actions, [
+      .didGetMyContact(
+        includingFacts: .types([.username])
+      ),
       .didStartBackup(
         passphrase: passphrase,
-        params: .init(username: dbContact.username!)
+        params: .init(username: username)
       )
     ])
 
@@ -130,9 +120,8 @@ final class BackupFeatureTests: XCTestCase {
     }
   }
 
-  func testStartBackupWithoutDbContact() {
+  func testStartBackupWithoutContactUsername() {
     var isBackupRunning: [Bool] = [false]
-    let contactID = "contact-id".data(using: .utf8)!
 
     let store = TestStore(
       initialState: BackupState(
@@ -143,29 +132,20 @@ final class BackupFeatureTests: XCTestCase {
     )
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
+    store.environment.messenger.myContact.run = { _ in
+      var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
+      contact.getFactsFromContact.run = { _ in [] }
+      return contact
+    }
     store.environment.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
-    }
-    store.environment.messenger.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getContact.run = {
-        var contact: XXClient.Contact = .unimplemented(Data())
-        contact.getIdFromContact.run = { _ in contactID }
-        return contact
-      }
-      return e2e
-    }
-    store.environment.db.run = {
-      var db: Database = .unimplemented
-      db.fetchContacts.run = { _ in [] }
-      return db
     }
 
     store.send(.startTapped) {
       $0.isStarting = true
     }
 
-    let failure = BackupState.Error.dbContactNotFound
+    let failure = BackupState.Error.contactUsernameMissing
     store.receive(.didStart(failure: failure as NSError)) {
       $0.isRunning = false
       $0.isStarting = false
@@ -173,62 +153,10 @@ final class BackupFeatureTests: XCTestCase {
     }
   }
 
-  func testStartBackupWithoutDbContactUsername() {
-    var isBackupRunning: [Bool] = [false]
-    let contactID = "contact-id".data(using: .utf8)!
-    let dbContact = XXModels.Contact(
-      id: contactID,
-      username: nil
-    )
-
-    let store = TestStore(
-      initialState: BackupState(
-        passphrase: "1234"
-      ),
-      reducer: backupReducer,
-      environment: .unimplemented
-    )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.isBackupRunning.run = {
-      isBackupRunning.removeFirst()
-    }
-    store.environment.messenger.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getContact.run = {
-        var contact: XXClient.Contact = .unimplemented(Data())
-        contact.getIdFromContact.run = { _ in contactID }
-        return contact
-      }
-      return e2e
-    }
-    store.environment.db.run = {
-      var db: Database = .unimplemented
-      db.fetchContacts.run = { _ in [dbContact] }
-      return db
-    }
-
-    store.send(.startTapped) {
-      $0.isStarting = true
-    }
-
-    let failure = BackupState.Error.dbContactUsernameMissing
-    store.receive(.didStart(failure: failure as NSError)) {
-      $0.isRunning = false
-      $0.isStarting = false
-      $0.alert = .error(failure)
-    }
-  }
-
-  func testStartBackupFailure() {
+  func testStartBackupMyContactFailure() {
     struct Failure: Error {}
     let failure = Failure()
     var isBackupRunning: [Bool] = [false]
-    let contactID = "contact-id".data(using: .utf8)!
-    let dbContact = XXModels.Contact(
-      id: contactID,
-      username: "db-contact-username"
-    )
 
     let store = TestStore(
       initialState: BackupState(
@@ -239,25 +167,46 @@ final class BackupFeatureTests: XCTestCase {
     )
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
+    store.environment.messenger.myContact.run = { _ in throw failure }
+    store.environment.messenger.isBackupRunning.run = {
+      isBackupRunning.removeFirst()
+    }
+
+    store.send(.startTapped) {
+      $0.isStarting = true
+    }
+
+    store.receive(.didStart(failure: failure as NSError)) {
+      $0.isRunning = false
+      $0.isStarting = false
+      $0.alert = .error(failure)
+    }
+  }
+
+  func testStartBackupStartFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+    var isBackupRunning: [Bool] = [false]
+
+    let store = TestStore(
+      initialState: BackupState(
+        passphrase: "1234"
+      ),
+      reducer: backupReducer,
+      environment: .unimplemented
+    )
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.myContact.run = { _ in
+      var contact = Contact.unimplemented("data".data(using: .utf8)!)
+      contact.getFactsFromContact.run = { _ in [Fact(type: .username, value: "username")] }
+      return contact
+    }
     store.environment.messenger.startBackup.run = { _, _ in
       throw failure
     }
     store.environment.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
-    }
-    store.environment.messenger.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getContact.run = {
-        var contact: XXClient.Contact = .unimplemented(Data())
-        contact.getIdFromContact.run = { _ in contactID }
-        return contact
-      }
-      return e2e
-    }
-    store.environment.db.run = {
-      var db: Database = .unimplemented
-      db.fetchContacts.run = { _ in return [dbContact] }
-      return db
     }
 
     store.send(.startTapped) {
@@ -463,5 +412,5 @@ private enum Action: Equatable {
   case didResumeBackup
   case didStopBackup
   case didRemoveBackup
-  case didFetchContacts(XXModels.Contact.Query)
+  case didGetMyContact(includingFacts: MessengerMyContact.IncludeFacts?)
 }
