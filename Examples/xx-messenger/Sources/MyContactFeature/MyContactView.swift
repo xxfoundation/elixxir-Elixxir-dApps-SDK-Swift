@@ -1,3 +1,4 @@
+import AppCore
 import ComposableArchitecture
 import SwiftUI
 import XXModels
@@ -50,7 +51,16 @@ public struct MyContactView: View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
         Section {
+          Text(viewStore.contact?.id.hexString ?? "")
+            .font(.footnote.monospaced())
+            .textSelection(.enabled)
+        } header: {
+          Label("ID", systemImage: "number")
+        }
+
+        Section {
           Text(viewStore.contact?.username ?? "")
+            .textSelection(.enabled)
         } header: {
           Label("Username", systemImage: "person")
         }
@@ -59,6 +69,7 @@ public struct MyContactView: View {
           if let contact = viewStore.contact {
             if let email = contact.email {
               Text(email)
+                .textSelection(.enabled)
               Button(role: .destructive) {
                 viewStore.send(.unregisterEmailTapped)
               } label: {
@@ -135,6 +146,7 @@ public struct MyContactView: View {
           if let contact = viewStore.contact {
             if let phone = contact.phone {
               Text(phone)
+                .textSelection(.enabled)
               Button(role: .destructive) {
                 viewStore.send(.unregisterPhoneTapped)
               } label: {
