@@ -8,6 +8,22 @@ import XXModels
 
 final class SendRequestFeatureTests: XCTestCase {
   func testStart() {
+    var didSetFactsOnE2EContact: [[Fact]] = []
+    let e2eContactData = "e2e-contact-data".data(using: .utf8)!
+    let e2eContactDataWithFacts = "e2e-contact-data-with-facts".data(using: .utf8)!
+    let e2eContact: XXClient.Contact = {
+      var contact = XXClient.Contact.unimplemented(e2eContactData)
+      contact.setFactsOnContact.run = { data, facts in
+        didSetFactsOnE2EContact.append(facts)
+        return e2eContactDataWithFacts
+      }
+      return contact
+    }()
+    let udFacts = [
+      Fact(type: .username, value: "ud-username"),
+      Fact(type: .email, value: "ud-email"),
+      Fact(type: .phone, value: "ud-phone"),
+    ]
     let store = TestStore(
       initialState: SendRequestState(
         contact: .unimplemented("contact-data".data(using: .utf8)!)
@@ -15,47 +31,56 @@ final class SendRequestFeatureTests: XCTestCase {
       reducer: sendRequestReducer,
       environment: .unimplemented
     )
-
-    var dbDidFetchContacts: [XXModels.Contact.Query] = []
-    let dbContactsPublisher = PassthroughSubject<[XXModels.Contact], Error>()
-
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
-      e2e.getContact.run = {
-        var contact: XXClient.Contact = .unimplemented("my-contact-data".data(using: .utf8)!)
-        contact.getIdFromContact.run = { _ in "my-contact-id".data(using: .utf8)! }
-        return contact
-      }
+      e2e.getContact.run = { e2eContact }
       return e2e
     }
-    store.environment.db.run = {
-      var db: Database = .unimplemented
-      db.fetchContactsPublisher.run = { query in
-        dbDidFetchContacts.append(query)
-        return dbContactsPublisher.eraseToAnyPublisher()
-      }
-      return db
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.getFacts.run = { udFacts }
+      return ud
     }
 
     store.send(.start)
 
-    XCTAssertNoDifference(dbDidFetchContacts, [.init(id: ["my-contact-id".data(using: .utf8)!])])
+    store.receive(.myContactFetched(.unimplemented(e2eContactDataWithFacts))) {
+      $0.myContact = .unimplemented(e2eContactDataWithFacts)
+    }
+  }
 
-    dbContactsPublisher.send([])
+  func testMyContactFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
 
-    store.receive(.myContactFetched(nil))
-
-    var myDbContact = XXModels.Contact(id: "my-contact-id".data(using: .utf8)!)
-    myDbContact.marshaled = "my-contact-data".data(using: .utf8)!
-    dbContactsPublisher.send([myDbContact])
-
-    store.receive(.myContactFetched(.live("my-contact-data".data(using: .utf8)!))) {
-      $0.myContact = .live("my-contact-data".data(using: .utf8)!)
+    let store = TestStore(
+      initialState: SendRequestState(
+        contact: .unimplemented("contact-data".data(using: .utf8)!)
+      ),
+      reducer: sendRequestReducer,
+      environment: .unimplemented
+    )
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = { .unimplemented(Data()) }
+      return e2e
+    }
+    store.environment.messenger.ud.get = {
+      var ud: UserDiscovery = .unimplemented
+      ud.getFacts.run = { throw failure }
+      return ud
     }
 
-    dbContactsPublisher.send(completion: .finished)
+    store.send(.start)
+
+    store.receive(.myContactFetchFailed(failure as NSError)) {
+      $0.myContact = nil
+      $0.failure = failure.localizedDescription
+    }
   }
 
   func testSendRequest() {
