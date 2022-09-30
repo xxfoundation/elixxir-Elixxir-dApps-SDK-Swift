@@ -3,6 +3,7 @@ import CheckContactAuthFeature
 import Combine
 import ComposableArchitecture
 import ConfirmRequestFeature
+import ContactLookupFeature
 import CustomDump
 import SendRequestFeature
 import VerifyContactFeature
@@ -97,6 +98,37 @@ final class ContactFeatureTests: XCTestCase {
     expectedSavedContact.phone = "contact-phone"
 
     XCTAssertNoDifference(dbDidSaveContact, [expectedSavedContact])
+  }
+
+  func testLookupTapped() {
+    let contactId = "contact-id".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: contactId
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.lookupTapped) {
+      $0.lookup = ContactLookupState(id: contactId)
+    }
+  }
+
+  func testLookupDismissed() {
+    let contactId = "contact-id".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: contactId,
+        lookup: ContactLookupState(id: contactId)
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.lookupDismissed) {
+      $0.lookup = nil
+    }
   }
 
   func testSendRequestWithDBContact() {

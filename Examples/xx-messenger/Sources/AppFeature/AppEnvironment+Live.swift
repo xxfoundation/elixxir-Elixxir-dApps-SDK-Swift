@@ -37,6 +37,9 @@ extension AppEnvironment {
       db: dbManager.getDB,
       mainQueue: mainQueue,
       bgQueue: bgQueue,
+      lookup: {
+        ContactLookupEnvironment()
+      },
       sendRequest: {
         SendRequestEnvironment(
           messenger: messenger,
