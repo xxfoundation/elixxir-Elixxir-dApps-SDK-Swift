@@ -145,6 +145,7 @@ final class ContactFeatureTests: XCTestCase {
 
     store.send(.lookup(.didLookup(contact))) {
       $0.xxContact = contact
+      $0.lookup = nil
     }
   }
 
