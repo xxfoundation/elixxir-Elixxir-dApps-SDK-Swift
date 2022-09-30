@@ -13,10 +13,12 @@ public struct ContactLookupView: View {
     init(state: ContactLookupState) {
       id = state.id
       isLookingUp = state.isLookingUp
+      failure = state.failure
     }
 
     var id: Data
     var isLookingUp: Bool
+    var failure: String?
   }
 
   public var body: some View {
@@ -42,6 +44,14 @@ public struct ContactLookupView: View {
           .disabled(viewStore.isLookingUp)
         } header: {
           Text("Contact ID")
+        }
+
+        if let failure = viewStore.failure {
+          Section {
+            Text(failure)
+          } header: {
+            Text("Error")
+          }
         }
       }
       .navigationTitle("Lookup")
