@@ -23,12 +23,14 @@ final class ContactLookupFeatureTests: XCTestCase {
 
     store.send(.lookupTapped) {
       $0.isLookingUp = true
+      $0.failure = nil
     }
 
     XCTAssertEqual(didLookupId, [id])
 
     store.receive(.didLookup(lookedUpContact)) {
       $0.isLookingUp = false
+      $0.failure = nil
     }
   }
 
@@ -47,11 +49,12 @@ final class ContactLookupFeatureTests: XCTestCase {
 
     store.send(.lookupTapped) {
       $0.isLookingUp = true
+      $0.failure = nil
     }
 
     store.receive(.didFail(failure)) {
-      $0.failure = failure.localizedDescription
       $0.isLookingUp = false
+      $0.failure = failure.localizedDescription
     }
   }
 }

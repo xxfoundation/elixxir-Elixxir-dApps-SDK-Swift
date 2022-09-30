@@ -57,6 +57,7 @@ public let contactLookupReducer = Reducer<ContactLookupState, ContactLookupActio
   switch action {
   case .lookupTapped:
     state.isLookingUp = true
+    state.failure = nil
     return Effect.result { [state] in
       do {
         let contact = try env.messenger.lookupContact(id: state.id)
@@ -71,11 +72,12 @@ public let contactLookupReducer = Reducer<ContactLookupState, ContactLookupActio
 
   case .didLookup(_):
     state.isLookingUp = false
+    state.failure = nil
     return .none
 
   case .didFail(let error):
-    state.failure = error.localizedDescription
     state.isLookingUp = false
+    state.failure = error.localizedDescription
     return .none
   }
 }
