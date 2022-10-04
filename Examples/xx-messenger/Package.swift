@@ -69,7 +69,7 @@ let package = Package(
     .target(
       name: "AppCore",
       dependencies: [
-        .product(name: "Pulse", package: "Pulse"),
+        .product(name: "Logging", package: "swift-log"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
         .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXDatabase", package: "client-ios-db"),
