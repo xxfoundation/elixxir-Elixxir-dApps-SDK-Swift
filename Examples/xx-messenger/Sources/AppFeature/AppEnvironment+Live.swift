@@ -34,6 +34,11 @@ extension AppEnvironment {
     let mainQueue = DispatchQueue.main.eraseToAnyScheduler()
     let bgQueue = DispatchQueue.global(qos: .background).eraseToAnyScheduler()
 
+    defer {
+      _ = try! messenger.setLogLevel(.debug)
+      messenger.startLogging()
+    }
+
     let contactEnvironment = ContactEnvironment(
       messenger: messenger,
       db: dbManager.getDB,
