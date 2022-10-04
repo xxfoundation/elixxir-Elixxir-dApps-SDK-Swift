@@ -25,6 +25,7 @@ let package = Package(
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "MyContactFeature", targets: ["MyContactFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
+    .library(name: "ResetAuthFeature", targets: ["ResetAuthFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
     .library(name: "SendRequestFeature", targets: ["SendRequestFeature"]),
     .library(name: "UserSearchFeature", targets: ["UserSearchFeature"]),
@@ -95,6 +96,7 @@ let package = Package(
         .target(name: "HomeFeature"),
         .target(name: "MyContactFeature"),
         .target(name: "RegisterFeature"),
+        .target(name: "ResetAuthFeature"),
         .target(name: "RestoreFeature"),
         .target(name: "SendRequestFeature"),
         .target(name: "UserSearchFeature"),
@@ -192,6 +194,7 @@ let package = Package(
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
         .target(name: "ContactLookupFeature"),
+        .target(name: "ResetAuthFeature"),
         .target(name: "SendRequestFeature"),
         .target(name: "VerifyContactFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
@@ -307,6 +310,23 @@ let package = Package(
       dependencies: [
         .target(name: "RegisterFeature"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "ResetAuthFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ResetAuthFeatureTests",
+      dependencies: [
+        .target(name: "ResetAuthFeature"),
       ],
       swiftSettings: swiftSettings
     ),

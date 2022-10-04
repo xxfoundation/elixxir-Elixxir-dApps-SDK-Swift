@@ -10,6 +10,7 @@ import Foundation
 import HomeFeature
 import MyContactFeature
 import RegisterFeature
+import ResetAuthFeature
 import RestoreFeature
 import SendRequestFeature
 import UserSearchFeature
@@ -73,6 +74,13 @@ extension AppEnvironment {
         CheckContactAuthEnvironment(
           messenger: messenger,
           db: dbManager.getDB,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
+      resetAuth: {
+        ResetAuthEnvironment(
+          messenger: messenger,
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )

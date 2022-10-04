@@ -5,6 +5,7 @@ import ComposableArchitecture
 import ComposablePresentation
 import ConfirmRequestFeature
 import ContactLookupFeature
+import ResetAuthFeature
 import SendRequestFeature
 import SwiftUI
 import VerifyContactFeature
@@ -32,6 +33,7 @@ public struct ContactView: View {
     var canVerifyContact: Bool
     var canConfirmRequest: Bool
     var canCheckAuthorization: Bool
+    var canResetAuthorization: Bool
 
     init(state: ContactState) {
       dbContact = state.dbContact
@@ -47,6 +49,7 @@ public struct ContactView: View {
       canVerifyContact = state.dbContact?.marshaled != nil
       canConfirmRequest = state.dbContact?.marshaled != nil
       canCheckAuthorization = state.dbContact?.marshaled != nil
+      canResetAuthorization = state.dbContact?.marshaled != nil
     }
   }
 
@@ -178,6 +181,17 @@ public struct ContactView: View {
               }
             }
             .disabled(!viewStore.canCheckAuthorization)
+
+            Button {
+              viewStore.send(.resetAuthTapped)
+            } label: {
+              HStack {
+                Text("Reset authorization")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+            .disabled(!viewStore.canResetAuthorization)
           } header: {
             Text("Auth")
           }
@@ -241,6 +255,14 @@ public struct ContactView: View {
         ),
         onDeactivate: { viewStore.send(.checkAuthDismissed) },
         destination: CheckContactAuthView.init(store:)
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.resetAuth,
+          action: ContactAction.resetAuth
+        ),
+        onDeactivate: { viewStore.send(.resetAuthDismissed) },
+        destination: ResetAuthView.init(store:)
       ))
       .background(NavigationLinkWithStore(
         store.scope(
