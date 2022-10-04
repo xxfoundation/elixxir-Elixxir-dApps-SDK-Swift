@@ -25,6 +25,7 @@ let package = Package(
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "MyContactFeature", targets: ["MyContactFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
+    .library(name: "ResetAuthFeature", targets: ["ResetAuthFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
     .library(name: "SendRequestFeature", targets: ["SendRequestFeature"]),
     .library(name: "UserSearchFeature", targets: ["UserSearchFeature"]),
@@ -307,6 +308,21 @@ let package = Package(
       dependencies: [
         .target(name: "RegisterFeature"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "ResetAuthFeature",
+      dependencies: [
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ResetAuthFeatureTests",
+      dependencies: [
+        .target(name: "ResetAuthFeature"),
       ],
       swiftSettings: swiftSettings
     ),
