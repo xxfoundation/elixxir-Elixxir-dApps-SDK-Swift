@@ -39,6 +39,7 @@ public struct Messenger {
   public var backupParams: MessengerBackupParams
   public var stopBackup: MessengerStopBackup
   public var setLogLevel: MessengerSetLogLevel
+  public var startLogging: MessengerStartLogging
 }
 
 extension Messenger {
@@ -81,7 +82,8 @@ extension Messenger {
       resumeBackup: .live(env),
       backupParams: .live(env),
       stopBackup: .live(env),
-      setLogLevel: .live(env)
+      setLogLevel: .live(env),
+      startLogging: .live(env)
     )
   }
 }
@@ -125,6 +127,7 @@ extension Messenger {
     resumeBackup: .unimplemented,
     backupParams: .unimplemented,
     stopBackup: .unimplemented,
-    setLogLevel: .unimplemented
+    setLogLevel: .unimplemented,
+    startLogging: .unimplemented
   )
 }
