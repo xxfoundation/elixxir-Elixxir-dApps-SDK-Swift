@@ -5,6 +5,7 @@ import ComposableArchitecture
 import ConfirmRequestFeature
 import ContactLookupFeature
 import CustomDump
+import ResetAuthFeature
 import SendRequestFeature
 import VerifyContactFeature
 import XCTest
@@ -291,6 +292,44 @@ final class ContactFeatureTests: XCTestCase {
 
     store.send(.checkAuthDismissed) {
       $0.checkAuth = nil
+    }
+  }
+
+  func testResetAuthTapped() {
+    let contactData = "contact-data".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: Data(),
+        dbContact: XXModels.Contact(
+          id: Data(),
+          marshaled: contactData
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.resetAuthTapped) {
+      $0.resetAuth = ResetAuthState(
+        partner: .unimplemented(contactData)
+      )
+    }
+  }
+
+  func testResetAuthDismissed() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: Data(),
+        resetAuth: ResetAuthState(
+          partner: .unimplemented(Data())
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.resetAuthDismissed) {
+      $0.resetAuth = nil
     }
   }
 

@@ -6,6 +6,7 @@ import ComposablePresentation
 import ConfirmRequestFeature
 import ContactLookupFeature
 import Foundation
+import ResetAuthFeature
 import SendRequestFeature
 import VerifyContactFeature
 import XCTestDynamicOverlay
@@ -26,6 +27,7 @@ public struct ContactState: Equatable {
     verifyContact: VerifyContactState? = nil,
     confirmRequest: ConfirmRequestState? = nil,
     checkAuth: CheckContactAuthState? = nil,
+    resetAuth: ResetAuthState? = nil,
     chat: ChatState? = nil
   ) {
     self.id = id
@@ -39,6 +41,7 @@ public struct ContactState: Equatable {
     self.verifyContact = verifyContact
     self.confirmRequest = confirmRequest
     self.checkAuth = checkAuth
+    self.resetAuth = resetAuth
     self.chat = chat
   }
 
@@ -53,6 +56,7 @@ public struct ContactState: Equatable {
   public var verifyContact: VerifyContactState?
   public var confirmRequest: ConfirmRequestState?
   public var checkAuth: CheckContactAuthState?
+  public var resetAuth: ResetAuthState?
   public var chat: ChatState?
 }
 
@@ -75,6 +79,9 @@ public enum ContactAction: Equatable, BindableAction {
   case confirmRequestTapped
   case confirmRequestDismissed
   case confirmRequest(ConfirmRequestAction)
+  case resetAuthTapped
+  case resetAuthDismissed
+  case resetAuth(ResetAuthAction)
   case chatTapped
   case chatDismissed
   case chat(ChatAction)
@@ -92,6 +99,7 @@ public struct ContactEnvironment {
     verifyContact: @escaping () -> VerifyContactEnvironment,
     confirmRequest: @escaping () -> ConfirmRequestEnvironment,
     checkAuth: @escaping () -> CheckContactAuthEnvironment,
+    resetAuth: @escaping () -> ResetAuthEnvironment,
     chat: @escaping () -> ChatEnvironment
   ) {
     self.messenger = messenger
@@ -103,6 +111,7 @@ public struct ContactEnvironment {
     self.verifyContact = verifyContact
     self.confirmRequest = confirmRequest
     self.checkAuth = checkAuth
+    self.resetAuth = resetAuth
     self.chat = chat
   }
 
@@ -115,6 +124,7 @@ public struct ContactEnvironment {
   public var verifyContact: () -> VerifyContactEnvironment
   public var confirmRequest: () -> ConfirmRequestEnvironment
   public var checkAuth: () -> CheckContactAuthEnvironment
+  public var resetAuth: () -> ResetAuthEnvironment
   public var chat: () -> ChatEnvironment
 }
 
@@ -130,6 +140,7 @@ extension ContactEnvironment {
     verifyContact: { .unimplemented },
     confirmRequest: { .unimplemented },
     checkAuth: { .unimplemented },
+    resetAuth: { .unimplemented },
     chat: { .unimplemented }
   )
 }
@@ -247,9 +258,21 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.chat = nil
     return .none
 
+  case .resetAuthTapped:
+    if let marshaled = state.dbContact?.marshaled {
+      state.resetAuth = ResetAuthState(
+        partner: .live(marshaled)
+      )
+    }
+    return .none
+
+  case .resetAuthDismissed:
+    state.resetAuth = nil
+    return .none
+
   case .binding(_), .lookup(_), .sendRequest(_),
       .verifyContact(_), .confirmRequest(_),
-      .checkAuth(_), .chat(_):
+      .checkAuth(_), .resetAuth(_), .chat(_):
     return .none
   }
 }
@@ -288,6 +311,13 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
   id: .notNil(),
   action: /ContactAction.checkAuth,
   environment: { $0.checkAuth() }
+)
+.presenting(
+  resetAuthReducer,
+  state: .keyPath(\.resetAuth),
+  id: .notNil(),
+  action: /ContactAction.resetAuth,
+  environment: { $0.resetAuth() }
 )
 .presenting(
   chatReducer,
