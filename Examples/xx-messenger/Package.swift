@@ -57,6 +57,10 @@ let package = Package(
       .upToNextMajor(from: "0.5.2")
     ),
     .package(
+      url: "https://github.com/apple/swift-log.git",
+      .upToNextMajor(from: "1.4.4")
+    ),
+    .package(
       url: "https://github.com/kean/Pulse.git",
       .upToNextMajor(from: "2.1.2")
     ),
@@ -104,6 +108,8 @@ let package = Package(
         .target(name: "WelcomeFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "Logging", package: "swift-log"),
+        .product(name: "PulseLogHandler", package: "Pulse"),
         .product(name: "PulseUI", package: "Pulse"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
         .product(name: "XXModels", package: "client-ios-db"),
