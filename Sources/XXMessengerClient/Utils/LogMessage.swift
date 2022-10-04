@@ -1,13 +1,18 @@
 import Foundation
 import Logging
 
-struct LogMessage: Equatable {
-  var level: Logger.Level
-  var text: String
+public struct LogMessage: Equatable {
+  public init(level: Logger.Level, text: String) {
+    self.level = level
+    self.text = text
+  }
+
+  public var level: Logger.Level
+  public var text: String
 }
 
 extension LogMessage {
-  static func parse(_ string: String) -> LogMessage? {
+  public static func parse(_ string: String) -> LogMessage {
     let level: Logger.Level
     let text: String
     let pattern = #"([A-Z]+) (.*)"#
