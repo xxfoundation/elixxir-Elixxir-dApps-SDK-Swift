@@ -645,6 +645,7 @@ final class MyContactFeatureTests: XCTestCase {
   func testLoadFactsFromClient() {
     let contactId = "contact-id".data(using: .utf8)!
     let dbContact = XXModels.Contact(id: contactId)
+    let username = "user234"
     let email = "test@email.com"
     let phone = "123456789"
 
@@ -672,6 +673,7 @@ final class MyContactFeatureTests: XCTestCase {
       var ud: UserDiscovery = .unimplemented
       ud.getFacts.run = {
         [
+          Fact(type: .username, value: username),
           Fact(type: .email, value: email),
           Fact(type: .phone, value: phone),
         ]
@@ -697,6 +699,7 @@ final class MyContactFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(didFetchContacts, [.init(id: [contactId])])
     var expectedSavedContact = dbContact
+    expectedSavedContact.username = username
     expectedSavedContact.email = email
     expectedSavedContact.phone = phone
     XCTAssertNoDifference(didSaveContact, [expectedSavedContact])

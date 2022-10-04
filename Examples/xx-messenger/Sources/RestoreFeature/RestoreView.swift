@@ -21,7 +21,7 @@ public struct RestoreView: View {
     var isRestoring: Bool
     var focusedField: RestoreState.Field?
     var fileImportFailure: String?
-    var restoreFailure: String?
+    var restoreFailures: [String]
 
     init(state: RestoreState) {
       file = state.file.map { .init(name: $0.name, size: $0.data.count) }
@@ -30,7 +30,7 @@ public struct RestoreView: View {
       isRestoring = state.isRestoring
       focusedField = state.focusedField
       fileImportFailure = state.fileImportFailure
-      restoreFailure = state.restoreFailure
+      restoreFailures = state.restoreFailures
     }
   }
 
@@ -38,69 +38,9 @@ public struct RestoreView: View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       NavigationView {
         Form {
-          Section {
-            if let file = viewStore.file {
-              HStack(alignment: .bottom) {
-                Text(file.name)
-                Spacer()
-                Text(format(byteCount: file.size))
-              }
-            }
-
-            Button {
-              viewStore.send(.importFileTapped)
-            } label: {
-              Text("Import backup file")
-            }
-            .fileImporter(
-              isPresented: viewStore.binding(
-                get: \.isImportingFile,
-                send: { .set(\.$isImportingFile, $0) }
-              ),
-              allowedContentTypes: [.data],
-              onCompletion: { result in
-                viewStore.send(.fileImport(result.mapError { $0 as NSError }))
-              }
-            )
-
-            if let failure = viewStore.fileImportFailure {
-              Text("Error: \(failure)")
-            }
-          } header: {
-            Text("File")
-          }
-          .disabled(viewStore.isRestoring)
-
+          fileSection(viewStore)
           if viewStore.file != nil {
-            Section {
-              SecureField("Passphrase", text: viewStore.binding(
-                get: \.passphrase,
-                send: { .set(\.$passphrase, $0) }
-              ))
-              .textContentType(.password)
-              .textInputAutocapitalization(.never)
-              .disableAutocorrection(true)
-              .focused($focusedField, equals: .passphrase)
-
-              Button {
-                viewStore.send(.restoreTapped)
-              } label: {
-                HStack {
-                  Text("Restore")
-                  Spacer()
-                  if viewStore.isRestoring {
-                    ProgressView()
-                  }
-                }
-              }
-
-              if let failure = viewStore.restoreFailure {
-                Text("Error: \(failure)")
-              }
-            } header: {
-              Text("Backup")
-            }
-            .disabled(viewStore.isRestoring)
+            restoreSection(viewStore)
           }
         }
         .toolbar {
@@ -110,7 +50,7 @@ public struct RestoreView: View {
             } label: {
               Text("Cancel")
             }
-            .disabled(viewStore.isRestoring)
+            .disabled(viewStore.isImportingFile || viewStore.isRestoring)
           }
         }
         .navigationTitle("Restore")
@@ -118,6 +58,85 @@ public struct RestoreView: View {
         .onChange(of: focusedField) { viewStore.send(.set(\.$focusedField, $0)) }
       }
       .navigationViewStyle(.stack)
+    }
+  }
+
+  @ViewBuilder func fileSection(_ viewStore: ViewStore<ViewState, RestoreAction>) -> some View {
+    Section {
+      if let file = viewStore.file {
+        HStack(alignment: .bottom) {
+          Text(file.name)
+          Spacer()
+          Text(format(byteCount: file.size))
+        }
+      } else {
+        Button {
+          viewStore.send(.importFileTapped)
+        } label: {
+          Text("Import backup file")
+        }
+        .fileImporter(
+          isPresented: viewStore.binding(
+            get: \.isImportingFile,
+            send: { .set(\.$isImportingFile, $0) }
+          ),
+          allowedContentTypes: [.data],
+          onCompletion: { result in
+            viewStore.send(.fileImport(result.mapError { $0 as NSError }))
+          }
+        )
+        .disabled(viewStore.isRestoring)
+      }
+    } header: {
+      Text("File")
+    }
+
+    if let failure = viewStore.fileImportFailure {
+      Section {
+        Text(failure)
+      } header: {
+        Text("Error")
+      }
+    }
+  }
+
+  @ViewBuilder func restoreSection(_ viewStore: ViewStore<ViewState, RestoreAction>) -> some View {
+    Section {
+      SecureField("Passphrase", text: viewStore.binding(
+        get: \.passphrase,
+        send: { .set(\.$passphrase, $0) }
+      ))
+      .textContentType(.password)
+      .textInputAutocapitalization(.never)
+      .disableAutocorrection(true)
+      .focused($focusedField, equals: .passphrase)
+      .disabled(viewStore.isRestoring)
+
+      Button {
+        viewStore.send(.restoreTapped)
+      } label: {
+        HStack {
+          Text("Restore")
+          Spacer()
+          if viewStore.isRestoring {
+            ProgressView()
+          }
+        }
+      }
+    } header: {
+      Text("Restore")
+    }
+    .disabled(viewStore.isRestoring)
+
+    if !viewStore.restoreFailures.isEmpty {
+      Section {
+        ForEach(Array(viewStore.restoreFailures.enumerated()), id: \.offset) { _, failure in
+          Text(failure)
+        }
+        .font(.footnote)
+      } header: {
+        Text("Error")
+      }
     }
   }
 
@@ -133,7 +152,19 @@ public struct RestoreView: View {
 public struct RestoreView_Previews: PreviewProvider {
   public static var previews: some View {
     RestoreView(store: Store(
-      initialState: RestoreState(),
+      initialState: RestoreState(
+        file: .init(name: "preview", data: Data()),
+        fileImportFailure: nil,
+        restoreFailures: [
+          "Preview failure 1",
+          "Preview failure 2",
+          "Preview failure 3",
+        ],
+        focusedField: nil,
+        isImportingFile: false,
+        passphrase: "",
+        isRestoring: true
+      ),
       reducer: .empty,
       environment: ()
     ))

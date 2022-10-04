@@ -4,6 +4,7 @@ import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
 import ConfirmRequestFeature
+import ContactLookupFeature
 import Foundation
 import SendRequestFeature
 import VerifyContactFeature
@@ -20,6 +21,7 @@ public struct ContactState: Equatable {
     importUsername: Bool = true,
     importEmail: Bool = true,
     importPhone: Bool = true,
+    lookup: ContactLookupState? = nil,
     sendRequest: SendRequestState? = nil,
     verifyContact: VerifyContactState? = nil,
     confirmRequest: ConfirmRequestState? = nil,
@@ -32,6 +34,7 @@ public struct ContactState: Equatable {
     self.importUsername = importUsername
     self.importEmail = importEmail
     self.importPhone = importPhone
+    self.lookup = lookup
     self.sendRequest = sendRequest
     self.verifyContact = verifyContact
     self.confirmRequest = confirmRequest
@@ -45,6 +48,7 @@ public struct ContactState: Equatable {
   @BindableState public var importUsername: Bool
   @BindableState public var importEmail: Bool
   @BindableState public var importPhone: Bool
+  public var lookup: ContactLookupState?
   public var sendRequest: SendRequestState?
   public var verifyContact: VerifyContactState?
   public var confirmRequest: ConfirmRequestState?
@@ -56,6 +60,9 @@ public enum ContactAction: Equatable, BindableAction {
   case start
   case dbContactFetched(XXModels.Contact?)
   case importFactsTapped
+  case lookupTapped
+  case lookupDismissed
+  case lookup(ContactLookupAction)
   case sendRequestTapped
   case sendRequestDismissed
   case sendRequest(SendRequestAction)
@@ -80,6 +87,7 @@ public struct ContactEnvironment {
     db: DBManagerGetDB,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
+    lookup: @escaping () -> ContactLookupEnvironment,
     sendRequest: @escaping () -> SendRequestEnvironment,
     verifyContact: @escaping () -> VerifyContactEnvironment,
     confirmRequest: @escaping () -> ConfirmRequestEnvironment,
@@ -90,6 +98,7 @@ public struct ContactEnvironment {
     self.db = db
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
+    self.lookup = lookup
     self.sendRequest = sendRequest
     self.verifyContact = verifyContact
     self.confirmRequest = confirmRequest
@@ -101,6 +110,7 @@ public struct ContactEnvironment {
   public var db: DBManagerGetDB
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
+  public var lookup: () -> ContactLookupEnvironment
   public var sendRequest: () -> SendRequestEnvironment
   public var verifyContact: () -> VerifyContactEnvironment
   public var confirmRequest: () -> ConfirmRequestEnvironment
@@ -115,6 +125,7 @@ extension ContactEnvironment {
     db: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
+    lookup: { .unimplemented },
     sendRequest: { .unimplemented },
     verifyContact: { .unimplemented },
     confirmRequest: { .unimplemented },
@@ -162,6 +173,19 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
+
+  case .lookupTapped:
+    state.lookup = ContactLookupState(id: state.id)
+    return .none
+
+  case .lookupDismissed:
+    state.lookup = nil
+    return .none
+
+  case .lookup(.didLookup(let xxContact)):
+    state.xxContact = xxContact
+    state.lookup = nil
+    return .none
 
   case .sendRequestTapped:
     if let xxContact = state.xxContact {
@@ -223,11 +247,20 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.chat = nil
     return .none
 
-  case .binding(_), .sendRequest(_), .verifyContact(_), .confirmRequest(_), .checkAuth(_), .chat(_):
+  case .binding(_), .lookup(_), .sendRequest(_),
+      .verifyContact(_), .confirmRequest(_),
+      .checkAuth(_), .chat(_):
     return .none
   }
 }
 .binding()
+.presenting(
+  contactLookupReducer,
+  state: .keyPath(\.lookup),
+  id: .notNil(),
+  action: /ContactAction.lookup,
+  environment: { $0.lookup() }
+)
 .presenting(
   sendRequestReducer,
   state: .keyPath(\.sendRequest),

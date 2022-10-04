@@ -8,6 +8,7 @@ public struct BackupView: View {
   }
 
   let store: Store<BackupState, BackupAction>
+  @FocusState var focusedField: BackupState.Field?
 
   struct ViewState: Equatable {
     struct Backup: Equatable {
@@ -23,6 +24,7 @@ public struct BackupView: View {
       backup = state.backup.map { backup in
         Backup(date: backup.date, size: backup.data.count)
       }
+      focusedField = state.focusedField
       passphrase = state.passphrase
       isExporting = state.isExporting
       exportData = state.exportData
@@ -34,6 +36,7 @@ public struct BackupView: View {
     var isStopping: Bool
     var isLoading: Bool { isStarting || isResuming || isStopping }
     var backup: Backup?
+    var focusedField: BackupState.Field?
     var passphrase: String
     var isExporting: Bool
     var exportData: Data?
@@ -57,9 +60,9 @@ public struct BackupView: View {
         )
       }
       .navigationTitle("Backup")
-      .task {
-        await viewStore.send(.task).finish()
-      }
+      .task { await viewStore.send(.task).finish() }
+      .onChange(of: viewStore.focusedField) { focusedField = $0 }
+      .onChange(of: focusedField) { viewStore.send(.set(\.$focusedField, $0)) }
     }
   }
 
@@ -75,6 +78,11 @@ public struct BackupView: View {
         prompt: Text("Backup passphrase"),
         label: { Text("Backup passphrase") }
       )
+      .textContentType(.password)
+      .textInputAutocapitalization(.never)
+      .disableAutocorrection(true)
+      .focused($focusedField, equals: .passphrase)
+
       Button {
         viewStore.send(.startTapped)
       } label: {
@@ -91,6 +99,7 @@ public struct BackupView: View {
     } header: {
       Text("New backup")
     }
+    .disabled(viewStore.isStarting)
   }
 
   @ViewBuilder func backupSection(

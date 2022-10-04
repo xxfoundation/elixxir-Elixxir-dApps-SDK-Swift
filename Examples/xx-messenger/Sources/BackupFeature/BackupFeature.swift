@@ -1,15 +1,16 @@
-import AppCore
 import Combine
 import ComposableArchitecture
 import Foundation
 import XXClient
 import XXMessengerClient
-import XXModels
 
 public struct BackupState: Equatable {
+  public enum Field: String, Hashable {
+    case passphrase
+  }
+
   public enum Error: String, Swift.Error, Equatable {
-    case dbContactNotFound
-    case dbContactUsernameMissing
+    case contactUsernameMissing
   }
 
   public init(
@@ -19,6 +20,7 @@ public struct BackupState: Equatable {
     isStopping: Bool = false,
     backup: BackupStorage.Backup? = nil,
     alert: AlertState<BackupAction>? = nil,
+    focusedField: Field? = nil,
     passphrase: String = "",
     isExporting: Bool = false,
     exportData: Data? = nil
@@ -29,6 +31,7 @@ public struct BackupState: Equatable {
     self.isStopping = isStopping
     self.backup = backup
     self.alert = alert
+    self.focusedField = focusedField
     self.passphrase = passphrase
     self.isExporting = isExporting
     self.exportData = exportData
@@ -40,6 +43,7 @@ public struct BackupState: Equatable {
   public var isStopping: Bool
   public var backup: BackupStorage.Backup?
   public var alert: AlertState<BackupAction>?
+  @BindableState public var focusedField: Field?
   @BindableState public var passphrase: String
   @BindableState public var isExporting: Bool
   public var exportData: Data?
@@ -64,20 +68,17 @@ public enum BackupAction: Equatable, BindableAction {
 public struct BackupEnvironment {
   public init(
     messenger: Messenger,
-    db: DBManagerGetDB,
     backupStorage: BackupStorage,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>
   ) {
     self.messenger = messenger
-    self.db = db
     self.backupStorage = backupStorage
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
   }
 
   public var messenger: Messenger
-  public var db: DBManagerGetDB
   public var backupStorage: BackupStorage
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
@@ -87,7 +88,6 @@ public struct BackupEnvironment {
 extension BackupEnvironment {
   public static let unimplemented = BackupEnvironment(
     messenger: .unimplemented,
-    db: .unimplemented,
     backupStorage: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented
@@ -119,17 +119,12 @@ public let backupReducer = Reducer<BackupState, BackupAction, BackupEnvironment>
 
   case .startTapped:
     state.isStarting = true
+    state.focusedField = nil
     return Effect.run { [state] subscriber in
       do {
-        let e2e: E2E = try env.messenger.e2e.tryGet()
-        let contactID = try e2e.getContact().getId()
-        let db = try env.db()
-        let query = XXModels.Contact.Query(id: [contactID])
-        guard let contact = try db.fetchContacts(query).first else {
-          throw BackupState.Error.dbContactNotFound
-        }
-        guard let username = contact.username else {
-          throw BackupState.Error.dbContactUsernameMissing
+        let contact = try env.messenger.myContact(includeFacts: .types([.username]))
+        guard let username = try contact.getFact(.username)?.value else {
+          throw BackupState.Error.contactUsernameMissing
         }
         try env.messenger.startBackup(
           password: state.passphrase,

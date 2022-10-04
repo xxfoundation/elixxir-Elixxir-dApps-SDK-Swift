@@ -285,6 +285,7 @@ public let myContactReducer = Reducer<MyContactState, MyContactAction, MyContact
         let contactId = try env.messenger.e2e.tryGet().getContact().getId()
         if var dbContact = try env.db().fetchContacts(.init(id: [contactId])).first {
           let facts = try env.messenger.ud.tryGet().getFacts()
+          dbContact.username = facts.get(.username)?.value
           dbContact.email = facts.get(.email)?.value
           dbContact.phone = facts.get(.phone)?.value
           try env.db().saveContact(dbContact)

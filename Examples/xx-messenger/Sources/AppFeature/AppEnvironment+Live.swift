@@ -4,6 +4,7 @@ import ChatFeature
 import CheckContactAuthFeature
 import ConfirmRequestFeature
 import ContactFeature
+import ContactLookupFeature
 import ContactsFeature
 import Foundation
 import HomeFeature
@@ -37,6 +38,13 @@ extension AppEnvironment {
       db: dbManager.getDB,
       mainQueue: mainQueue,
       bgQueue: bgQueue,
+      lookup: {
+        ContactLookupEnvironment(
+          messenger: messenger,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
       sendRequest: {
         SendRequestEnvironment(
           messenger: messenger,
@@ -156,7 +164,6 @@ extension AppEnvironment {
           backup: {
             BackupEnvironment(
               messenger: messenger,
-              db: dbManager.getDB,
               backupStorage: backupStorage,
               mainQueue: mainQueue,
               bgQueue: bgQueue

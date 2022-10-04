@@ -20,6 +20,7 @@ let package = Package(
     .library(name: "CheckContactAuthFeature", targets: ["CheckContactAuthFeature"]),
     .library(name: "ConfirmRequestFeature", targets: ["ConfirmRequestFeature"]),
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
+    .library(name: "ContactLookupFeature", targets: ["ContactLookupFeature"]),
     .library(name: "ContactsFeature", targets: ["ContactsFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "MyContactFeature", targets: ["MyContactFeature"]),
@@ -89,6 +90,7 @@ let package = Package(
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
         .target(name: "ContactFeature"),
+        .target(name: "ContactLookupFeature"),
         .target(name: "ContactsFeature"),
         .target(name: "HomeFeature"),
         .target(name: "MyContactFeature"),
@@ -117,10 +119,8 @@ let package = Package(
     .target(
       name: "BackupFeature",
       dependencies: [
-        .target(name: "AppCore"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
-        .product(name: "XXModels", package: "client-ios-db"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -191,6 +191,7 @@ let package = Package(
         .target(name: "ChatFeature"),
         .target(name: "CheckContactAuthFeature"),
         .target(name: "ConfirmRequestFeature"),
+        .target(name: "ContactLookupFeature"),
         .target(name: "SendRequestFeature"),
         .target(name: "VerifyContactFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
@@ -204,6 +205,24 @@ let package = Package(
       name: "ContactFeatureTests",
       dependencies: [
         .target(name: "ContactFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "ContactLookupFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "ContactLookupFeatureTests",
+      dependencies: [
+        .target(name: "ContactLookupFeature"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings

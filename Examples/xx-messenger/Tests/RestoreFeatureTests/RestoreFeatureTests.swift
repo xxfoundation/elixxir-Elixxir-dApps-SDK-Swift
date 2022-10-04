@@ -80,12 +80,17 @@ final class RestoreFeatureTests: XCTestCase {
     let backupData = "backup-data".data(using: .utf8)!
     let backupPassphrase = "backup-passphrase"
     let restoredFacts = [
-      Fact(type: .email, value: "restored-email"),
-      Fact(type: .phone, value: "restored-phone"),
+      Fact(type: .username, value: "restored-fact-username"),
+      Fact(type: .email, value: "restored-fact-email"),
+      Fact(type: .phone, value: "restored-fact-phone"),
     ]
     let restoreResult = MessengerRestoreBackup.Result(
-      restoredParams: BackupParams(username: "restored-username"),
-      restoredContacts: []
+      restoredParams: BackupParams(username: "restored-param-username"),
+      restoredContacts: [
+        "contact-1-id".data(using: .utf8)!,
+        "contact-2-id".data(using: .utf8)!,
+        "contact-3-id".data(using: .utf8)!,
+      ]
     )
     let now = Date()
     let contactId = "contact-id".data(using: .utf8)!
@@ -93,6 +98,7 @@ final class RestoreFeatureTests: XCTestCase {
     var udFacts: [Fact] = []
     var didRestoreWithData: [Data] = []
     var didRestoreWithPassphrase: [String] = []
+    var didFetchContacts: [XXModels.Contact.Query] = []
     var didSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
@@ -128,6 +134,10 @@ final class RestoreFeatureTests: XCTestCase {
     }
     store.environment.db.run = {
       var db: Database = .unimplemented
+      db.fetchContacts.run = { query in
+        didFetchContacts.append(query)
+        return []
+      }
       db.saveContact.run = { contact in
         didSaveContact.append(contact)
         return contact
@@ -145,13 +155,32 @@ final class RestoreFeatureTests: XCTestCase {
 
     XCTAssertNoDifference(didRestoreWithData, [backupData])
     XCTAssertNoDifference(didRestoreWithPassphrase, [backupPassphrase])
-    XCTAssertNoDifference(didSaveContact, [Contact(
-      id: contactId,
-      username: restoreResult.restoredParams.username,
-      email: restoredFacts.get(.email)?.value,
-      phone: restoredFacts.get(.phone)?.value,
-      createdAt: now
-    )])
+    XCTAssertNoDifference(didFetchContacts, [
+      .init(id: [restoreResult.restoredContacts[0]]),
+      .init(id: [restoreResult.restoredContacts[1]]),
+      .init(id: [restoreResult.restoredContacts[2]]),
+    ])
+    XCTAssertNoDifference(didSaveContact, [
+      Contact(
+        id: contactId,
+        username: restoredFacts.get(.username)?.value,
+        email: restoredFacts.get(.email)?.value,
+        phone: restoredFacts.get(.phone)?.value,
+        createdAt: now
+      ),
+      Contact(
+        id: restoreResult.restoredContacts[0],
+        createdAt: now
+      ),
+      Contact(
+        id: restoreResult.restoredContacts[1],
+        createdAt: now
+      ),
+      Contact(
+        id: restoreResult.restoredContacts[2],
+        createdAt: now
+      ),
+    ])
 
     store.receive(.finished) {
       $0.isRestoring = false
@@ -171,10 +200,10 @@ final class RestoreFeatureTests: XCTestCase {
   }
 
   func testRestoreFailure() {
-    struct Failure: Error {}
-    let failure = Failure()
-
-    var didDestroyMessenger = 0
+    enum Failure: Error {
+      case restore
+      case destroy
+    }
 
     let store = TestStore(
       initialState: RestoreState(
@@ -186,18 +215,19 @@ final class RestoreFeatureTests: XCTestCase {
 
     store.environment.bgQueue = .immediate
     store.environment.mainQueue = .immediate
-    store.environment.messenger.restoreBackup.run = { _, _ in throw failure }
-    store.environment.messenger.destroy.run = { didDestroyMessenger += 1 }
+    store.environment.messenger.restoreBackup.run = { _, _ in throw Failure.restore }
+    store.environment.messenger.destroy.run = { throw Failure.destroy }
 
     store.send(.restoreTapped) {
       $0.isRestoring = true
     }
 
-    XCTAssertEqual(didDestroyMessenger, 1)
-
-    store.receive(.failed(failure as NSError)) {
+    store.receive(.failed([Failure.restore as NSError, Failure.destroy as NSError])) {
       $0.isRestoring = false
-      $0.restoreFailure = failure.localizedDescription
+      $0.restoreFailures = [
+        Failure.restore.localizedDescription,
+        Failure.destroy.localizedDescription,
+      ]
     }
   }
 }

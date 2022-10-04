@@ -24,7 +24,7 @@ public struct RestoreState: Equatable {
   public init(
     file: File? = nil,
     fileImportFailure: String? = nil,
-    restoreFailure: String? = nil,
+    restoreFailures: [String] = [],
     focusedField: Field? = nil,
     isImportingFile: Bool = false,
     passphrase: String = "",
@@ -32,7 +32,7 @@ public struct RestoreState: Equatable {
   ) {
     self.file = file
     self.fileImportFailure = fileImportFailure
-    self.restoreFailure = restoreFailure
+    self.restoreFailures = restoreFailures
     self.focusedField = focusedField
     self.isImportingFile = isImportingFile
     self.passphrase = passphrase
@@ -41,7 +41,7 @@ public struct RestoreState: Equatable {
 
   public var file: File?
   public var fileImportFailure: String?
-  public var restoreFailure: String?
+  public var restoreFailures: [String]
   @BindableState public var focusedField: Field?
   @BindableState public var isImportingFile: Bool
   @BindableState public var passphrase: String
@@ -53,7 +53,7 @@ public enum RestoreAction: Equatable, BindableAction {
   case fileImport(Result<URL, NSError>)
   case restoreTapped
   case finished
-  case failed(NSError)
+  case failed([NSError])
   case binding(BindingAction<RestoreState>)
 }
 
@@ -125,7 +125,7 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
     guard let backupData = state.file?.data, backupData.count > 0 else { return .none }
     let backupPassphrase = state.passphrase
     state.isRestoring = true
-    state.restoreFailure = nil
+    state.restoreFailures = []
     return Effect.result {
       do {
         let result = try env.messenger.restoreBackup(
@@ -135,15 +135,28 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
         let facts = try env.messenger.ud.tryGet().getFacts()
         try env.db().saveContact(Contact(
           id: try env.messenger.e2e.tryGet().getContact().getId(),
-          username: result.restoredParams.username,
+          username: facts.get(.username)?.value,
           email: facts.get(.email)?.value,
           phone: facts.get(.phone)?.value,
           createdAt: env.now()
         ))
+        try result.restoredContacts.forEach { contactId in
+          if try env.db().fetchContacts(.init(id: [contactId])).isEmpty {
+            try env.db().saveContact(Contact(
+              id: contactId,
+              createdAt: env.now()
+            ))
+          }
+        }
         return .success(.finished)
       } catch {
-        try? env.messenger.destroy()
-        return .success(.failed(error as NSError))
+        var errors = [error as NSError]
+        do {
+          try env.messenger.destroy()
+        } catch {
+          errors.append(error as NSError)
+        }
+        return .success(.failed(errors))
       }
     }
     .subscribe(on: env.bgQueue)
@@ -154,9 +167,9 @@ public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironm
     state.isRestoring = false
     return .none
 
-  case .failed(let error):
+  case .failed(let errors):
     state.isRestoring = false
-    state.restoreFailure = error.localizedDescription
+    state.restoreFailures = errors.map(\.localizedDescription)
     return .none
 
   case .binding(_):

@@ -4,6 +4,7 @@ import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
 import ConfirmRequestFeature
+import ContactLookupFeature
 import SendRequestFeature
 import SwiftUI
 import VerifyContactFeature
@@ -26,6 +27,11 @@ public struct ContactView: View {
     var importUsername: Bool
     var importEmail: Bool
     var importPhone: Bool
+    var canLookup: Bool
+    var canSendRequest: Bool
+    var canVerifyContact: Bool
+    var canConfirmRequest: Bool
+    var canCheckAuthorization: Bool
 
     init(state: ContactState) {
       dbContact = state.dbContact
@@ -36,6 +42,11 @@ public struct ContactView: View {
       importUsername = state.importUsername
       importEmail = state.importEmail
       importPhone = state.importPhone
+      canLookup = state.dbContact?.id != nil
+      canSendRequest = state.xxContact != nil || state.dbContact?.marshaled != nil
+      canVerifyContact = state.dbContact?.marshaled != nil
+      canConfirmRequest = state.dbContact?.marshaled != nil
+      canCheckAuthorization = state.dbContact?.marshaled != nil
     }
   }
 
@@ -100,15 +111,30 @@ public struct ContactView: View {
 
         if let dbContact = viewStore.dbContact {
           Section {
+            Label(dbContact.id.hexString(), systemImage: "number")
+              .font(.footnote.monospaced())
             Label(dbContact.username ?? "", systemImage: "person")
             Label(dbContact.email ?? "", systemImage: "envelope")
             Label(dbContact.phone ?? "", systemImage: "phone")
           } header: {
             Text("Contact")
           }
+          .textSelection(.enabled)
 
           Section {
             ContactAuthStatusView(dbContact.authStatus)
+
+            Button {
+              viewStore.send(.lookupTapped)
+            } label: {
+              HStack {
+                Text("Lookup")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+            .disabled(!viewStore.canLookup)
+
             Button {
               viewStore.send(.sendRequestTapped)
             } label: {
@@ -118,6 +144,8 @@ public struct ContactView: View {
                 Image(systemName: "chevron.forward")
               }
             }
+            .disabled(!viewStore.canSendRequest)
+
             Button {
               viewStore.send(.verifyContactTapped)
             } label: {
@@ -127,6 +155,8 @@ public struct ContactView: View {
                 Image(systemName: "chevron.forward")
               }
             }
+            .disabled(!viewStore.canVerifyContact)
+
             Button {
               viewStore.send(.confirmRequestTapped)
             } label: {
@@ -136,6 +166,8 @@ public struct ContactView: View {
                 Image(systemName: "chevron.forward")
               }
             }
+            .disabled(!viewStore.canConfirmRequest)
+
             Button {
               viewStore.send(.checkAuthTapped)
             } label: {
@@ -145,6 +177,7 @@ public struct ContactView: View {
                 Image(systemName: "chevron.forward")
               }
             }
+            .disabled(!viewStore.canCheckAuthorization)
           } header: {
             Text("Auth")
           }
@@ -167,6 +200,15 @@ public struct ContactView: View {
       }
       .navigationTitle("Contact")
       .task { viewStore.send(.start) }
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.lookup,
+          action: ContactAction.lookup
+        ),
+        mapState: replayNonNil(),
+        onDeactivate: { viewStore.send(.lookupDismissed) },
+        destination: ContactLookupView.init(store:)
+      ))
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.sendRequest,

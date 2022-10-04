@@ -3,11 +3,16 @@ import ComposableArchitecture
 import CustomDump
 import XCTest
 import XXClient
+import XXMessengerClient
 import XXModels
 @testable import SendRequestFeature
 
 final class SendRequestFeatureTests: XCTestCase {
   func testStart() {
+    let myContact = XXClient.Contact.unimplemented("my-contact-data".data(using: .utf8)!)
+
+    var didGetMyContact: [MessengerMyContact.IncludeFacts?] = []
+
     let store = TestStore(
       initialState: SendRequestState(
         contact: .unimplemented("contact-data".data(using: .utf8)!)
@@ -15,47 +20,41 @@ final class SendRequestFeatureTests: XCTestCase {
       reducer: sendRequestReducer,
       environment: .unimplemented
     )
-
-    var dbDidFetchContacts: [XXModels.Contact.Query] = []
-    let dbContactsPublisher = PassthroughSubject<[XXModels.Contact], Error>()
-
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getContact.run = {
-        var contact: XXClient.Contact = .unimplemented("my-contact-data".data(using: .utf8)!)
-        contact.getIdFromContact.run = { _ in "my-contact-id".data(using: .utf8)! }
-        return contact
-      }
-      return e2e
-    }
-    store.environment.db.run = {
-      var db: Database = .unimplemented
-      db.fetchContactsPublisher.run = { query in
-        dbDidFetchContacts.append(query)
-        return dbContactsPublisher.eraseToAnyPublisher()
-      }
-      return db
+    store.environment.messenger.myContact.run = { includeFacts in
+      didGetMyContact.append(includeFacts)
+      return myContact
     }
 
     store.send(.start)
 
-    XCTAssertNoDifference(dbDidFetchContacts, [.init(id: ["my-contact-id".data(using: .utf8)!])])
-
-    dbContactsPublisher.send([])
-
-    store.receive(.myContactFetched(nil))
-
-    var myDbContact = XXModels.Contact(id: "my-contact-id".data(using: .utf8)!)
-    myDbContact.marshaled = "my-contact-data".data(using: .utf8)!
-    dbContactsPublisher.send([myDbContact])
-
-    store.receive(.myContactFetched(.live("my-contact-data".data(using: .utf8)!))) {
-      $0.myContact = .live("my-contact-data".data(using: .utf8)!)
+    store.receive(.myContactFetched(myContact)) {
+      $0.myContact = myContact
     }
+  }
 
-    dbContactsPublisher.send(completion: .finished)
+  func testMyContactFailure() {
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: SendRequestState(
+        contact: .unimplemented("contact-data".data(using: .utf8)!)
+      ),
+      reducer: sendRequestReducer,
+      environment: .unimplemented
+    )
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.messenger.myContact.run = { _ in throw failure }
+
+    store.send(.start)
+
+    store.receive(.myContactFetchFailed(failure as NSError)) {
+      $0.myContact = nil
+      $0.failure = failure.localizedDescription
+    }
   }
 
   func testSendRequest() {
