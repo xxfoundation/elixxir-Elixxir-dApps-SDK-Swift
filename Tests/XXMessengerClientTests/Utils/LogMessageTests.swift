@@ -55,4 +55,17 @@ final class LogMessageTests: XCTestCase {
       LogMessage(level: .info, text: "Informing...")
     )
   }
+
+  func testParsingMultilineMessage() {
+    XCTAssertNoDifference(
+      LogMessage.parse("""
+      ERROR 2022/10/04 23:51:15.021658 First line
+      Second line
+      """),
+      LogMessage(level: .error, text: """
+      First line
+      Second line
+      """)
+    )
+  }
 }

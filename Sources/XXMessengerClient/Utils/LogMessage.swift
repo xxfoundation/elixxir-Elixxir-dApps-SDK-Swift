@@ -15,8 +15,11 @@ extension LogMessage {
   public static func parse(_ string: String) -> LogMessage {
     let level: Logger.Level
     let text: String
-    let pattern = #"^([A-Z]+)( \d{4}/\d{2}/\d{2})?( \d{1,2}:\d{2}:\d{2}\.\d+)? (.*)$"#
-    let regex = try! NSRegularExpression(pattern: pattern)
+    let pattern = #"^([A-Z]+)( \d{4}/\d{2}/\d{2})?( \d{1,2}:\d{2}:\d{2}\.\d+)? (.*)"#
+    let regex = try! NSRegularExpression(
+      pattern: pattern,
+      options: .dotMatchesLineSeparators
+    )
     let stringRange = NSRange(location: 0, length: string.utf16.count)
     if let match = regex.firstMatch(in: string, range: stringRange) {
       var groups: [Int: String] = [:]
