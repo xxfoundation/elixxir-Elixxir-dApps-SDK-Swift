@@ -79,7 +79,11 @@ extension AppEnvironment {
         )
       },
       resetAuth: {
-        ResetAuthEnvironment()
+        ResetAuthEnvironment(
+          messenger: messenger,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
       },
       chat: {
         ChatEnvironment(
