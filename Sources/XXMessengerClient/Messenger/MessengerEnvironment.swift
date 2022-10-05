@@ -1,5 +1,4 @@
 import Foundation
-import Logging
 import XXClient
 import XCTestDynamicOverlay
 
@@ -19,7 +18,7 @@ public struct MessengerEnvironment {
   public var isListeningForMessages: Stored<Bool>
   public var isRegisteredWithUD: IsRegisteredWithUD
   public var loadCMix: LoadCMix
-  public var log: (LogMessage) -> Void
+  public var logger: MessengerLogger
   public var login: Login
   public var lookupUD: LookupUD
   public var messageListeners: ListenersRegistry
@@ -51,9 +50,7 @@ extension MessengerEnvironment {
     .path
 
   public static func live() -> MessengerEnvironment {
-    let logger = Logger(label: "xx.network.client")
-
-    return MessengerEnvironment(
+    MessengerEnvironment(
       authCallbacks: .live(),
       backup: .inMemory(),
       backupCallbacks: .live(),
@@ -69,7 +66,7 @@ extension MessengerEnvironment {
       isListeningForMessages: .inMemory(false),
       isRegisteredWithUD: .live,
       loadCMix: .live,
-      log: { logger.log(level: $0.level, .init(stringLiteral: $0.text)) },
+      logger: .live(),
       login: .live,
       lookupUD: .live,
       messageListeners: .live(),
@@ -112,7 +109,7 @@ extension MessengerEnvironment {
     isListeningForMessages: .unimplemented(placeholder: false),
     isRegisteredWithUD: .unimplemented,
     loadCMix: .unimplemented,
-    log: XCTUnimplemented("\(Self.self).log"),
+    logger: .unimplemented,
     login: .unimplemented,
     lookupUD: .unimplemented,
     messageListeners: .unimplemented,

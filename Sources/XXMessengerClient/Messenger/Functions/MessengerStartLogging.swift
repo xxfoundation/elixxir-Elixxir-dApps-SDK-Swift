@@ -15,8 +15,7 @@ extension MessengerStartLogging {
   public static func live(_ env: MessengerEnvironment) -> MessengerStartLogging {
     return MessengerStartLogging {
       env.registerLogWriter(.init { messageString in
-        let message = LogMessage.parse(messageString)
-        env.log(message)
+        env.logger(.parse(messageString))
       })
     }
   }
