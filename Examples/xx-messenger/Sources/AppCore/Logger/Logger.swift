@@ -1,5 +1,5 @@
 import Foundation
-import Pulse
+import Logging
 import XCTestDynamicOverlay
 
 public struct Logger {
@@ -21,14 +21,12 @@ public struct Logger {
 
 extension Logger {
   public static func live() -> Logger {
-    Logger { msg, file, function, line in
+    let logger = Logging.Logger(label: "xx.network.XXMessengerExample")
+    return Logger { msg, file, function, line in
       switch msg {
       case .error(let error):
-        LoggerStore.shared.storeMessage(
-          label: "xx-messenger",
-          level: .error,
-          message: error.localizedDescription,
-          metadata: [:],
+        logger.error(
+          .init(stringLiteral: error.localizedDescription),
           file: file,
           function: function,
           line: line

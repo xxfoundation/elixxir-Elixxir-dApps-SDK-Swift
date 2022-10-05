@@ -1,4 +1,5 @@
 import Foundation
+import Logging
 import XXClient
 import XCTestDynamicOverlay
 
@@ -18,6 +19,7 @@ public struct MessengerEnvironment {
   public var isListeningForMessages: Stored<Bool>
   public var isRegisteredWithUD: IsRegisteredWithUD
   public var loadCMix: LoadCMix
+  public var log: (LogMessage) -> Void
   public var login: Login
   public var lookupUD: LookupUD
   public var messageListeners: ListenersRegistry
@@ -29,8 +31,10 @@ public struct MessengerEnvironment {
   public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
   public var registerForNotifications: RegisterForNotifications
+  public var registerLogWriter: RegisterLogWriter
   public var resumeBackup: ResumeBackup
   public var searchUD: SearchUD
+  public var setLogLevel: SetLogLevel
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
   public var ud: Stored<UserDiscovery?>
@@ -47,7 +51,9 @@ extension MessengerEnvironment {
     .path
 
   public static func live() -> MessengerEnvironment {
-    MessengerEnvironment(
+    let logger = Logger(label: "xx.network.client")
+
+    return MessengerEnvironment(
       authCallbacks: .live(),
       backup: .inMemory(),
       backupCallbacks: .live(),
@@ -63,6 +69,7 @@ extension MessengerEnvironment {
       isListeningForMessages: .inMemory(false),
       isRegisteredWithUD: .live,
       loadCMix: .live,
+      log: { logger.log(level: $0.level, .init(stringLiteral: $0.text)) },
       login: .live,
       lookupUD: .live,
       messageListeners: .live(),
@@ -74,8 +81,10 @@ extension MessengerEnvironment {
       newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
       registerForNotifications: .live,
+      registerLogWriter: .live,
       resumeBackup: .live,
       searchUD: .live,
+      setLogLevel: .live,
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
       ud: .inMemory(),
@@ -103,6 +112,7 @@ extension MessengerEnvironment {
     isListeningForMessages: .unimplemented(placeholder: false),
     isRegisteredWithUD: .unimplemented,
     loadCMix: .unimplemented,
+    log: XCTUnimplemented("\(Self.self).log"),
     login: .unimplemented,
     lookupUD: .unimplemented,
     messageListeners: .unimplemented,
@@ -114,8 +124,10 @@ extension MessengerEnvironment {
     newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
     registerForNotifications: .unimplemented,
+    registerLogWriter: .unimplemented,
     resumeBackup: .unimplemented,
     searchUD: .unimplemented,
+    setLogLevel: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
     ud: .unimplemented(),

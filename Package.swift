@@ -31,6 +31,10 @@ let package = Package(
       url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
       .upToNextMajor(from: "4.2.2")
     ),
+    .package(
+      url: "https://github.com/apple/swift-log.git",
+      .upToNextMajor(from: "1.4.4")
+    ),
   ],
   targets: [
     .target(
@@ -55,6 +59,7 @@ let package = Package(
       dependencies: [
         .target(name: "XXClient"),
         .product(name: "KeychainAccess", package: "KeychainAccess"),
+        .product(name: "Logging", package: "swift-log"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ],
       swiftSettings: swiftSettings
