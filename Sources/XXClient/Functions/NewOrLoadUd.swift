@@ -7,6 +7,20 @@ public struct NewOrLoadUd {
       e2eId: Int,
       username: String?,
       registrationValidationSignature: Data?,
+      environment: UDEnvironment
+    ) {
+      self.e2eId = e2eId
+      self.username = username
+      self.registrationValidationSignature = registrationValidationSignature
+      self.cert = environment.cert
+      self.contact = environment.contact
+      self.address = environment.address
+    }
+
+    public init(
+      e2eId: Int,
+      username: String?,
+      registrationValidationSignature: Data?,
       cert: Data,
       contact: Data,
       address: String
