@@ -1,3 +1,4 @@
+import AppCore
 import BackupFeature
 import ComposableArchitecture
 import ComposablePresentation
@@ -136,6 +137,12 @@ public struct HomeView: View {
             .disabled(viewStore.isDeletingAccount)
           } header: {
             Text("Account")
+          }
+
+          Section {
+            AppVersionText()
+          } header: {
+            Text("App version")
           }
         }
         .navigationTitle("Home")

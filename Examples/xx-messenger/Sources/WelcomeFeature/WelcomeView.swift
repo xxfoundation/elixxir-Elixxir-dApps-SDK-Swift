@@ -1,3 +1,4 @@
+import AppCore
 import ComposableArchitecture
 import SwiftUI
 
@@ -23,7 +24,9 @@ public struct WelcomeView: View {
       NavigationView {
         Form {
           Section {
-            Text("xx messenger")
+            AppVersionText()
+          } header: {
+            Text("App version")
           }
 
           if let failure = viewStore.failure {

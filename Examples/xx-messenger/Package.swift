@@ -413,6 +413,7 @@ let package = Package(
     .target(
       name: "WelcomeFeature",
       dependencies: [
+        .target(name: "AppCore"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
       ],
