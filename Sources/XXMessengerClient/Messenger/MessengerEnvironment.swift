@@ -37,9 +37,7 @@ public struct MessengerEnvironment {
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
   public var ud: Stored<UserDiscovery?>
-  public var udAddress: String?
-  public var udCert: Data?
-  public var udContact: Data?
+  public var udEnvironment: UDEnvironment?
 }
 
 extension MessengerEnvironment {
@@ -85,9 +83,7 @@ extension MessengerEnvironment {
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
       ud: .inMemory(),
-      udAddress: nil,
-      udCert: nil,
-      udContact: nil
+      udEnvironment: nil
     )
   }
 }
@@ -128,8 +124,6 @@ extension MessengerEnvironment {
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
     ud: .unimplemented(),
-    udAddress: nil,
-    udCert: nil,
-    udContact: nil
+    udEnvironment: nil
   )
 }

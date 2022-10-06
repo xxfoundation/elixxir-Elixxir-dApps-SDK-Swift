@@ -26,9 +26,11 @@ final class MessengerRestoreBackupTests: XCTestCase {
       dhKeyPrivate: "reception-dhKeyPrivate".data(using: .utf8)!,
       e2eGrp: "reception-e2eGrp".data(using: .utf8)!
     )
-    let udContactFromNdf = "ud-contact".data(using: .utf8)!
-    let udCertFromNdf = "ud-cert".data(using: .utf8)!
-    let udAddressFromNdf = "ud-address"
+    let udEnvironmentFromNDF = UDEnvironment(
+      address: "ud-address",
+      cert: "ud-cert".data(using: .utf8)!,
+      contact: "ud-contact".data(using: .utf8)!
+    )
 
     var caughtActions: [CaughtAction] = []
 
@@ -81,9 +83,7 @@ final class MessengerRestoreBackupTests: XCTestCase {
       ))
       var e2e: E2E = .unimplemented
       e2e.getId.run = { e2eId }
-      e2e.getUdCertFromNdf.run = { udCertFromNdf }
-      e2e.getUdContactFromNdf.run = { udContactFromNdf }
-      e2e.getUdAddressFromNdf.run = { udAddressFromNdf }
+      e2e.getUdEnvironmentFromNdf.run = { udEnvironmentFromNDF }
       return e2e
     }
     env.newUdManagerFromBackup.run = { params, _ in
@@ -151,9 +151,7 @@ final class MessengerRestoreBackupTests: XCTestCase {
       ),
       .didNewUdManagerFromBackup(params: .init(
         e2eId: e2eId,
-        cert: udCertFromNdf,
-        contact: udContactFromNdf,
-        address: udAddressFromNdf
+        environment: udEnvironmentFromNDF
       )),
       .didSetUD,
     ])
