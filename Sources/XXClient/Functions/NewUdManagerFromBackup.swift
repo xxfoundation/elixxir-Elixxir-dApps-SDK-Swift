@@ -5,6 +5,16 @@ public struct NewUdManagerFromBackup {
   public struct Params: Equatable {
     public init(
       e2eId: Int,
+      environment: UDEnvironment
+    ) {
+      self.e2eId = e2eId
+      self.cert = environment.cert
+      self.contact = environment.contact
+      self.address = environment.address
+    }
+
+    public init(
+      e2eId: Int,
       cert: Data,
       contact: Data,
       address: String

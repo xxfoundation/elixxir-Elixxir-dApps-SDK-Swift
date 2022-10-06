@@ -62,9 +62,7 @@ extension MessengerRestoreBackup {
       let ud = try env.newUdManagerFromBackup(
         params: NewUdManagerFromBackup.Params(
           e2eId: e2e.getId(),
-          cert: env.udCert ?? e2e.getUdCertFromNdf(),
-          contact: env.udContact ?? (try e2e.getUdContactFromNdf()),
-          address: env.udAddress ?? e2e.getUdAddressFromNdf()
+          environment: env.udEnvironment ?? (try e2e.getUdEnvironmentFromNdf())
         ),
         follower: UdNetworkStatus { cMix.networkFollowerStatus() }
       )
