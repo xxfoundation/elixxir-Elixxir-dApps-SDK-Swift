@@ -8,13 +8,15 @@ public struct GroupChatProcessor {
       msg: Data,
       receptionId: Data,
       ephemeralId: Int64,
-      roundId: Int64
+      roundId: Int64,
+      roundUrl: String
     ) {
       self.decryptedMessage = decryptedMessage
       self.msg = msg
       self.receptionId = receptionId
       self.ephemeralId = ephemeralId
       self.roundId = roundId
+      self.roundUrl = roundUrl
     }
 
     public var decryptedMessage: GroupChatMessage
@@ -22,6 +24,7 @@ public struct GroupChatProcessor {
     public var receptionId: Data
     public var ephemeralId: Int64
     public var roundId: Int64
+    public var roundUrl: String
   }
 
   public init(
@@ -58,20 +61,24 @@ extension GroupChatProcessor {
         receptionId: Data?,
         ephemeralId: Int64,
         roundId: Int64,
+        roundUrl: String?,
         err: Error?
       ) {
         if let err = err {
           callback.handle(.failure(err as NSError))
           return
         }
-        guard let decryptedMessage = decryptedMessage else {
+        guard let decryptedMessage else {
           fatalError("BindingsGroupChatProcessor received `nil` decryptedMessage")
         }
-        guard let msg = msg else {
+        guard let msg else {
           fatalError("BindingsGroupChatProcessor received `nil` msg")
         }
-        guard let receptionId = receptionId else {
+        guard let receptionId else {
           fatalError("BindingsGroupChatProcessor received `nil` receptionId")
+        }
+        guard let roundUrl else {
+          fatalError("BindingsGroupChatProcessor received `nil` roundUrl")
         }
         do {
           callback.handle(.success(.init(
@@ -79,7 +86,8 @@ extension GroupChatProcessor {
             msg: msg,
             receptionId: receptionId,
             ephemeralId: ephemeralId,
-            roundId: roundId
+            roundId: roundId,
+            roundUrl: roundUrl
           )))
         } catch {
           callback.handle(.failure(error as NSError))

@@ -132,7 +132,7 @@ Parameters:
 @end
 
 @protocol BindingsGroupChatProcessor <NSObject>
-- (void)process:(NSData* _Nullable)decryptedMessage msg:(NSData* _Nullable)msg receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId err:(NSError* _Nullable)err;
+- (void)process:(NSData* _Nullable)decryptedMessage msg:(NSData* _Nullable)msg receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId roundUrl:(NSString* _Nullable)roundUrl err:(NSError* _Nullable)err;
 - (NSString* _Nonnull)string;
 @end
 
@@ -2593,7 +2593,7 @@ The decryptedMessage field will be a JSON marshalled GroupChatMessage.
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (void)process:(NSData* _Nullable)decryptedMessage msg:(NSData* _Nullable)msg receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId err:(NSError* _Nullable)err;
+- (void)process:(NSData* _Nullable)decryptedMessage msg:(NSData* _Nullable)msg receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId roundUrl:(NSString* _Nullable)roundUrl err:(NSError* _Nullable)err;
 - (NSString* _Nonnull)string;
 @end
 
