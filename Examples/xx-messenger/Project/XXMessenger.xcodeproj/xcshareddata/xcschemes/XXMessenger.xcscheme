@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "31964B8928A6D37100BBDC17"
-               BuildableName = "XXMessenger.app"
+               BuildableName = "XXME.app"
                BlueprintName = "XXMessenger"
                ReferencedContainer = "container:XXMessenger.xcodeproj">
             </BuildableReference>
@@ -226,7 +226,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "31964B8928A6D37100BBDC17"
-            BuildableName = "XXMessenger.app"
+            BuildableName = "XXME.app"
             BlueprintName = "XXMessenger"
             ReferencedContainer = "container:XXMessenger.xcodeproj">
          </BuildableReference>
@@ -243,7 +243,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "31964B8928A6D37100BBDC17"
-            BuildableName = "XXMessenger.app"
+            BuildableName = "XXME.app"
             BlueprintName = "XXMessenger"
             ReferencedContainer = "container:XXMessenger.xcodeproj">
          </BuildableReference>
