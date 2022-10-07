@@ -115,6 +115,7 @@ public struct HomeEnvironment {
   public var backup: () -> BackupEnvironment
 }
 
+#if DEBUG
 extension HomeEnvironment {
   public static let unimplemented = HomeEnvironment(
     messenger: .unimplemented,
@@ -127,6 +128,7 @@ extension HomeEnvironment {
     backup: { .unimplemented }
   )
 }
+#endif
 
 public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 { state, action, env in

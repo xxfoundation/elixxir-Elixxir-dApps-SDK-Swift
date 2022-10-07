@@ -82,6 +82,7 @@ public struct RestoreEnvironment {
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
 
+#if DEBUG
 extension RestoreEnvironment {
   public static let unimplemented = RestoreEnvironment(
     messenger: .unimplemented,
@@ -92,6 +93,7 @@ extension RestoreEnvironment {
     bgQueue: .unimplemented
   )
 }
+#endif
 
 public let restoreReducer = Reducer<RestoreState, RestoreAction, RestoreEnvironment>
 { state, action, env in

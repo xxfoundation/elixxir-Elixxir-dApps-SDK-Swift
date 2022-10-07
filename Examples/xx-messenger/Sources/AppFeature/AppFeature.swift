@@ -59,6 +59,7 @@ struct AppEnvironment {
   var home: () -> HomeEnvironment
 }
 
+#if DEBUG
 extension AppEnvironment {
   static let unimplemented = AppEnvironment(
     dbManager: .unimplemented,
@@ -74,6 +75,7 @@ extension AppEnvironment {
     home: { .unimplemented }
   )
 }
+#endif
 
 let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 { state, action, env in
