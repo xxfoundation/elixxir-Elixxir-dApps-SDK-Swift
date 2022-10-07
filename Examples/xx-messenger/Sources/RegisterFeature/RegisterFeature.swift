@@ -62,6 +62,7 @@ public struct RegisterEnvironment {
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
 
+#if DEBUG
 extension RegisterEnvironment {
   public static let unimplemented = RegisterEnvironment(
     messenger: .unimplemented,
@@ -71,6 +72,7 @@ extension RegisterEnvironment {
     bgQueue: .unimplemented
   )
 }
+#endif
 
 public let registerReducer = Reducer<RegisterState, RegisterAction, RegisterEnvironment>
 { state, action, env in

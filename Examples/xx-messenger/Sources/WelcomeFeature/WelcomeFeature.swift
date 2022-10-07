@@ -38,6 +38,7 @@ public struct WelcomeEnvironment {
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
 
+#if DEBUG
 extension WelcomeEnvironment {
   public static let unimplemented = WelcomeEnvironment(
     messenger: .unimplemented,
@@ -45,6 +46,7 @@ extension WelcomeEnvironment {
     bgQueue: .unimplemented
   )
 }
+#endif
 
 public let welcomeReducer = Reducer<WelcomeState, WelcomeAction, WelcomeEnvironment>
 { state, action, env in
