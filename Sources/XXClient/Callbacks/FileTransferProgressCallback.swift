@@ -3,6 +3,14 @@ import XCTestDynamicOverlay
 
 public struct FileTransferProgressCallback {
   public struct Callback {
+    public init(
+      progress: Progress,
+      partTracker: FilePartTracker
+    ) {
+      self.progress = progress
+      self.partTracker = partTracker
+    }
+
     public var progress: Progress
     public var partTracker: FilePartTracker
   }
