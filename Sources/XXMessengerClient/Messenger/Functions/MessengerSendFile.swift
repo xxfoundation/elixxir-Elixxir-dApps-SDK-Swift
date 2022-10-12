@@ -3,20 +3,7 @@ import XCTestDynamicOverlay
 import XXClient
 
 public struct MessengerSendFile {
-  public struct CallbackData {
-    public init(
-      transferId: Data,
-      result: Result<FileTransferProgressCallback.Callback, NSError>
-    ) {
-      self.transferId = transferId
-      self.result = result
-    }
-
-    public var transferId: Data
-    public var result: Result<FileTransferProgressCallback.Callback, NSError>
-  }
-
-  public typealias Callback = (CallbackData) -> Void
+  public typealias Callback = (Data, XXClient.Progress) -> Void
 
   public enum Error: Swift.Error, Equatable {
     case notConnected
@@ -25,7 +12,7 @@ public struct MessengerSendFile {
   public var run: (FileTransferSend.Params, @escaping Callback) throws -> Void
 
   public func callAsFunction(
-    params: FileTransferSend.Params,
+    _ params: FileTransferSend.Params,
     callback: @escaping Callback
   ) throws -> Void {
     try run(params, callback)
@@ -44,33 +31,37 @@ extension MessengerSendFile {
           e2eFileTransferParamsJSON: env.getE2EFileTransferParams(),
           fileTransferParamsJSON: env.getFileTransferParams()
         ),
-        callback: .unimplemented
+        callback: ReceiveFileCallback { _ in
+          fatalError("Bindings issue: ReceiveFileCallback called when sending file.")
+        }
       )
       let semaphore = DispatchSemaphore(value: 0)
-      var transferId: Data! = nil
+      var transferId: Data!
+      var error: Swift.Error?
       transferId = try fileTransfer.send(
         params: params,
         callback: FileTransferProgressCallback { result in
-          callback(CallbackData(
-            transferId: transferId,
-            result: result
-          ))
+          guard let transferId else {
+            fatalError("Bindings issue: file transfer progress callback was called before send function returned transfer id.")
+          }
           switch result {
-          case .failure(_):
-
+          case .failure(let err):
+            error = err
             semaphore.signal()
-          case .success(let callback):
-            if callback.progress.error != nil {
 
-            }
-            if callback.progress.completed {
+          case .success(let cb):
+            callback(transferId, cb.progress)
+            if cb.progress.completed || cb.progress.error != nil {
               semaphore.signal()
             }
           }
         }
       )
       semaphore.wait()
-      try? fileTransfer.closeSend(transferId: transferId)
+      try fileTransfer.closeSend(transferId: transferId)
+      if let error {
+        throw error
+      }
     }
   }
 }
