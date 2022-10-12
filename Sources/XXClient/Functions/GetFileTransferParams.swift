@@ -23,4 +23,3 @@ extension GetFileTransferParams {
     run: XCTUnimplemented("\(Self.self)", placeholder: "unimplemented".data(using: .utf8)!)
   )
 }
-

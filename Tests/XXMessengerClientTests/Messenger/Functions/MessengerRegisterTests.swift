@@ -12,9 +12,11 @@ final class MessengerRegisterTests: XCTestCase {
     let e2eId = 1234
     let networkFollowerStatus: NetworkFollowerStatus = .stopped
     let registrationSignature = "registration-signature".data(using: .utf8)!
-    let udCertFromNDF = "ndf-ud-cert".data(using: .utf8)!
-    let udContactFromNDF = "ndf-ud-contact".data(using: .utf8)!
-    let udAddressFromNDF = "ndf-ud-address"
+    let udEnvironmentFromNDF = UDEnvironment(
+      address: "ndf-ud-address",
+      cert: "ndf-ud-cert".data(using: .utf8)!,
+      contact: "ndf-ud-contact".data(using: .utf8)!
+    )
     let username = "new-user-name"
 
     var env: MessengerEnvironment = .unimplemented
@@ -29,15 +31,11 @@ final class MessengerRegisterTests: XCTestCase {
     env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { e2eId }
-      e2e.getUdCertFromNdf.run = { udCertFromNDF }
-      e2e.getUdContactFromNdf.run = { udContactFromNDF }
-      e2e.getUdAddressFromNdf.run = { udAddressFromNDF }
+      e2e.getUdEnvironmentFromNdf.run = { udEnvironmentFromNDF }
       return e2e
     }
     env.ud.set = { didSetUD.append($0) }
-    env.udCert = nil
-    env.udContact = nil
-    env.udAddress = nil
+    env.udEnvironment = nil
     env.newOrLoadUd.run = { params, follower in
       didNewOrLoadUDWithParams.append(params)
       didNewOrLoadUDWithFollower.append(follower)
@@ -50,9 +48,7 @@ final class MessengerRegisterTests: XCTestCase {
       e2eId: e2eId,
       username: username,
       registrationValidationSignature: registrationSignature,
-      cert: udCertFromNDF,
-      contact: udContactFromNDF,
-      address: udAddressFromNDF
+      environment: udEnvironmentFromNDF
     )])
     XCTAssertEqual(didNewOrLoadUDWithFollower.count, 1)
     XCTAssertEqual(
@@ -68,9 +64,11 @@ final class MessengerRegisterTests: XCTestCase {
 
     let e2eId = 1234
     let registrationSignature = "registration-signature".data(using: .utf8)!
-    let altUdCert = "alt-ud-cert".data(using: .utf8)!
-    let altUdContact = "alt-ud-contact".data(using: .utf8)!
-    let altUdAddress = "alt-ud-address"
+    let udEnvironment = UDEnvironment(
+      address: "alt-ud-address",
+      cert: "alt-ud-cert".data(using: .utf8)!,
+      contact: "alt-ud-contact".data(using: .utf8)!
+    )
     let username = "new-user-name"
 
     var env: MessengerEnvironment = .unimplemented
@@ -88,9 +86,7 @@ final class MessengerRegisterTests: XCTestCase {
       return e2e
     }
     env.ud.set = { didSetUD.append($0) }
-    env.udCert = altUdCert
-    env.udContact = altUdContact
-    env.udAddress = altUdAddress
+    env.udEnvironment = udEnvironment
     env.newOrLoadUd.run = { params, _ in
       didNewOrLoadUDWithParams.append(params)
       return .unimplemented
@@ -102,9 +98,7 @@ final class MessengerRegisterTests: XCTestCase {
       e2eId: e2eId,
       username: username,
       registrationValidationSignature: registrationSignature,
-      cert: altUdCert,
-      contact: altUdContact,
-      address: altUdAddress
+      environment: udEnvironment
     )])
     XCTAssertEqual(didSetUD.compactMap { $0 }.count, 1)
   }
@@ -152,12 +146,10 @@ final class MessengerRegisterTests: XCTestCase {
     env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { 1234 }
-      e2e.getUdCertFromNdf.run = { "ndf-ud-cert".data(using: .utf8)! }
-      e2e.getUdContactFromNdf.run = { throw error }
+      e2e.getUdEnvironmentFromNdf.run = { throw error }
       return e2e
     }
-    env.udCert = nil
-    env.udContact = nil
+    env.udEnvironment = nil
     let register: MessengerRegister = .live(env)
 
     XCTAssertThrowsError(try register(username: "new-user-name")) { err in
@@ -183,9 +175,11 @@ final class MessengerRegisterTests: XCTestCase {
       e2e.getId.run = { 1234 }
       return e2e
     }
-    env.udCert = "ud-cert".data(using: .utf8)!
-    env.udContact = "ud-contact".data(using: .utf8)!
-    env.udAddress = "ud-address"
+    env.udEnvironment = UDEnvironment(
+      address: "ud-address",
+      cert: "ud-cert".data(using: .utf8)!,
+      contact: "ud-contact".data(using: .utf8)!
+    )
     env.newOrLoadUd.run = { _, _ in throw error }
     let register: MessengerRegister = .live(env)
 

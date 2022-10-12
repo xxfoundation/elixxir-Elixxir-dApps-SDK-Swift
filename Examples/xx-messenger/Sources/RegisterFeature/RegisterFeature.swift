@@ -7,6 +7,10 @@ import XXMessengerClient
 import XXModels
 
 public struct RegisterState: Equatable {
+  public enum Error: Swift.Error, Equatable {
+    case usernameMismatch(registering: String, registered: String?)
+  }
+
   public enum Field: String, Hashable {
     case username
   }
@@ -58,6 +62,7 @@ public struct RegisterEnvironment {
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
 
+#if DEBUG
 extension RegisterEnvironment {
   public static let unimplemented = RegisterEnvironment(
     messenger: .unimplemented,
@@ -67,6 +72,7 @@ extension RegisterEnvironment {
     bgQueue: .unimplemented
   )
 }
+#endif
 
 public let registerReducer = Reducer<RegisterState, RegisterAction, RegisterEnvironment>
 { state, action, env in
@@ -82,14 +88,22 @@ public let registerReducer = Reducer<RegisterState, RegisterAction, RegisterEnvi
       do {
         let db = try env.db()
         try env.messenger.register(username: username)
-        var contact = try env.messenger.e2e.tryGet().getContact()
-        try contact.setFact(.username, username)
+        let contact = try env.messenger.myContact()
+        let facts = try contact.getFacts()
         try db.saveContact(Contact(
           id: try contact.getId(),
           marshaled: contact.data,
-          username: username,
+          username: facts.get(.username)?.value,
+          email: facts.get(.email)?.value,
+          phone: facts.get(.phone)?.value,
           createdAt: env.now()
         ))
+        guard facts.get(.username)?.value == username else {
+          throw RegisterState.Error.usernameMismatch(
+            registering: username,
+            registered: facts.get(.username)?.value
+          )
+        }
         fulfill(.success(.finished))
       }
       catch {
@@ -106,6 +120,7 @@ public let registerReducer = Reducer<RegisterState, RegisterAction, RegisterEnvi
     return .none
 
   case .finished:
+    state.isRegistering = false
     return .none
   }
 }

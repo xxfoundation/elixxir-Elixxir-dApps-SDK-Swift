@@ -16,14 +16,20 @@ public struct MessengerListenForMessages {
 extension MessengerListenForMessages {
   public static func live(_ env: MessengerEnvironment) -> MessengerListenForMessages {
     MessengerListenForMessages {
-      guard let e2e = env.e2e() else {
-        throw Error.notConnected
+      do {
+        guard let e2e = env.e2e() else {
+          throw Error.notConnected
+        }
+        try e2e.registerListener(
+          senderId: nil,
+          messageType: 2,
+          callback: env.messageListeners.registered()
+        )
+        env.isListeningForMessages.set(true)
+      } catch {
+        env.isListeningForMessages.set(false)
+        throw error
       }
-      try e2e.registerListener(
-        senderId: nil,
-        messageType: 2,
-        callback: env.messageListeners.registered()
-      )
     }
   }
 }

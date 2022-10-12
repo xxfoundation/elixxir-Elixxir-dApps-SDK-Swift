@@ -1,15 +1,10 @@
-// swift-tools-version: 5.6
-
+// swift-tools-version: 5.7
 import PackageDescription
 
 let swiftSettings: [SwiftSetting] = [
-  .unsafeFlags(
-    [
-      "-Xfrontend", "-debug-time-function-bodies",
-      "-Xfrontend", "-debug-time-expression-type-checking",
-    ],
-    .when(configuration: .debug)
-  ),
+  //.unsafeFlags(["-Xfrontend", "-warn-concurrency"], .when(configuration: .debug)),
+  //.unsafeFlags(["-Xfrontend", "-debug-time-function-bodies"], .when(configuration: .debug)),
+  //.unsafeFlags(["-Xfrontend", "-debug-time-expression-type-checking"], .when(configuration: .debug)),
 ]
 
 let package = Package(
@@ -26,15 +21,19 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/pointfreeco/swift-custom-dump.git",
-      .upToNextMajor(from: "0.5.0")
+      .upToNextMajor(from: "0.5.2")
     ),
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
-      .upToNextMajor(from: "0.4.0")
+      .upToNextMajor(from: "0.4.1")
     ),
     .package(
       url: "https://github.com/kishikawakatsumi/KeychainAccess.git",
       .upToNextMajor(from: "4.2.2")
+    ),
+    .package(
+      url: "https://github.com/apple/swift-log.git",
+      .upToNextMajor(from: "1.4.4")
     ),
   ],
   targets: [
@@ -60,6 +59,7 @@ let package = Package(
       dependencies: [
         .target(name: "XXClient"),
         .product(name: "KeychainAccess", package: "KeychainAccess"),
+        .product(name: "Logging", package: "swift-log"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
       ],
       swiftSettings: swiftSettings

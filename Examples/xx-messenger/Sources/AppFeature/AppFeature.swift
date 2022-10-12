@@ -6,6 +6,7 @@ import Foundation
 import HomeFeature
 import RestoreFeature
 import WelcomeFeature
+import XXClient
 import XXMessengerClient
 
 struct AppState: Equatable {
@@ -37,6 +38,7 @@ extension AppState.Screen {
 
 enum AppAction: Equatable, BindableAction {
   case start
+  case stop
   case binding(BindingAction<AppState>)
   case welcome(WelcomeAction)
   case restore(RestoreAction)
@@ -46,6 +48,10 @@ enum AppAction: Equatable, BindableAction {
 struct AppEnvironment {
   var dbManager: DBManager
   var messenger: Messenger
+  var authHandler: AuthCallbackHandler
+  var messageListener: MessageListenerHandler
+  var backupStorage: BackupStorage
+  var log: Logger
   var mainQueue: AnySchedulerOf<DispatchQueue>
   var bgQueue: AnySchedulerOf<DispatchQueue>
   var welcome: () -> WelcomeEnvironment
@@ -53,10 +59,15 @@ struct AppEnvironment {
   var home: () -> HomeEnvironment
 }
 
+#if DEBUG
 extension AppEnvironment {
   static let unimplemented = AppEnvironment(
     dbManager: .unimplemented,
     messenger: .unimplemented,
+    authHandler: .unimplemented,
+    messageListener: .unimplemented,
+    backupStorage: .unimplemented,
+    log: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
     welcome: { .unimplemented },
@@ -64,37 +75,57 @@ extension AppEnvironment {
     home: { .unimplemented }
   )
 }
+#endif
 
 let appReducer = Reducer<AppState, AppAction, AppEnvironment>
 { state, action, env in
+  enum EffectId {}
+
   switch action {
   case .start, .welcome(.finished), .restore(.finished), .home(.deleteAccount(.success)):
     state.screen = .loading
-    return .run { subscriber in
+    return Effect.run { subscriber in
+      var cancellables: [XXClient.Cancellable] = []
+
       do {
         if env.dbManager.hasDB() == false {
           try env.dbManager.makeDB()
         }
 
-        if env.messenger.isLoaded() == false {
-          if env.messenger.isCreated() == false {
-            subscriber.send(.set(\.$screen, .welcome(WelcomeState())))
-            subscriber.send(completion: .finished)
-            return AnyCancellable {}
-          }
-          try env.messenger.load()
-        }
+        cancellables.append(env.authHandler(onError: { error in
+          env.log(.error(error as NSError))
+        }))
+        cancellables.append(env.messageListener(onError: { error in
+          env.log(.error(error as NSError))
+        }))
+        cancellables.append(env.messenger.registerBackupCallback(.init { data in
+          try? env.backupStorage.store(data)
+        }))
 
-        subscriber.send(.set(\.$screen, .home(HomeState())))
+        let isLoaded = env.messenger.isLoaded()
+        let isCreated = env.messenger.isCreated()
+
+        if !isLoaded, !isCreated {
+          subscriber.send(.set(\.$screen, .welcome(WelcomeState())))
+        } else if !isLoaded {
+          try env.messenger.load()
+          subscriber.send(.set(\.$screen, .home(HomeState())))
+        } else {
+          subscriber.send(.set(\.$screen, .home(HomeState())))
+        }
       } catch {
         subscriber.send(.set(\.$screen, .failure(error.localizedDescription)))
       }
-      subscriber.send(completion: .finished)
-      return AnyCancellable {}
+
+      return AnyCancellable { cancellables.forEach { $0.cancel() } }
     }
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
+    .cancellable(id: EffectId.self, cancelInFlight: true)
+
+  case .stop:
+    return .cancel(id: EffectId.self)
 
   case .welcome(.restoreTapped):
     state.screen = .restore(RestoreState())

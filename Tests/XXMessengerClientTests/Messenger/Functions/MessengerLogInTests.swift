@@ -11,10 +11,12 @@ final class MessengerLogInTests: XCTestCase {
 
     let e2eId = 1234
     let networkFollowerStatus: NetworkFollowerStatus = .stopped
-    let udCertFromNDF = "ndf-ud-cert".data(using: .utf8)!
-    let udContactFromNDF = "ndf-ud-contact".data(using: .utf8)!
-    let udAddressFromNDF = "ndf-ud-address"
-
+    let udEnvironmentFromNDF = UDEnvironment(
+      address: "ndf-ud-address",
+      cert: "ndf-ud-cert".data(using: .utf8)!,
+      contact: "ndf-ud-contact".data(using: .utf8)!
+    )
+    
     var env: MessengerEnvironment = .unimplemented
     env.cMix.get = {
       var cMix: CMix = .unimplemented
@@ -24,15 +26,11 @@ final class MessengerLogInTests: XCTestCase {
     env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { e2eId }
-      e2e.getUdCertFromNdf.run = { udCertFromNDF }
-      e2e.getUdContactFromNdf.run = { udContactFromNDF }
-      e2e.getUdAddressFromNdf.run = { udAddressFromNDF }
+      e2e.getUdEnvironmentFromNdf.run = { udEnvironmentFromNDF }
       return e2e
     }
     env.ud.set = { didSetUD.append($0) }
-    env.udCert = nil
-    env.udContact = nil
-    env.udAddress = nil
+    env.udEnvironment = nil
     env.newOrLoadUd.run = { params, follower in
       didNewOrLoadUDWithParams.append(params)
       didNewOrLoadUDWithFollower.append(follower)
@@ -45,9 +43,7 @@ final class MessengerLogInTests: XCTestCase {
       e2eId: e2eId,
       username: nil,
       registrationValidationSignature: nil,
-      cert: udCertFromNDF,
-      contact: udContactFromNDF,
-      address: udAddressFromNDF
+      environment: udEnvironmentFromNDF
     )])
     XCTAssertEqual(didNewOrLoadUDWithFollower.count, 1)
     XCTAssertEqual(
@@ -62,9 +58,11 @@ final class MessengerLogInTests: XCTestCase {
     var didSetUD: [UserDiscovery?] = []
 
     let e2eId = 1234
-    let altUdCert = "alt-ud-cert".data(using: .utf8)!
-    let altUdContact = "alt-ud-contact".data(using: .utf8)!
-    let altUdAddress = "alt-ud-address"
+    let udEnvironment = UDEnvironment(
+      address: "alt-ud-address",
+      cert: "alt-ud-cert".data(using: .utf8)!,
+      contact: "alt-ud-contact".data(using: .utf8)!
+    )
 
     var env: MessengerEnvironment = .unimplemented
     env.cMix.get = {
@@ -78,9 +76,7 @@ final class MessengerLogInTests: XCTestCase {
       return e2e
     }
     env.ud.set = { didSetUD.append($0) }
-    env.udCert = altUdCert
-    env.udContact = altUdContact
-    env.udAddress = altUdAddress
+    env.udEnvironment = udEnvironment
     env.newOrLoadUd.run = { params, _ in
       didNewOrLoadUDWithParams.append(params)
       return .unimplemented
@@ -92,9 +88,7 @@ final class MessengerLogInTests: XCTestCase {
       e2eId: e2eId,
       username: nil,
       registrationValidationSignature: nil,
-      cert: altUdCert,
-      contact: altUdContact,
-      address: altUdAddress
+      environment: udEnvironment
     )])
     XCTAssertEqual(didSetUD.compactMap { $0 }.count, 1)
   }
@@ -139,12 +133,10 @@ final class MessengerLogInTests: XCTestCase {
     env.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getId.run = { 1234 }
-      e2e.getUdCertFromNdf.run = { "ndf-ud-cert".data(using: .utf8)! }
-      e2e.getUdContactFromNdf.run = { throw error }
+      e2e.getUdEnvironmentFromNdf.run = { throw error }
       return e2e
     }
-    env.udCert = nil
-    env.udContact = nil
+    env.udEnvironment = nil
     let logIn: MessengerLogIn = .live(env)
 
     XCTAssertThrowsError(try logIn()) { err in
@@ -167,9 +159,11 @@ final class MessengerLogInTests: XCTestCase {
       e2e.getId.run = { 1234 }
       return e2e
     }
-    env.udCert = "ud-cert".data(using: .utf8)!
-    env.udContact = "ud-contact".data(using: .utf8)!
-    env.udAddress = "ud-address"
+    env.udEnvironment = UDEnvironment(
+      address: "ud-address",
+      cert: "ud-cert".data(using: .utf8)!,
+      contact: "ud-contact".data(using: .utf8)!
+    )
     env.newOrLoadUd.run = { _, _ in throw error }
     let logIn: MessengerLogIn = .live(env)
 

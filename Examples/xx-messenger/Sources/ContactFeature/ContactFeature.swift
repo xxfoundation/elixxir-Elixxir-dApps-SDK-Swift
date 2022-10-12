@@ -4,7 +4,9 @@ import CheckContactAuthFeature
 import ComposableArchitecture
 import ComposablePresentation
 import ConfirmRequestFeature
+import ContactLookupFeature
 import Foundation
+import ResetAuthFeature
 import SendRequestFeature
 import VerifyContactFeature
 import XCTestDynamicOverlay
@@ -20,10 +22,12 @@ public struct ContactState: Equatable {
     importUsername: Bool = true,
     importEmail: Bool = true,
     importPhone: Bool = true,
+    lookup: ContactLookupState? = nil,
     sendRequest: SendRequestState? = nil,
     verifyContact: VerifyContactState? = nil,
     confirmRequest: ConfirmRequestState? = nil,
     checkAuth: CheckContactAuthState? = nil,
+    resetAuth: ResetAuthState? = nil,
     chat: ChatState? = nil
   ) {
     self.id = id
@@ -32,10 +36,12 @@ public struct ContactState: Equatable {
     self.importUsername = importUsername
     self.importEmail = importEmail
     self.importPhone = importPhone
+    self.lookup = lookup
     self.sendRequest = sendRequest
     self.verifyContact = verifyContact
     self.confirmRequest = confirmRequest
     self.checkAuth = checkAuth
+    self.resetAuth = resetAuth
     self.chat = chat
   }
 
@@ -45,10 +51,12 @@ public struct ContactState: Equatable {
   @BindableState public var importUsername: Bool
   @BindableState public var importEmail: Bool
   @BindableState public var importPhone: Bool
+  public var lookup: ContactLookupState?
   public var sendRequest: SendRequestState?
   public var verifyContact: VerifyContactState?
   public var confirmRequest: ConfirmRequestState?
   public var checkAuth: CheckContactAuthState?
+  public var resetAuth: ResetAuthState?
   public var chat: ChatState?
 }
 
@@ -56,6 +64,9 @@ public enum ContactAction: Equatable, BindableAction {
   case start
   case dbContactFetched(XXModels.Contact?)
   case importFactsTapped
+  case lookupTapped
+  case lookupDismissed
+  case lookup(ContactLookupAction)
   case sendRequestTapped
   case sendRequestDismissed
   case sendRequest(SendRequestAction)
@@ -68,6 +79,9 @@ public enum ContactAction: Equatable, BindableAction {
   case confirmRequestTapped
   case confirmRequestDismissed
   case confirmRequest(ConfirmRequestAction)
+  case resetAuthTapped
+  case resetAuthDismissed
+  case resetAuth(ResetAuthAction)
   case chatTapped
   case chatDismissed
   case chat(ChatAction)
@@ -80,20 +94,24 @@ public struct ContactEnvironment {
     db: DBManagerGetDB,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
+    lookup: @escaping () -> ContactLookupEnvironment,
     sendRequest: @escaping () -> SendRequestEnvironment,
     verifyContact: @escaping () -> VerifyContactEnvironment,
     confirmRequest: @escaping () -> ConfirmRequestEnvironment,
     checkAuth: @escaping () -> CheckContactAuthEnvironment,
+    resetAuth: @escaping () -> ResetAuthEnvironment,
     chat: @escaping () -> ChatEnvironment
   ) {
     self.messenger = messenger
     self.db = db
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
+    self.lookup = lookup
     self.sendRequest = sendRequest
     self.verifyContact = verifyContact
     self.confirmRequest = confirmRequest
     self.checkAuth = checkAuth
+    self.resetAuth = resetAuth
     self.chat = chat
   }
 
@@ -101,10 +119,12 @@ public struct ContactEnvironment {
   public var db: DBManagerGetDB
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
+  public var lookup: () -> ContactLookupEnvironment
   public var sendRequest: () -> SendRequestEnvironment
   public var verifyContact: () -> VerifyContactEnvironment
   public var confirmRequest: () -> ConfirmRequestEnvironment
   public var checkAuth: () -> CheckContactAuthEnvironment
+  public var resetAuth: () -> ResetAuthEnvironment
   public var chat: () -> ChatEnvironment
 }
 
@@ -115,10 +135,12 @@ extension ContactEnvironment {
     db: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
+    lookup: { .unimplemented },
     sendRequest: { .unimplemented },
     verifyContact: { .unimplemented },
     confirmRequest: { .unimplemented },
     checkAuth: { .unimplemented },
+    resetAuth: { .unimplemented },
     chat: { .unimplemented }
   )
 }
@@ -162,6 +184,19 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     .subscribe(on: env.bgQueue)
     .receive(on: env.mainQueue)
     .eraseToEffect()
+
+  case .lookupTapped:
+    state.lookup = ContactLookupState(id: state.id)
+    return .none
+
+  case .lookupDismissed:
+    state.lookup = nil
+    return .none
+
+  case .lookup(.didLookup(let xxContact)):
+    state.xxContact = xxContact
+    state.lookup = nil
+    return .none
 
   case .sendRequestTapped:
     if let xxContact = state.xxContact {
@@ -223,11 +258,32 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
     state.chat = nil
     return .none
 
-  case .binding(_), .sendRequest(_), .verifyContact(_), .confirmRequest(_), .checkAuth(_), .chat(_):
+  case .resetAuthTapped:
+    if let marshaled = state.dbContact?.marshaled {
+      state.resetAuth = ResetAuthState(
+        partner: .live(marshaled)
+      )
+    }
+    return .none
+
+  case .resetAuthDismissed:
+    state.resetAuth = nil
+    return .none
+
+  case .binding(_), .lookup(_), .sendRequest(_),
+      .verifyContact(_), .confirmRequest(_),
+      .checkAuth(_), .resetAuth(_), .chat(_):
     return .none
   }
 }
 .binding()
+.presenting(
+  contactLookupReducer,
+  state: .keyPath(\.lookup),
+  id: .notNil(),
+  action: /ContactAction.lookup,
+  environment: { $0.lookup() }
+)
 .presenting(
   sendRequestReducer,
   state: .keyPath(\.sendRequest),
@@ -255,6 +311,13 @@ public let contactReducer = Reducer<ContactState, ContactAction, ContactEnvironm
   id: .notNil(),
   action: /ContactAction.checkAuth,
   environment: { $0.checkAuth() }
+)
+.presenting(
+  resetAuthReducer,
+  state: .keyPath(\.resetAuth),
+  id: .notNil(),
+  action: /ContactAction.resetAuth,
+  environment: { $0.resetAuth() }
 )
 .presenting(
   chatReducer,

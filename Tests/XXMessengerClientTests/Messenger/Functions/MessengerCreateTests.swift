@@ -15,7 +15,7 @@ final class MessengerCreateTests: XCTestCase {
     var didDownloadNDF: [NDFEnvironment] = []
     var didGenerateSecret: [Int] = []
     var didSavePassword: [Data] = []
-    var didRemoveDirectory: [String] = []
+    var didRemoveItem: [String] = []
     var didCreateDirectory: [String] = []
     var didNewCMix: [DidNewCMix] = []
 
@@ -37,8 +37,8 @@ final class MessengerCreateTests: XCTestCase {
       didSavePassword.append(password)
     }
     env.storageDir = storageDir
-    env.fileManager.removeDirectory = { path in
-      didRemoveDirectory.append(path)
+    env.fileManager.removeItem = { path in
+      didRemoveItem.append(path)
     }
     env.fileManager.createDirectory = { path in
       didCreateDirectory.append(path)
@@ -58,7 +58,7 @@ final class MessengerCreateTests: XCTestCase {
     XCTAssertNoDifference(didDownloadNDF, [.unimplemented])
     XCTAssertNoDifference(didGenerateSecret, [32])
     XCTAssertNoDifference(didSavePassword, [password])
-    XCTAssertNoDifference(didRemoveDirectory, [storageDir])
+    XCTAssertNoDifference(didRemoveItem, [storageDir])
     XCTAssertNoDifference(didCreateDirectory, [storageDir])
     XCTAssertNoDifference(didNewCMix, [.init(
       ndfJSON: String(data: ndf, encoding: .utf8)!,
@@ -108,7 +108,7 @@ final class MessengerCreateTests: XCTestCase {
     env.generateSecret.run = { _ in "password".data(using: .utf8)! }
     env.passwordStorage.save = { _ in }
     env.storageDir = "storage-dir"
-    env.fileManager.removeDirectory = { _ in throw error }
+    env.fileManager.removeItem = { _ in throw error }
     let create: MessengerCreate = .live(env)
 
     XCTAssertThrowsError(try create()) { err in
@@ -126,7 +126,7 @@ final class MessengerCreateTests: XCTestCase {
     env.generateSecret.run = { _ in "password".data(using: .utf8)! }
     env.passwordStorage.save = { _ in }
     env.storageDir = "storage-dir"
-    env.fileManager.removeDirectory = { _ in }
+    env.fileManager.removeItem = { _ in }
     env.fileManager.createDirectory = { _ in throw error }
     let create: MessengerCreate = .live(env)
 
@@ -145,7 +145,7 @@ final class MessengerCreateTests: XCTestCase {
     env.generateSecret.run = { _ in "password".data(using: .utf8)! }
     env.passwordStorage.save = { _ in }
     env.storageDir = "storage-dir"
-    env.fileManager.removeDirectory = { _ in }
+    env.fileManager.removeItem = { _ in }
     env.fileManager.createDirectory = { _ in }
     env.newCMix.run = { _, _, _, _ in throw error }
     let create: MessengerCreate = .live(env)

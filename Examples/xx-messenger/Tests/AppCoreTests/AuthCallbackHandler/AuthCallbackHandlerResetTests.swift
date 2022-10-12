@@ -10,12 +10,11 @@ final class AuthCallbackHandlerResetTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     let dbContact = XXModels.Contact(
-      id: "id".data(using: .utf8)!,
-      authStatus: .friend
+      id: "id".data(using: .utf8)!
     )
     let reset = AuthCallbackHandlerReset.live(
       db: .init {
-        var db: Database = .failing
+        var db: Database = .unimplemented
         db.fetchContacts.run = { query in
           didFetchContacts.append(query)
           return [dbContact]
@@ -34,14 +33,14 @@ final class AuthCallbackHandlerResetTests: XCTestCase {
 
     XCTAssertNoDifference(didFetchContacts, [.init(id: ["id".data(using: .utf8)!])])
     var expectedSavedContact = dbContact
-    expectedSavedContact.authStatus = .stranger
+    expectedSavedContact.authStatus = .friend
     XCTAssertNoDifference(didSaveContact, [expectedSavedContact])
   }
 
   func testResetWhenContactNotInDatabase() throws {
     let reset = AuthCallbackHandlerReset.live(
       db: .init {
-        var db: Database = .failing
+        var db: Database = .unimplemented
         db.fetchContacts.run = { _ in [] }
         return db
       }

@@ -1,12 +1,16 @@
 import AppCore
+import BackupFeature
 import ChatFeature
 import CheckContactAuthFeature
 import ConfirmRequestFeature
 import ContactFeature
+import ContactLookupFeature
 import ContactsFeature
 import Foundation
 import HomeFeature
+import MyContactFeature
 import RegisterFeature
+import ResetAuthFeature
 import RestoreFeature
 import SendRequestFeature
 import UserSearchFeature
@@ -26,14 +30,27 @@ extension AppEnvironment {
       handleConfirm: .live(db: dbManager.getDB),
       handleReset: .live(db: dbManager.getDB)
     )
+    let backupStorage = BackupStorage.onDisk()
     let mainQueue = DispatchQueue.main.eraseToAnyScheduler()
     let bgQueue = DispatchQueue.global(qos: .background).eraseToAnyScheduler()
+
+    defer {
+      _ = try! messenger.setLogLevel(.debug)
+      messenger.startLogging()
+    }
 
     let contactEnvironment = ContactEnvironment(
       messenger: messenger,
       db: dbManager.getDB,
       mainQueue: mainQueue,
       bgQueue: bgQueue,
+      lookup: {
+        ContactLookupEnvironment(
+          messenger: messenger,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
       sendRequest: {
         SendRequestEnvironment(
           messenger: messenger,
@@ -66,6 +83,13 @@ extension AppEnvironment {
           bgQueue: bgQueue
         )
       },
+      resetAuth: {
+        ResetAuthEnvironment(
+          messenger: messenger,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
+      },
       chat: {
         ChatEnvironment(
           messenger: messenger,
@@ -84,6 +108,13 @@ extension AppEnvironment {
     return AppEnvironment(
       dbManager: dbManager,
       messenger: messenger,
+      authHandler: authHandler,
+      messageListener: .live(
+        messenger: messenger,
+        db: dbManager.getDB
+      ),
+      backupStorage: backupStorage,
+      log: .live(),
       mainQueue: mainQueue,
       bgQueue: bgQueue,
       welcome: {
@@ -94,17 +125,19 @@ extension AppEnvironment {
         )
       },
       restore: {
-        RestoreEnvironment()
+        RestoreEnvironment(
+          messenger: messenger,
+          db: dbManager.getDB,
+          loadData: .live,
+          now: Date.init,
+          mainQueue: mainQueue,
+          bgQueue: bgQueue
+        )
       },
       home: {
         HomeEnvironment(
           messenger: messenger,
           dbManager: dbManager,
-          authHandler: authHandler,
-          messageListener: .live(
-            messenger: messenger,
-            db: dbManager.getDB
-          ),
           mainQueue: mainQueue,
           bgQueue: bgQueue,
           register: {
@@ -122,7 +155,15 @@ extension AppEnvironment {
               db: dbManager.getDB,
               mainQueue: mainQueue,
               bgQueue: bgQueue,
-              contact: { contactEnvironment }
+              contact: { contactEnvironment },
+              myContact: {
+                MyContactEnvironment(
+                  messenger: messenger,
+                  db: dbManager.getDB,
+                  mainQueue: mainQueue,
+                  bgQueue: bgQueue
+                )
+              }
             )
           },
           userSearch: {
@@ -131,6 +172,14 @@ extension AppEnvironment {
               mainQueue: mainQueue,
               bgQueue: bgQueue,
               contact: { contactEnvironment }
+            )
+          },
+          backup: {
+            BackupEnvironment(
+              messenger: messenger,
+              backupStorage: backupStorage,
+              mainQueue: mainQueue,
+              bgQueue: bgQueue
             )
           }
         )

@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import ContactFeature
+import CustomDump
 import XCTest
 import XXClient
 import XXMessengerClient
@@ -63,6 +64,8 @@ final class UserSearchFeatureTests: XCTestCase {
       $0.results = []
       $0.failure = nil
     }
+
+    XCTAssertNoDifference(didSearchWithQuery, [.init(username: "Username")])
 
     store.receive(.didSucceed(contacts)) {
       $0.isSearching = false

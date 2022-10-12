@@ -34,7 +34,7 @@ final class CheckContactAuthFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
         didBulkUpdateContactsWithAssignments.append(assignments)
@@ -86,7 +86,7 @@ final class CheckContactAuthFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
         didBulkUpdateContactsWithAssignments.append(assignments)

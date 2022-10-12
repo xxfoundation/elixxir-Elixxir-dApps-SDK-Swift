@@ -16,7 +16,7 @@ extension MessengerCreate {
       let password = env.generateSecret()
       try env.passwordStorage.save(password)
       let storageDir = env.storageDir
-      try env.fileManager.removeDirectory(storageDir)
+      try env.fileManager.removeItem(storageDir)
       try env.fileManager.createDirectory(storageDir)
       try env.newCMix(
         ndfJSON: String(data: ndfData, encoding: .utf8)!,

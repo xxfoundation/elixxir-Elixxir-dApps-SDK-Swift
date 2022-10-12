@@ -1,4 +1,5 @@
 import XXClient
+import XXMessengerClient
 
 extension Message {
   static func stub(_ stubId: Int) -> Message {
@@ -15,4 +16,10 @@ extension Message {
       roundURL: "roundURL-\(stubId)"
     )
   }
+}
+
+extension BackupParams {
+  static let stub = BackupParams(
+    username: "stub-username"
+  )
 }

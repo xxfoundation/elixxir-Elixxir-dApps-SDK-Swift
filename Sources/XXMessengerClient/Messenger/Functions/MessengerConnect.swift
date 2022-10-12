@@ -25,6 +25,7 @@ extension MessengerConnect {
         identity: try cMix.makeReceptionIdentity(legacy: true),
         e2eParamsJSON: env.getE2EParams()
       ))
+      env.isListeningForMessages.set(false)
     }
   }
 }

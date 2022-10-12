@@ -1,4 +1,5 @@
 import AppCore
+import BackupFeature
 import Combine
 import ComposableArchitecture
 import ComposablePresentation
@@ -14,30 +15,26 @@ import XXModels
 public struct HomeState: Equatable {
   public init(
     failure: String? = nil,
-    authFailure: String? = nil,
-    messageListenerFailure: String? = nil,
     isNetworkHealthy: Bool? = nil,
     networkNodesReport: NodeRegistrationReport? = nil,
     isDeletingAccount: Bool = false,
     alert: AlertState<HomeAction>? = nil,
     register: RegisterState? = nil,
     contacts: ContactsState? = nil,
-    userSearch: UserSearchState? = nil
+    userSearch: UserSearchState? = nil,
+    backup: BackupState? = nil
   ) {
     self.failure = failure
-    self.authFailure = authFailure
-    self.messageListenerFailure = messageListenerFailure
     self.isNetworkHealthy = isNetworkHealthy
     self.isDeletingAccount = isDeletingAccount
     self.alert = alert
     self.register = register
     self.contacts = contacts
     self.userSearch = userSearch
+    self.backup = backup
   }
 
   public var failure: String?
-  public var authFailure: String?
-  public var messageListenerFailure: String?
   public var isNetworkHealthy: Bool?
   public var networkNodesReport: NodeRegistrationReport?
   public var isDeletingAccount: Bool
@@ -45,6 +42,7 @@ public struct HomeState: Equatable {
   public var register: RegisterState?
   public var contacts: ContactsState?
   public var userSearch: UserSearchState?
+  public var backup: BackupState?
 }
 
 public enum HomeAction: Equatable {
@@ -53,20 +51,6 @@ public enum HomeAction: Equatable {
     case didStartRegistered
     case didStartUnregistered
     case failure(NSError)
-  }
-
-  public enum AuthHandler: Equatable {
-    case start
-    case stop
-    case failure(NSError)
-    case failureDismissed
-  }
-
-  public enum MessageListener: Equatable {
-    case start
-    case stop
-    case failure(NSError)
-    case failureDismissed
   }
 
   public enum NetworkMonitor: Equatable {
@@ -84,8 +68,6 @@ public enum HomeAction: Equatable {
   }
 
   case messenger(Messenger)
-  case authHandler(AuthHandler)
-  case messageListener(MessageListener)
   case networkMonitor(NetworkMonitor)
   case deleteAccount(DeleteAccount)
   case didDismissAlert
@@ -94,71 +76,68 @@ public enum HomeAction: Equatable {
   case didDismissUserSearch
   case contactsButtonTapped
   case didDismissContacts
+  case backupButtonTapped
+  case didDismissBackup
   case register(RegisterAction)
   case contacts(ContactsAction)
   case userSearch(UserSearchAction)
+  case backup(BackupAction)
 }
 
 public struct HomeEnvironment {
   public init(
     messenger: Messenger,
     dbManager: DBManager,
-    authHandler: AuthCallbackHandler,
-    messageListener: MessageListenerHandler,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>,
     register: @escaping () -> RegisterEnvironment,
     contacts: @escaping () -> ContactsEnvironment,
-    userSearch: @escaping () -> UserSearchEnvironment
+    userSearch: @escaping () -> UserSearchEnvironment,
+    backup: @escaping () -> BackupEnvironment
   ) {
     self.messenger = messenger
     self.dbManager = dbManager
-    self.authHandler = authHandler
-    self.messageListener = messageListener
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
     self.register = register
     self.contacts = contacts
     self.userSearch = userSearch
+    self.backup = backup
   }
 
   public var messenger: Messenger
   public var dbManager: DBManager
-  public var authHandler: AuthCallbackHandler
-  public var messageListener: MessageListenerHandler
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var register: () -> RegisterEnvironment
   public var contacts: () -> ContactsEnvironment
   public var userSearch: () -> UserSearchEnvironment
+  public var backup: () -> BackupEnvironment
 }
 
+#if DEBUG
 extension HomeEnvironment {
   public static let unimplemented = HomeEnvironment(
     messenger: .unimplemented,
     dbManager: .unimplemented,
-    authHandler: .unimplemented,
-    messageListener: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented,
     register: { .unimplemented },
     contacts: { .unimplemented },
-    userSearch: { .unimplemented }
+    userSearch: { .unimplemented },
+    backup: { .unimplemented }
   )
 }
+#endif
 
 public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 { state, action, env in
   enum NetworkHealthEffectId {}
   enum NetworkNodesEffectId {}
-  enum AuthCallbacksEffectId {}
-  enum MessageListenerEffectId {}
 
   switch action {
   case .messenger(.start):
     return .merge(
-      Effect(value: .authHandler(.start)),
-      Effect(value: .messageListener(.start)),
       Effect(value: .networkMonitor(.stop)),
       Effect.result {
         do {
@@ -166,6 +145,9 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 
           if env.messenger.isConnected() == false {
             try env.messenger.connect()
+          }
+
+          if env.messenger.isListeningForMessages() == false {
             try env.messenger.listenForMessages()
           }
 
@@ -174,6 +156,10 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
               return .success(.messenger(.didStartUnregistered))
             }
             try env.messenger.logIn()
+          }
+
+          if !env.messenger.isBackupRunning() {
+            try? env.messenger.resumeBackup()
           }
 
           return .success(.messenger(.didStartRegistered))
@@ -195,52 +181,6 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
 
   case .messenger(.failure(let error)):
     state.failure = error.localizedDescription
-    return .none
-
-  case .authHandler(.start):
-    return Effect.run { subscriber in
-      let cancellable = env.authHandler(onError: { error in
-        subscriber.send(.authHandler(.failure(error as NSError)))
-      })
-      return AnyCancellable { cancellable.cancel() }
-    }
-    .subscribe(on: env.bgQueue)
-    .receive(on: env.mainQueue)
-    .eraseToEffect()
-    .cancellable(id: AuthCallbacksEffectId.self, cancelInFlight: true)
-
-  case .authHandler(.stop):
-    return .cancel(id: AuthCallbacksEffectId.self)
-
-  case .authHandler(.failure(let error)):
-    state.authFailure = error.localizedDescription
-    return .none
-
-  case .authHandler(.failureDismissed):
-    state.authFailure = nil
-    return .none
-
-  case .messageListener(.start):
-    return Effect.run { subscriber in
-      let cancellable = env.messageListener(onError: { error in
-        subscriber.send(.messageListener(.failure(error as NSError)))
-      })
-      return AnyCancellable { cancellable.cancel() }
-    }
-    .subscribe(on: env.bgQueue)
-    .receive(on: env.mainQueue)
-    .eraseToEffect()
-    .cancellable(id: MessageListenerEffectId.self, cancelInFlight: true)
-
-  case .messageListener(.stop):
-    return .cancel(id: MessageListenerEffectId.self)
-
-  case .messageListener(.failure(let error)):
-    state.messageListenerFailure = error.localizedDescription
-    return .none
-
-  case .messageListener(.failureDismissed):
-    state.messageListenerFailure = nil
     return .none
 
   case .networkMonitor(.start):
@@ -344,7 +284,15 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
     state.register = nil
     return Effect(value: .messenger(.start))
 
-  case .register(_), .contacts(_), .userSearch(_):
+  case .backupButtonTapped:
+    state.backup = BackupState()
+    return .none
+
+  case .didDismissBackup:
+    state.backup = nil
+    return .none
+
+  case .register(_), .contacts(_), .userSearch(_), .backup(_):
     return .none
   }
 }
@@ -368,4 +316,11 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
   id: .notNil(),
   action: /HomeAction.userSearch,
   environment: { $0.userSearch() }
+)
+.presenting(
+  backupReducer,
+  state: .keyPath(\.backup),
+  id: .notNil(),
+  action: /HomeAction.backup,
+  environment: { $0.backup() }
 )

@@ -34,7 +34,7 @@ final class ChatFeatureTests: XCTestCase {
       return e2e
     }
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchMessagesPublisher.run = { query in
         didFetchMessagesWithQuery.append(query)
         return messagesPublisher.eraseToAnyPublisher()

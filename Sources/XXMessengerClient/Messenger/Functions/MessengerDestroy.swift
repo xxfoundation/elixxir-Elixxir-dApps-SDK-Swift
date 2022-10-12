@@ -22,7 +22,8 @@ extension MessengerDestroy {
       env.ud.set(nil)
       env.e2e.set(nil)
       env.cMix.set(nil)
-      try env.fileManager.removeDirectory(env.storageDir)
+      env.isListeningForMessages.set(false)
+      try env.fileManager.removeItem(env.storageDir)
       try env.passwordStorage.remove()
     }
   }

@@ -1,11 +1,13 @@
 import ComposableArchitecture
 import HomeFeature
+import PulseUI
 import RestoreFeature
 import SwiftUI
 import WelcomeFeature
 
 struct AppView: View {
   let store: Store<AppState, AppAction>
+  @State var isPresentingPulse = false
 
   enum ViewState: Equatable {
     case loading
@@ -118,6 +120,15 @@ struct AppView: View {
       }
       .animation(.default, value: viewStore.state)
       .task { viewStore.send(.start) }
+    }
+    .onShake {
+      isPresentingPulse = true
+    }
+    .fullScreenCover(isPresented: $isPresentingPulse) {
+      PulseUI.MainView(
+        store: .shared,
+        onDismiss: { isPresentingPulse = false }
+      )
     }
   }
 }

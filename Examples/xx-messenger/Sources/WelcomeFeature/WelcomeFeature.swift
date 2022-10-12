@@ -4,12 +4,15 @@ import XXMessengerClient
 
 public struct WelcomeState: Equatable {
   public init(
-    isCreatingCMix: Bool = false
+    isCreatingCMix: Bool = false,
+    failure: String? = nil
   ) {
     self.isCreatingAccount = isCreatingCMix
+    self.failure = failure
   }
 
   public var isCreatingAccount: Bool
+  public var failure: String?
 }
 
 public enum WelcomeAction: Equatable {
@@ -35,6 +38,7 @@ public struct WelcomeEnvironment {
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
 
+#if DEBUG
 extension WelcomeEnvironment {
   public static let unimplemented = WelcomeEnvironment(
     messenger: .unimplemented,
@@ -42,12 +46,14 @@ extension WelcomeEnvironment {
     bgQueue: .unimplemented
   )
 }
+#endif
 
 public let welcomeReducer = Reducer<WelcomeState, WelcomeAction, WelcomeEnvironment>
 { state, action, env in
   switch action {
   case .newAccountTapped:
     state.isCreatingAccount = true
+    state.failure = nil
     return .future { fulfill in
       do {
         try env.messenger.create()
@@ -66,10 +72,12 @@ public let welcomeReducer = Reducer<WelcomeState, WelcomeAction, WelcomeEnvironm
 
   case .finished:
     state.isCreatingAccount = false
+    state.failure = nil
     return .none
 
-  case .failed(_):
+  case .failed(let failure):
     state.isCreatingAccount = false
+    state.failure = failure
     return .none
   }
 }

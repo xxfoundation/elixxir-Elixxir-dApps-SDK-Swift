@@ -18,7 +18,7 @@ extension AuthCallbackHandlerReset {
       guard var dbContact = try db().fetchContacts(.init(id: [id])).first else {
         return
       }
-      dbContact.authStatus = .stranger
+      dbContact.authStatus = .friend
       dbContact = try db().saveContact(dbContact)
     }
   }

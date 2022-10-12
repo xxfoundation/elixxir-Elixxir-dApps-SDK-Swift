@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "31964B8928A6D37100BBDC17"
-               BuildableName = "XXMessenger.app"
+               BuildableName = "XXME.app"
                BlueprintName = "XXMessenger"
                ReferencedContainer = "container:XXMessenger.xcodeproj">
             </BuildableReference>
@@ -46,6 +46,16 @@
                BlueprintIdentifier = "AppFeatureTests"
                BuildableName = "AppFeatureTests"
                BlueprintName = "AppFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BackupFeatureTests"
+               BuildableName = "BackupFeatureTests"
+               BlueprintName = "BackupFeatureTests"
                ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>
@@ -93,6 +103,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ContactLookupFeatureTests"
+               BuildableName = "ContactLookupFeatureTests"
+               BlueprintName = "ContactLookupFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "ContactsFeatureTests"
                BuildableName = "ContactsFeatureTests"
                BlueprintName = "ContactsFeatureTests"
@@ -113,9 +133,29 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "MyContactFeatureTests"
+               BuildableName = "MyContactFeatureTests"
+               BlueprintName = "MyContactFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "RegisterFeatureTests"
                BuildableName = "RegisterFeatureTests"
                BlueprintName = "RegisterFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ResetAuthFeatureTests"
+               BuildableName = "ResetAuthFeatureTests"
+               BlueprintName = "ResetAuthFeatureTests"
                ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>
@@ -186,7 +226,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "31964B8928A6D37100BBDC17"
-            BuildableName = "XXMessenger.app"
+            BuildableName = "XXME.app"
             BlueprintName = "XXMessenger"
             ReferencedContainer = "container:XXMessenger.xcodeproj">
          </BuildableReference>
@@ -203,7 +243,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "31964B8928A6D37100BBDC17"
-            BuildableName = "XXMessenger.app"
+            BuildableName = "XXME.app"
             BlueprintName = "XXMessenger"
             ReferencedContainer = "container:XXMessenger.xcodeproj">
          </BuildableReference>

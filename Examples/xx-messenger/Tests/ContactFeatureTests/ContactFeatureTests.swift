@@ -3,7 +3,9 @@ import CheckContactAuthFeature
 import Combine
 import ComposableArchitecture
 import ConfirmRequestFeature
+import ContactLookupFeature
 import CustomDump
+import ResetAuthFeature
 import SendRequestFeature
 import VerifyContactFeature
 import XCTest
@@ -27,7 +29,7 @@ final class ContactFeatureTests: XCTestCase {
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.fetchContactsPublisher.run = { query in
         dbDidFetchContacts.append(query)
         return dbContactsPublisher.eraseToAnyPublisher()
@@ -80,7 +82,7 @@ final class ContactFeatureTests: XCTestCase {
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
     store.environment.db.run = {
-      var db: Database = .failing
+      var db: Database = .unimplemented
       db.saveContact.run = { contact in
         dbDidSaveContact.append(contact)
         return contact
@@ -97,6 +99,55 @@ final class ContactFeatureTests: XCTestCase {
     expectedSavedContact.phone = "contact-phone"
 
     XCTAssertNoDifference(dbDidSaveContact, [expectedSavedContact])
+  }
+
+  func testLookupTapped() {
+    let contactId = "contact-id".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: contactId
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.lookupTapped) {
+      $0.lookup = ContactLookupState(id: contactId)
+    }
+  }
+
+  func testLookupDismissed() {
+    let contactId = "contact-id".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: contactId,
+        lookup: ContactLookupState(id: contactId)
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.lookupDismissed) {
+      $0.lookup = nil
+    }
+  }
+
+  func testLookupDidLookup() {
+    let contactId = "contact-id".data(using: .utf8)!
+    let contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
+    let store = TestStore(
+      initialState: ContactState(
+        id: contactId,
+        lookup: ContactLookupState(id: contactId)
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.lookup(.didLookup(contact))) {
+      $0.xxContact = contact
+      $0.lookup = nil
+    }
   }
 
   func testSendRequestWithDBContact() {
@@ -241,6 +292,44 @@ final class ContactFeatureTests: XCTestCase {
 
     store.send(.checkAuthDismissed) {
       $0.checkAuth = nil
+    }
+  }
+
+  func testResetAuthTapped() {
+    let contactData = "contact-data".data(using: .utf8)!
+    let store = TestStore(
+      initialState: ContactState(
+        id: Data(),
+        dbContact: XXModels.Contact(
+          id: Data(),
+          marshaled: contactData
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.resetAuthTapped) {
+      $0.resetAuth = ResetAuthState(
+        partner: .unimplemented(contactData)
+      )
+    }
+  }
+
+  func testResetAuthDismissed() {
+    let store = TestStore(
+      initialState: ContactState(
+        id: Data(),
+        resetAuth: ResetAuthState(
+          partner: .unimplemented(Data())
+        )
+      ),
+      reducer: contactReducer,
+      environment: .unimplemented
+    )
+
+    store.send(.resetAuthDismissed) {
+      $0.resetAuth = nil
     }
   }
 

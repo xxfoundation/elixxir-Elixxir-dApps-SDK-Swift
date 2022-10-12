@@ -4,6 +4,8 @@ import XCTestDynamicOverlay
 
 public struct MessengerEnvironment {
   public var authCallbacks: AuthCallbacksRegistry
+  public var backup: Stored<Backup?>
+  public var backupCallbacks: BackupCallbacksRegistry
   public var cMix: Stored<CMix?>
   public var downloadNDF: DownloadAndVerifySignedNdf
   public var e2e: Stored<E2E?>
@@ -15,24 +17,30 @@ public struct MessengerEnvironment {
   public var getFileTransferParams: GetFileTransferParams
   public var getSingleUseParams: GetSingleUseParams
   public var initFileTransfer: InitFileTransfer
+  public var initializeBackup: InitializeBackup
+  public var isListeningForMessages: Stored<Bool>
   public var isRegisteredWithUD: IsRegisteredWithUD
   public var loadCMix: LoadCMix
+  public var logger: MessengerLogger
   public var login: Login
   public var lookupUD: LookupUD
   public var messageListeners: ListenersRegistry
   public var multiLookupUD: MultiLookupUD
   public var ndfEnvironment: NDFEnvironment
   public var newCMix: NewCMix
+  public var newCMixFromBackup: NewCMixFromBackup
   public var newOrLoadUd: NewOrLoadUd
+  public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
   public var registerForNotifications: RegisterForNotifications
+  public var registerLogWriter: RegisterLogWriter
+  public var resumeBackup: ResumeBackup
   public var searchUD: SearchUD
+  public var setLogLevel: SetLogLevel
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
   public var ud: Stored<UserDiscovery?>
-  public var udAddress: String?
-  public var udCert: Data?
-  public var udContact: Data?
+  public var udEnvironment: UDEnvironment?
 }
 
 extension MessengerEnvironment {
@@ -45,6 +53,8 @@ extension MessengerEnvironment {
   public static func live() -> MessengerEnvironment {
     MessengerEnvironment(
       authCallbacks: .live(),
+      backup: .inMemory(),
+      backupCallbacks: .live(),
       cMix: .inMemory(),
       downloadNDF: .live,
       e2e: .inMemory(),
@@ -56,24 +66,30 @@ extension MessengerEnvironment {
       getFileTransferParams: .liveDefault,
       getSingleUseParams: .liveDefault,
       initFileTransfer: .live,
+      initializeBackup: .live,
+      isListeningForMessages: .inMemory(false),
       isRegisteredWithUD: .live,
       loadCMix: .live,
+      logger: .live(),
       login: .live,
       lookupUD: .live,
       messageListeners: .live(),
       multiLookupUD: .live(),
       ndfEnvironment: .mainnet,
       newCMix: .live,
+      newCMixFromBackup: .live,
       newOrLoadUd: .live,
+      newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
       registerForNotifications: .live,
+      registerLogWriter: .live,
+      resumeBackup: .live,
       searchUD: .live,
+      setLogLevel: .live,
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
       ud: .inMemory(),
-      udAddress: nil,
-      udCert: nil,
-      udContact: nil
+      udEnvironment: nil
     )
   }
 }
@@ -81,6 +97,8 @@ extension MessengerEnvironment {
 extension MessengerEnvironment {
   public static let unimplemented = MessengerEnvironment(
     authCallbacks: .unimplemented,
+    backup: .unimplemented(),
+    backupCallbacks: .unimplemented,
     cMix: .unimplemented(),
     downloadNDF: .unimplemented,
     e2e: .unimplemented(),
@@ -92,23 +110,29 @@ extension MessengerEnvironment {
     getFileTransferParams: .unimplemented,
     getSingleUseParams: .unimplemented,
     initFileTransfer: .unimplemented,
+    initializeBackup: .unimplemented,
+    isListeningForMessages: .unimplemented(placeholder: false),
     isRegisteredWithUD: .unimplemented,
     loadCMix: .unimplemented,
+    logger: .unimplemented,
     login: .unimplemented,
     lookupUD: .unimplemented,
     messageListeners: .unimplemented,
     multiLookupUD: .unimplemented,
     ndfEnvironment: .unimplemented,
     newCMix: .unimplemented,
+    newCMixFromBackup: .unimplemented,
     newOrLoadUd: .unimplemented,
+    newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
     registerForNotifications: .unimplemented,
+    registerLogWriter: .unimplemented,
+    resumeBackup: .unimplemented,
     searchUD: .unimplemented,
+    setLogLevel: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
     ud: .unimplemented(),
-    udAddress: nil,
-    udCert: nil,
-    udContact: nil
+    udEnvironment: nil
   )
 }

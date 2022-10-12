@@ -1,3 +1,5 @@
+import AppCore
+import BackupFeature
 import ComposableArchitecture
 import ComposablePresentation
 import ContactsFeature
@@ -15,16 +17,12 @@ public struct HomeView: View {
 
   struct ViewState: Equatable {
     var failure: String?
-    var authFailure: String?
-    var messageListenerFailure: String?
     var isNetworkHealthy: Bool?
     var networkNodesReport: NodeRegistrationReport?
     var isDeletingAccount: Bool
 
     init(state: HomeState) {
       failure = state.failure
-      authFailure = state.authFailure
-      messageListenerFailure = state.messageListenerFailure
       isNetworkHealthy = state.isNetworkHealthy
       isDeletingAccount = state.isDeletingAccount
       networkNodesReport = state.networkNodesReport
@@ -45,32 +43,6 @@ public struct HomeView: View {
               }
             } header: {
               Text("Error")
-            }
-          }
-
-          if let authFailure = viewStore.authFailure {
-            Section {
-              Text(authFailure)
-              Button {
-                viewStore.send(.authHandler(.failureDismissed))
-              } label: {
-                Text("Dismiss")
-              }
-            } header: {
-              Text("Auth Error")
-            }
-          }
-
-          if let messageListenerFailure = viewStore.messageListenerFailure {
-            Section {
-              Text(messageListenerFailure)
-              Button {
-                viewStore.send(.messageListener(.failureDismissed))
-              } label: {
-                Text("Dismiss")
-              }
-            } header: {
-              Text("Message Listener Error")
             }
           }
 
@@ -141,6 +113,16 @@ public struct HomeView: View {
           }
 
           Section {
+            Button {
+              viewStore.send(.backupButtonTapped)
+            } label: {
+              HStack {
+                Text("Backup")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
+
             Button(role: .destructive) {
               viewStore.send(.deleteAccount(.buttonTapped))
             } label: {
@@ -155,6 +137,12 @@ public struct HomeView: View {
             .disabled(viewStore.isDeletingAccount)
           } header: {
             Text("Account")
+          }
+
+          Section {
+            AppVersionText()
+          } header: {
+            Text("App version")
           }
         }
         .navigationTitle("Home")
@@ -181,6 +169,16 @@ public struct HomeView: View {
             viewStore.send(.didDismissUserSearch)
           },
           destination: UserSearchView.init(store:)
+        ))
+        .background(NavigationLinkWithStore(
+          store.scope(
+            state: \.backup,
+            action: HomeAction.backup
+          ),
+          onDeactivate: {
+            viewStore.send(.didDismissBackup)
+          },
+          destination: BackupView.init(store:)
         ))
       }
       .navigationViewStyle(.stack)

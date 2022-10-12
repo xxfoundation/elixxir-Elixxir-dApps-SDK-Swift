@@ -1,4 +1,5 @@
 import AppCore
+import Combine
 import ComposableArchitecture
 import Foundation
 import XCTestDynamicOverlay
@@ -40,7 +41,8 @@ public enum SendRequestAction: Equatable, BindableAction {
   case sendSucceeded
   case sendFailed(String)
   case binding(BindingAction<SendRequestState>)
-  case myContactFetched(XXClient.Contact?)
+  case myContactFetched(XXClient.Contact)
+  case myContactFetchFailed(NSError)
 }
 
 public struct SendRequestEnvironment {
@@ -75,25 +77,30 @@ extension SendRequestEnvironment {
 
 public let sendRequestReducer = Reducer<SendRequestState, SendRequestAction, SendRequestEnvironment>
 { state, action, env in
-  enum DBFetchEffectID {}
-
   switch action {
   case .start:
-    return Effect
-      .catching { try env.messenger.e2e.tryGet().getContact().getId() }
-      .tryMap { try env.db().fetchContactsPublisher(.init(id: [$0])) }
-      .flatMap { $0 }
-      .assertNoFailure()
-      .map(\.first)
-      .map { $0?.marshaled.map { XXClient.Contact.live($0) } }
-      .map(SendRequestAction.myContactFetched)
-      .subscribe(on: env.bgQueue)
-      .receive(on: env.mainQueue)
-      .eraseToEffect()
-      .cancellable(id: DBFetchEffectID.self, cancelInFlight: true)
+    return Effect.run { subscriber in
+      do {
+        let contact = try env.messenger.myContact()
+        subscriber.send(.myContactFetched(contact))
+      } catch {
+        subscriber.send(.myContactFetchFailed(error as NSError))
+      }
+      subscriber.send(completion: .finished)
+      return AnyCancellable {}
+    }
+    .receive(on: env.mainQueue)
+    .subscribe(on: env.bgQueue)
+    .eraseToEffect()
 
   case .myContactFetched(let contact):
     state.myContact = contact
+    state.failure = nil
+    return .none
+
+  case .myContactFetchFailed(let failure):
+    state.myContact = nil
+    state.failure = failure.localizedDescription
     return .none
 
   case .sendTapped:
