@@ -12,8 +12,11 @@ public struct MessengerEnvironment {
   public var fileManager: MessengerFileManager
   public var generateSecret: GenerateSecret
   public var getCMixParams: GetCMixParams
+  public var getE2EFileTransferParams: GetE2EFileTransferParams
   public var getE2EParams: GetE2EParams
+  public var getFileTransferParams: GetFileTransferParams
   public var getSingleUseParams: GetSingleUseParams
+  public var initFileTransfer: InitFileTransfer
   public var initializeBackup: InitializeBackup
   public var isListeningForMessages: Stored<Bool>
   public var isRegisteredWithUD: IsRegisteredWithUD
@@ -58,8 +61,11 @@ extension MessengerEnvironment {
       fileManager: .live(),
       generateSecret: .live,
       getCMixParams: .liveDefault,
+      getE2EFileTransferParams: .liveDefault,
       getE2EParams: .liveDefault,
+      getFileTransferParams: .liveDefault,
       getSingleUseParams: .liveDefault,
+      initFileTransfer: .live,
       initializeBackup: .live,
       isListeningForMessages: .inMemory(false),
       isRegisteredWithUD: .live,
@@ -99,8 +105,11 @@ extension MessengerEnvironment {
     fileManager: .unimplemented,
     generateSecret: .unimplemented,
     getCMixParams: .unimplemented,
+    getE2EFileTransferParams: .unimplemented,
     getE2EParams: .unimplemented,
+    getFileTransferParams: .unimplemented,
     getSingleUseParams: .unimplemented,
+    initFileTransfer: .unimplemented,
     initializeBackup: .unimplemented,
     isListeningForMessages: .unimplemented(placeholder: false),
     isRegisteredWithUD: .unimplemented,
