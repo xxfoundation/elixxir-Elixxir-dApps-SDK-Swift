@@ -33,7 +33,7 @@ public struct MessengerEnvironment {
   public var newOrLoadUd: NewOrLoadUd
   public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
-  public var receiveFileCallbacksRegistry: ReceiveFileCallbacksRegistry
+  public var receiveFileCallbacks: ReceiveFileCallbacksRegistry
   public var registerForNotifications: RegisterForNotifications
   public var registerLogWriter: RegisterLogWriter
   public var resumeBackup: ResumeBackup
@@ -84,7 +84,7 @@ extension MessengerEnvironment {
       newOrLoadUd: .live,
       newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
-      receiveFileCallbacksRegistry: .live(),
+      receiveFileCallbacks: .live(),
       registerForNotifications: .live,
       registerLogWriter: .live,
       resumeBackup: .live,
@@ -130,7 +130,7 @@ extension MessengerEnvironment {
     newOrLoadUd: .unimplemented,
     newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
-    receiveFileCallbacksRegistry: .unimplemented,
+    receiveFileCallbacks: .unimplemented,
     registerForNotifications: .unimplemented,
     registerLogWriter: .unimplemented,
     resumeBackup: .unimplemented,

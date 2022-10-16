@@ -34,7 +34,7 @@ final class MessengerStartFileTransferTests: XCTestCase {
     env.fileTransfer.set = {
       didSetFileTransfer.append($0)
     }
-    env.receiveFileCallbacksRegistry.registered = {
+    env.receiveFileCallbacks.registered = {
       ReceiveFileCallback { result in
         didReceiveFile.append(result)
       }

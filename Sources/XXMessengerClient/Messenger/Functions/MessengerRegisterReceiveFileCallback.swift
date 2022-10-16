@@ -12,7 +12,7 @@ public struct MessengerRegisterReceiveFileCallback {
 extension MessengerRegisterReceiveFileCallback {
   public static func live(_ env: MessengerEnvironment) -> MessengerRegisterReceiveFileCallback {
     MessengerRegisterReceiveFileCallback { callback in
-      env.receiveFileCallbacksRegistry.register(callback)
+      env.receiveFileCallbacks.register(callback)
     }
   }
 }

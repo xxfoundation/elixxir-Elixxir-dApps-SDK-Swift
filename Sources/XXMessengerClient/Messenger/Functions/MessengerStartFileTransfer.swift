@@ -25,7 +25,7 @@ extension MessengerStartFileTransfer {
           e2eFileTransferParamsJSON: env.getE2EFileTransferParams(),
           fileTransferParamsJSON: env.getFileTransferParams()
         ),
-        callback: env.receiveFileCallbacksRegistry.registered()
+        callback: env.receiveFileCallbacks.registered()
       )
       env.fileTransfer.set(fileTransfer)
     }

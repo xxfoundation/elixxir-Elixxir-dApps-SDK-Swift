@@ -10,7 +10,7 @@ final class MessengerRegisterReceiveFileCallbackTests: XCTestCase {
     var didCancelRegisteredCallback = 0
 
     var env: MessengerEnvironment = .unimplemented
-    env.receiveFileCallbacksRegistry.register = { callback in
+    env.receiveFileCallbacks.register = { callback in
       registeredCallbacks.append(callback)
       return Cancellable { didCancelRegisteredCallback += 1 }
     }
