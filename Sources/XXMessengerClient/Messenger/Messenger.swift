@@ -40,6 +40,7 @@ public struct Messenger {
   public var stopBackup: MessengerStopBackup
   public var setLogLevel: MessengerSetLogLevel
   public var startLogging: MessengerStartLogging
+  public var registerReceiveFileCallback: MessengerRegisterReceiveFileCallback
   public var startFileTransfer: MessengerStartFileTransfer
   public var sendFile: MessengerSendFile
   public var receiveFile: MessengerReceiveFile
@@ -87,6 +88,7 @@ extension Messenger {
       stopBackup: .live(env),
       setLogLevel: .live(env),
       startLogging: .live(env),
+      registerReceiveFileCallback: .live(env),
       startFileTransfer: .live(env),
       sendFile: .live(env),
       receiveFile: .live(env)
@@ -135,6 +137,7 @@ extension Messenger {
     stopBackup: .unimplemented,
     setLogLevel: .unimplemented,
     startLogging: .unimplemented,
+    registerReceiveFileCallback: .unimplemented,
     startFileTransfer: .unimplemented,
     sendFile: .unimplemented,
     receiveFile: .unimplemented
