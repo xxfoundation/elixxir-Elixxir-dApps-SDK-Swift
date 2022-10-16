@@ -10,6 +10,7 @@ public struct MessengerEnvironment {
   public var downloadNDF: DownloadAndVerifySignedNdf
   public var e2e: Stored<E2E?>
   public var fileManager: MessengerFileManager
+  public var fileTransfer: Stored<FileTransfer?>
   public var generateSecret: GenerateSecret
   public var getCMixParams: GetCMixParams
   public var getE2EFileTransferParams: GetE2EFileTransferParams
@@ -59,6 +60,7 @@ extension MessengerEnvironment {
       downloadNDF: .live,
       e2e: .inMemory(),
       fileManager: .live(),
+      fileTransfer: .inMemory(),
       generateSecret: .live,
       getCMixParams: .liveDefault,
       getE2EFileTransferParams: .liveDefault,
@@ -103,6 +105,7 @@ extension MessengerEnvironment {
     downloadNDF: .unimplemented,
     e2e: .unimplemented(),
     fileManager: .unimplemented,
+    fileTransfer: .unimplemented(),
     generateSecret: .unimplemented,
     getCMixParams: .unimplemented,
     getE2EFileTransferParams: .unimplemented,
