@@ -12,6 +12,7 @@ final class MessengerStartFileTransferTests: XCTestCase {
     var didInitFileTransfer: [InitFileTransfer.Params] = []
     var receiveFileCallback: ReceiveFileCallback?
     var didSetFileTransfer: [FileTransfer?] = []
+    var didReceiveFile: [ReceiveFileCallback.Result] = []
 
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = {
@@ -33,6 +34,11 @@ final class MessengerStartFileTransferTests: XCTestCase {
     env.fileTransfer.set = {
       didSetFileTransfer.append($0)
     }
+    env.receiveFileCallbacksRegistry.registered = {
+      ReceiveFileCallback { result in
+        didReceiveFile.append(result)
+      }
+    }
 
     let start: MessengerStartFileTransfer = .live(env)
 
@@ -45,6 +51,17 @@ final class MessengerStartFileTransferTests: XCTestCase {
     )])
     XCTAssertNotNil(receiveFileCallback)
     XCTAssertNoDifference(didSetFileTransfer.map { $0 != nil }, [true])
+
+    let error = NSError(domain: "test", code: 7)
+    receiveFileCallback?.handle(.success(.stub(1)))
+    receiveFileCallback?.handle(.failure(error))
+    receiveFileCallback?.handle(.success(.stub(2)))
+
+    XCTAssertNoDifference(didReceiveFile, [
+      .success(.stub(1)),
+      .failure(error),
+      .success(.stub(2)),
+    ])
   }
 
   func testStartWhenNotConnected() {
@@ -60,3 +77,4 @@ final class MessengerStartFileTransferTests: XCTestCase {
     }
   }
 }
+
