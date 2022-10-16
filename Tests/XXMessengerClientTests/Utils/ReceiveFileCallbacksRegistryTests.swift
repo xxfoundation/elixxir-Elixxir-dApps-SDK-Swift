@@ -5,8 +5,8 @@ import XXClient
 
 final class ReceiveFileCallbacksRegistryTests: XCTestCase {
   func testRegistry() {
-    var firstCallbackDidHandle: [Result<ReceivedFile, NSError>] = []
-    var secondCallbackDidHandle: [Result<ReceivedFile, NSError>] = []
+    var firstCallbackDidHandle: [ReceiveFileCallback.Result] = []
+    var secondCallbackDidHandle: [ReceiveFileCallback.Result] = []
 
     let firstCallback = ReceiveFileCallback { result in
       firstCallbackDidHandle.append(result)
@@ -19,7 +19,7 @@ final class ReceiveFileCallbacksRegistryTests: XCTestCase {
     let firstCallbackCancellable = callbackRegistry.register(firstCallback)
     let secondCallbackCancellable = callbackRegistry.register(secondCallback)
 
-    let firstResult = Result<ReceivedFile, NSError>.success(.stub(1))
+    let firstResult = ReceiveFileCallback.Result.success(.stub(1))
     registeredCallbacks.handle(firstResult)
 
     XCTAssertNoDifference(firstCallbackDidHandle, [firstResult])
@@ -27,7 +27,7 @@ final class ReceiveFileCallbacksRegistryTests: XCTestCase {
 
     firstCallbackCancellable.cancel()
     let secondError = NSError(domain: "test", code: 321)
-    let secondResult = Result<ReceivedFile, NSError>.failure(secondError)
+    let secondResult = ReceiveFileCallback.Result.failure(secondError)
     registeredCallbacks.handle(secondResult)
 
     XCTAssertNoDifference(firstCallbackDidHandle, [firstResult])
@@ -35,7 +35,7 @@ final class ReceiveFileCallbacksRegistryTests: XCTestCase {
 
     secondCallbackCancellable.cancel()
 
-    let thirdData = Result<ReceivedFile, NSError>.success(.stub(2))
+    let thirdData = ReceiveFileCallback.Result.success(.stub(2))
     registeredCallbacks.handle(thirdData)
 
     XCTAssertNoDifference(firstCallbackDidHandle, [firstResult])
