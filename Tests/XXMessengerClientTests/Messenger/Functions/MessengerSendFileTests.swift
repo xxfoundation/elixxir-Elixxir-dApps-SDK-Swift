@@ -5,28 +5,15 @@ import XXClient
 
 final class MessengerSendFileTests: XCTestCase {
   func testSendFile() throws {
-    let e2eId = 123
-    let e2eFileTransferParams = "e2eFileTransferParams".data(using: .utf8)!
-    let fileTransferParams = "fileTransferParams".data(using: .utf8)!
     let newTransferId = "transferId".data(using: .utf8)!
 
-    var didInitFileTransfer: [InitFileTransfer.Params] = []
     var didSendFile: [FileTransferSend.Params] = []
     var didCloseSend: [Data] = []
     var didReceiveCallback: [MessengerSendFile.CallbackInfo] = []
-
     var fileTransferProgressCallback: FileTransferProgressCallback!
 
     var env: MessengerEnvironment = .unimplemented
-    env.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getId.run = { e2eId }
-      return e2e
-    }
-    env.getE2EFileTransferParams.run = { e2eFileTransferParams }
-    env.getFileTransferParams.run = { fileTransferParams }
-    env.initFileTransfer.run = { params, callback in
-      didInitFileTransfer.append(params)
+    env.fileTransfer.get = {
       var fileTransfer: FileTransfer = .unimplemented
       fileTransfer.send.run = { params, callback in
         didSendFile.append(params)
@@ -47,13 +34,6 @@ final class MessengerSendFileTests: XCTestCase {
     }
 
     XCTAssertNoDifference(transferId, newTransferId)
-    XCTAssertNoDifference(didInitFileTransfer, [
-      .init(
-        e2eId: e2eId,
-        e2eFileTransferParamsJSON: e2eFileTransferParams,
-        fileTransferParamsJSON: fileTransferParams
-      )
-    ])
     XCTAssertNoDifference(didSendFile, [
       .init(
         payload: params.file,
@@ -99,15 +79,15 @@ final class MessengerSendFileTests: XCTestCase {
     XCTAssertNoDifference(didCloseSend, [transferId])
   }
 
-  func testSendFileWhenNotConnected() {
+  func testSendFileWhenNotStarted() {
     var env: MessengerEnvironment = .unimplemented
-    env.e2e.get = { nil }
+    env.fileTransfer.get = { nil }
     let sendFile: MessengerSendFile = .live(env)
 
     XCTAssertThrowsError(try sendFile(.stub) { _ in }) { error in
       XCTAssertNoDifference(
         error as? MessengerSendFile.Error,
-        MessengerSendFile.Error.notConnected
+        MessengerSendFile.Error.fileTransferNotStarted
       )
     }
   }
@@ -118,14 +98,7 @@ final class MessengerSendFileTests: XCTestCase {
     var fileTransferProgressCallback: FileTransferProgressCallback!
 
     var env: MessengerEnvironment = .unimplemented
-    env.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getId.run = { 123 }
-      return e2e
-    }
-    env.getE2EFileTransferParams.run = { Data() }
-    env.getFileTransferParams.run = { Data() }
-    env.initFileTransfer.run = { params, callback in
+    env.fileTransfer.get = {
       var fileTransfer: FileTransfer = .unimplemented
       fileTransfer.send.run = { _, callback in
         fileTransferProgressCallback = callback
@@ -157,14 +130,7 @@ final class MessengerSendFileTests: XCTestCase {
     var fileTransferProgressCallback: FileTransferProgressCallback!
 
     var env: MessengerEnvironment = .unimplemented
-    env.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getId.run = { 123 }
-      return e2e
-    }
-    env.getE2EFileTransferParams.run = { Data() }
-    env.getFileTransferParams.run = { Data() }
-    env.initFileTransfer.run = { params, callback in
+    env.fileTransfer.get = {
       var fileTransfer: FileTransfer = .unimplemented
       fileTransfer.send.run = { _, callback in
         fileTransferProgressCallback = callback
@@ -205,14 +171,7 @@ final class MessengerSendFileTests: XCTestCase {
     var fileTransferProgressCallback: FileTransferProgressCallback!
 
     var env: MessengerEnvironment = .unimplemented
-    env.e2e.get = {
-      var e2e: E2E = .unimplemented
-      e2e.getId.run = { 123 }
-      return e2e
-    }
-    env.getE2EFileTransferParams.run = { Data() }
-    env.getFileTransferParams.run = { Data() }
-    env.initFileTransfer.run = { params, callback in
+    env.fileTransfer.get = {
       var fileTransfer: FileTransfer = .unimplemented
       fileTransfer.send.run = { _, callback in
         fileTransferProgressCallback = callback

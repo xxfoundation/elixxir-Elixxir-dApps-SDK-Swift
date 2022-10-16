@@ -156,3 +156,64 @@ let restoredPhone = facts.get(.phone)?.value
 ```
 
 If no error was thrown during restoration, the `Messenger` is already loaded, started, connected, and logged in.
+
+## 🚢 File transfers
+
+### Setup for receiving files
+
+```swift
+// register receive file callback before starting file transfer manager:
+let cancellable = messenger.registerReceiveFileCallback(.init { result in
+  switch result {
+  case .success(let receivedFile):
+    // handle file metadata...
+
+    // start receiving file data:
+    try! messenger.receiveFile(.init(transferId: receivedFile.transferId)) { info in
+      switch info {
+      case .progress(let transmitted, let total):
+        // handle progress...
+
+      case .finished(let data):
+        // handle received file data...
+
+      case .failed(let error):
+        // handle error...
+      }
+    }
+
+  case .failure(let error):
+    // handle error...
+  }
+})
+
+// start file transfer manager:
+try messenger.startFileTransfer()
+```
+
+### Send files
+
+Make sure to call `messenger.startFileTransfer` before sending files.
+
+```swift
+let file = FileSend(
+  name: ...,
+  type: ...,
+  preview: ...,
+  contents: ...
+)
+
+// send file:
+let transferId = try messenger.sendFile(.init(file: file, recipientId: ...)) { info in
+  switch info {
+  case .progress(let transferId, let transmitted, let total):
+    // handle progress...
+
+  case .finished(let transferId):
+    // handle completion...
+
+  case .failed(let transferId, let error):
+    // handle error...
+  }
+}
+```

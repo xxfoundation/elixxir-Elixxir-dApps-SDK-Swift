@@ -10,6 +10,7 @@ public struct MessengerEnvironment {
   public var downloadNDF: DownloadAndVerifySignedNdf
   public var e2e: Stored<E2E?>
   public var fileManager: MessengerFileManager
+  public var fileTransfer: Stored<FileTransfer?>
   public var generateSecret: GenerateSecret
   public var getCMixParams: GetCMixParams
   public var getE2EFileTransferParams: GetE2EFileTransferParams
@@ -32,6 +33,7 @@ public struct MessengerEnvironment {
   public var newOrLoadUd: NewOrLoadUd
   public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
+  public var receiveFileCallbacks: ReceiveFileCallbacksRegistry
   public var registerForNotifications: RegisterForNotifications
   public var registerLogWriter: RegisterLogWriter
   public var resumeBackup: ResumeBackup
@@ -59,6 +61,7 @@ extension MessengerEnvironment {
       downloadNDF: .live,
       e2e: .inMemory(),
       fileManager: .live(),
+      fileTransfer: .inMemory(),
       generateSecret: .live,
       getCMixParams: .liveDefault,
       getE2EFileTransferParams: .liveDefault,
@@ -81,6 +84,7 @@ extension MessengerEnvironment {
       newOrLoadUd: .live,
       newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
+      receiveFileCallbacks: .live(),
       registerForNotifications: .live,
       registerLogWriter: .live,
       resumeBackup: .live,
@@ -103,6 +107,7 @@ extension MessengerEnvironment {
     downloadNDF: .unimplemented,
     e2e: .unimplemented(),
     fileManager: .unimplemented,
+    fileTransfer: .unimplemented(),
     generateSecret: .unimplemented,
     getCMixParams: .unimplemented,
     getE2EFileTransferParams: .unimplemented,
@@ -125,6 +130,7 @@ extension MessengerEnvironment {
     newOrLoadUd: .unimplemented,
     newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
+    receiveFileCallbacks: .unimplemented,
     registerForNotifications: .unimplemented,
     registerLogWriter: .unimplemented,
     resumeBackup: .unimplemented,
