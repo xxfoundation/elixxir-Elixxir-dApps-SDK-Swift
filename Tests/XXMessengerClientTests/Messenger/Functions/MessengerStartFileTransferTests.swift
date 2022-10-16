@@ -28,8 +28,7 @@ final class MessengerStartFileTransferTests: XCTestCase {
     env.initFileTransfer.run = { params, callback in
       didInitFileTransfer.append(params)
       receiveFileCallback = callback
-      var fileTransfer: FileTransfer = .unimplemented
-      return fileTransfer
+      return .unimplemented
     }
     env.fileTransfer.set = {
       didSetFileTransfer.append($0)

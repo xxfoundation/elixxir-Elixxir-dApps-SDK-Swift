@@ -5,8 +5,6 @@ import XXClient
 
 final class MessengerSendFileTests: XCTestCase {
   func testSendFile() throws {
-    let e2eFileTransferParams = "e2eFileTransferParams".data(using: .utf8)!
-    let fileTransferParams = "fileTransferParams".data(using: .utf8)!
     let newTransferId = "transferId".data(using: .utf8)!
 
     var didSendFile: [FileTransferSend.Params] = []
