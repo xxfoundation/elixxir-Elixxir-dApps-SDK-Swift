@@ -23,3 +23,16 @@ extension BackupParams {
     username: "stub-username"
   )
 }
+
+extension ReceivedFile {
+  static func stub(_ id: Int) -> ReceivedFile {
+    ReceivedFile(
+      transferId: "transfer-id-\(id)".data(using: .utf8)!,
+      senderId: "sender-id-\(id)".data(using: .utf8)!,
+      preview: "preview-\(id)".data(using: .utf8)!,
+      name: "name-\(id)",
+      type: "type-\(id)",
+      size: id
+    )
+  }
+}
