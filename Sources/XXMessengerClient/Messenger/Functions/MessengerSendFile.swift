@@ -37,7 +37,7 @@ public struct MessengerSendFile {
   public typealias Callback = (CallbackInfo) -> Void
 
   public enum Error: Swift.Error, Equatable {
-    case notConnected
+    case fileTransferNotStarted
   }
 
   public var run: (Params, @escaping Callback) throws -> Data
@@ -53,19 +53,9 @@ public struct MessengerSendFile {
 extension MessengerSendFile {
   public static func live(_ env: MessengerEnvironment) -> MessengerSendFile {
     MessengerSendFile { params, callback in
-      guard let e2e = env.e2e() else {
-        throw Error.notConnected
+      guard let fileTransfer = env.fileTransfer() else {
+        throw Error.fileTransferNotStarted
       }
-      let fileTransfer = try env.initFileTransfer(
-        params: InitFileTransfer.Params(
-          e2eId: e2e.getId(),
-          e2eFileTransferParamsJSON: env.getE2EFileTransferParams(),
-          fileTransferParamsJSON: env.getFileTransferParams()
-        ),
-        callback: ReceiveFileCallback { _ in
-          fatalError("Bindings issue: ReceiveFileCallback called when sending file.")
-        }
-      )
       func close(id: Data) {
         do {
           try fileTransfer.closeSend(transferId: id)
