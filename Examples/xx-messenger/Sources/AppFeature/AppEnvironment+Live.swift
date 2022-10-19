@@ -114,7 +114,9 @@ extension AppEnvironment {
         db: dbManager.getDB
       ),
       receiveFileHandler: .live(
-        messenger: messenger
+        messenger: messenger,
+        db: dbManager.getDB,
+        now: Date.init
       ),
       backupStorage: backupStorage,
       log: .live(),
