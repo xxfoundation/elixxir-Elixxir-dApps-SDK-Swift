@@ -5,6 +5,14 @@ import XXMessengerClient
 import XXModels
 
 public struct SendImage {
+  public struct ProgressError: Error, Equatable {
+    public init(message: String) {
+      self.message = message
+    }
+
+    public var message: String
+  }
+
   public typealias OnError = (Error) -> Void
   public typealias Completion = () -> Void
 
@@ -27,8 +35,79 @@ extension SendImage {
     now: @escaping () -> Date
   ) -> SendImage {
     SendImage { image, recipientId, onError, completion in
-      // TODO: implement sending image
-      completion()
+      func updateProgress(transferId: Data, progress: Float) {
+        do {
+          if var transfer = try db().fetchFileTransfers(.init(id: [transferId])).first {
+            transfer.progress = progress
+            try db().saveFileTransfer(transfer)
+          }
+        } catch {
+          onError(error)
+        }
+      }
+
+      let file = FileSend(
+        name: "image.jpg",
+        type: "image",
+        preview: nil,
+        contents: image
+      )
+      let params = MessengerSendFile.Params(
+        file: file,
+        recipientId: recipientId,
+        retry: 2,
+        callbackIntervalMS: 500
+      )
+      do {
+        let date = now()
+        let myContactId = try messenger.e2e.tryGet().getContact().getId()
+        let transferId = try messenger.sendFile(params) { info in
+          switch info {
+          case .progress(let transferId, let transmitted, let total):
+            updateProgress(
+              transferId: transferId,
+              progress: total > 0 ? Float(transmitted) / Float(total) : 0
+            )
+
+          case .finished(let transferId):
+            updateProgress(
+              transferId: transferId,
+              progress: 1
+            )
+
+          case .failed(_, .error(let error)):
+            onError(error)
+
+          case .failed(_, .progressError(let message)):
+            onError(ProgressError(message: message))
+
+          case .failed(_, .close(let error)):
+            onError(error)
+          }
+        }
+        try db().saveFileTransfer(XXModels.FileTransfer(
+          id: transferId,
+          contactId: myContactId,
+          name: file.name,
+          type: file.type,
+          data: image,
+          progress: 0,
+          isIncoming: false,
+          createdAt: date
+        ))
+        try db().saveMessage(XXModels.Message(
+          senderId: myContactId,
+          recipientId: recipientId,
+          groupId: nil,
+          date: date,
+          status: .sent,
+          isUnread: false,
+          text: "",
+          fileTransferId: transferId
+        ))
+      } catch {
+        onError(error)
+      }
     }
   }
 }
