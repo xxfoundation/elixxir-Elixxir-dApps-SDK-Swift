@@ -468,21 +468,19 @@ final class AppFeatureTests: XCTestCase {
     ])
 
     actions = []
-    struct AuthError: Error {}
-    let authError = AuthError()
+    let authError = NSError(domain: "auth-handler-error", code: 1)
     authHandlerOnError.first?(authError)
 
     XCTAssertNoDifference(actions, [
-      .didLog(.error(authError as NSError))
+      .didLog(.error(authError))
     ])
 
     actions = []
-    struct MessageError: Error {}
-    let messageError = MessageError()
+    let messageError = NSError(domain: "message-listener-error", code: 2)
     messageListenerOnError.first?(messageError)
 
     XCTAssertNoDifference(actions, [
-      .didLog(.error(messageError as NSError))
+      .didLog(.error(messageError))
     ])
 
     actions = []
