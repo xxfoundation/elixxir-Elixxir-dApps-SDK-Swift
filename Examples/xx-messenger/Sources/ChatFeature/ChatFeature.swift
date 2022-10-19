@@ -18,13 +18,15 @@ public struct ChatState: Equatable, Identifiable {
       date: Date,
       senderId: Data,
       text: String,
-      status: XXModels.Message.Status
+      status: XXModels.Message.Status,
+      fileTransfer: XXModels.FileTransfer? = nil
     ) {
       self.id = id
       self.date = date
       self.senderId = senderId
       self.text = text
       self.status = status
+      self.fileTransfer = fileTransfer
     }
 
     public var id: Int64
@@ -32,6 +34,7 @@ public struct ChatState: Equatable, Identifiable {
     public var senderId: Data
     public var text: String
     public var status: XXModels.Message.Status
+    public var fileTransfer: XXModels.FileTransfer?
   }
 
   public init(
