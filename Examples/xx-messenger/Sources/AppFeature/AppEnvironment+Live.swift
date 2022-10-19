@@ -99,6 +99,11 @@ extension AppEnvironment {
             db: dbManager.getDB,
             now: Date.init
           ),
+          sendImage: .live(
+            messenger: messenger,
+            db: dbManager.getDB,
+            now: Date.init
+          ),
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )

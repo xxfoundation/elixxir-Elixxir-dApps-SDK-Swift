@@ -66,6 +66,7 @@ public enum ChatAction: Equatable, BindableAction {
   case didFetchMessages(IdentifiedArrayOf<ChatState.Message>)
   case sendTapped
   case sendFailed(String)
+  case imagePicked(Data)
   case dismissSendFailureTapped
   case binding(BindingAction<ChatState>)
 }
@@ -75,12 +76,14 @@ public struct ChatEnvironment {
     messenger: Messenger,
     db: DBManagerGetDB,
     sendMessage: SendMessage,
+    sendImage: SendImage,
     mainQueue: AnySchedulerOf<DispatchQueue>,
     bgQueue: AnySchedulerOf<DispatchQueue>
   ) {
     self.messenger = messenger
     self.db = db
     self.sendMessage = sendMessage
+    self.sendImage = sendImage
     self.mainQueue = mainQueue
     self.bgQueue = bgQueue
   }
@@ -88,6 +91,7 @@ public struct ChatEnvironment {
   public var messenger: Messenger
   public var db: DBManagerGetDB
   public var sendMessage: SendMessage
+  public var sendImage: SendImage
   public var mainQueue: AnySchedulerOf<DispatchQueue>
   public var bgQueue: AnySchedulerOf<DispatchQueue>
 }
@@ -98,6 +102,7 @@ extension ChatEnvironment {
     messenger: .unimplemented,
     db: .unimplemented,
     sendMessage: .unimplemented,
+    sendImage: .unimplemented,
     mainQueue: .unimplemented,
     bgQueue: .unimplemented
   )
@@ -195,6 +200,28 @@ public let chatReducer = Reducer<ChatState, ChatAction, ChatEnvironment>
   case .sendFailed(let failure):
     state.sendFailure = failure
     return .none
+
+  case .imagePicked(let data):
+    let chatId = state.id
+    return Effect.run { subscriber in
+      switch chatId {
+      case .contact(let recipientId):
+        env.sendImage(
+          data,
+          to: recipientId,
+          onError: { error in
+            subscriber.send(.sendFailed(error.localizedDescription))
+          },
+          completion: {
+            subscriber.send(completion: .finished)
+          }
+        )
+      }
+      return AnyCancellable {}
+    }
+    .subscribe(on: env.bgQueue)
+    .receive(on: env.mainQueue)
+    .eraseToEffect()
 
   case .dismissSendFailureTapped:
     state.sendFailure = nil

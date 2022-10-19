@@ -8,6 +8,7 @@ public struct ChatView: View {
   }
 
   let store: Store<ChatState, ChatAction>
+  @State var isPresentingImagePicker = false
 
   struct ViewState: Equatable {
     var myContactId: Data?
@@ -87,12 +88,28 @@ public struct ChatView: View {
             ))
             .textFieldStyle(.roundedBorder)
 
-            Button {
-              viewStore.send(.sendTapped)
-            } label: {
-              Image(systemName: "paperplane.fill")
+            if viewStore.text.isEmpty == false {
+              Button {
+                viewStore.send(.sendTapped)
+              } label: {
+                Image(systemName: "paperplane.fill")
+              }
+              .buttonStyle(.borderedProminent)
+            } else {
+              Button {
+                isPresentingImagePicker = true
+              } label: {
+                Image(systemName: "photo.on.rectangle.angled")
+              }
+              .buttonStyle(.borderedProminent)
+              .sheet(isPresented: $isPresentingImagePicker) {
+                ImagePicker { image in
+                  if let data = image.jpegData(compressionQuality: 0.7) {
+                    viewStore.send(.imagePicked(data))
+                  }
+                }
+              }
             }
-            .buttonStyle(.borderedProminent)
           }
           .padding()
         }

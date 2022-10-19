@@ -240,4 +240,70 @@ final class ChatFeatureTests: XCTestCase {
       $0.sendFailure = nil
     }
   }
+
+  func testSendImage() {
+    struct SendImageParams: Equatable {
+      var image: Data
+      var recipientId: Data
+    }
+    var didSendImageWithParams: [SendImageParams] = []
+    var sendImageCompletion: SendImage.Completion?
+
+    let store = TestStore(
+      initialState: ChatState(id: .contact("contact-id".data(using: .utf8)!)),
+      reducer: chatReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.sendImage.run = { image, recipientId, _, completion in
+      didSendImageWithParams.append(.init(image: image, recipientId: recipientId))
+      sendImageCompletion = completion
+    }
+
+    let image = "image-data".data(using: .utf8)!
+    store.send(.imagePicked(image))
+
+    XCTAssertNoDifference(didSendImageWithParams, [
+      .init(image: image, recipientId: "contact-id".data(using: .utf8)!)
+    ])
+
+    sendImageCompletion?()
+  }
+
+  func testSendImageFailure() {
+    var sendImageOnError: SendImage.OnError?
+    var sendImageCompletion: SendImage.Completion?
+
+    let store = TestStore(
+      initialState: ChatState(
+        id: .contact("contact-id".data(using: .utf8)!)
+      ),
+      reducer: chatReducer,
+      environment: .unimplemented
+    )
+
+    store.environment.mainQueue = .immediate
+    store.environment.bgQueue = .immediate
+    store.environment.sendImage.run = { _, _, onError, completion in
+      sendImageOnError = onError
+      sendImageCompletion = completion
+    }
+
+    store.send(.imagePicked(Data()))
+
+    let error = NSError(domain: "test", code: 123)
+    sendImageOnError?(error)
+
+    store.receive(.sendFailed(error.localizedDescription)) {
+      $0.sendFailure = error.localizedDescription
+    }
+
+    sendImageCompletion?()
+
+    store.send(.dismissSendFailureTapped) {
+      $0.sendFailure = nil
+    }
+  }
 }
