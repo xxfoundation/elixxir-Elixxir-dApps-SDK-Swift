@@ -16,6 +16,6 @@ extension MessengerIsFileTransferRunning {
 
 extension MessengerIsFileTransferRunning {
   public static let unimplemented = MessengerIsFileTransferRunning(
-    run: XCTUnimplemented("\(Self.self)")
+    run: XCTUnimplemented("\(Self.self)", placeholder: false)
   )
 }
