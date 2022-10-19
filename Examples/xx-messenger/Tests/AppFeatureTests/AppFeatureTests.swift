@@ -34,6 +34,10 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.receiveFileHandler.run = { _ in
+      actions.append(.didStartReceiveFileHandler)
+      return Cancellable {}
+    }
     store.environment.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
@@ -49,6 +53,7 @@ final class AppFeatureTests: XCTestCase {
       .didMakeDB,
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didStartReceiveFileHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -83,6 +88,10 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.receiveFileHandler.run = { _ in
+      actions.append(.didStartReceiveFileHandler)
+      return Cancellable {}
+    }
     store.environment.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
@@ -98,6 +107,7 @@ final class AppFeatureTests: XCTestCase {
       .didMakeDB,
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didStartReceiveFileHandler,
       .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
@@ -132,6 +142,10 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.receiveFileHandler.run = { _ in
+      actions.append(.didStartReceiveFileHandler)
+      return Cancellable {}
+    }
     store.environment.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
@@ -148,6 +162,7 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didStartReceiveFileHandler,
       .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
@@ -182,6 +197,10 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.receiveFileHandler.run = { _ in
+      actions.append(.didStartReceiveFileHandler)
+      return Cancellable {}
+    }
     store.environment.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
@@ -198,6 +217,7 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didStartReceiveFileHandler,
       .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
@@ -229,6 +249,10 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.receiveFileHandler.run = { _ in
+      actions.append(.didStartReceiveFileHandler)
+      return Cancellable {}
+    }
     store.environment.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
@@ -245,6 +269,7 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didStartReceiveFileHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -331,6 +356,10 @@ final class AppFeatureTests: XCTestCase {
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
+    store.environment.receiveFileHandler.run = { _ in
+      actions.append(.didStartReceiveFileHandler)
+      return Cancellable {}
+    }
     store.environment.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
@@ -346,6 +375,7 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didStartReceiveFileHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -356,6 +386,7 @@ final class AppFeatureTests: XCTestCase {
     var actions: [Action]!
     var authHandlerOnError: [AuthCallbackHandler.OnError] = []
     var messageListenerOnError: [MessageListenerHandler.OnError] = []
+    var fileHandlerOnError: [ReceiveFileHandler.OnError] = []
     var backupCallback: [UpdateBackupFunc] = []
 
     let store = TestStore(
@@ -383,6 +414,13 @@ final class AppFeatureTests: XCTestCase {
         actions.append(.didCancelMessageListener)
       }
     }
+    store.environment.receiveFileHandler.run = { onError in
+      fileHandlerOnError.append(onError)
+      actions.append(.didStartReceiveFileHandler)
+      return Cancellable {
+        actions.append(.didCancelReceiveFileHandler)
+      }
+    }
     store.environment.messenger.registerBackupCallback.run = { callback in
       backupCallback.append(callback)
       actions.append(.didRegisterBackupCallback)
@@ -406,6 +444,7 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didStartReceiveFileHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -420,9 +459,11 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didCancelAuthHandler,
       .didCancelMessageListener,
+      .didCancelReceiveFileHandler,
       .didCancelBackupCallback,
       .didStartAuthHandler,
       .didStartMessageListener,
+      .didStartReceiveFileHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -445,6 +486,14 @@ final class AppFeatureTests: XCTestCase {
     ])
 
     actions = []
+    let fileError = NSError(domain: "receive-file-error", code: 3)
+    fileHandlerOnError.first?(fileError)
+
+    XCTAssertNoDifference(actions, [
+      .didLog(.error(fileError))
+    ])
+
+    actions = []
     let backupData = "backup".data(using: .utf8)!
     backupCallback.first?.handle(backupData)
 
@@ -458,6 +507,7 @@ final class AppFeatureTests: XCTestCase {
     XCTAssertNoDifference(actions, [
       .didCancelAuthHandler,
       .didCancelMessageListener,
+      .didCancelReceiveFileHandler,
       .didCancelBackupCallback,
     ])
   }
@@ -467,10 +517,12 @@ private enum Action: Equatable {
   case didMakeDB
   case didStartAuthHandler
   case didStartMessageListener
+  case didStartReceiveFileHandler
   case didRegisterBackupCallback
   case didLoadMessenger
   case didCancelAuthHandler
   case didCancelMessageListener
+  case didCancelReceiveFileHandler
   case didCancelBackupCallback
   case didLog(Logger.Message)
   case didStoreBackup(Data)
