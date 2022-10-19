@@ -5,6 +5,7 @@ public struct Messenger {
   public var e2e: Stored<E2E?>
   public var ud: Stored<UserDiscovery?>
   public var backup: Stored<Backup?>
+  public var fileTransfer: Stored<FileTransfer?>
   public var isCreated: MessengerIsCreated
   public var create: MessengerCreate
   public var restoreBackup: MessengerRestoreBackup
@@ -54,6 +55,7 @@ extension Messenger {
       e2e: env.e2e,
       ud: env.ud,
       backup: env.backup,
+      fileTransfer: env.fileTransfer,
       isCreated: .live(env),
       create: .live(env),
       restoreBackup: .live(env),
@@ -104,6 +106,7 @@ extension Messenger {
     e2e: .unimplemented(),
     ud: .unimplemented(),
     backup: .unimplemented(),
+    fileTransfer: .unimplemented(),
     isCreated: .unimplemented,
     create: .unimplemented,
     restoreBackup: .unimplemented,
