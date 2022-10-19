@@ -115,31 +115,50 @@ public let chatReducer = Reducer<ChatState, ChatAction, ChatEnvironment>
       let myContactId = try env.messenger.e2e.tryGet().getContact().getId()
       state.myContactId = myContactId
       let queryChat: XXModels.Message.Query.Chat
+      let receivedFileTransfersQuery: XXModels.FileTransfer.Query
+      let sentFileTransfersQuery: XXModels.FileTransfer.Query
       switch state.id {
       case .contact(let contactId):
         queryChat = .direct(myContactId, contactId)
+        receivedFileTransfersQuery = .init(
+          contactId: contactId,
+          isIncoming: true
+        )
+        sentFileTransfersQuery = .init(
+          contactId: myContactId,
+          isIncoming: false
+        )
       }
-      let query = XXModels.Message.Query(chat: queryChat)
-      return try env.db().fetchMessagesPublisher(query)
-        .assertNoFailure()
-        .map { messages in
-          messages.compactMap { message in
-            guard let id = message.id else { return nil }
-            return ChatState.Message(
-              id: id,
-              date: message.date,
-              senderId: message.senderId,
-              text: message.text,
-              status: message.status
-            )
-          }
+      let messagesQuery = XXModels.Message.Query(chat: queryChat)
+      return Publishers.CombineLatest3(
+        try env.db().fetchMessagesPublisher(messagesQuery),
+        try env.db().fetchFileTransfersPublisher(receivedFileTransfersQuery),
+        try env.db().fetchFileTransfersPublisher(sentFileTransfersQuery)
+      )
+      .map { messages, receivedFileTransfers, sentFileTransfers in
+        (messages, receivedFileTransfers + sentFileTransfers)
+      }
+      .assertNoFailure()
+      .map { messages, fileTransfers in
+        messages.compactMap { message in
+          guard let id = message.id else { return nil }
+          return ChatState.Message(
+            id: id,
+            date: message.date,
+            senderId: message.senderId,
+            text: message.text,
+            status: message.status,
+            fileTransfer: fileTransfers.first { $0.id == message.fileTransferId }
+          )
         }
-        .map { IdentifiedArrayOf<ChatState.Message>(uniqueElements: $0) }
-        .map(ChatAction.didFetchMessages)
-        .subscribe(on: env.bgQueue)
-        .receive(on: env.mainQueue)
-        .eraseToEffect()
-        .cancellable(id: FetchEffectId.self, cancelInFlight: true)
+      }
+      .removeDuplicates()
+      .map { IdentifiedArrayOf<ChatState.Message>(uniqueElements: $0) }
+      .map(ChatAction.didFetchMessages)
+      .subscribe(on: env.bgQueue)
+      .receive(on: env.mainQueue)
+      .eraseToEffect()
+      .cancellable(id: FetchEffectId.self, cancelInFlight: true)
     } catch {
       state.failure = error.localizedDescription
       return .none

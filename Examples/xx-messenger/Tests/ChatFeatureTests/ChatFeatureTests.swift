@@ -21,6 +21,8 @@ final class ChatFeatureTests: XCTestCase {
 
     var didFetchMessagesWithQuery: [XXModels.Message.Query] = []
     let messagesPublisher = PassthroughSubject<[XXModels.Message], Error>()
+    var didFetchFileTransfersWithQuery: [XXModels.FileTransfer.Query] = []
+    let fileTransfersPublisher = PassthroughSubject<[XXModels.FileTransfer], Error>()
 
     store.environment.mainQueue = .immediate
     store.environment.bgQueue = .immediate
@@ -39,6 +41,10 @@ final class ChatFeatureTests: XCTestCase {
         didFetchMessagesWithQuery.append(query)
         return messagesPublisher.eraseToAnyPublisher()
       }
+      db.fetchFileTransfersPublisher.run = { query in
+        didFetchFileTransfersWithQuery.append(query)
+        return fileTransfersPublisher.eraseToAnyPublisher()
+      }
       return db
     }
 
@@ -49,7 +55,25 @@ final class ChatFeatureTests: XCTestCase {
     XCTAssertNoDifference(didFetchMessagesWithQuery, [
       .init(chat: .direct(myContactId, contactId))
     ])
+    XCTAssertNoDifference(didFetchFileTransfersWithQuery, [
+      .init(contactId: contactId, isIncoming: true),
+      .init(contactId: myContactId, isIncoming: false),
+    ])
 
+    let receivedFileTransfer = FileTransfer(
+      id: "file-transfer-1-id".data(using: .utf8)!,
+      contactId: contactId,
+      name: "file-transfer-1-name",
+      type: "file-transfer-1-type",
+      isIncoming: true
+    )
+    let sentFileTransfer = FileTransfer(
+      id: "file-transfer-2-id".data(using: .utf8)!,
+      contactId: myContactId,
+      name: "file-transfer-2-name",
+      type: "file-transfer-2-type",
+      isIncoming: false
+    )
     messagesPublisher.send([
       .init(
         id: nil,
@@ -69,7 +93,8 @@ final class ChatFeatureTests: XCTestCase {
         date: Date(timeIntervalSince1970: 1),
         status: .received,
         isUnread: false,
-        text: "Message 1"
+        text: "Message 1",
+        fileTransferId: receivedFileTransfer.id
       ),
       .init(
         id: 2,
@@ -79,8 +104,13 @@ final class ChatFeatureTests: XCTestCase {
         date: Date(timeIntervalSince1970: 2),
         status: .sent,
         isUnread: false,
-        text: "Message 2"
+        text: "Message 2",
+        fileTransferId: sentFileTransfer.id
       ),
+    ])
+    fileTransfersPublisher.send([
+      receivedFileTransfer,
+      sentFileTransfer,
     ])
 
     let expectedMessages = IdentifiedArrayOf<ChatState.Message>(uniqueElements: [
@@ -89,14 +119,16 @@ final class ChatFeatureTests: XCTestCase {
         date: Date(timeIntervalSince1970: 1),
         senderId: contactId,
         text: "Message 1",
-        status: .received
+        status: .received,
+        fileTransfer: receivedFileTransfer
       ),
       .init(
         id: 2,
         date: Date(timeIntervalSince1970: 2),
         senderId: myContactId,
         text: "Message 2",
-        status: .sent
+        status: .sent,
+        fileTransfer: sentFileTransfer
       ),
     ])
 
@@ -105,6 +137,7 @@ final class ChatFeatureTests: XCTestCase {
     }
 
     messagesPublisher.send(completion: .finished)
+    fileTransfersPublisher.send(completion: .finished)
   }
 
   func testStartFailure() {
