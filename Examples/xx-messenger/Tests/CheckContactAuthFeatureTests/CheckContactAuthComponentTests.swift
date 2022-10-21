@@ -5,27 +5,26 @@ import XXClient
 import XXModels
 @testable import CheckContactAuthFeature
 
-final class CheckContactAuthFeatureTests: XCTestCase {
+final class CheckContactAuthComponentTests: XCTestCase {
   func testCheck() {
     var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
     let contactId = "contact-id".data(using: .utf8)!
     contact.getIdFromContact.run = { _ in contactId }
 
     let store = TestStore(
-      initialState: CheckContactAuthState(
+      initialState: CheckContactAuthComponent.State(
         contact: contact
       ),
-      reducer: checkContactAuthReducer,
-      environment: .unimplemented
+      reducer: CheckContactAuthComponent()
     )
 
     var didCheckPartnerId: [Data] = []
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.hasAuthenticatedChannel.run = { partnerId in
         didCheckPartnerId.append(partnerId)
@@ -33,7 +32,7 @@ final class CheckContactAuthFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
@@ -64,20 +63,19 @@ final class CheckContactAuthFeatureTests: XCTestCase {
     contact.getIdFromContact.run = { _ in contactId }
 
     let store = TestStore(
-      initialState: CheckContactAuthState(
+      initialState: CheckContactAuthComponent.State(
         contact: contact
       ),
-      reducer: checkContactAuthReducer,
-      environment: .unimplemented
+      reducer: CheckContactAuthComponent()
     )
 
     var didCheckPartnerId: [Data] = []
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.hasAuthenticatedChannel.run = { partnerId in
         didCheckPartnerId.append(partnerId)
@@ -85,7 +83,7 @@ final class CheckContactAuthFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
@@ -116,19 +114,18 @@ final class CheckContactAuthFeatureTests: XCTestCase {
     contact.getIdFromContact.run = { _ in contactId }
 
     let store = TestStore(
-      initialState: CheckContactAuthState(
+      initialState: CheckContactAuthComponent.State(
         contact: contact
       ),
-      reducer: checkContactAuthReducer,
-      environment: .unimplemented
+      reducer: CheckContactAuthComponent()
     )
 
     struct Failure: Error {}
     let error = Failure()
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.hasAuthenticatedChannel.run = { _ in throw error }
       return e2e
