@@ -7,22 +7,21 @@ import XXMessengerClient
 import XXModels
 @testable import SendRequestFeature
 
-final class SendRequestFeatureTests: XCTestCase {
+final class SendRequestComponentTests: XCTestCase {
   func testStart() {
     let myContact = XXClient.Contact.unimplemented("my-contact-data".data(using: .utf8)!)
 
     var didGetMyContact: [MessengerMyContact.IncludeFacts?] = []
 
     let store = TestStore(
-      initialState: SendRequestState(
+      initialState: SendRequestComponent.State(
         contact: .unimplemented("contact-data".data(using: .utf8)!)
       ),
-      reducer: sendRequestReducer,
-      environment: .unimplemented
+      reducer: SendRequestComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.myContact.run = { includeFacts in
+    store.dependencies.appDependencies.mainQueue = .immediate
+    store.dependencies.appDependencies.bgQueue = .immediate
+    store.dependencies.appDependencies.messenger.myContact.run = { includeFacts in
       didGetMyContact.append(includeFacts)
       return myContact
     }
@@ -39,15 +38,14 @@ final class SendRequestFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: SendRequestState(
+      initialState: SendRequestComponent.State(
         contact: .unimplemented("contact-data".data(using: .utf8)!)
       ),
-      reducer: sendRequestReducer,
-      environment: .unimplemented
+      reducer: SendRequestComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.myContact.run = { _ in throw failure }
+    store.dependencies.appDependencies.mainQueue = .immediate
+    store.dependencies.appDependencies.bgQueue = .immediate
+    store.dependencies.appDependencies.messenger.myContact.run = { _ in throw failure }
 
     store.send(.start)
 
@@ -70,12 +68,11 @@ final class SendRequestFeatureTests: XCTestCase {
     myContact.getFactsFromContact.run = { _ in myFacts }
 
     let store = TestStore(
-      initialState: SendRequestState(
+      initialState: SendRequestComponent.State(
         contact: contact,
         myContact: myContact
       ),
-      reducer: sendRequestReducer,
-      environment: .unimplemented
+      reducer: SendRequestComponent()
     )
 
     struct DidBulkUpdateContacts: Equatable {
@@ -90,9 +87,9 @@ final class SendRequestFeatureTests: XCTestCase {
     var didBulkUpdateContacts: [DidBulkUpdateContacts] = []
     var didRequestAuthChannel: [DidRequestAuthChannel] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.db.run = {
+    store.dependencies.appDependencies.mainQueue = .immediate
+    store.dependencies.appDependencies.bgQueue = .immediate
+    store.dependencies.appDependencies.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContacts.append(.init(query: query, assignments: assignments))
@@ -100,7 +97,7 @@ final class SendRequestFeatureTests: XCTestCase {
       }
       return db
     }
-    store.environment.messenger.e2e.get = {
+    store.dependencies.appDependencies.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.requestAuthenticatedChannel.run = { partner, myFacts in
         didRequestAuthChannel.append(.init(partner: partner, myFacts: myFacts))
@@ -149,25 +146,24 @@ final class SendRequestFeatureTests: XCTestCase {
     myContact.getFactsFromContact.run = { _ in myFacts }
 
     let store = TestStore(
-      initialState: SendRequestState(
+      initialState: SendRequestComponent.State(
         contact: contact,
         myContact: myContact
       ),
-      reducer: sendRequestReducer,
-      environment: .unimplemented
+      reducer: SendRequestComponent()
     )
 
     struct Failure: Error {}
     let failure = Failure()
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.db.run = {
+    store.dependencies.appDependencies.mainQueue = .immediate
+    store.dependencies.appDependencies.bgQueue = .immediate
+    store.dependencies.appDependencies.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { _, _ in return 0 }
       return db
     }
-    store.environment.messenger.e2e.get = {
+    store.dependencies.appDependencies.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.requestAuthenticatedChannel.run = { _, _ in throw failure }
       return e2e

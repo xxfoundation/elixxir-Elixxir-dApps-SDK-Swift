@@ -4,11 +4,11 @@ import SwiftUI
 import XXClient
 
 public struct SendRequestView: View {
-  public init(store: Store<SendRequestState, SendRequestAction>) {
+  public init(store: StoreOf<SendRequestComponent>) {
     self.store = store
   }
 
-  let store: Store<SendRequestState, SendRequestAction>
+  let store: StoreOf<SendRequestComponent>
 
   struct ViewState: Equatable {
     var contactUsername: String?
@@ -23,7 +23,7 @@ public struct SendRequestView: View {
     var isSending: Bool
     var failure: String?
 
-    init(state: SendRequestState) {
+    init(state: SendRequestComponent.State) {
       contactUsername = try? state.contact.getFact(.username)?.value
       contactEmail = try? state.contact.getFact(.email)?.value
       contactPhone = try? state.contact.getFact(.phone)?.value
@@ -129,7 +129,7 @@ public struct SendRequestView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       SendRequestView(store: Store(
-        initialState: SendRequestState(
+        initialState: SendRequestComponent.State(
           contact: {
             var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
             contact.getFactsFromContact.run = { _ in
@@ -158,8 +158,7 @@ public struct SendRequestView_Previews: PreviewProvider {
           isSending: false,
           failure: "Something went wrong"
         ),
-        reducer: .empty,
-        environment: ()
+        reducer: EmptyReducer()
       ))
     }
   }
