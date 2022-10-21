@@ -5,6 +5,7 @@ public struct Messenger {
   public var e2e: Stored<E2E?>
   public var ud: Stored<UserDiscovery?>
   public var backup: Stored<Backup?>
+  public var fileTransfer: Stored<FileTransfer?>
   public var isCreated: MessengerIsCreated
   public var create: MessengerCreate
   public var restoreBackup: MessengerRestoreBackup
@@ -41,6 +42,7 @@ public struct Messenger {
   public var setLogLevel: MessengerSetLogLevel
   public var startLogging: MessengerStartLogging
   public var registerReceiveFileCallback: MessengerRegisterReceiveFileCallback
+  public var isFileTransferRunning: MessengerIsFileTransferRunning
   public var startFileTransfer: MessengerStartFileTransfer
   public var sendFile: MessengerSendFile
   public var receiveFile: MessengerReceiveFile
@@ -53,6 +55,7 @@ extension Messenger {
       e2e: env.e2e,
       ud: env.ud,
       backup: env.backup,
+      fileTransfer: env.fileTransfer,
       isCreated: .live(env),
       create: .live(env),
       restoreBackup: .live(env),
@@ -89,6 +92,7 @@ extension Messenger {
       setLogLevel: .live(env),
       startLogging: .live(env),
       registerReceiveFileCallback: .live(env),
+      isFileTransferRunning: .live(env),
       startFileTransfer: .live(env),
       sendFile: .live(env),
       receiveFile: .live(env)
@@ -102,6 +106,7 @@ extension Messenger {
     e2e: .unimplemented(),
     ud: .unimplemented(),
     backup: .unimplemented(),
+    fileTransfer: .unimplemented(),
     isCreated: .unimplemented,
     create: .unimplemented,
     restoreBackup: .unimplemented,
@@ -138,6 +143,7 @@ extension Messenger {
     setLogLevel: .unimplemented,
     startLogging: .unimplemented,
     registerReceiveFileCallback: .unimplemented,
+    isFileTransferRunning: .unimplemented,
     startFileTransfer: .unimplemented,
     sendFile: .unimplemented,
     receiveFile: .unimplemented

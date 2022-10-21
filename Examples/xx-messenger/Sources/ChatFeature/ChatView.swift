@@ -8,6 +8,7 @@ public struct ChatView: View {
   }
 
   let store: Store<ChatState, ChatAction>
+  @State var isPresentingImagePicker = false
 
   struct ViewState: Equatable {
     var myContactId: Data?
@@ -87,12 +88,28 @@ public struct ChatView: View {
             ))
             .textFieldStyle(.roundedBorder)
 
-            Button {
-              viewStore.send(.sendTapped)
-            } label: {
-              Image(systemName: "paperplane.fill")
+            if viewStore.text.isEmpty == false {
+              Button {
+                viewStore.send(.sendTapped)
+              } label: {
+                Image(systemName: "paperplane.fill")
+              }
+              .buttonStyle(.borderedProminent)
+            } else {
+              Button {
+                isPresentingImagePicker = true
+              } label: {
+                Image(systemName: "photo.on.rectangle.angled")
+              }
+              .buttonStyle(.borderedProminent)
+              .sheet(isPresented: $isPresentingImagePicker) {
+                ImagePicker { image in
+                  if let data = image.jpegData(compressionQuality: 0.7) {
+                    viewStore.send(.imagePicked(data))
+                  }
+                }
+              }
             }
-            .buttonStyle(.borderedProminent)
           }
           .padding()
         }
@@ -112,6 +129,10 @@ public struct ChatView: View {
       message.senderId == myContactId ? .trailing : .leading
     }
 
+    var paddingEdge: Edge.Set {
+      message.senderId == myContactId ? .leading : .trailing
+    }
+
     var textColor: Color? {
       message.senderId == myContactId ? Color.white : nil
     }
@@ -123,20 +144,38 @@ public struct ChatView: View {
           .font(.footnote)
           .frame(maxWidth: .infinity, alignment: alignment)
 
-        Text(message.text)
-          .foregroundColor(textColor)
-          .padding(.horizontal, 16)
-          .padding(.vertical, 8)
-          .background {
-            if message.senderId == myContactId {
-              RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.blue)
-            } else {
-              RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Material.ultraThick)
+        VStack(alignment: .leading) {
+          if let fileTransfer = message.fileTransfer {
+            Text("\(fileTransfer.name) (\(fileTransfer.type))")
+            if fileTransfer.progress < 1 {
+              ProgressView(value: fileTransfer.progress)
             }
+            if fileTransfer.type == "image",
+               let data = fileTransfer.data,
+               let image = UIImage(data: data) {
+              Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .padding(.bottom, 8)
+            }
+          } else {
+            Text(message.text)
           }
-          .frame(maxWidth: .infinity, alignment: alignment)
+        }
+        .foregroundColor(textColor)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 8)
+        .background {
+          if message.senderId == myContactId {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+              .fill(Color.blue)
+          } else {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+              .fill(Material.ultraThick)
+          }
+        }
+        .frame(maxWidth: .infinity, alignment: alignment)
+        .padding(paddingEdge, 60)
       }
       .padding(.horizontal)
     }
@@ -177,6 +216,47 @@ public struct ChatView_Previews: PreviewProvider {
               senderId: "my-contact-id".data(using: .utf8)!,
               text: "Hi!",
               status: .sent
+            ),
+            .init(
+              id: 3,
+              date: Date(),
+              senderId: "contact-id".data(using: .utf8)!,
+              text: "",
+              status: .received,
+              fileTransfer: .init(
+                id: Data(),
+                contactId: Data(),
+                name: "received_file.jpeg",
+                type: "image",
+                progress: 0.75,
+                isIncoming: true
+              )
+            ),
+            .init(
+              id: 4,
+              date: Date(),
+              senderId: "my-contact-id".data(using: .utf8)!,
+              text: "",
+              status: .sent,
+              fileTransfer: .init(
+                id: Data(),
+                contactId: Data(),
+                name: "sent_file.jpeg",
+                type: "image",
+                data: {
+                  let bounds = CGRect(origin: .zero, size: .init(width: 4, height: 3))
+                  let format = UIGraphicsImageRendererFormat()
+                  format.scale = 1
+                  let renderer = UIGraphicsImageRenderer(bounds: bounds, format: format)
+                  let image = renderer.image { ctx in
+                    UIColor.systemMint.setFill()
+                    ctx.fill(bounds)
+                  }
+                  return image.jpegData(compressionQuality: 0.72)
+                }(),
+                progress: 1,
+                isIncoming: true
+              )
             ),
           ],
           failure: "Something went wrong when fetching messages from database.",

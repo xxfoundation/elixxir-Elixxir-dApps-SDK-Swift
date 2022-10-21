@@ -4,7 +4,7 @@ public struct FileSend: Equatable {
   public init(
     name: String,
     type: String,
-    preview: Data,
+    preview: Data?,
     contents: Data
   ) {
     self.name = name
@@ -15,7 +15,7 @@ public struct FileSend: Equatable {
 
   public var name: String
   public var type: String
-  public var preview: Data
+  public var preview: Data?
   public var contents: Data
 }
 

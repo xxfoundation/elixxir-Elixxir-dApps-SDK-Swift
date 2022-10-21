@@ -99,6 +99,11 @@ extension AppEnvironment {
             db: dbManager.getDB,
             now: Date.init
           ),
+          sendImage: .live(
+            messenger: messenger,
+            db: dbManager.getDB,
+            now: Date.init
+          ),
           mainQueue: mainQueue,
           bgQueue: bgQueue
         )
@@ -112,6 +117,11 @@ extension AppEnvironment {
       messageListener: .live(
         messenger: messenger,
         db: dbManager.getDB
+      ),
+      receiveFileHandler: .live(
+        messenger: messenger,
+        db: dbManager.getDB,
+        now: Date.init
       ),
       backupStorage: backupStorage,
       log: .live(),

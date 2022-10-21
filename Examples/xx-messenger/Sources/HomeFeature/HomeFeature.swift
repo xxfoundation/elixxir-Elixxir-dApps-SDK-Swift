@@ -151,6 +151,10 @@ public let homeReducer = Reducer<HomeState, HomeAction, HomeEnvironment>
             try env.messenger.listenForMessages()
           }
 
+          if env.messenger.isFileTransferRunning() == false {
+            try env.messenger.startFileTransfer()
+          }
+
           if env.messenger.isLoggedIn() == false {
             if try env.messenger.isRegistered() == false {
               return .success(.messenger(.didStartUnregistered))

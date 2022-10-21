@@ -50,6 +50,7 @@ struct AppEnvironment {
   var messenger: Messenger
   var authHandler: AuthCallbackHandler
   var messageListener: MessageListenerHandler
+  var receiveFileHandler: ReceiveFileHandler
   var backupStorage: BackupStorage
   var log: Logger
   var mainQueue: AnySchedulerOf<DispatchQueue>
@@ -66,6 +67,7 @@ extension AppEnvironment {
     messenger: .unimplemented,
     authHandler: .unimplemented,
     messageListener: .unimplemented,
+    receiveFileHandler: .unimplemented,
     backupStorage: .unimplemented,
     log: .unimplemented,
     mainQueue: .unimplemented,
@@ -98,6 +100,10 @@ let appReducer = Reducer<AppState, AppAction, AppEnvironment>
         cancellables.append(env.messageListener(onError: { error in
           env.log(.error(error as NSError))
         }))
+        cancellables.append(env.receiveFileHandler(onError: { error in
+          env.log(.error(error as NSError))
+        }))
+
         cancellables.append(env.messenger.registerBackupCallback(.init { data in
           try? env.backupStorage.store(data)
         }))
