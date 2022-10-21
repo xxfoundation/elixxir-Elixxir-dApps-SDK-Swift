@@ -2,8 +2,7 @@ import ComposableArchitecture
 import XCTest
 @testable import WelcomeFeature
 
-@MainActor
-final class WelcomeFeatureTests: XCTestCase {
+final class WelcomeComponentTests: XCTestCase {
   func testNewAccountTapped() {
     let mainQueue = DispatchQueue.test
     let bgQueue = DispatchQueue.test
@@ -11,14 +10,13 @@ final class WelcomeFeatureTests: XCTestCase {
     var didCreateMessenger = 0
 
     let store = TestStore(
-      initialState: WelcomeState(),
-      reducer: welcomeReducer,
-      environment: .unimplemented
+      initialState: WelcomeComponent.State(),
+      reducer: WelcomeComponent()
     )
 
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.messenger.create.run = { didCreateMessenger += 1 }
+    store.dependencies.app.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.dependencies.app.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.dependencies.app.messenger.create.run = { didCreateMessenger += 1 }
 
     store.send(.newAccountTapped) {
       $0.isCreatingAccount = true
@@ -44,14 +42,13 @@ final class WelcomeFeatureTests: XCTestCase {
     let bgQueue = DispatchQueue.test
 
     let store = TestStore(
-      initialState: WelcomeState(),
-      reducer: welcomeReducer,
-      environment: .unimplemented
+      initialState: WelcomeComponent.State(),
+      reducer: WelcomeComponent()
     )
 
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.messenger.create.run = { throw failure }
+    store.dependencies.app.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.dependencies.app.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.dependencies.app.messenger.create.run = { throw failure }
 
     store.send(.newAccountTapped) {
       $0.isCreatingAccount = true
@@ -69,9 +66,8 @@ final class WelcomeFeatureTests: XCTestCase {
 
   func testRestore() {
     let store = TestStore(
-      initialState: WelcomeState(),
-      reducer: welcomeReducer,
-      environment: .unimplemented
+      initialState: WelcomeComponent.State(),
+      reducer: WelcomeComponent()
     )
 
     store.send(.restoreTapped)
