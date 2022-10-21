@@ -82,6 +82,7 @@ let package = Package(
       name: "AppCoreTests",
       dependencies: [
         .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
