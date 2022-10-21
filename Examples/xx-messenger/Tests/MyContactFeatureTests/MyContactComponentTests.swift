@@ -7,22 +7,21 @@ import XXMessengerClient
 import XXModels
 @testable import MyContactFeature
 
-final class MyContactFeatureTests: XCTestCase {
+final class MyContactComponentTests: XCTestCase {
   func testStart() {
     let contactId = "contact-id".data(using: .utf8)!
 
     let store = TestStore(
-      initialState: MyContactState(),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      initialState: MyContactComponent.State(),
+      reducer: MyContactComponent()
     )
 
     var dbDidFetchContacts: [XXModels.Contact.Query] = []
     let dbContactsPublisher = PassthroughSubject<[XXModels.Contact], Error>()
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -31,7 +30,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContactsPublisher.run = { query in
         dbDidFetchContacts.append(query)
@@ -65,14 +64,13 @@ final class MyContactFeatureTests: XCTestCase {
     var didSendRegisterFact: [Fact] = []
 
     let store = TestStore(
-      initialState: MyContactState(),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      initialState: MyContactComponent.State(),
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.sendRegisterFact.run = { fact in
         didSendRegisterFact.append(fact)
@@ -110,14 +108,13 @@ final class MyContactFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: MyContactState(),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      initialState: MyContactComponent.State(),
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.sendRegisterFact.run = { _ in throw failure }
       return ud
@@ -149,17 +146,16 @@ final class MyContactFeatureTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
-      initialState: MyContactState(
+      initialState: MyContactComponent.State(
         email: email,
         emailConfirmationID: confirmationID
       ),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.confirmFact.run = { id, code in
         didConfirmWithID.append(id)
@@ -167,7 +163,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return ud
     }
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -176,7 +172,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
@@ -228,16 +224,15 @@ final class MyContactFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: MyContactState(
+      initialState: MyContactComponent.State(
         emailConfirmationID: "123"
       ),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.confirmFact.run = { _, _ in throw failure }
       return ud
@@ -266,21 +261,20 @@ final class MyContactFeatureTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
-      initialState: MyContactState(
+      initialState: MyContactComponent.State(
         contact: dbContact
       ),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.removeFact.run = { didRemoveFact.append($0) }
       return ud
     }
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -289,7 +283,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
@@ -322,16 +316,15 @@ final class MyContactFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: MyContactState(
+      initialState: MyContactComponent.State(
         contact: .init(id: Data(), email: "test@email.com")
       ),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.removeFact.run = { _ in throw failure }
       return ud
@@ -357,14 +350,13 @@ final class MyContactFeatureTests: XCTestCase {
     var didSendRegisterFact: [Fact] = []
 
     let store = TestStore(
-      initialState: MyContactState(),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      initialState: MyContactComponent.State(),
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.sendRegisterFact.run = { fact in
         didSendRegisterFact.append(fact)
@@ -402,14 +394,13 @@ final class MyContactFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: MyContactState(),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      initialState: MyContactComponent.State(),
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.sendRegisterFact.run = { _ in throw failure }
       return ud
@@ -441,17 +432,16 @@ final class MyContactFeatureTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
-      initialState: MyContactState(
+      initialState: MyContactComponent.State(
         phone: phone,
         phoneConfirmationID: confirmationID
       ),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.confirmFact.run = { id, code in
         didConfirmWithID.append(id)
@@ -459,7 +449,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return ud
     }
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -468,7 +458,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
@@ -520,16 +510,15 @@ final class MyContactFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: MyContactState(
+      initialState: MyContactComponent.State(
         phoneConfirmationID: "123"
       ),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.confirmFact.run = { _, _ in throw failure }
       return ud
@@ -558,21 +547,20 @@ final class MyContactFeatureTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
-      initialState: MyContactState(
+      initialState: MyContactComponent.State(
         contact: dbContact
       ),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.removeFact.run = { didRemoveFact.append($0) }
       return ud
     }
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -581,7 +569,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
@@ -614,16 +602,15 @@ final class MyContactFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: MyContactState(
+      initialState: MyContactComponent.State(
         contact: .init(id: Data(), phone: "+123456789")
       ),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.removeFact.run = { _ in throw failure }
       return ud
@@ -653,14 +640,13 @@ final class MyContactFeatureTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
-      initialState: MyContactState(),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      initialState: MyContactComponent.State(),
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -669,7 +655,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.getFacts.run = {
         [
@@ -680,7 +666,7 @@ final class MyContactFeatureTests: XCTestCase {
       }
       return ud
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
@@ -714,14 +700,13 @@ final class MyContactFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: MyContactState(),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      initialState: MyContactComponent.State(),
+      reducer: MyContactComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -746,9 +731,8 @@ final class MyContactFeatureTests: XCTestCase {
 
   func testErrorAlert() {
     let store = TestStore(
-      initialState: MyContactState(),
-      reducer: myContactReducer,
-      environment: .unimplemented
+      initialState: MyContactComponent.State(),
+      reducer: MyContactComponent()
     )
 
     let failure = "Something went wrong"

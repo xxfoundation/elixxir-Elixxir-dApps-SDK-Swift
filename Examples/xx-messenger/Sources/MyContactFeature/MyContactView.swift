@@ -4,15 +4,15 @@ import SwiftUI
 import XXModels
 
 public struct MyContactView: View {
-  public init(store: Store<MyContactState, MyContactAction>) {
+  public init(store: StoreOf<MyContactComponent>) {
     self.store = store
   }
 
-  let store: Store<MyContactState, MyContactAction>
-  @FocusState var focusedField: MyContactState.Field?
+  let store: StoreOf<MyContactComponent>
+  @FocusState var focusedField: MyContactComponent.State.Field?
 
   struct ViewState: Equatable {
-    init(state: MyContactState) {
+    init(state: MyContactComponent.State) {
       contact = state.contact
       focusedField = state.focusedField
       email = state.email
@@ -31,7 +31,7 @@ public struct MyContactView: View {
     }
 
     var contact: XXModels.Contact?
-    var focusedField: MyContactState.Field?
+    var focusedField: MyContactComponent.State.Field?
     var email: String
     var emailConfirmation: Bool
     var emailCode: String
@@ -86,7 +86,7 @@ public struct MyContactView: View {
               TextField(
                 text: viewStore.binding(
                   get: \.email,
-                  send: { MyContactAction.set(\.$email, $0) }
+                  send: { MyContactComponent.Action.set(\.$email, $0) }
                 ),
                 prompt: Text("Enter email"),
                 label: { Text("Email") }
@@ -99,7 +99,7 @@ public struct MyContactView: View {
                 TextField(
                   text: viewStore.binding(
                     get: \.emailCode,
-                    send: { MyContactAction.set(\.$emailConfirmationCode, $0) }
+                    send: { MyContactComponent.Action.set(\.$emailConfirmationCode, $0) }
                   ),
                   prompt: Text("Enter confirmation code"),
                   label: { Text("Confirmation code") }
@@ -163,7 +163,7 @@ public struct MyContactView: View {
               TextField(
                 text: viewStore.binding(
                   get: \.phone,
-                  send: { MyContactAction.set(\.$phone, $0) }
+                  send: { MyContactComponent.Action.set(\.$phone, $0) }
                 ),
                 prompt: Text("Enter phone"),
                 label: { Text("Phone") }
@@ -176,7 +176,7 @@ public struct MyContactView: View {
                 TextField(
                   text: viewStore.binding(
                     get: \.phoneCode,
-                    send: { MyContactAction.set(\.$phoneConfirmationCode, $0) }
+                    send: { MyContactComponent.Action.set(\.$phoneConfirmationCode, $0) }
                   ),
                   prompt: Text("Enter confirmation code"),
                   label: { Text("Confirmation code") }
@@ -250,9 +250,8 @@ public struct MyContactView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       MyContactView(store: Store(
-        initialState: MyContactState(),
-        reducer: .empty,
-        environment: ()
+        initialState: MyContactComponent.State(),
+        reducer: EmptyReducer()
       ))
     }
   }
