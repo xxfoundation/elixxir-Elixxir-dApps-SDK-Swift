@@ -2,20 +2,20 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct ConfirmRequestView: View {
-  public init(store: Store<ConfirmRequestState, ConfirmRequestAction>) {
+  public init(store: StoreOf<ConfirmRequestComponent>) {
     self.store = store
   }
 
-  let store: Store<ConfirmRequestState, ConfirmRequestAction>
+  let store: StoreOf<ConfirmRequestComponent>
 
   struct ViewState: Equatable {
     var username: String?
     var email: String?
     var phone: String?
     var isConfirming: Bool
-    var result: ConfirmRequestState.Result?
+    var result: ConfirmRequestComponent.State.Result?
 
-    init(state: ConfirmRequestState) {
+    init(state: ConfirmRequestComponent.State) {
       username = try? state.contact.getFact(.username)?.value
       email = try? state.contact.getFact(.email)?.value
       phone = try? state.contact.getFact(.phone)?.value
@@ -84,11 +84,10 @@ public struct ConfirmRequestView: View {
 public struct ConfirmRequestView_Previews: PreviewProvider {
   public static var previews: some View {
     ConfirmRequestView(store: Store(
-      initialState: ConfirmRequestState(
+      initialState: ConfirmRequestComponent.State(
         contact: .unimplemented("contact-data".data(using: .utf8)!)
       ),
-      reducer: .empty,
-      environment: ()
+      reducer: EmptyReducer()
     ))
   }
 }

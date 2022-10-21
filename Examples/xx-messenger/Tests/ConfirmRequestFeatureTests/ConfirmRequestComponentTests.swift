@@ -5,27 +5,26 @@ import XXClient
 import XXModels
 @testable import ConfirmRequestFeature
 
-final class ConfirmRequestFeatureTests: XCTestCase {
+final class ConfirmRequestComponentTests: XCTestCase {
   func testConfirm() {
     var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
     let contactId = "contact-id".data(using: .utf8)!
     contact.getIdFromContact.run = { _ in contactId }
 
     let store = TestStore(
-      initialState: ConfirmRequestState(
+      initialState: ConfirmRequestComponent.State(
         contact: contact
       ),
-      reducer: confirmRequestReducer,
-      environment: .unimplemented
+      reducer: ConfirmRequestComponent()
     )
 
     var didConfirmRequestFromContact: [XXClient.Contact] = []
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.confirmReceivedRequest.run = { contact in
         didConfirmRequestFromContact.append(contact)
@@ -33,7 +32,7 @@ final class ConfirmRequestFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
@@ -70,11 +69,10 @@ final class ConfirmRequestFeatureTests: XCTestCase {
     contact.getIdFromContact.run = { _ in contactId }
 
     let store = TestStore(
-      initialState: ConfirmRequestState(
+      initialState: ConfirmRequestComponent.State(
         contact: contact
       ),
-      reducer: confirmRequestReducer,
-      environment: .unimplemented
+      reducer: ConfirmRequestComponent()
     )
 
     struct Failure: Error {}
@@ -83,14 +81,14 @@ final class ConfirmRequestFeatureTests: XCTestCase {
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.confirmReceivedRequest.run = { _ in throw error }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
