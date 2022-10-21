@@ -9,6 +9,29 @@ import XXClient
 @testable import AppFeature
 
 final class AppComponentTests: XCTestCase {
+  func testSetupLogging() {
+    var actions: [Action] = []
+
+    let store = TestStore(
+      initialState: AppComponent.State(),
+      reducer: AppComponent()
+    )
+    store.dependencies.app.messenger.setLogLevel.run = { level in
+      actions.append(.didSetLogLevel(level))
+      return true
+    }
+    store.dependencies.app.messenger.startLogging.run = {
+      actions.append(.didStartLogging)
+    }
+
+    store.send(.setupLogging)
+
+    XCTAssertNoDifference(actions, [
+      .didSetLogLevel(.debug),
+      .didStartLogging,
+    ])
+  }
+
   func testStartWithoutMessengerCreated() {
     var actions: [Action]!
 
@@ -514,4 +537,6 @@ private enum Action: Equatable {
   case didCancelBackupCallback
   case didLog(Logger.Message)
   case didStoreBackup(Data)
+  case didSetLogLevel(LogLevel)
+  case didStartLogging
 }

@@ -23,6 +23,7 @@ struct AppComponent: ReducerProtocol {
   }
 
   enum Action: Equatable, BindableAction {
+    case setupLogging
     case start
     case stop
     case binding(BindingAction<State>)
@@ -55,6 +56,11 @@ struct AppComponent: ReducerProtocol {
       let log = self.log
 
       switch action {
+      case .setupLogging:
+        _ = try! messenger.setLogLevel(.debug)
+        messenger.startLogging()
+        return .none
+
       case .start, .welcome(.finished), .restore(.finished), .home(.deleteAccount(.success)):
         state.screen = .loading
         return Effect.run { subscriber in
