@@ -89,7 +89,7 @@ private enum AppDependenciesKey: DependencyKey {
 }
 
 extension DependencyValues {
-  public var appDependencies: AppDependencies {
+  public var app: AppDependencies {
     get { self[AppDependenciesKey.self] }
     set { self[AppDependenciesKey.self] = newValue }
   }

@@ -13,9 +13,9 @@ final class ContactLookupComponentTests: XCTestCase {
       initialState: ContactLookupComponent.State(id: id),
       reducer: ContactLookupComponent()
     )
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.messenger.lookupContact.run = { id in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.lookupContact.run = { id in
       didLookupId.append(id)
       return lookedUpContact
     }
@@ -41,9 +41,9 @@ final class ContactLookupComponentTests: XCTestCase {
       initialState: ContactLookupComponent.State(id: id),
       reducer: ContactLookupComponent()
     )
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.messenger.lookupContact.run = { _ in throw failure }
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.lookupContact.run = { _ in throw failure }
 
     store.send(.lookupTapped) {
       $0.isLookingUp = true

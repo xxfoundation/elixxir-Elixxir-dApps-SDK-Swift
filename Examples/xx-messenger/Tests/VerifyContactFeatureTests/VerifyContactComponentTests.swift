@@ -22,13 +22,13 @@ final class VerifyContactComponentTests: XCTestCase {
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.messenger.verifyContact.run = { contact in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.verifyContact.run = { contact in
       didVerifyContact.append(contact)
       return true
     }
-    store.dependencies.appDependencies.dbManager.getDB.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
@@ -75,13 +75,13 @@ final class VerifyContactComponentTests: XCTestCase {
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.messenger.verifyContact.run = { contact in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.verifyContact.run = { contact in
       didVerifyContact.append(contact)
       return false
     }
-    store.dependencies.appDependencies.dbManager.getDB.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
@@ -130,10 +130,10 @@ final class VerifyContactComponentTests: XCTestCase {
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.messenger.verifyContact.run = { _ in throw error }
-    store.dependencies.appDependencies.dbManager.getDB.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.verifyContact.run = { _ in throw error }
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)

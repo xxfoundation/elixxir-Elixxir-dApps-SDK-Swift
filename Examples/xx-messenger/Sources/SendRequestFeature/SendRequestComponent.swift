@@ -48,10 +48,10 @@ public struct SendRequestComponent: ReducerProtocol {
 
   public init() {}
 
-  @Dependency(\.appDependencies.messenger) var messenger: Messenger
-  @Dependency(\.appDependencies.dbManager.getDB) var db: DBManagerGetDB
-  @Dependency(\.appDependencies.mainQueue) var mainQueue: AnySchedulerOf<DispatchQueue>
-  @Dependency(\.appDependencies.bgQueue) var bgQueue: AnySchedulerOf<DispatchQueue>
+  @Dependency(\.app.messenger) var messenger: Messenger
+  @Dependency(\.app.dbManager.getDB) var db: DBManagerGetDB
+  @Dependency(\.app.mainQueue) var mainQueue: AnySchedulerOf<DispatchQueue>
+  @Dependency(\.app.bgQueue) var bgQueue: AnySchedulerOf<DispatchQueue>
 
   public var body: some ReducerProtocol<State, Action> {
     BindingReducer()

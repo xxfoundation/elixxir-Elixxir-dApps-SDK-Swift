@@ -19,9 +19,9 @@ final class SendRequestComponentTests: XCTestCase {
       ),
       reducer: SendRequestComponent()
     )
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.messenger.myContact.run = { includeFacts in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.myContact.run = { includeFacts in
       didGetMyContact.append(includeFacts)
       return myContact
     }
@@ -43,9 +43,9 @@ final class SendRequestComponentTests: XCTestCase {
       ),
       reducer: SendRequestComponent()
     )
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.messenger.myContact.run = { _ in throw failure }
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.myContact.run = { _ in throw failure }
 
     store.send(.start)
 
@@ -87,9 +87,9 @@ final class SendRequestComponentTests: XCTestCase {
     var didBulkUpdateContacts: [DidBulkUpdateContacts] = []
     var didRequestAuthChannel: [DidRequestAuthChannel] = []
 
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.dbManager.getDB.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContacts.append(.init(query: query, assignments: assignments))
@@ -97,7 +97,7 @@ final class SendRequestComponentTests: XCTestCase {
       }
       return db
     }
-    store.dependencies.appDependencies.messenger.e2e.get = {
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.requestAuthenticatedChannel.run = { partner, myFacts in
         didRequestAuthChannel.append(.init(partner: partner, myFacts: myFacts))
@@ -156,14 +156,14 @@ final class SendRequestComponentTests: XCTestCase {
     struct Failure: Error {}
     let failure = Failure()
 
-    store.dependencies.appDependencies.mainQueue = .immediate
-    store.dependencies.appDependencies.bgQueue = .immediate
-    store.dependencies.appDependencies.dbManager.getDB.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { _, _ in return 0 }
       return db
     }
-    store.dependencies.appDependencies.messenger.e2e.get = {
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.requestAuthenticatedChannel.run = { _, _ in throw failure }
       return e2e

@@ -29,9 +29,9 @@ public struct ContactLookupComponent: ReducerProtocol {
 
   public init() {}
 
-  @Dependency(\.appDependencies.messenger) var messenger
-  @Dependency(\.appDependencies.mainQueue) var mainQueue
-  @Dependency(\.appDependencies.bgQueue) var bgQueue
+  @Dependency(\.app.messenger) var messenger
+  @Dependency(\.app.mainQueue) var mainQueue
+  @Dependency(\.app.bgQueue) var bgQueue
 
   public func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
     switch action {
