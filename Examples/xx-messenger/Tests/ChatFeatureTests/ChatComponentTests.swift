@@ -8,15 +8,14 @@ import XXMessengerClient
 import XXModels
 @testable import ChatFeature
 
-final class ChatFeatureTests: XCTestCase {
+final class ChatComponentTests: XCTestCase {
   func testStart() {
     let contactId = "contact-id".data(using: .utf8)!
     let myContactId = "my-contact-id".data(using: .utf8)!
 
     let store = TestStore(
-      initialState: ChatState(id: .contact(contactId)),
-      reducer: chatReducer,
-      environment: .unimplemented
+      initialState: ChatComponent.State(id: .contact(contactId)),
+      reducer: ChatComponent()
     )
 
     var didFetchMessagesWithQuery: [XXModels.Message.Query] = []
@@ -24,9 +23,9 @@ final class ChatFeatureTests: XCTestCase {
     var didFetchFileTransfersWithQuery: [XXModels.FileTransfer.Query] = []
     let fileTransfersPublisher = PassthroughSubject<[XXModels.FileTransfer], Error>()
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -35,7 +34,7 @@ final class ChatFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchMessagesPublisher.run = { query in
         didFetchMessagesWithQuery.append(query)
@@ -113,7 +112,7 @@ final class ChatFeatureTests: XCTestCase {
       sentFileTransfer,
     ])
 
-    let expectedMessages = IdentifiedArrayOf<ChatState.Message>(uniqueElements: [
+    let expectedMessages = IdentifiedArrayOf<ChatComponent.State.Message>(uniqueElements: [
       .init(
         id: 1,
         date: Date(timeIntervalSince1970: 1),
@@ -142,17 +141,16 @@ final class ChatFeatureTests: XCTestCase {
 
   func testStartFailure() {
     let store = TestStore(
-      initialState: ChatState(id: .contact("contact-id".data(using: .utf8)!)),
-      reducer: chatReducer,
-      environment: .unimplemented
+      initialState: ChatComponent.State(id: .contact("contact-id".data(using: .utf8)!)),
+      reducer: ChatComponent()
     )
 
     struct Failure: Error {}
     let error = Failure()
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -176,14 +174,13 @@ final class ChatFeatureTests: XCTestCase {
     var sendMessageCompletion: SendMessage.Completion?
 
     let store = TestStore(
-      initialState: ChatState(id: .contact("contact-id".data(using: .utf8)!)),
-      reducer: chatReducer,
-      environment: .unimplemented
+      initialState: ChatComponent.State(id: .contact("contact-id".data(using: .utf8)!)),
+      reducer: ChatComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.sendMessage.run = { text, recipientId, _, completion in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.sendMessage.run = { text, recipientId, _, completion in
       didSendMessageWithParams.append(.init(text: text, recipientId: recipientId))
       sendMessageCompletion = completion
     }
@@ -208,17 +205,16 @@ final class ChatFeatureTests: XCTestCase {
     var sendMessageCompletion: SendMessage.Completion?
 
     let store = TestStore(
-      initialState: ChatState(
+      initialState: ChatComponent.State(
         id: .contact("contact-id".data(using: .utf8)!),
         text: "Hello"
       ),
-      reducer: chatReducer,
-      environment: .unimplemented
+      reducer: ChatComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.sendMessage.run = { _, _, onError, completion in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.sendMessage.run = { _, _, onError, completion in
       sendMessageOnError = onError
       sendMessageCompletion = completion
     }
@@ -250,14 +246,13 @@ final class ChatFeatureTests: XCTestCase {
     var sendImageCompletion: SendImage.Completion?
 
     let store = TestStore(
-      initialState: ChatState(id: .contact("contact-id".data(using: .utf8)!)),
-      reducer: chatReducer,
-      environment: .unimplemented
+      initialState: ChatComponent.State(id: .contact("contact-id".data(using: .utf8)!)),
+      reducer: ChatComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.sendImage.run = { image, recipientId, _, completion in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.sendImage.run = { image, recipientId, _, completion in
       didSendImageWithParams.append(.init(image: image, recipientId: recipientId))
       sendImageCompletion = completion
     }
@@ -277,16 +272,15 @@ final class ChatFeatureTests: XCTestCase {
     var sendImageCompletion: SendImage.Completion?
 
     let store = TestStore(
-      initialState: ChatState(
+      initialState: ChatComponent.State(
         id: .contact("contact-id".data(using: .utf8)!)
       ),
-      reducer: chatReducer,
-      environment: .unimplemented
+      reducer: ChatComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.sendImage.run = { _, _, onError, completion in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.sendImage.run = { _, _, onError, completion in
       sendImageOnError = onError
       sendImageCompletion = completion
     }
