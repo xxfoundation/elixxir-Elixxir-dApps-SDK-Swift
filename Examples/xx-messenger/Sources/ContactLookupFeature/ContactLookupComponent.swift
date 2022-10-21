@@ -27,6 +27,8 @@ public struct ContactLookupComponent: ReducerProtocol {
     case didFail(NSError)
   }
 
+  public init() {}
+
   @Dependency(\.appDependencies.messenger) var messenger
   @Dependency(\.appDependencies.mainQueue) var mainQueue
   @Dependency(\.appDependencies.bgQueue) var bgQueue
