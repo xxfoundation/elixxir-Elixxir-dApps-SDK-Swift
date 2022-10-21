@@ -11,12 +11,11 @@ import XXMessengerClient
 import XXModels
 @testable import HomeFeature
 
-final class HomeFeatureTests: XCTestCase {
+final class HomeComponentTests: XCTestCase {
   func testMessengerStartUnregistered() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     var messengerDidStartWithTimeout: [Int] = []
@@ -24,17 +23,17 @@ final class HomeFeatureTests: XCTestCase {
     var messengerDidListenForMessages = 0
     var messengerDidStartFileTransfer = 0
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
-    store.environment.messenger.isConnected.run = { false }
-    store.environment.messenger.connect.run = { messengerDidConnect += 1 }
-    store.environment.messenger.isListeningForMessages.run = { false }
-    store.environment.messenger.listenForMessages.run = { messengerDidListenForMessages += 1 }
-    store.environment.messenger.isFileTransferRunning.run = { false }
-    store.environment.messenger.startFileTransfer.run = { messengerDidStartFileTransfer += 1 }
-    store.environment.messenger.isLoggedIn.run = { false }
-    store.environment.messenger.isRegistered.run = { false }
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
+    store.dependencies.app.messenger.isConnected.run = { false }
+    store.dependencies.app.messenger.connect.run = { messengerDidConnect += 1 }
+    store.dependencies.app.messenger.isListeningForMessages.run = { false }
+    store.dependencies.app.messenger.listenForMessages.run = { messengerDidListenForMessages += 1 }
+    store.dependencies.app.messenger.isFileTransferRunning.run = { false }
+    store.dependencies.app.messenger.startFileTransfer.run = { messengerDidStartFileTransfer += 1 }
+    store.dependencies.app.messenger.isLoggedIn.run = { false }
+    store.dependencies.app.messenger.isRegistered.run = { false }
 
     store.send(.messenger(.start))
 
@@ -45,15 +44,14 @@ final class HomeFeatureTests: XCTestCase {
 
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartUnregistered)) {
-      $0.register = RegisterState()
+      $0.register = RegisterComponent.State()
     }
   }
 
   func testMessengerStartRegistered() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     var messengerDidStartWithTimeout: [Int] = []
@@ -63,21 +61,21 @@ final class HomeFeatureTests: XCTestCase {
     var messengerDidLogIn = 0
     var messengerDidResumeBackup = 0
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
-    store.environment.messenger.isConnected.run = { false }
-    store.environment.messenger.connect.run = { messengerDidConnect += 1 }
-    store.environment.messenger.isListeningForMessages.run = { false }
-    store.environment.messenger.listenForMessages.run = { messengerDidListenForMessages += 1 }
-    store.environment.messenger.isFileTransferRunning.run = { false }
-    store.environment.messenger.startFileTransfer.run = { messengerDidStartFileTransfer += 1 }
-    store.environment.messenger.isLoggedIn.run = { false }
-    store.environment.messenger.isRegistered.run = { true }
-    store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
-    store.environment.messenger.isBackupRunning.run = { false }
-    store.environment.messenger.resumeBackup.run = { messengerDidResumeBackup += 1 }
-    store.environment.messenger.cMix.get = {
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
+    store.dependencies.app.messenger.isConnected.run = { false }
+    store.dependencies.app.messenger.connect.run = { messengerDidConnect += 1 }
+    store.dependencies.app.messenger.isListeningForMessages.run = { false }
+    store.dependencies.app.messenger.listenForMessages.run = { messengerDidListenForMessages += 1 }
+    store.dependencies.app.messenger.isFileTransferRunning.run = { false }
+    store.dependencies.app.messenger.startFileTransfer.run = { messengerDidStartFileTransfer += 1 }
+    store.dependencies.app.messenger.isLoggedIn.run = { false }
+    store.dependencies.app.messenger.isRegistered.run = { true }
+    store.dependencies.app.messenger.logIn.run = { messengerDidLogIn += 1 }
+    store.dependencies.app.messenger.isBackupRunning.run = { false }
+    store.dependencies.app.messenger.resumeBackup.run = { messengerDidResumeBackup += 1 }
+    store.dependencies.app.messenger.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.addHealthCallback.run = { _ in Cancellable {} }
       cMix.getNodeRegistrationStatus.run = {
@@ -105,27 +103,26 @@ final class HomeFeatureTests: XCTestCase {
 
   func testRegisterFinished() {
     let store = TestStore(
-      initialState: HomeState(
-        register: RegisterState()
+      initialState: HomeComponent.State(
+        register: RegisterComponent.State()
       ),
-      reducer: homeReducer,
-      environment: .unimplemented
+      reducer: HomeComponent()
     )
 
     var messengerDidStartWithTimeout: [Int] = []
     var messengerDidLogIn = 0
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
-    store.environment.messenger.isConnected.run = { true }
-    store.environment.messenger.isListeningForMessages.run = { true }
-    store.environment.messenger.isFileTransferRunning.run = { true }
-    store.environment.messenger.isLoggedIn.run = { false }
-    store.environment.messenger.isRegistered.run = { true }
-    store.environment.messenger.logIn.run = { messengerDidLogIn += 1 }
-    store.environment.messenger.isBackupRunning.run = { true }
-    store.environment.messenger.cMix.get = {
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.start.run = { messengerDidStartWithTimeout.append($0) }
+    store.dependencies.app.messenger.isConnected.run = { true }
+    store.dependencies.app.messenger.isListeningForMessages.run = { true }
+    store.dependencies.app.messenger.isFileTransferRunning.run = { true }
+    store.dependencies.app.messenger.isLoggedIn.run = { false }
+    store.dependencies.app.messenger.isRegistered.run = { true }
+    store.dependencies.app.messenger.logIn.run = { messengerDidLogIn += 1 }
+    store.dependencies.app.messenger.isBackupRunning.run = { true }
+    store.dependencies.app.messenger.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.addHealthCallback.run = { _ in Cancellable {} }
       cMix.getNodeRegistrationStatus.run = {
@@ -153,17 +150,16 @@ final class HomeFeatureTests: XCTestCase {
 
   func testMessengerStartFailure() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     struct Failure: Error {}
     let error = Failure()
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.start.run = { _ in throw error }
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.start.run = { _ in throw error }
 
     store.send(.messenger(.start))
 
@@ -175,19 +171,18 @@ final class HomeFeatureTests: XCTestCase {
 
   func testMessengerStartConnectFailure() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     struct Failure: Error {}
     let error = Failure()
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.start.run = { _ in }
-    store.environment.messenger.isConnected.run = { false }
-    store.environment.messenger.connect.run = { throw error }
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.start.run = { _ in }
+    store.dependencies.app.messenger.isConnected.run = { false }
+    store.dependencies.app.messenger.connect.run = { throw error }
 
     store.send(.messenger(.start))
 
@@ -199,22 +194,21 @@ final class HomeFeatureTests: XCTestCase {
 
   func testMessengerStartIsRegisteredFailure() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     struct Failure: Error {}
     let error = Failure()
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.start.run = { _ in }
-    store.environment.messenger.isConnected.run = { true }
-    store.environment.messenger.isListeningForMessages.run = { true }
-    store.environment.messenger.isFileTransferRunning.run = { true }
-    store.environment.messenger.isLoggedIn.run = { false }
-    store.environment.messenger.isRegistered.run = { throw error }
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.start.run = { _ in }
+    store.dependencies.app.messenger.isConnected.run = { true }
+    store.dependencies.app.messenger.isListeningForMessages.run = { true }
+    store.dependencies.app.messenger.isFileTransferRunning.run = { true }
+    store.dependencies.app.messenger.isLoggedIn.run = { false }
+    store.dependencies.app.messenger.isRegistered.run = { throw error }
 
     store.send(.messenger(.start))
 
@@ -226,23 +220,22 @@ final class HomeFeatureTests: XCTestCase {
 
   func testMessengerStartLogInFailure() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     struct Failure: Error {}
     let error = Failure()
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.start.run = { _ in }
-    store.environment.messenger.isConnected.run = { true }
-    store.environment.messenger.isListeningForMessages.run = { true }
-    store.environment.messenger.isFileTransferRunning.run = { true }
-    store.environment.messenger.isLoggedIn.run = { false }
-    store.environment.messenger.isRegistered.run = { true }
-    store.environment.messenger.logIn.run = { throw error }
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.start.run = { _ in }
+    store.dependencies.app.messenger.isConnected.run = { true }
+    store.dependencies.app.messenger.isListeningForMessages.run = { true }
+    store.dependencies.app.messenger.isFileTransferRunning.run = { true }
+    store.dependencies.app.messenger.isLoggedIn.run = { false }
+    store.dependencies.app.messenger.isRegistered.run = { true }
+    store.dependencies.app.messenger.logIn.run = { throw error }
 
     store.send(.messenger(.start))
 
@@ -254,9 +247,8 @@ final class HomeFeatureTests: XCTestCase {
 
   func testNetworkMonitorStart() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     let bgQueue = DispatchQueue.test
@@ -271,9 +263,9 @@ final class HomeFeatureTests: XCTestCase {
       .init(registered: 2, total: 12),
     ]
 
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.messenger.cMix.get = {
+    store.dependencies.app.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.dependencies.app.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.dependencies.app.messenger.cMix.get = {
       var cMix: CMix = .unimplemented
       cMix.addHealthCallback.run = { callback in
         cMixDidAddHealthCallback.append(callback)
@@ -339,9 +331,8 @@ final class HomeFeatureTests: XCTestCase {
 
   func testAccountDeletion() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     var dbDidFetchContacts: [XXModels.Contact.Query] = []
@@ -349,9 +340,9 @@ final class HomeFeatureTests: XCTestCase {
     var messengerDidDestroy = 0
     var didRemoveDB = 0
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
@@ -360,7 +351,7 @@ final class HomeFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.dbManager.getDB.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         dbDidFetchContacts.append(query)
@@ -374,17 +365,17 @@ final class HomeFeatureTests: XCTestCase {
       }
       return db
     }
-    store.environment.dbManager.removeDB.run = {
+    store.dependencies.app.dbManager.removeDB.run = {
       didRemoveDB += 1
     }
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.permanentDeleteAccount.run = { usernameFact in
         udDidPermanentDeleteAccount.append(usernameFact)
       }
       return ud
     }
-    store.environment.messenger.destroy.run = {
+    store.dependencies.app.messenger.destroy.run = {
       messengerDidDestroy += 1
     }
 
@@ -412,17 +403,16 @@ final class HomeFeatureTests: XCTestCase {
 
   func testAccountDeletionFailure() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     struct Failure: Error {}
     let error = Failure()
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
@@ -444,11 +434,10 @@ final class HomeFeatureTests: XCTestCase {
 
   func testDidDismissAlert() {
     let store = TestStore(
-      initialState: HomeState(
+      initialState: HomeComponent.State(
         alert: AlertState(title: TextState(""))
       ),
-      reducer: homeReducer,
-      environment: .unimplemented
+      reducer: HomeComponent()
     )
 
     store.send(.didDismissAlert) {
@@ -458,11 +447,10 @@ final class HomeFeatureTests: XCTestCase {
 
   func testDidDismissRegister() {
     let store = TestStore(
-      initialState: HomeState(
-        register: RegisterState()
+      initialState: HomeComponent.State(
+        register: RegisterComponent.State()
       ),
-      reducer: homeReducer,
-      environment: .unimplemented
+      reducer: HomeComponent()
     )
 
     store.send(.didDismissRegister) {
@@ -472,23 +460,21 @@ final class HomeFeatureTests: XCTestCase {
 
   func testUserSearchButtonTapped() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     store.send(.userSearchButtonTapped) {
-      $0.userSearch = UserSearchState()
+      $0.userSearch = UserSearchComponent.State()
     }
   }
 
   func testDidDismissUserSearch() {
     let store = TestStore(
-      initialState: HomeState(
-        userSearch: UserSearchState()
+      initialState: HomeComponent.State(
+        userSearch: UserSearchComponent.State()
       ),
-      reducer: homeReducer,
-      environment: .unimplemented
+      reducer: HomeComponent()
     )
 
     store.send(.didDismissUserSearch) {
@@ -498,23 +484,21 @@ final class HomeFeatureTests: XCTestCase {
 
   func testContactsButtonTapped() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     store.send(.contactsButtonTapped) {
-      $0.contacts = ContactsState()
+      $0.contacts = ContactsComponent.State()
     }
   }
 
   func testDidDismissContacts() {
     let store = TestStore(
-      initialState: HomeState(
-        contacts: ContactsState()
+      initialState: HomeComponent.State(
+        contacts: ContactsComponent.State()
       ),
-      reducer: homeReducer,
-      environment: .unimplemented
+      reducer: HomeComponent()
     )
 
     store.send(.didDismissContacts) {
@@ -524,23 +508,21 @@ final class HomeFeatureTests: XCTestCase {
 
   func testBackupButtonTapped() {
     let store = TestStore(
-      initialState: HomeState(),
-      reducer: homeReducer,
-      environment: .unimplemented
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
     )
 
     store.send(.backupButtonTapped) {
-      $0.backup = BackupState()
+      $0.backup = BackupComponent.State()
     }
   }
 
   func testDidDismissBackup() {
     let store = TestStore(
-      initialState: HomeState(
-        backup: BackupState()
+      initialState: HomeComponent.State(
+        backup: BackupComponent.State()
       ),
-      reducer: homeReducer,
-      environment: .unimplemented
+      reducer: HomeComponent()
     )
 
     store.send(.didDismissBackup) {

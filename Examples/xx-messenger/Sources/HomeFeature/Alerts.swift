@@ -1,8 +1,8 @@
 import ComposableArchitecture
 
 extension AlertState {
-  public static func confirmAccountDeletion() -> AlertState<HomeAction> {
-    AlertState<HomeAction>(
+  public static func confirmAccountDeletion() -> AlertState<HomeComponent.Action> {
+    AlertState<HomeComponent.Action>(
       title: TextState("Delete Account"),
       message: TextState("This will permanently delete your account and can't be undone."),
       buttons: [
@@ -12,8 +12,8 @@ extension AlertState {
     )
   }
 
-  public static func accountDeletionFailed(_ error: Error) -> AlertState<HomeAction> {
-    AlertState<HomeAction>(
+  public static func accountDeletionFailed(_ error: Error) -> AlertState<HomeComponent.Action> {
+    AlertState<HomeComponent.Action>(
       title: TextState("Error"),
       message: TextState(error.localizedDescription),
       buttons: []
