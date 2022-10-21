@@ -16,19 +16,18 @@ import XXModels
 final class ContactFeatureTests: XCTestCase {
   func testStart() {
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     var dbDidFetchContacts: [XXModels.Contact.Query] = []
     let dbContactsPublisher = PassthroughSubject<[XXModels.Contact], Error>()
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.db.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContactsPublisher.run = { query in
         dbDidFetchContacts.append(query)
@@ -68,20 +67,19 @@ final class ContactFeatureTests: XCTestCase {
     }
 
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
         dbContact: dbContact,
         xxContact: xxContact
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     var dbDidSaveContact: [XXModels.Contact] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.db.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.saveContact.run = { contact in
         dbDidSaveContact.append(contact)
@@ -104,27 +102,25 @@ final class ContactFeatureTests: XCTestCase {
   func testLookupTapped() {
     let contactId = "contact-id".data(using: .utf8)!
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: contactId
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.lookupTapped) {
-      $0.lookup = ContactLookupState(id: contactId)
+      $0.lookup = ContactLookupComponent.State(id: contactId)
     }
   }
 
   func testLookupDismissed() {
     let contactId = "contact-id".data(using: .utf8)!
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: contactId,
-        lookup: ContactLookupState(id: contactId)
+        lookup: ContactLookupComponent.State(id: contactId)
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.lookupDismissed) {
@@ -136,12 +132,11 @@ final class ContactFeatureTests: XCTestCase {
     let contactId = "contact-id".data(using: .utf8)!
     let contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: contactId,
-        lookup: ContactLookupState(id: contactId)
+        lookup: ContactLookupComponent.State(id: contactId)
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.lookup(.didLookup(contact))) {
@@ -155,16 +150,15 @@ final class ContactFeatureTests: XCTestCase {
     dbContact.marshaled = "contact-data".data(using: .utf8)!
 
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: dbContact.id,
         dbContact: dbContact
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.sendRequestTapped) {
-      $0.sendRequest = SendRequestState(contact: .live(dbContact.marshaled!))
+      $0.sendRequest = SendRequestComponent.State(contact: .live(dbContact.marshaled!))
     }
   }
 
@@ -172,29 +166,27 @@ final class ContactFeatureTests: XCTestCase {
     let xxContact = XXClient.Contact.unimplemented("contact-id".data(using: .utf8)!)
 
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
         xxContact: xxContact
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.sendRequestTapped) {
-      $0.sendRequest = SendRequestState(contact: xxContact)
+      $0.sendRequest = SendRequestComponent.State(contact: xxContact)
     }
   }
 
   func testSendRequestDismissed() {
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
-        sendRequest: SendRequestState(
+        sendRequest: SendRequestComponent.State(
           contact: .unimplemented("contact-id".data(using: .utf8)!)
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.sendRequestDismissed) {
@@ -204,14 +196,13 @@ final class ContactFeatureTests: XCTestCase {
 
   func testSendRequestSucceeded() {
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
-        sendRequest: SendRequestState(
+        sendRequest: SendRequestComponent.State(
           contact: .unimplemented("contact-id".data(using: .utf8)!)
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.sendRequest(.sendSucceeded)) {
@@ -222,19 +213,18 @@ final class ContactFeatureTests: XCTestCase {
   func testVerifyContactTapped() {
     let contactData = "contact-data".data(using: .utf8)!
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: Data(),
         dbContact: XXModels.Contact(
           id: Data(),
           marshaled: contactData
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.verifyContactTapped) {
-      $0.verifyContact = VerifyContactState(
+      $0.verifyContact = VerifyContactComponent.State(
         contact: .unimplemented(contactData)
       )
     }
@@ -242,14 +232,13 @@ final class ContactFeatureTests: XCTestCase {
 
   func testVerifyContactDismissed() {
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
-        verifyContact: VerifyContactState(
+        verifyContact: VerifyContactComponent.State(
           contact: .unimplemented("contact-data".data(using: .utf8)!)
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.verifyContactDismissed) {
@@ -260,19 +249,18 @@ final class ContactFeatureTests: XCTestCase {
   func testCheckAuthTapped() {
     let contactData = "contact-data".data(using: .utf8)!
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: Data(),
         dbContact: XXModels.Contact(
           id: Data(),
           marshaled: contactData
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.checkAuthTapped) {
-      $0.checkAuth = CheckContactAuthState(
+      $0.checkAuth = CheckContactAuthComponent.State(
         contact: .unimplemented(contactData)
       )
     }
@@ -280,14 +268,13 @@ final class ContactFeatureTests: XCTestCase {
 
   func testCheckAuthDismissed() {
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
-        checkAuth: CheckContactAuthState(
+        checkAuth: CheckContactAuthComponent.State(
           contact: .unimplemented("contact-data".data(using: .utf8)!)
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.checkAuthDismissed) {
@@ -298,19 +285,18 @@ final class ContactFeatureTests: XCTestCase {
   func testResetAuthTapped() {
     let contactData = "contact-data".data(using: .utf8)!
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: Data(),
         dbContact: XXModels.Contact(
           id: Data(),
           marshaled: contactData
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.resetAuthTapped) {
-      $0.resetAuth = ResetAuthState(
+      $0.resetAuth = ResetAuthComponent.State(
         partner: .unimplemented(contactData)
       )
     }
@@ -318,14 +304,13 @@ final class ContactFeatureTests: XCTestCase {
 
   func testResetAuthDismissed() {
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: Data(),
-        resetAuth: ResetAuthState(
+        resetAuth: ResetAuthComponent.State(
           partner: .unimplemented(Data())
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.resetAuthDismissed) {
@@ -336,19 +321,18 @@ final class ContactFeatureTests: XCTestCase {
   func testConfirmRequestTapped() {
     let contactData = "contact-data".data(using: .utf8)!
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: Data(),
         dbContact: XXModels.Contact(
           id: Data(),
           marshaled: contactData
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.confirmRequestTapped) {
-      $0.confirmRequest = ConfirmRequestState(
+      $0.confirmRequest = ConfirmRequestComponent.State(
         contact: .unimplemented(contactData)
       )
     }
@@ -356,14 +340,13 @@ final class ContactFeatureTests: XCTestCase {
 
   func testConfirmRequestDismissed() {
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
-        confirmRequest: ConfirmRequestState(
+        confirmRequest: ConfirmRequestComponent.State(
           contact: .unimplemented("contact-data".data(using: .utf8)!)
         )
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.confirmRequestDismissed) {
@@ -374,26 +357,24 @@ final class ContactFeatureTests: XCTestCase {
   func testChatTapped() {
     let contactId = "contact-id".data(using: .utf8)!
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: contactId
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.chatTapped) {
-      $0.chat = ChatState(id: .contact(contactId))
+      $0.chat = ChatComponent.State(id: .contact(contactId))
     }
   }
 
   func testChatDismissed() {
     let store = TestStore(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
-        chat: ChatState(id: .contact("contact-id".data(using: .utf8)!))
+        chat: ChatComponent.State(id: .contact("contact-id".data(using: .utf8)!))
       ),
-      reducer: contactReducer,
-      environment: .unimplemented
+      reducer: ContactComponent()
     )
 
     store.send(.chatDismissed) {

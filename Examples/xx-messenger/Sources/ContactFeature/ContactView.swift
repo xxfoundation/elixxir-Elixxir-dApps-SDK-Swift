@@ -13,11 +13,11 @@ import XXClient
 import XXModels
 
 public struct ContactView: View {
-  public init(store: Store<ContactState, ContactAction>) {
+  public init(store: StoreOf<ContactComponent>) {
     self.store = store
   }
 
-  let store: Store<ContactState, ContactAction>
+  let store: StoreOf<ContactComponent>
 
   struct ViewState: Equatable {
     var dbContact: XXModels.Contact?
@@ -35,7 +35,7 @@ public struct ContactView: View {
     var canCheckAuthorization: Bool
     var canResetAuthorization: Bool
 
-    init(state: ContactState) {
+    init(state: ContactComponent.State) {
       dbContact = state.dbContact
       xxContactIsSet = state.xxContact != nil
       xxContactUsername = try? state.xxContact?.getFact(.username)?.value
@@ -217,7 +217,7 @@ public struct ContactView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.lookup,
-          action: ContactAction.lookup
+          action: ContactComponent.Action.lookup
         ),
         mapState: replayNonNil(),
         onDeactivate: { viewStore.send(.lookupDismissed) },
@@ -226,7 +226,7 @@ public struct ContactView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.sendRequest,
-          action: ContactAction.sendRequest
+          action: ContactComponent.Action.sendRequest
         ),
         mapState: replayNonNil(),
         onDeactivate: { viewStore.send(.sendRequestDismissed) },
@@ -235,7 +235,7 @@ public struct ContactView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.verifyContact,
-          action: ContactAction.verifyContact
+          action: ContactComponent.Action.verifyContact
         ),
         onDeactivate: { viewStore.send(.verifyContactDismissed) },
         destination: VerifyContactView.init(store:)
@@ -243,7 +243,7 @@ public struct ContactView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.confirmRequest,
-          action: ContactAction.confirmRequest
+          action: ContactComponent.Action.confirmRequest
         ),
         onDeactivate: { viewStore.send(.confirmRequestDismissed) },
         destination: ConfirmRequestView.init(store:)
@@ -251,7 +251,7 @@ public struct ContactView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.checkAuth,
-          action: ContactAction.checkAuth
+          action: ContactComponent.Action.checkAuth
         ),
         onDeactivate: { viewStore.send(.checkAuthDismissed) },
         destination: CheckContactAuthView.init(store:)
@@ -259,7 +259,7 @@ public struct ContactView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.resetAuth,
-          action: ContactAction.resetAuth
+          action: ContactComponent.Action.resetAuth
         ),
         onDeactivate: { viewStore.send(.resetAuthDismissed) },
         destination: ResetAuthView.init(store:)
@@ -267,7 +267,7 @@ public struct ContactView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.chat,
-          action: ContactAction.chat
+          action: ContactComponent.Action.chat
         ),
         onDeactivate: { viewStore.send(.chatDismissed) },
         destination: ChatView.init(store:)
@@ -280,11 +280,10 @@ public struct ContactView: View {
 public struct ContactView_Previews: PreviewProvider {
   public static var previews: some View {
     ContactView(store: Store(
-      initialState: ContactState(
+      initialState: ContactComponent.State(
         id: "contact-id".data(using: .utf8)!
       ),
-      reducer: .empty,
-      environment: ()
+      reducer: EmptyReducer()
     ))
   }
 }
