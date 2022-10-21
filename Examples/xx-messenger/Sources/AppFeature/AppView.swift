@@ -6,7 +6,7 @@ import SwiftUI
 import WelcomeFeature
 
 struct AppView: View {
-  let store: Store<AppState, AppAction>
+  let store: StoreOf<AppComponent>
   @State var isPresentingPulse = false
 
   enum ViewState: Equatable {
@@ -16,7 +16,7 @@ struct AppView: View {
     case home
     case failure(String)
 
-    init(_ state: AppState) {
+    init(_ state: AppComponent.State) {
       switch state.screen {
       case .loading: self = .loading
       case .welcome(_): self = .welcome
@@ -42,8 +42,8 @@ struct AppView: View {
         case .welcome:
           IfLetStore(
             store.scope(
-              state: { (/AppState.Screen.welcome).extract(from: $0.screen) },
-              action: AppAction.welcome
+              state: { (/AppComponent.State.Screen.welcome).extract(from: $0.screen) },
+              action: AppComponent.Action.welcome
             ),
             then: { store in
               WelcomeView(store: store)
@@ -58,8 +58,8 @@ struct AppView: View {
         case .restore:
           IfLetStore(
             store.scope(
-              state: { (/AppState.Screen.restore).extract(from: $0.screen) },
-              action: AppAction.restore
+              state: { (/AppComponent.State.Screen.restore).extract(from: $0.screen) },
+              action: AppComponent.Action.restore
             ),
             then: { store in
               RestoreView(store: store)
@@ -74,8 +74,8 @@ struct AppView: View {
         case .home:
           IfLetStore(
             store.scope(
-              state: { (/AppState.Screen.home).extract(from: $0.screen) },
-              action: AppAction.home
+              state: { (/AppComponent.State.Screen.home).extract(from: $0.screen) },
+              action: AppComponent.Action.home
             ),
             then: { store in
               HomeView(store: store)
@@ -137,9 +137,8 @@ struct AppView: View {
 struct AppView_Previews: PreviewProvider {
   static var previews: some View {
     AppView(store: Store(
-      initialState: AppState(),
-      reducer: .empty,
-      environment: ()
+      initialState: AppComponent.State(),
+      reducer: EmptyReducer()
     ))
   }
 }

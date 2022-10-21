@@ -8,37 +8,36 @@ import XCTest
 import XXClient
 @testable import AppFeature
 
-final class AppFeatureTests: XCTestCase {
+final class AppComponentTests: XCTestCase {
   func testStartWithoutMessengerCreated() {
     var actions: [Action]!
 
     let store = TestStore(
-      initialState: AppState(),
-      reducer: appReducer,
-      environment: .unimplemented
+      initialState: AppComponent.State(),
+      reducer: AppComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.dbManager.hasDB.run = { false }
-    store.environment.messenger.isLoaded.run = { false }
-    store.environment.messenger.isCreated.run = { false }
-    store.environment.dbManager.makeDB.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.hasDB.run = { false }
+    store.dependencies.app.messenger.isLoaded.run = { false }
+    store.dependencies.app.messenger.isCreated.run = { false }
+    store.dependencies.app.dbManager.makeDB.run = {
       actions.append(.didMakeDB)
     }
-    store.environment.authHandler.run = { _ in
+    store.dependencies.app.authHandler.run = { _ in
       actions.append(.didStartAuthHandler)
       return Cancellable {}
     }
-    store.environment.messageListener.run = { _ in
+    store.dependencies.app.messageListener.run = { _ in
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
-    store.environment.receiveFileHandler.run = { _ in
+    store.dependencies.app.receiveFileHandler.run = { _ in
       actions.append(.didStartReceiveFileHandler)
       return Cancellable {}
     }
-    store.environment.messenger.registerBackupCallback.run = { _ in
+    store.dependencies.app.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
@@ -46,8 +45,8 @@ final class AppFeatureTests: XCTestCase {
     actions = []
     store.send(.start)
 
-    store.receive(.set(\.$screen, .welcome(WelcomeState()))) {
-      $0.screen = .welcome(WelcomeState())
+    store.receive(.set(\.$screen, .welcome(WelcomeComponent.State()))) {
+      $0.screen = .welcome(WelcomeComponent.State())
     }
     XCTAssertNoDifference(actions, [
       .didMakeDB,
@@ -64,35 +63,34 @@ final class AppFeatureTests: XCTestCase {
     var actions: [Action]!
 
     let store = TestStore(
-      initialState: AppState(),
-      reducer: appReducer,
-      environment: .unimplemented
+      initialState: AppComponent.State(),
+      reducer: AppComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.dbManager.hasDB.run = { false }
-    store.environment.messenger.isLoaded.run = { false }
-    store.environment.messenger.isCreated.run = { true }
-    store.environment.dbManager.makeDB.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.hasDB.run = { false }
+    store.dependencies.app.messenger.isLoaded.run = { false }
+    store.dependencies.app.messenger.isCreated.run = { true }
+    store.dependencies.app.dbManager.makeDB.run = {
       actions.append(.didMakeDB)
     }
-    store.environment.messenger.load.run = {
+    store.dependencies.app.messenger.load.run = {
       actions.append(.didLoadMessenger)
     }
-    store.environment.authHandler.run = { _ in
+    store.dependencies.app.authHandler.run = { _ in
       actions.append(.didStartAuthHandler)
       return Cancellable {}
     }
-    store.environment.messageListener.run = { _ in
+    store.dependencies.app.messageListener.run = { _ in
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
-    store.environment.receiveFileHandler.run = { _ in
+    store.dependencies.app.receiveFileHandler.run = { _ in
       actions.append(.didStartReceiveFileHandler)
       return Cancellable {}
     }
-    store.environment.messenger.registerBackupCallback.run = { _ in
+    store.dependencies.app.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
@@ -100,8 +98,8 @@ final class AppFeatureTests: XCTestCase {
     actions = []
     store.send(.start)
 
-    store.receive(.set(\.$screen, .home(HomeState()))) {
-      $0.screen = .home(HomeState())
+    store.receive(.set(\.$screen, .home(HomeComponent.State()))) {
+      $0.screen = .home(HomeComponent.State())
     }
     XCTAssertNoDifference(actions, [
       .didMakeDB,
@@ -119,34 +117,33 @@ final class AppFeatureTests: XCTestCase {
     var actions: [Action]!
 
     let store = TestStore(
-      initialState: AppState(
-        screen: .welcome(WelcomeState())
+      initialState: AppComponent.State(
+        screen: .welcome(WelcomeComponent.State())
       ),
-      reducer: appReducer,
-      environment: .unimplemented
+      reducer: AppComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.dbManager.hasDB.run = { true }
-    store.environment.messenger.isLoaded.run = { false }
-    store.environment.messenger.isCreated.run = { true }
-    store.environment.messenger.load.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.hasDB.run = { true }
+    store.dependencies.app.messenger.isLoaded.run = { false }
+    store.dependencies.app.messenger.isCreated.run = { true }
+    store.dependencies.app.messenger.load.run = {
       actions.append(.didLoadMessenger)
     }
-    store.environment.authHandler.run = { _ in
+    store.dependencies.app.authHandler.run = { _ in
       actions.append(.didStartAuthHandler)
       return Cancellable {}
     }
-    store.environment.messageListener.run = { _ in
+    store.dependencies.app.messageListener.run = { _ in
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
-    store.environment.receiveFileHandler.run = { _ in
+    store.dependencies.app.receiveFileHandler.run = { _ in
       actions.append(.didStartReceiveFileHandler)
       return Cancellable {}
     }
-    store.environment.messenger.registerBackupCallback.run = { _ in
+    store.dependencies.app.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
@@ -156,8 +153,8 @@ final class AppFeatureTests: XCTestCase {
       $0.screen = .loading
     }
 
-    store.receive(.set(\.$screen, .home(HomeState()))) {
-      $0.screen = .home(HomeState())
+    store.receive(.set(\.$screen, .home(HomeComponent.State()))) {
+      $0.screen = .home(HomeComponent.State())
     }
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
@@ -174,34 +171,33 @@ final class AppFeatureTests: XCTestCase {
     var actions: [Action]!
 
     let store = TestStore(
-      initialState: AppState(
-        screen: .restore(RestoreState())
+      initialState: AppComponent.State(
+        screen: .restore(RestoreComponent.State())
       ),
-      reducer: appReducer,
-      environment: .unimplemented
+      reducer: AppComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.dbManager.hasDB.run = { true }
-    store.environment.messenger.isLoaded.run = { false }
-    store.environment.messenger.isCreated.run = { true }
-    store.environment.messenger.load.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.hasDB.run = { true }
+    store.dependencies.app.messenger.isLoaded.run = { false }
+    store.dependencies.app.messenger.isCreated.run = { true }
+    store.dependencies.app.messenger.load.run = {
       actions.append(.didLoadMessenger)
     }
-    store.environment.authHandler.run = { _ in
+    store.dependencies.app.authHandler.run = { _ in
       actions.append(.didStartAuthHandler)
       return Cancellable {}
     }
-    store.environment.messageListener.run = { _ in
+    store.dependencies.app.messageListener.run = { _ in
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
-    store.environment.receiveFileHandler.run = { _ in
+    store.dependencies.app.receiveFileHandler.run = { _ in
       actions.append(.didStartReceiveFileHandler)
       return Cancellable {}
     }
-    store.environment.messenger.registerBackupCallback.run = { _ in
+    store.dependencies.app.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
@@ -211,8 +207,8 @@ final class AppFeatureTests: XCTestCase {
       $0.screen = .loading
     }
 
-    store.receive(.set(\.$screen, .home(HomeState()))) {
-      $0.screen = .home(HomeState())
+    store.receive(.set(\.$screen, .home(HomeComponent.State()))) {
+      $0.screen = .home(HomeComponent.State())
     }
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
@@ -229,31 +225,30 @@ final class AppFeatureTests: XCTestCase {
     var actions: [Action]!
 
     let store = TestStore(
-      initialState: AppState(
-        screen: .home(HomeState())
+      initialState: AppComponent.State(
+        screen: .home(HomeComponent.State())
       ),
-      reducer: appReducer,
-      environment: .unimplemented
+      reducer: AppComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.dbManager.hasDB.run = { true }
-    store.environment.messenger.isLoaded.run = { false }
-    store.environment.messenger.isCreated.run = { false }
-    store.environment.authHandler.run = { _ in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.hasDB.run = { true }
+    store.dependencies.app.messenger.isLoaded.run = { false }
+    store.dependencies.app.messenger.isCreated.run = { false }
+    store.dependencies.app.authHandler.run = { _ in
       actions.append(.didStartAuthHandler)
       return Cancellable {}
     }
-    store.environment.messageListener.run = { _ in
+    store.dependencies.app.messageListener.run = { _ in
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
-    store.environment.receiveFileHandler.run = { _ in
+    store.dependencies.app.receiveFileHandler.run = { _ in
       actions.append(.didStartReceiveFileHandler)
       return Cancellable {}
     }
-    store.environment.messenger.registerBackupCallback.run = { _ in
+    store.dependencies.app.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
@@ -263,8 +258,8 @@ final class AppFeatureTests: XCTestCase {
       $0.screen = .loading
     }
 
-    store.receive(.set(\.$screen, .welcome(WelcomeState()))) {
-      $0.screen = .welcome(WelcomeState())
+    store.receive(.set(\.$screen, .welcome(WelcomeComponent.State()))) {
+      $0.screen = .welcome(WelcomeComponent.State())
     }
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
@@ -278,15 +273,14 @@ final class AppFeatureTests: XCTestCase {
 
   func testWelcomeRestoreTapped() {
     let store = TestStore(
-      initialState: AppState(
-        screen: .welcome(WelcomeState())
+      initialState: AppComponent.State(
+        screen: .welcome(WelcomeComponent.State())
       ),
-      reducer: appReducer,
-      environment: .unimplemented
+      reducer: AppComponent()
     )
 
     store.send(.welcome(.restoreTapped)) {
-      $0.screen = .restore(RestoreState())
+      $0.screen = .restore(RestoreComponent.State())
     }
   }
 
@@ -294,11 +288,10 @@ final class AppFeatureTests: XCTestCase {
     let failure = "Something went wrong"
 
     let store = TestStore(
-      initialState: AppState(
-        screen: .welcome(WelcomeState())
+      initialState: AppComponent.State(
+        screen: .welcome(WelcomeComponent.State())
       ),
-      reducer: appReducer,
-      environment: .unimplemented
+      reducer: AppComponent()
     )
 
     store.send(.welcome(.failed(failure))) {
@@ -311,15 +304,14 @@ final class AppFeatureTests: XCTestCase {
     let error = Failure()
 
     let store = TestStore(
-      initialState: AppState(),
-      reducer: appReducer,
-      environment: .unimplemented
+      initialState: AppComponent.State(),
+      reducer: AppComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.dbManager.hasDB.run = { false }
-    store.environment.dbManager.makeDB.run = { throw error }
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.hasDB.run = { false }
+    store.dependencies.app.dbManager.makeDB.run = { throw error }
 
     store.send(.start)
 
@@ -337,30 +329,29 @@ final class AppFeatureTests: XCTestCase {
     var actions: [Action]!
 
     let store = TestStore(
-      initialState: AppState(),
-      reducer: appReducer,
-      environment: .unimplemented
+      initialState: AppComponent.State(),
+      reducer: AppComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.dbManager.hasDB.run = { true }
-    store.environment.messenger.isLoaded.run = { false }
-    store.environment.messenger.isCreated.run = { true }
-    store.environment.messenger.load.run = { throw error }
-    store.environment.authHandler.run = { _ in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.hasDB.run = { true }
+    store.dependencies.app.messenger.isLoaded.run = { false }
+    store.dependencies.app.messenger.isCreated.run = { true }
+    store.dependencies.app.messenger.load.run = { throw error }
+    store.dependencies.app.authHandler.run = { _ in
       actions.append(.didStartAuthHandler)
       return Cancellable {}
     }
-    store.environment.messageListener.run = { _ in
+    store.dependencies.app.messageListener.run = { _ in
       actions.append(.didStartMessageListener)
       return Cancellable {}
     }
-    store.environment.receiveFileHandler.run = { _ in
+    store.dependencies.app.receiveFileHandler.run = { _ in
       actions.append(.didStartReceiveFileHandler)
       return Cancellable {}
     }
-    store.environment.messenger.registerBackupCallback.run = { _ in
+    store.dependencies.app.messenger.registerBackupCallback.run = { _ in
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
@@ -390,56 +381,55 @@ final class AppFeatureTests: XCTestCase {
     var backupCallback: [UpdateBackupFunc] = []
 
     let store = TestStore(
-      initialState: AppState(),
-      reducer: appReducer,
-      environment: .unimplemented
+      initialState: AppComponent.State(),
+      reducer: AppComponent()
     )
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.dbManager.hasDB.run = { true }
-    store.environment.messenger.isLoaded.run = { true }
-    store.environment.messenger.isCreated.run = { true }
-    store.environment.authHandler.run = { onError in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.dbManager.hasDB.run = { true }
+    store.dependencies.app.messenger.isLoaded.run = { true }
+    store.dependencies.app.messenger.isCreated.run = { true }
+    store.dependencies.app.authHandler.run = { onError in
       authHandlerOnError.append(onError)
       actions.append(.didStartAuthHandler)
       return Cancellable {
         actions.append(.didCancelAuthHandler)
       }
     }
-    store.environment.messageListener.run = { onError in
+    store.dependencies.app.messageListener.run = { onError in
       messageListenerOnError.append(onError)
       actions.append(.didStartMessageListener)
       return Cancellable {
         actions.append(.didCancelMessageListener)
       }
     }
-    store.environment.receiveFileHandler.run = { onError in
+    store.dependencies.app.receiveFileHandler.run = { onError in
       fileHandlerOnError.append(onError)
       actions.append(.didStartReceiveFileHandler)
       return Cancellable {
         actions.append(.didCancelReceiveFileHandler)
       }
     }
-    store.environment.messenger.registerBackupCallback.run = { callback in
+    store.dependencies.app.messenger.registerBackupCallback.run = { callback in
       backupCallback.append(callback)
       actions.append(.didRegisterBackupCallback)
       return Cancellable {
         actions.append(.didCancelBackupCallback)
       }
     }
-    store.environment.log.run = { msg, _, _, _ in
+    store.dependencies.app.log.run = { msg, _, _, _ in
       actions.append(.didLog(msg))
     }
-    store.environment.backupStorage.store = { data in
+    store.dependencies.app.backupStorage.store = { data in
       actions.append(.didStoreBackup(data))
     }
 
     actions = []
     store.send(.start)
 
-    store.receive(.set(\.$screen, .home(HomeState()))) {
-      $0.screen = .home(HomeState())
+    store.receive(.set(\.$screen, .home(HomeComponent.State()))) {
+      $0.screen = .home(HomeComponent.State())
     }
     XCTAssertNoDifference(actions, [
       .didStartAuthHandler,
@@ -453,8 +443,8 @@ final class AppFeatureTests: XCTestCase {
       $0.screen = .loading
     }
 
-    store.receive(.set(\.$screen, .home(HomeState()))) {
-      $0.screen = .home(HomeState())
+    store.receive(.set(\.$screen, .home(HomeComponent.State()))) {
+      $0.screen = .home(HomeComponent.State())
     }
     XCTAssertNoDifference(actions, [
       .didCancelAuthHandler,
