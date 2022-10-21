@@ -3,14 +3,14 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct ContactLookupView: View {
-  public init(store: Store<ContactLookupState, ContactLookupAction>) {
+  public init(store: StoreOf<ContactLookupComponent>) {
     self.store = store
   }
 
-  let store: Store<ContactLookupState, ContactLookupAction>
+  let store: StoreOf<ContactLookupComponent>
 
   struct ViewState: Equatable {
-    init(state: ContactLookupState) {
+    init(state: ContactLookupComponent.State) {
       id = state.id
       isLookingUp = state.isLookingUp
       failure = state.failure
@@ -64,11 +64,10 @@ public struct ContactLookupView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       ContactLookupView(store: Store(
-        initialState: ContactLookupState(
+        initialState: ContactLookupComponent.State(
           id: "1234".data(using: .utf8)!
         ),
-        reducer: .empty,
-        environment: ()
+        reducer: EmptyReducer()
       ))
     }
   }
