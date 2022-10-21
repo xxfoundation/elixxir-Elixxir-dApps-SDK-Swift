@@ -69,6 +69,7 @@ let package = Package(
     .target(
       name: "AppCore",
       dependencies: [
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "Logging", package: "swift-log"),
         .product(name: "XCTestDynamicOverlay", package: "xctest-dynamic-overlay"),
         .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
@@ -82,7 +83,6 @@ let package = Package(
       name: "AppCoreTests",
       dependencies: [
         .target(name: "AppCore"),
-        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
@@ -378,6 +378,7 @@ let package = Package(
     .target(
       name: "UserSearchFeature",
       dependencies: [
+        .target(name: "AppCore"),
         .target(name: "ContactFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
