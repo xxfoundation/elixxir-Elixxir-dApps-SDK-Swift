@@ -6,7 +6,7 @@ import XXMessengerClient
 import XXModels
 @testable import RegisterFeature
 
-final class RegisterFeatureTests: XCTestCase {
+final class RegisterComponentTests: XCTestCase {
   func testRegister() throws {
     let now = Date()
     let username = "registering-username"
@@ -26,24 +26,23 @@ final class RegisterFeatureTests: XCTestCase {
     var dbDidSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
-      initialState: RegisterState(),
-      reducer: registerReducer,
-      environment: .unimplemented
+      initialState: RegisterComponent.State(),
+      reducer: RegisterComponent()
     )
-    store.environment.now = { now }
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.register.run = { username in
+    store.dependencies.app.now = { now }
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.register.run = { username in
       messengerDidRegisterUsername.append(username)
     }
-    store.environment.messenger.myContact.run = { includeFacts in
+    store.dependencies.app.messenger.myContact.run = { includeFacts in
       didGetMyContact.append(includeFacts)
       var contact = XXClient.Contact.unimplemented(myContactData)
       contact.getIdFromContact.run = { _ in myContactId }
       contact.getFactsFromContact.run = { _ in myContactFacts }
       return contact
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.saveContact.run = { contact in
         dbDidSaveContact.append(contact)
@@ -87,17 +86,16 @@ final class RegisterFeatureTests: XCTestCase {
     let error = Error()
 
     let store = TestStore(
-      initialState: RegisterState(),
-      reducer: registerReducer,
-      environment: .unimplemented
+      initialState: RegisterComponent.State(),
+      reducer: RegisterComponent()
     )
 
     let mainQueue = DispatchQueue.test
     let bgQueue = DispatchQueue.test
 
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.db.run = { throw error }
+    store.dependencies.app.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.dependencies.app.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.dependencies.app.dbManager.getDB.run = { throw error }
 
     store.send(.registerTapped) {
       $0.isRegistering = true
@@ -117,18 +115,17 @@ final class RegisterFeatureTests: XCTestCase {
     let error = Error()
 
     let store = TestStore(
-      initialState: RegisterState(),
-      reducer: registerReducer,
-      environment: .unimplemented
+      initialState: RegisterComponent.State(),
+      reducer: RegisterComponent()
     )
 
     let mainQueue = DispatchQueue.test
     let bgQueue = DispatchQueue.test
 
-    store.environment.mainQueue = mainQueue.eraseToAnyScheduler()
-    store.environment.bgQueue = bgQueue.eraseToAnyScheduler()
-    store.environment.db.run = { .unimplemented }
-    store.environment.messenger.register.run = { _ in throw error }
+    store.dependencies.app.mainQueue = mainQueue.eraseToAnyScheduler()
+    store.dependencies.app.bgQueue = bgQueue.eraseToAnyScheduler()
+    store.dependencies.app.dbManager.getDB.run = { .unimplemented }
+    store.dependencies.app.messenger.register.run = { _ in throw error }
 
     store.send(.registerTapped) {
       $0.isRegistering = true
@@ -162,26 +159,25 @@ final class RegisterFeatureTests: XCTestCase {
     var dbDidSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
-      initialState: RegisterState(
+      initialState: RegisterComponent.State(
         username: username
       ),
-      reducer: registerReducer,
-      environment: .unimplemented
+      reducer: RegisterComponent()
     )
-    store.environment.now = { now }
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.register.run = { username in
+    store.dependencies.app.now = { now }
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.register.run = { username in
       messengerDidRegisterUsername.append(username)
     }
-    store.environment.messenger.myContact.run = { includeFacts in
+    store.dependencies.app.messenger.myContact.run = { includeFacts in
       didGetMyContact.append(includeFacts)
       var contact = XXClient.Contact.unimplemented(myContactData)
       contact.getIdFromContact.run = { _ in myContactId }
       contact.getFactsFromContact.run = { _ in myContactFacts }
       return contact
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.saveContact.run = { contact in
         dbDidSaveContact.append(contact)
@@ -207,7 +203,7 @@ final class RegisterFeatureTests: XCTestCase {
       )
     ])
 
-    let failure = RegisterState.Error.usernameMismatch(
+    let failure = RegisterComponent.State.Error.usernameMismatch(
       registering: username,
       registered: myContactUsername
     )
