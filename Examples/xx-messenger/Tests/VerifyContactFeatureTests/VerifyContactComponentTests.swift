@@ -5,31 +5,30 @@ import XXClient
 import XXModels
 @testable import VerifyContactFeature
 
-final class VerifyContactFeatureTests: XCTestCase {
+final class VerifyContactComponentTests: XCTestCase {
   func testVerify() {
     var contact = XXClient.Contact.unimplemented("contact-data".data(using: .utf8)!)
     let contactId = "contact-id".data(using: .utf8)!
     contact.getIdFromContact.run = { _ in contactId }
 
     let store = TestStore(
-      initialState: VerifyContactState(
+      initialState: VerifyContactComponent.State(
         contact: contact
       ),
-      reducer: verifyContactReducer,
-      environment: .unimplemented
+      reducer: VerifyContactComponent()
     )
 
     var didVerifyContact: [XXClient.Contact] = []
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.verifyContact.run = { contact in
+    store.dependencies.appDependencies.mainQueue = .immediate
+    store.dependencies.appDependencies.bgQueue = .immediate
+    store.dependencies.appDependencies.messenger.verifyContact.run = { contact in
       didVerifyContact.append(contact)
       return true
     }
-    store.environment.db.run = {
+    store.dependencies.appDependencies.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
@@ -66,24 +65,23 @@ final class VerifyContactFeatureTests: XCTestCase {
     contact.getIdFromContact.run = { _ in contactId }
 
     let store = TestStore(
-      initialState: VerifyContactState(
+      initialState: VerifyContactComponent.State(
         contact: contact
       ),
-      reducer: verifyContactReducer,
-      environment: .unimplemented
+      reducer: VerifyContactComponent()
     )
 
     var didVerifyContact: [XXClient.Contact] = []
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.verifyContact.run = { contact in
+    store.dependencies.appDependencies.mainQueue = .immediate
+    store.dependencies.appDependencies.bgQueue = .immediate
+    store.dependencies.appDependencies.messenger.verifyContact.run = { contact in
       didVerifyContact.append(contact)
       return false
     }
-    store.environment.db.run = {
+    store.dependencies.appDependencies.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)
@@ -120,11 +118,10 @@ final class VerifyContactFeatureTests: XCTestCase {
     contact.getIdFromContact.run = { _ in contactId }
 
     let store = TestStore(
-      initialState: VerifyContactState(
+      initialState: VerifyContactComponent.State(
         contact: contact
       ),
-      reducer: verifyContactReducer,
-      environment: .unimplemented
+      reducer: VerifyContactComponent()
     )
 
     struct Failure: Error {}
@@ -133,10 +130,10 @@ final class VerifyContactFeatureTests: XCTestCase {
     var didBulkUpdateContactsWithQuery: [XXModels.Contact.Query] = []
     var didBulkUpdateContactsWithAssignments: [XXModels.Contact.Assignments] = []
 
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.verifyContact.run = { _ in throw error }
-    store.environment.db.run = {
+    store.dependencies.appDependencies.mainQueue = .immediate
+    store.dependencies.appDependencies.bgQueue = .immediate
+    store.dependencies.appDependencies.messenger.verifyContact.run = { _ in throw error }
+    store.dependencies.appDependencies.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.bulkUpdateContacts.run = { query, assignments in
         didBulkUpdateContactsWithQuery.append(query)

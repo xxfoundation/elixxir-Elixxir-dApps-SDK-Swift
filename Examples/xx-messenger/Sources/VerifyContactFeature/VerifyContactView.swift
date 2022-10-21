@@ -2,20 +2,20 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct VerifyContactView: View {
-  public init(store: Store<VerifyContactState, VerifyContactAction>) {
+  public init(store: StoreOf<VerifyContactComponent>) {
     self.store = store
   }
 
-  let store: Store<VerifyContactState, VerifyContactAction>
+  let store: StoreOf<VerifyContactComponent>
 
   struct ViewState: Equatable {
     var username: String?
     var email: String?
     var phone: String?
     var isVerifying: Bool
-    var result: VerifyContactState.Result?
+    var result: VerifyContactComponent.State.Result?
 
-    init(state: VerifyContactState) {
+    init(state: VerifyContactComponent.State) {
       username = try? state.contact.getFact(.username)?.value
       email = try? state.contact.getFact(.email)?.value
       phone = try? state.contact.getFact(.phone)?.value
@@ -89,11 +89,10 @@ public struct VerifyContactView: View {
 public struct VerifyContactView_Previews: PreviewProvider {
   public static var previews: some View {
     VerifyContactView(store: Store(
-      initialState: VerifyContactState(
+      initialState: VerifyContactComponent.State(
         contact: .unimplemented("contact-data".data(using: .utf8)!)
       ),
-      reducer: .empty,
-      environment: ()
+      reducer: EmptyReducer()
     ))
   }
 }
