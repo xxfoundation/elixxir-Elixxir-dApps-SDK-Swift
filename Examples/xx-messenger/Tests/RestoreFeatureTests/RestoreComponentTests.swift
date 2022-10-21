@@ -6,19 +6,18 @@ import XXMessengerClient
 import XXModels
 @testable import RestoreFeature
 
-final class RestoreFeatureTests: XCTestCase {
+final class RestoreComponentTests: XCTestCase {
   func testFileImport() {
     let fileURL = URL(string: "file-url")!
     var didLoadDataFromURL: [URL] = []
     let dataFromURL = "data-from-url".data(using: .utf8)!
 
     let store = TestStore(
-      initialState: RestoreState(),
-      reducer: restoreReducer,
-      environment: .unimplemented
+      initialState: RestoreComponent.State(),
+      reducer: RestoreComponent()
     )
 
-    store.environment.loadData.load = { url in
+    store.dependencies.app.loadData.load = { url in
       didLoadDataFromURL.append(url)
       return dataFromURL
     }
@@ -41,11 +40,10 @@ final class RestoreFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: RestoreState(
+      initialState: RestoreComponent.State(
         isImportingFile: true
       ),
-      reducer: restoreReducer,
-      environment: .unimplemented
+      reducer: RestoreComponent()
     )
 
     store.send(.fileImport(.failure(failure as NSError))) {
@@ -60,14 +58,13 @@ final class RestoreFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: RestoreState(
+      initialState: RestoreComponent.State(
         isImportingFile: true
       ),
-      reducer: restoreReducer,
-      environment: .unimplemented
+      reducer: RestoreComponent()
     )
 
-    store.environment.loadData.load = { _ in throw failure }
+    store.dependencies.app.loadData.load = { _ in throw failure }
 
     store.send(.fileImport(.success(URL(string: "test")!))) {
       $0.isImportingFile = false
@@ -102,23 +99,22 @@ final class RestoreFeatureTests: XCTestCase {
     var didSaveContact: [XXModels.Contact] = []
 
     let store = TestStore(
-      initialState: RestoreState(
+      initialState: RestoreComponent.State(
         file: .init(name: "file-name", data: backupData)
       ),
-      reducer: restoreReducer,
-      environment: .unimplemented
+      reducer: RestoreComponent()
     )
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.now = { now }
-    store.environment.messenger.restoreBackup.run = { data, passphrase in
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.now = { now }
+    store.dependencies.app.messenger.restoreBackup.run = { data, passphrase in
       didRestoreWithData.append(data)
       didRestoreWithPassphrase.append(passphrase)
       udFacts = restoredFacts
       return restoreResult
     }
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.getContact.run = {
         var contact: XXClient.Contact = .unimplemented(Data())
@@ -127,12 +123,12 @@ final class RestoreFeatureTests: XCTestCase {
       }
       return e2e
     }
-    store.environment.messenger.ud.get = {
+    store.dependencies.app.messenger.ud.get = {
       var ud: UserDiscovery = .unimplemented
       ud.getFacts.run = { udFacts }
       return ud
     }
-    store.environment.db.run = {
+    store.dependencies.app.dbManager.getDB.run = {
       var db: Database = .unimplemented
       db.fetchContacts.run = { query in
         didFetchContacts.append(query)
@@ -189,11 +185,10 @@ final class RestoreFeatureTests: XCTestCase {
 
   func testRestoreWithoutFile() {
     let store = TestStore(
-      initialState: RestoreState(
+      initialState: RestoreComponent.State(
         file: nil
       ),
-      reducer: restoreReducer,
-      environment: .unimplemented
+      reducer: RestoreComponent()
     )
 
     store.send(.restoreTapped)
@@ -206,17 +201,16 @@ final class RestoreFeatureTests: XCTestCase {
     }
 
     let store = TestStore(
-      initialState: RestoreState(
+      initialState: RestoreComponent.State(
         file: .init(name: "name", data: "data".data(using: .utf8)!)
       ),
-      reducer: restoreReducer,
-      environment: .unimplemented
+      reducer: RestoreComponent()
     )
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.restoreBackup.run = { _, _ in throw Failure.restore }
-    store.environment.messenger.destroy.run = { throw Failure.destroy }
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.restoreBackup.run = { _, _ in throw Failure.restore }
+    store.dependencies.app.messenger.destroy.run = { throw Failure.destroy }
 
     store.send(.restoreTapped) {
       $0.isRestoring = true

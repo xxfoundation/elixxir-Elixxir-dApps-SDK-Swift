@@ -2,12 +2,12 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct RestoreView: View {
-  public init(store: Store<RestoreState, RestoreAction>) {
+  public init(store: StoreOf<RestoreComponent>) {
     self.store = store
   }
 
-  let store: Store<RestoreState, RestoreAction>
-  @FocusState var focusedField: RestoreState.Field?
+  let store: StoreOf<RestoreComponent>
+  @FocusState var focusedField: RestoreComponent.State.Field?
 
   struct ViewState: Equatable {
     struct File: Equatable {
@@ -19,11 +19,11 @@ public struct RestoreView: View {
     var isImportingFile: Bool
     var passphrase: String
     var isRestoring: Bool
-    var focusedField: RestoreState.Field?
+    var focusedField: RestoreComponent.State.Field?
     var fileImportFailure: String?
     var restoreFailures: [String]
 
-    init(state: RestoreState) {
+    init(state: RestoreComponent.State) {
       file = state.file.map { .init(name: $0.name, size: $0.data.count) }
       isImportingFile = state.isImportingFile
       passphrase = state.passphrase
@@ -61,7 +61,7 @@ public struct RestoreView: View {
     }
   }
 
-  @ViewBuilder func fileSection(_ viewStore: ViewStore<ViewState, RestoreAction>) -> some View {
+  @ViewBuilder func fileSection(_ viewStore: ViewStore<ViewState, RestoreComponent.Action>) -> some View {
     Section {
       if let file = viewStore.file {
         HStack(alignment: .bottom) {
@@ -100,7 +100,7 @@ public struct RestoreView: View {
     }
   }
 
-  @ViewBuilder func restoreSection(_ viewStore: ViewStore<ViewState, RestoreAction>) -> some View {
+  @ViewBuilder func restoreSection(_ viewStore: ViewStore<ViewState, RestoreComponent.Action>) -> some View {
     Section {
       SecureField("Passphrase", text: viewStore.binding(
         get: \.passphrase,
@@ -152,7 +152,7 @@ public struct RestoreView: View {
 public struct RestoreView_Previews: PreviewProvider {
   public static var previews: some View {
     RestoreView(store: Store(
-      initialState: RestoreState(
+      initialState: RestoreComponent.State(
         file: .init(name: "preview", data: Data()),
         fileImportFailure: nil,
         restoreFailures: [
@@ -165,8 +165,7 @@ public struct RestoreView_Previews: PreviewProvider {
         passphrase: "",
         isRestoring: true
       ),
-      reducer: .empty,
-      environment: ()
+      reducer: EmptyReducer()
     ))
   }
 }
