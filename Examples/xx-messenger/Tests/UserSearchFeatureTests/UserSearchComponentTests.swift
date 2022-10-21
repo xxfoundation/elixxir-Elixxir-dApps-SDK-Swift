@@ -6,12 +6,11 @@ import XXClient
 import XXMessengerClient
 @testable import UserSearchFeature
 
-final class UserSearchFeatureTests: XCTestCase {
+final class UserSearchComponentTests: XCTestCase {
   func testSearch() {
     let store = TestStore(
-      initialState: UserSearchState(),
-      reducer: userSearchReducer,
-      environment: .unimplemented
+      initialState: UserSearchComponent.State(),
+      reducer: UserSearchComponent()
     )
 
     var didSearchWithQuery: [MessengerSearchContacts.Query] = []
@@ -43,9 +42,9 @@ final class UserSearchFeatureTests: XCTestCase {
     contact4.getFactsFromContact.run = { _ in throw GetFactsFromContactError() }
     let contacts = [contact1, contact2, contact3, contact4]
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.searchContacts.run = { query in
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.searchContacts.run = { query in
       didSearchWithQuery.append(query)
       return contacts
     }
@@ -93,17 +92,16 @@ final class UserSearchFeatureTests: XCTestCase {
 
   func testSearchFailure() {
     let store = TestStore(
-      initialState: UserSearchState(),
-      reducer: userSearchReducer,
-      environment: .unimplemented
+      initialState: UserSearchComponent.State(),
+      reducer: UserSearchComponent()
     )
 
     struct Failure: Error {}
     let failure = Failure()
 
-    store.environment.bgQueue = .immediate
-    store.environment.mainQueue = .immediate
-    store.environment.messenger.searchContacts.run = { _ in throw failure }
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.messenger.searchContacts.run = { _ in throw failure }
 
     store.send(.searchTapped) {
       $0.focusedField = nil
@@ -121,7 +119,7 @@ final class UserSearchFeatureTests: XCTestCase {
 
   func testResultTapped() {
     let store = TestStore(
-      initialState: UserSearchState(
+      initialState: UserSearchComponent.State(
         results: [
           .init(
             id: "contact-id".data(using: .utf8)!,
@@ -129,12 +127,11 @@ final class UserSearchFeatureTests: XCTestCase {
           )
         ]
       ),
-      reducer: userSearchReducer,
-      environment: .unimplemented
+      reducer: UserSearchComponent()
     )
 
     store.send(.resultTapped(id: "contact-id".data(using: .utf8)!)) {
-      $0.contact = ContactState(
+      $0.contact = ContactComponent.State(
         id: "contact-id".data(using: .utf8)!,
         xxContact: .unimplemented("contact-data".data(using: .utf8)!)
       )
@@ -143,13 +140,12 @@ final class UserSearchFeatureTests: XCTestCase {
 
   func testDismissingContact() {
     let store = TestStore(
-      initialState: UserSearchState(
-        contact: ContactState(
+      initialState: UserSearchComponent.State(
+        contact: ContactComponent.State(
           id: "contact-id".data(using: .utf8)!
         )
       ),
-      reducer: userSearchReducer,
-      environment: .unimplemented
+      reducer: UserSearchComponent()
     )
 
     store.send(.didDismissContact) {

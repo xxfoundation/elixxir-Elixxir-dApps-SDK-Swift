@@ -5,21 +5,21 @@ import SwiftUI
 import XXMessengerClient
 
 public struct UserSearchView: View {
-  public init(store: Store<UserSearchState, UserSearchAction>) {
+  public init(store: StoreOf<UserSearchComponent>) {
     self.store = store
   }
 
-  let store: Store<UserSearchState, UserSearchAction>
-  @FocusState var focusedField: UserSearchState.Field?
+  let store: StoreOf<UserSearchComponent>
+  @FocusState var focusedField: UserSearchComponent.State.Field?
 
   struct ViewState: Equatable {
-    var focusedField: UserSearchState.Field?
+    var focusedField: UserSearchComponent.State.Field?
     var query: MessengerSearchContacts.Query
     var isSearching: Bool
     var failure: String?
-    var results: IdentifiedArrayOf<UserSearchState.Result>
+    var results: IdentifiedArrayOf<UserSearchComponent.State.Result>
 
-    init(state: UserSearchState) {
+    init(state: UserSearchComponent.State) {
       focusedField = state.focusedField
       query = state.query
       isSearching = state.isSearching
@@ -35,7 +35,7 @@ public struct UserSearchView: View {
           TextField(
             text: viewStore.binding(
               get: { $0.query.username ?? "" },
-              send: { UserSearchAction.set(\.$query.username, $0.isEmpty ? nil : $0) }
+              send: { UserSearchComponent.Action.set(\.$query.username, $0.isEmpty ? nil : $0) }
             ),
             prompt: Text("Enter username"),
             label: { Text("Username") }
@@ -45,7 +45,7 @@ public struct UserSearchView: View {
           TextField(
             text: viewStore.binding(
               get: { $0.query.email ?? "" },
-              send: { UserSearchAction.set(\.$query.email, $0.isEmpty ? nil : $0) }
+              send: { UserSearchComponent.Action.set(\.$query.email, $0.isEmpty ? nil : $0) }
             ),
             prompt: Text("Enter email"),
             label: { Text("Email") }
@@ -55,7 +55,7 @@ public struct UserSearchView: View {
           TextField(
             text: viewStore.binding(
               get: { $0.query.phone ?? "" },
-              send: { UserSearchAction.set(\.$query.phone, $0.isEmpty ? nil : $0) }
+              send: { UserSearchComponent.Action.set(\.$query.phone, $0.isEmpty ? nil : $0) }
             ),
             prompt: Text("Enter phone"),
             label: { Text("Phone") }
@@ -124,7 +124,7 @@ public struct UserSearchView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.contact,
-          action: UserSearchAction.contact
+          action: UserSearchComponent.Action.contact
         ),
         onDeactivate: { viewStore.send(.didDismissContact) },
         destination: ContactView.init(store:)
@@ -137,9 +137,8 @@ public struct UserSearchView: View {
 public struct UserSearchView_Previews: PreviewProvider {
   public static var previews: some View {
     UserSearchView(store: Store(
-      initialState: UserSearchState(),
-      reducer: .empty,
-      environment: ()
+      initialState: UserSearchComponent.State(),
+      reducer: EmptyReducer()
     ))
   }
 }
