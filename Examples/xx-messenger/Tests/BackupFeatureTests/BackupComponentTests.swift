@@ -14,19 +14,18 @@ final class BackupFeatureTests: XCTestCase {
     )
 
     let store = TestStore(
-      initialState: BackupState(),
-      reducer: backupReducer,
-      environment: .unimplemented
+      initialState: BackupComponent.State(),
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
-    store.environment.backupStorage.stored = {
+    store.dependencies.app.backupStorage.stored = {
       storedBackup
     }
-    store.environment.backupStorage.observe = {
+    store.dependencies.app.backupStorage.observe = {
       let id = UUID()
       observers[id] = $0
       return Cancellable { observers[id] = nil }
@@ -68,22 +67,21 @@ final class BackupFeatureTests: XCTestCase {
     let passphrase = "backup-password"
 
     let store = TestStore(
-      initialState: BackupState(),
-      reducer: backupReducer,
-      environment: .unimplemented
+      initialState: BackupComponent.State(),
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.myContact.run = { includeFacts in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.myContact.run = { includeFacts in
       actions.append(.didGetMyContact(includingFacts: includeFacts))
       var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
       contact.getFactsFromContact.run = { _ in [Fact(type: .username, value: username)] }
       return contact
     }
-    store.environment.messenger.startBackup.run = { passphrase, params in
+    store.dependencies.app.messenger.startBackup.run = { passphrase, params in
       actions.append(.didStartBackup(passphrase: passphrase, params: params))
     }
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
 
@@ -124,20 +122,19 @@ final class BackupFeatureTests: XCTestCase {
     var isBackupRunning: [Bool] = [false]
 
     let store = TestStore(
-      initialState: BackupState(
+      initialState: BackupComponent.State(
         passphrase: "1234"
       ),
-      reducer: backupReducer,
-      environment: .unimplemented
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.myContact.run = { _ in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.myContact.run = { _ in
       var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
       contact.getFactsFromContact.run = { _ in [] }
       return contact
     }
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
 
@@ -145,7 +142,7 @@ final class BackupFeatureTests: XCTestCase {
       $0.isStarting = true
     }
 
-    let failure = BackupState.Error.contactUsernameMissing
+    let failure = BackupComponent.State.Error.contactUsernameMissing
     store.receive(.didStart(failure: failure as NSError)) {
       $0.isRunning = false
       $0.isStarting = false
@@ -159,16 +156,15 @@ final class BackupFeatureTests: XCTestCase {
     var isBackupRunning: [Bool] = [false]
 
     let store = TestStore(
-      initialState: BackupState(
+      initialState: BackupComponent.State(
         passphrase: "1234"
       ),
-      reducer: backupReducer,
-      environment: .unimplemented
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.myContact.run = { _ in throw failure }
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.myContact.run = { _ in throw failure }
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
 
@@ -189,23 +185,22 @@ final class BackupFeatureTests: XCTestCase {
     var isBackupRunning: [Bool] = [false]
 
     let store = TestStore(
-      initialState: BackupState(
+      initialState: BackupComponent.State(
         passphrase: "1234"
       ),
-      reducer: backupReducer,
-      environment: .unimplemented
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.myContact.run = { _ in
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.myContact.run = { _ in
       var contact = Contact.unimplemented("data".data(using: .utf8)!)
       contact.getFactsFromContact.run = { _ in [Fact(type: .username, value: "username")] }
       return contact
     }
-    store.environment.messenger.startBackup.run = { _, _ in
+    store.dependencies.app.messenger.startBackup.run = { _, _ in
       throw failure
     }
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
 
@@ -225,16 +220,15 @@ final class BackupFeatureTests: XCTestCase {
     var isBackupRunning: [Bool] = [true]
 
     let store = TestStore(
-      initialState: BackupState(),
-      reducer: backupReducer,
-      environment: .unimplemented
+      initialState: BackupComponent.State(),
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.resumeBackup.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.resumeBackup.run = {
       actions.append(.didResumeBackup)
     }
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
 
@@ -260,16 +254,15 @@ final class BackupFeatureTests: XCTestCase {
     var isBackupRunning: [Bool] = [false]
 
     let store = TestStore(
-      initialState: BackupState(),
-      reducer: backupReducer,
-      environment: .unimplemented
+      initialState: BackupComponent.State(),
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.resumeBackup.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.resumeBackup.run = {
       throw failure
     }
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
 
@@ -289,19 +282,18 @@ final class BackupFeatureTests: XCTestCase {
     var isBackupRunning: [Bool] = [false]
 
     let store = TestStore(
-      initialState: BackupState(),
-      reducer: backupReducer,
-      environment: .unimplemented
+      initialState: BackupComponent.State(),
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.stopBackup.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.stopBackup.run = {
       actions.append(.didStopBackup)
     }
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
-    store.environment.backupStorage.remove = {
+    store.dependencies.app.backupStorage.remove = {
       actions.append(.didRemoveBackup)
     }
 
@@ -330,16 +322,15 @@ final class BackupFeatureTests: XCTestCase {
     var isBackupRunning: [Bool] = [true]
 
     let store = TestStore(
-      initialState: BackupState(),
-      reducer: backupReducer,
-      environment: .unimplemented
+      initialState: BackupComponent.State(),
+      reducer: BackupComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.stopBackup.run = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.stopBackup.run = {
       throw failure
     }
-    store.environment.messenger.isBackupRunning.run = {
+    store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
 
@@ -356,11 +347,10 @@ final class BackupFeatureTests: XCTestCase {
 
   func testAlertDismissed() {
     let store = TestStore(
-      initialState: BackupState(
+      initialState: BackupComponent.State(
         alert: .error(NSError(domain: "test", code: 0))
       ),
-      reducer: backupReducer,
-      environment: .unimplemented
+      reducer: BackupComponent()
     )
 
     store.send(.alertDismissed) {
@@ -372,14 +362,13 @@ final class BackupFeatureTests: XCTestCase {
     let backupData = "backup-data".data(using: .utf8)!
 
     let store = TestStore(
-      initialState: BackupState(
+      initialState: BackupComponent.State(
         backup: .init(
           date: Date(),
           data: backupData
         )
       ),
-      reducer: backupReducer,
-      environment: .unimplemented
+      reducer: BackupComponent()
     )
 
     store.send(.exportTapped) {
