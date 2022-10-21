@@ -3,14 +3,14 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct ResetAuthView: View {
-  public init(store: Store<ResetAuthState, ResetAuthAction>) {
+  public init(store: StoreOf<ResetAuthComponent>) {
     self.store = store
   }
 
-  let store: Store<ResetAuthState, ResetAuthAction>
+  let store: StoreOf<ResetAuthComponent>
 
   struct ViewState: Equatable {
-    init(state: ResetAuthState) {
+    init(state: ResetAuthComponent.State) {
       contactID = try? state.partner.getId()
       isResetting = state.isResetting
       failure = state.failure
@@ -68,11 +68,10 @@ public struct ResetAuthView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       ResetAuthView(store: Store(
-        initialState: ResetAuthState(
+        initialState: ResetAuthComponent.State(
           partner: .unimplemented(Data())
         ),
-        reducer: .empty,
-        environment: ()
+        reducer: EmptyReducer()
       ))
     }
   }

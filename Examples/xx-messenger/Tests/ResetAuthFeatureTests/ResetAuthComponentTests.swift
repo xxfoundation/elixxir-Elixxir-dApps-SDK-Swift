@@ -4,7 +4,7 @@ import XCTest
 import XXClient
 @testable import ResetAuthFeature
 
-final class ResetAuthFeatureTests: XCTestCase {
+final class ResetAuthComponentTests: XCTestCase {
   func testReset() {
     let partnerData = "contact-data".data(using: .utf8)!
     let partner = Contact.unimplemented(partnerData)
@@ -12,15 +12,14 @@ final class ResetAuthFeatureTests: XCTestCase {
     var didResetAuthChannel: [Contact] = []
 
     let store = TestStore(
-      initialState: ResetAuthState(
+      initialState: ResetAuthComponent.State(
         partner: partner
       ),
-      reducer: resetAuthReducer,
-      environment: .unimplemented
+      reducer: ResetAuthComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.resetAuthenticatedChannel.run = { contact in
         didResetAuthChannel.append(contact)
@@ -46,15 +45,14 @@ final class ResetAuthFeatureTests: XCTestCase {
     let failure = Failure()
 
     let store = TestStore(
-      initialState: ResetAuthState(
+      initialState: ResetAuthComponent.State(
         partner: .unimplemented(Data())
       ),
-      reducer: resetAuthReducer,
-      environment: .unimplemented
+      reducer: ResetAuthComponent()
     )
-    store.environment.mainQueue = .immediate
-    store.environment.bgQueue = .immediate
-    store.environment.messenger.e2e.get = {
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
       var e2e: E2E = .unimplemented
       e2e.resetAuthenticatedChannel.run = { _ in throw failure }
       return e2e
