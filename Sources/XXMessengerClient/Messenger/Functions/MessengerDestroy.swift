@@ -19,6 +19,8 @@ extension MessengerDestroy {
           env.sleep(1)
         }
       }
+      env.fileTransfer.set(nil)
+      env.backup.set(nil)
       env.ud.set(nil)
       env.e2e.set(nil)
       env.cMix.set(nil)
