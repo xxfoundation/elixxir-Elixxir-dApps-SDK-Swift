@@ -9,11 +9,11 @@ import UserSearchFeature
 import XXClient
 
 public struct HomeView: View {
-  public init(store: Store<HomeState, HomeAction>) {
+  public init(store: StoreOf<HomeComponent>) {
     self.store = store
   }
 
-  let store: Store<HomeState, HomeAction>
+  let store: StoreOf<HomeComponent>
 
   struct ViewState: Equatable {
     var failure: String?
@@ -21,7 +21,7 @@ public struct HomeView: View {
     var networkNodesReport: NodeRegistrationReport?
     var isDeletingAccount: Bool
 
-    init(state: HomeState) {
+    init(state: HomeComponent.State) {
       failure = state.failure
       isNetworkHealthy = state.isNetworkHealthy
       isDeletingAccount = state.isDeletingAccount
@@ -148,12 +148,12 @@ public struct HomeView: View {
         .navigationTitle("Home")
         .alert(
           store.scope(state: \.alert),
-          dismiss: HomeAction.didDismissAlert
+          dismiss: HomeComponent.Action.didDismissAlert
         )
         .background(NavigationLinkWithStore(
           store.scope(
             state: \.contacts,
-            action: HomeAction.contacts
+            action: HomeComponent.Action.contacts
           ),
           onDeactivate: {
             viewStore.send(.didDismissContacts)
@@ -163,7 +163,7 @@ public struct HomeView: View {
         .background(NavigationLinkWithStore(
           store.scope(
             state: \.userSearch,
-            action: HomeAction.userSearch
+            action: HomeComponent.Action.userSearch
           ),
           onDeactivate: {
             viewStore.send(.didDismissUserSearch)
@@ -173,7 +173,7 @@ public struct HomeView: View {
         .background(NavigationLinkWithStore(
           store.scope(
             state: \.backup,
-            action: HomeAction.backup
+            action: HomeComponent.Action.backup
           ),
           onDeactivate: {
             viewStore.send(.didDismissBackup)
@@ -186,7 +186,7 @@ public struct HomeView: View {
       .fullScreenCover(
         store.scope(
           state: \.register,
-          action: HomeAction.register
+          action: HomeComponent.Action.register
         ),
         onDismiss: {
           viewStore.send(.didDismissRegister)
@@ -201,9 +201,8 @@ public struct HomeView: View {
 public struct HomeView_Previews: PreviewProvider {
   public static var previews: some View {
     HomeView(store: Store(
-      initialState: HomeState(),
-      reducer: .empty,
-      environment: ()
+      initialState: HomeComponent.State(),
+      reducer: EmptyReducer()
     ))
   }
 }

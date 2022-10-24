@@ -3,12 +3,12 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 public struct BackupView: View {
-  public init(store: Store<BackupState, BackupAction>) {
+  public init(store: StoreOf<BackupComponent>) {
     self.store = store
   }
 
-  let store: Store<BackupState, BackupAction>
-  @FocusState var focusedField: BackupState.Field?
+  let store: StoreOf<BackupComponent>
+  @FocusState var focusedField: BackupComponent.State.Field?
 
   struct ViewState: Equatable {
     struct Backup: Equatable {
@@ -16,7 +16,7 @@ public struct BackupView: View {
       var size: Int
     }
 
-    init(state: BackupState) {
+    init(state: BackupComponent.State) {
       isRunning = state.isRunning
       isStarting = state.isStarting
       isResuming = state.isResuming
@@ -36,7 +36,7 @@ public struct BackupView: View {
     var isStopping: Bool
     var isLoading: Bool { isStarting || isResuming || isStopping }
     var backup: Backup?
-    var focusedField: BackupState.Field?
+    var focusedField: BackupComponent.State.Field?
     var passphrase: String
     var isExporting: Bool
     var exportData: Data?
@@ -67,7 +67,7 @@ public struct BackupView: View {
   }
 
   @ViewBuilder func newBackupSection(
-    _ viewStore: ViewStore<ViewState, BackupAction>
+    _ viewStore: ViewStore<ViewState, BackupComponent.Action>
   ) -> some View {
     Section {
       SecureField(
@@ -103,7 +103,7 @@ public struct BackupView: View {
   }
 
   @ViewBuilder func backupSection(
-    _ viewStore: ViewStore<ViewState, BackupAction>
+    _ viewStore: ViewStore<ViewState, BackupComponent.Action>
   ) -> some View {
     Section {
       backupView(viewStore)
@@ -115,7 +115,7 @@ public struct BackupView: View {
   }
 
   @ViewBuilder func backupView(
-    _ viewStore: ViewStore<ViewState, BackupAction>
+    _ viewStore: ViewStore<ViewState, BackupComponent.Action>
   ) -> some View {
     if let backup = viewStore.backup {
       HStack {
@@ -165,7 +165,7 @@ public struct BackupView: View {
   }
 
   @ViewBuilder func stopView(
-    _ viewStore: ViewStore<ViewState, BackupAction>
+    _ viewStore: ViewStore<ViewState, BackupComponent.Action>
   ) -> some View {
     if viewStore.isRunning {
       Button {
@@ -185,7 +185,7 @@ public struct BackupView: View {
   }
 
   @ViewBuilder func resumeView(
-    _ viewStore: ViewStore<ViewState, BackupAction>
+    _ viewStore: ViewStore<ViewState, BackupComponent.Action>
   ) -> some View {
     if !viewStore.isRunning, viewStore.backup != nil {
       Button {
@@ -240,9 +240,8 @@ public struct BackupView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       BackupView(store: Store(
-        initialState: BackupState(),
-        reducer: .empty,
-        environment: ()
+        initialState: BackupComponent.State(),
+        reducer: EmptyReducer()
       ))
     }
   }

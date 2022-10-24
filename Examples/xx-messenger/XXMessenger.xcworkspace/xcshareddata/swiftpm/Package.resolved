@@ -23,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/groue/GRDB.swift",
       "state" : {
-        "revision" : "0ac435744a4c67c4ec23a4a671c0d53ce1fee7c6",
-        "version" : "6.0.0"
+        "revision" : "13e1f4d7c2896a6a9293102f664e5311e017ffb2",
+        "version" : "6.1.0"
       }
     },
     {
@@ -68,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-composable-architecture.git",
       "state" : {
-        "revision" : "5c476994eaa79af8e466041f6de1ab116f37c528",
-        "version" : "0.42.0"
+        "revision" : "5bd450a8ac6a802f82d485bac219cbfacffa69fb",
+        "version" : "0.43.0"
       }
     },
     {
@@ -77,8 +77,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/darrarski/swift-composable-presentation.git",
       "state" : {
-        "revision" : "bdb7df9476cf29e8379fc50aa03848dd6c8033d9",
-        "version" : "0.5.3"
+        "revision" : "f69eb0c9a82832f67dfd5dace98e6d0e8d748b0f",
+        "version" : "0.6.0"
       }
     },
     {
@@ -113,8 +113,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
       "state" : {
-        "revision" : "30314f1ece684dd60679d598a9b89107557b67d9",
-        "version" : "0.4.1"
+        "revision" : "16e6409ee82e1b81390bdffbf217b9c08ab32784",
+        "version" : "0.5.0"
       }
     }
   ],

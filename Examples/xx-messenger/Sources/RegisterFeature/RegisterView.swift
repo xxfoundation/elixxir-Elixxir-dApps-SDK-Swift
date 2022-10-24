@@ -2,22 +2,22 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct RegisterView: View {
-  public init(store: Store<RegisterState, RegisterAction>) {
+  public init(store: StoreOf<RegisterComponent>) {
     self.store = store
   }
 
-  let store: Store<RegisterState, RegisterAction>
-  @FocusState var focusedField: RegisterState.Field?
+  let store: StoreOf<RegisterComponent>
+  @FocusState var focusedField: RegisterComponent.State.Field?
 
   struct ViewState: Equatable {
-    init(_ state: RegisterState) {
+    init(_ state: RegisterComponent.State) {
       focusedField = state.focusedField
       username = state.username
       isRegistering = state.isRegistering
       failure = state.failure
     }
 
-    var focusedField: RegisterState.Field?
+    var focusedField: RegisterComponent.State.Field?
     var username: String
     var isRegistering: Bool
     var failure: String?
@@ -31,7 +31,7 @@ public struct RegisterView: View {
             TextField(
               text: viewStore.binding(
                 get: \.username,
-                send: { RegisterAction.set(\.$username, $0) }
+                send: { RegisterComponent.Action.set(\.$username, $0) }
               ),
               prompt: Text("Enter username"),
               label: { Text("Username") }
@@ -78,9 +78,8 @@ public struct RegisterView: View {
 public struct RegisterView_Previews: PreviewProvider {
   public static var previews: some View {
     RegisterView(store: Store(
-      initialState: RegisterState(),
-      reducer: .empty,
-      environment: ()
+      initialState: RegisterComponent.State(),
+      reducer: EmptyReducer()
     ))
   }
 }

@@ -3,20 +3,20 @@ import SwiftUI
 import XXClient
 
 public struct CheckContactAuthView: View {
-  public init(store: Store<CheckContactAuthState, CheckContactAuthAction>) {
+  public init(store: StoreOf<CheckContactAuthComponent>) {
     self.store = store
   }
 
-  let store: Store<CheckContactAuthState, CheckContactAuthAction>
+  let store: StoreOf<CheckContactAuthComponent>
 
   struct ViewState: Equatable {
     var username: String?
     var email: String?
     var phone: String?
     var isChecking: Bool
-    var result: CheckContactAuthState.Result?
+    var result: CheckContactAuthComponent.State.Result?
 
-    init(state: CheckContactAuthState) {
+    init(state: CheckContactAuthComponent.State) {
       username = try? state.contact.getFact(.username)?.value
       email = try? state.contact.getFact(.email)?.value
       phone = try? state.contact.getFact(.phone)?.value
@@ -90,11 +90,10 @@ public struct CheckContactAuthView: View {
 public struct CheckContactAuthView_Previews: PreviewProvider {
   public static var previews: some View {
     CheckContactAuthView(store: Store(
-      initialState: CheckContactAuthState(
+      initialState: CheckContactAuthComponent.State(
         contact: .unimplemented("contact-data".data(using: .utf8)!)
       ),
-      reducer: .empty,
-      environment: ()
+      reducer: EmptyReducer()
     ))
   }
 }

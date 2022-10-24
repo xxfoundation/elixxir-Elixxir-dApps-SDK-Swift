@@ -3,21 +3,21 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct ChatView: View {
-  public init(store: Store<ChatState, ChatAction>) {
+  public init(store: StoreOf<ChatComponent>) {
     self.store = store
   }
 
-  let store: Store<ChatState, ChatAction>
+  let store: StoreOf<ChatComponent>
   @State var isPresentingImagePicker = false
 
   struct ViewState: Equatable {
     var myContactId: Data?
-    var messages: IdentifiedArrayOf<ChatState.Message>
+    var messages: IdentifiedArrayOf<ChatComponent.State.Message>
     var failure: String?
     var sendFailure: String?
     var text: String
 
-    init(state: ChatState) {
+    init(state: ChatComponent.State) {
       myContactId = state.myContactId
       messages = state.messages
       failure = state.failure
@@ -84,7 +84,7 @@ public struct ChatView: View {
           HStack {
             TextField("Text", text: viewStore.binding(
               get: \.text,
-              send: { ChatAction.set(\.$text, $0) }
+              send: { ChatComponent.Action.set(\.$text, $0) }
             ))
             .textFieldStyle(.roundedBorder)
 
@@ -122,7 +122,7 @@ public struct ChatView: View {
   }
 
   struct MessageView: View {
-    var message: ChatState.Message
+    var message: ChatComponent.State.Message
     var myContactId: Data?
 
     var alignment: Alignment {
@@ -199,7 +199,7 @@ public struct ChatView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       ChatView(store: Store(
-        initialState: ChatState(
+        initialState: ChatComponent.State(
           id: .contact("contact-id".data(using: .utf8)!),
           myContactId: "my-contact-id".data(using: .utf8)!,
           messages: [
@@ -262,8 +262,7 @@ public struct ChatView_Previews: PreviewProvider {
           failure: "Something went wrong when fetching messages from database.",
           sendFailure: "Something went wrong when sending message."
         ),
-        reducer: .empty,
-        environment: ()
+        reducer: EmptyReducer()
       ))
     }
   }

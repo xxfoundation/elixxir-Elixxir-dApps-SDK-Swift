@@ -3,14 +3,14 @@ import ComposableArchitecture
 import SwiftUI
 
 public struct WelcomeView: View {
-  public init(store: Store<WelcomeState, WelcomeAction>) {
+  public init(store: StoreOf<WelcomeComponent>) {
     self.store = store
   }
 
-  let store: Store<WelcomeState, WelcomeAction>
+  let store: StoreOf<WelcomeComponent>
 
   struct ViewState: Equatable {
-    init(_ state: WelcomeState) {
+    init(_ state: WelcomeComponent.State) {
       isCreatingAccount = state.isCreatingAccount
       failure = state.failure
     }
@@ -69,9 +69,8 @@ public struct WelcomeView: View {
 public struct WelcomeView_Previews: PreviewProvider {
   public static var previews: some View {
     WelcomeView(store: Store(
-      initialState: WelcomeState(),
-      reducer: .empty,
-      environment: ()
+      initialState: WelcomeComponent.State(),
+      reducer: EmptyReducer()
     ))
   }
 }

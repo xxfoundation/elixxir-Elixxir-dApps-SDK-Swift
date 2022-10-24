@@ -7,17 +7,17 @@ import SwiftUI
 import XXModels
 
 public struct ContactsView: View {
-  public init(store: Store<ContactsState, ContactsAction>) {
+  public init(store: StoreOf<ContactsComponent>) {
     self.store = store
   }
 
-  let store: Store<ContactsState, ContactsAction>
+  let store: StoreOf<ContactsComponent>
 
   struct ViewState: Equatable {
     var myId: Data?
     var contacts: IdentifiedArrayOf<XXModels.Contact>
 
-    init(state: ContactsState) {
+    init(state: ContactsComponent.State) {
       myId = state.myId
       contacts = state.contacts
     }
@@ -74,7 +74,7 @@ public struct ContactsView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.contact,
-          action: ContactsAction.contact
+          action: ContactsComponent.Action.contact
         ),
         onDeactivate: { viewStore.send(.contactDismissed) },
         destination: ContactView.init(store:)
@@ -82,7 +82,7 @@ public struct ContactsView: View {
       .background(NavigationLinkWithStore(
         store.scope(
           state: \.myContact,
-          action: ContactsAction.myContact
+          action: ContactsComponent.Action.myContact
         ),
         onDeactivate: { viewStore.send(.myContactDismissed) },
         destination: MyContactView.init(store:)
@@ -96,7 +96,7 @@ public struct ContactsView_Previews: PreviewProvider {
   public static var previews: some View {
     NavigationView {
       ContactsView(store: Store(
-        initialState: ContactsState(
+        initialState: ContactsComponent.State(
           contacts: [
             .init(
               id: "1".data(using: .utf8)!,
@@ -115,8 +115,7 @@ public struct ContactsView_Previews: PreviewProvider {
             ),
           ]
         ),
-        reducer: .empty,
-        environment: ()
+        reducer: EmptyReducer()
       ))
     }
   }
