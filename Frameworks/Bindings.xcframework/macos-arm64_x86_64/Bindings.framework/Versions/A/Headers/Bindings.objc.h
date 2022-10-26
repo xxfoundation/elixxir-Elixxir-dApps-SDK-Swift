@@ -14,10 +14,11 @@
 @class BindingsAuthenticatedConnection;
 @class BindingsBackup;
 @class BindingsBackupReport;
-@class BindingsBroadcastMessage;
-@class BindingsBroadcastReport;
-@class BindingsChannel;
-@class BindingsChannelDef;
+@class BindingsChannelDbCipher;
+@class BindingsChannelGeneration;
+@class BindingsChannelInfo;
+@class BindingsChannelSendReport;
+@class BindingsChannelsManager;
 @class BindingsCmix;
 @class BindingsConnection;
 @class BindingsDummyTraffic;
@@ -36,20 +37,26 @@
 @class BindingsNodeRegistrationReport;
 @class BindingsNotificationReport;
 @class BindingsProgress;
+@class BindingsReceivedChannelMessageReport;
 @class BindingsReceivedFile;
 @class BindingsReceptionIdentity;
 @class BindingsRestlikeMessage;
 @class BindingsRoundsList;
+@class BindingsShareURL;
 @class BindingsSingleUseCallbackReport;
 @class BindingsSingleUseResponseReport;
 @class BindingsSingleUseSendReport;
 @class BindingsUserDiscovery;
 @protocol BindingsAuthCallbacks;
 @class BindingsAuthCallbacks;
-@protocol BindingsBroadcastListener;
-@class BindingsBroadcastListener;
+@protocol BindingsChannelMessageReceptionCallback;
+@class BindingsChannelMessageReceptionCallback;
 @protocol BindingsClientError;
 @class BindingsClientError;
+@protocol BindingsEventModel;
+@class BindingsEventModel;
+@protocol BindingsEventModelBuilder;
+@class BindingsEventModelBuilder;
 @protocol BindingsFileTransferReceiveProgressCallback;
 @class BindingsFileTransferReceiveProgressCallback;
 @protocol BindingsFileTransferSentProgressCallback;
@@ -99,12 +106,147 @@
 - (void)reset:(NSData* _Nullable)contact receptionId:(NSData* _Nullable)receptionId ephemeralId:(int64_t)ephemeralId roundId:(int64_t)roundId;
 @end
 
-@protocol BindingsBroadcastListener <NSObject>
-- (void)callback:(NSData* _Nullable)p0 p1:(NSError* _Nullable)p1;
+@protocol BindingsChannelMessageReceptionCallback <NSObject>
+- (long)callback:(NSData* _Nullable)receivedChannelMessageReport err:(NSError* _Nullable)err;
 @end
 
 @protocol BindingsClientError <NSObject>
 - (void)report:(NSString* _Nullable)source message:(NSString* _Nullable)message trace:(NSString* _Nullable)trace;
+@end
+
+@protocol BindingsEventModel <NSObject>
+/**
+ * JoinChannel is called whenever a channel is joined locally.
+
+Parameters:
+ - channel - Returns the pretty print representation of a channel.
+ */
+- (void)joinChannel:(NSString* _Nullable)channel;
+/**
+ * LeaveChannel is called whenever a channel is left locally.
+
+Parameters:
+ - ChannelId - The marshalled channel [id.ID].
+ */
+- (void)leaveChannel:(NSData* _Nullable)channelID;
+/**
+ * ReceiveMessage is called whenever a message is received on a given
+channel. It may be called multiple times on the same message. It is
+incumbent on the user of the API to filter such called by message ID.
+
+Parameters:
+ - channelID - The marshalled channel [id.ID].
+ - messageID - The bytes of the [channel.MessageID] of the received
+   message.
+ - nickname - The nickname of the sender of the message.
+ - text - The content of the message.
+ - timestamp - Time the message was received; represented as nanoseconds
+   since unix epoch.
+ - pubKey - The sender's Ed25519 public key.
+ - codeset - The codeset version.
+ - lease - The number of nanoseconds that the message is valid for.
+ - roundId - The ID of the round that the message was received on.
+ - mType - the type of the message, always 1 for this call
+ - status - the [channels.SentStatus] of the message.
+
+Statuses will be enumerated as such:
+ Sent      =  0
+ Delivered =  1
+ Failed    =  2
+
+Returns a non-negative unique UUID for the message that it can be
+referenced by later with [EventModel.UpdateSentStatus].
+ */
+- (int64_t)receiveMessage:(NSData* _Nullable)channelID messageID:(NSData* _Nullable)messageID nickname:(NSString* _Nullable)nickname text:(NSString* _Nullable)text pubKey:(NSData* _Nullable)pubKey codeset:(long)codeset timestamp:(int64_t)timestamp lease:(int64_t)lease roundId:(int64_t)roundId mType:(int64_t)mType status:(int64_t)status;
+/**
+ * ReceiveReaction is called whenever a reaction to a message is received
+on a given channel. It may be called multiple times on the same reaction.
+It is incumbent on the user of the API to filter such called by message
+ID.
+
+Messages may arrive our of order, so a reply in theory can arrive before
+the initial message. As a result, it may be important to buffer
+reactions.
+
+Parameters:
+ - channelID - The marshalled channel [id.ID].
+ - messageID - The bytes of the [channel.MessageID] of the received
+   message.
+ - reactionTo - The [channel.MessageID] for the message that received a
+   reply.
+ - nickname - The nickname of the sender of the message.
+ - reaction - The contents of the reaction message.
+ - pubKey - The sender's Ed25519 public key.
+ - codeset - The codeset version.
+ - timestamp - Time the message was received; represented as nanoseconds
+   since unix epoch.
+ - lease - The number of nanoseconds that the message is valid for.
+ - roundId - The ID of the round that the message was received on.
+ - mType - the type of the message, always 1 for this call
+ - status - the [channels.SentStatus] of the message.
+
+Statuses will be enumerated as such:
+ Sent      =  0
+ Delivered =  1
+ Failed    =  2
+
+Returns a non-negative unique uuid for the message by which it can be
+referenced later with UpdateSentStatus
+ */
+- (int64_t)receiveReaction:(NSData* _Nullable)channelID messageID:(NSData* _Nullable)messageID reactionTo:(NSData* _Nullable)reactionTo nickname:(NSString* _Nullable)nickname reaction:(NSString* _Nullable)reaction pubKey:(NSData* _Nullable)pubKey codeset:(long)codeset timestamp:(int64_t)timestamp lease:(int64_t)lease roundId:(int64_t)roundId mType:(int64_t)mType status:(int64_t)status;
+/**
+ * ReceiveReply is called whenever a message is received that is a reply on
+a given channel. It may be called multiple times on the same message. It
+is incumbent on the user of the API to filter such called by message ID.
+
+Messages may arrive our of order, so a reply in theory can arrive before
+the initial message. As a result, it may be important to buffer replies.
+
+Parameters:
+ - channelID - The marshalled channel [id.ID].
+ - messageID - The bytes of the [channel.MessageID] of the received
+   message.
+ - reactionTo - The [channel.MessageID] for the message that received a
+   reply.
+ - nickname - The nickname of the sender of the message.
+ - text - The content of the message.
+ - pubKey - The sender's Ed25519 public key.
+ - codeset - The codeset version.
+ - timestamp - Time the message was received; represented as nanoseconds
+   since unix epoch.
+ - lease - The number of nanoseconds that the message is valid for.
+ - roundId - The ID of the round that the message was received on.
+ - mType - the type of the message, always 1 for this call
+ - status - the [channels.SentStatus] of the message.
+
+Statuses will be enumerated as such:
+ Sent      =  0
+ Delivered =  1
+ Failed    =  2
+
+Returns a non-negative unique UUID for the message that it can be
+referenced by later with [EventModel.UpdateSentStatus].
+ */
+- (int64_t)receiveReply:(NSData* _Nullable)channelID messageID:(NSData* _Nullable)messageID reactionTo:(NSData* _Nullable)reactionTo nickname:(NSString* _Nullable)nickname text:(NSString* _Nullable)text pubKey:(NSData* _Nullable)pubKey codeset:(long)codeset timestamp:(int64_t)timestamp lease:(int64_t)lease roundId:(int64_t)roundId mType:(int64_t)mType status:(int64_t)status;
+/**
+ * UpdateSentStatus is called whenever the sent status of a message has
+changed.
+
+Parameters:
+ - messageID - The bytes of the [channel.MessageID] of the received
+   message.
+ - status - the [channels.SentStatus] of the message.
+
+Statuses will be enumerated as such:
+ Sent      =  0
+ Delivered =  1
+ Failed    =  2
+ */
+- (void)updateSentStatus:(int64_t)uuid messageID:(NSData* _Nullable)messageID timestamp:(int64_t)timestamp roundID:(int64_t)roundID status:(int64_t)status;
+@end
+
+@protocol BindingsEventModelBuilder <NSObject>
+- (id<BindingsEventModel> _Nullable)build:(NSString* _Nullable)path;
 @end
 
 @protocol BindingsFileTransferReceiveProgressCallback <NSObject>
@@ -303,126 +445,71 @@ Example BackupReport:
 @end
 
 /**
- * BroadcastMessage is the bindings representation of a broadcast message.
-
-BroadcastMessage Example JSON:
- {
-	 "RoundID":42,
-  "EphID":[0,0,0,0,0,0,24,61],
-  "RoundURL":"https://dashboard.xx.network/rounds/25?xxmessenger=true",
-  "Payload":"SGVsbG8sIGJyb2FkY2FzdCBmcmllbmRzIQ=="
- }
+ * ChannelDbCipher is the bindings layer representation of the [channel.Cipher].
  */
-@interface BindingsBroadcastMessage : NSObject <goSeqRefInterface> {
-}
-@property(strong, readonly) _Nonnull id _ref;
-
-- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (nonnull instancetype)init;
-// skipped field BroadcastMessage.BroadcastReport with unsupported type: gitlab.com/elixxir/client/bindings.BroadcastReport
-
-@property (nonatomic) NSData* _Nullable payload;
-- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
-@end
-
-/**
- * BroadcastReport is the bindings representation of the info on how a broadcast
-message was sent
-
-BroadcastReport Example JSON:
- {
-	 "Rounds": [25, 26, 29],
-  "EphID":[0,0,0,0,0,0,24,61],
-  "RoundURL":"https://dashboard.xx.network/rounds/25?xxmessenger=true"
- }
- */
-@interface BindingsBroadcastReport : NSObject <goSeqRefInterface> {
-}
-@property(strong, readonly) _Nonnull id _ref;
-
-- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (nonnull instancetype)init;
-// skipped field BroadcastReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
-
-@property (nonatomic) NSString* _Nonnull roundURL;
-// skipped field BroadcastReport.EphID with unsupported type: gitlab.com/xx_network/primitives/id/ephemeral.Id
-
-- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
-@end
-
-/**
- * Channel is a bindings-level struct encapsulating the broadcast.Channel client
-object.
- */
-@interface BindingsChannel : NSObject <goSeqRefInterface, BindingsStopper> {
+@interface BindingsChannelDbCipher : NSObject <goSeqRefInterface> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
 /**
- * Broadcast sends a given payload over the broadcast channel using symmetric
-broadcast.
-
-Returns:
- - []byte - the JSON marshalled bytes of the BroadcastReport object, which
-   can be passed into Cmix.WaitForRoundResult to see if the broadcast
-   succeeded.
- */
-- (NSData* _Nullable)broadcast:(NSData* _Nullable)payload error:(NSError* _Nullable* _Nullable)error;
-/**
- * BroadcastAsymmetric sends a given payload over the broadcast channel using
-asymmetric broadcast. This mode of encryption requires a private key.
-
-Returns:
- - []byte - the JSON marshalled bytes of the BroadcastReport object, which
-   can be passed into WaitForRoundResult to see if the broadcast succeeded.
- */
-- (NSData* _Nullable)broadcastAsymmetric:(NSData* _Nullable)payload pk:(NSData* _Nullable)pk error:(NSError* _Nullable* _Nullable)error;
-/**
- * Get returns the result of calling json.Marshal on a ChannelDef based on the
-underlying crypto broadcast.Channel.
- */
-- (NSData* _Nullable)get:(NSError* _Nullable* _Nullable)error;
-/**
- * Listen registers a BroadcastListener for a given method. This allows users to
-handle incoming broadcast messages.
+ * Decrypt will decrypt the passed in encrypted value. The plaintext will
+be returned by this function. Any padding will be discarded within
+this function.
 
 Parameters:
- - l - BroadcastListener object
- - method - int corresponding to broadcast.Method constant, 0 for symmetric
-   or 1 for asymmetric
+ - ciphertext - the encrypted data returned by [ChannelDbCipher.Encrypt].
  */
-- (BOOL)listen:(id<BindingsBroadcastListener> _Nullable)l method:(long)method error:(NSError* _Nullable* _Nullable)error;
+- (NSData* _Nullable)decrypt:(NSData* _Nullable)ciphertext error:(NSError* _Nullable* _Nullable)error;
 /**
- * MaxAsymmetricPayloadSize returns the maximum possible payload size which can
-be broadcast.
+ * Encrypt will encrypt the raw data. It will return a ciphertext. Padding is
+done on the plaintext so all encrypted data looks uniform at rest.
+
+Parameters:
+ - plaintext - The data to be encrypted. This must be smaller than the block
+   size passed into [NewChannelsDatabaseCipher]. If it is larger, this will
+   return an error.
  */
-- (long)maxAsymmetricPayloadSize;
+- (NSData* _Nullable)encrypt:(NSData* _Nullable)plaintext error:(NSError* _Nullable* _Nullable)error;
 /**
- * MaxPayloadSize returns the maximum possible payload size which can be
-broadcast.
+ * GetID returns the ID for this ChannelDbCipher in the channelDbCipherTracker.
  */
-- (long)maxPayloadSize;
-/**
- * Stop stops the channel from listening for more messages.
- */
-- (void)stop;
+- (long)getID;
 @end
 
 /**
- * ChannelDef is the bindings representation of an elixxir/crypto
-broadcast.Channel object.
+ * ChannelGeneration contains information about a newly generated channel. It
+contains the public channel info formatted in pretty print and the private
+key for the channel in PEM format.
 
 Example JSON:
  {
-   "Name": "My broadcast channel",
-   "Description": "A broadcast channel for me to test things",
-   "Salt": "gpUqW7N22sffMXsvPLE7BA==",
-   "PubKey": "LS0tLS1CRUdJTiBSU0EgUFVCTElDIEtFWS0tLS0tCk1DZ0NJUUN2YkZVckJKRFpqT3Y0Y0MvUHZZdXNvQkFtUTFkb3Znb044aHRuUjA2T3F3SURBUUFCCi0tLS0tRU5EIFJTQSBQVUJMSUMgS0VZLS0tLS0="
+   "Channel": "\u003cSpeakeasy-v3:name|description:desc|level:Public|created:1665489600000000000|secrets:zjHmrPPMDQ0tNSANjAmQfKhRpJIdJMU+Hz5hsZ+fVpk=|qozRNkADprqb38lsnU7WxCtGCq9OChlySCEgl4NHjI4=|2|328|7aZQAtuVjE84q4Z09iGytTSXfZj9NyTa6qBp0ueKjCI=\u003e",
+	  "PrivateKey": "-----BEGIN RSA PRIVATE KEY-----\nMCYCAQACAwDVywIDAQABAgMAlVECAgDvAgIA5QICAJECAgCVAgIA1w==\n-----END RSA PRIVATE KEY-----"
  }
  */
-@interface BindingsChannelDef : NSObject <goSeqRefInterface> {
+@interface BindingsChannelGeneration : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) NSString* _Nonnull channel;
+@property (nonatomic) NSString* _Nonnull privateKey;
+@end
+
+/**
+ * ChannelInfo contains information about a channel.
+
+Example of ChannelInfo JSON:
+ {
+   "Name": "Test Channel",
+   "Description": "This is a test channel",
+   "ChannelID": "RRnpRhmvXtW9ugS1nILJ3WfttdctDvC2jeuH43E0g/0D",
+ }
+ */
+@interface BindingsChannelInfo : NSObject <goSeqRefInterface> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
@@ -430,8 +517,318 @@ Example JSON:
 - (nonnull instancetype)init;
 @property (nonatomic) NSString* _Nonnull name;
 @property (nonatomic) NSString* _Nonnull description;
-@property (nonatomic) NSData* _Nullable salt;
-@property (nonatomic) NSData* _Nullable pubKey;
+@property (nonatomic) NSString* _Nonnull channelID;
+@end
+
+/**
+ * ChannelSendReport is the bindings' representation of the return values of
+ChannelsManager's Send operations.
+
+JSON Example:
+ {
+   "MessageId": "0kitNxoFdsF4q1VMSI/xPzfCnGB2l+ln2+7CTHjHbJw=",
+   "Rounds":[1,5,9],
+   "EphId": 0
+ }
+ */
+@interface BindingsChannelSendReport : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) NSData* _Nullable messageId;
+// skipped field ChannelSendReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
+
+@property (nonatomic) int64_t ephId;
+- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
+ * ChannelsManager is a bindings-layer struct that wraps a [channels.Manager]
+interface.
+ */
+@interface BindingsChannelsManager : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * NewChannelsManager creates a new [ChannelsManager] from a new private
+identity ([channel.PrivateIdentity]).
+
+This is for creating a manager for an identity for the first time. For
+generating a new one channel identity, use [GenerateChannelIdentity]. To
+reload this channel manager, use [LoadChannelsManager], passing in the
+storage tag retrieved by [ChannelsManager.GetStorageTag].
+
+Parameters:
+ - cmixID - The tracked Cmix object ID. This can be retrieved using
+   [Cmix.GetID].
+ - privateIdentity - Bytes of a private identity ([channel.PrivateIdentity])
+   that is generated by [GenerateChannelIdentity].
+ - event -  An interface that contains a function that initialises and returns
+   the event model that is bindings-compatible.
+ */
+- (nullable instancetype)init:(long)cmixID privateIdentity:(NSData* _Nullable)privateIdentity eventBuilder:(id<BindingsEventModelBuilder> _Nullable)eventBuilder;
+// skipped constructor ChannelsManager.NewChannelsManagerGoEventModel with unsupported parameter or return types
+
+/**
+ * DeleteNickname deletes the nickname for a given channel.
+ */
+- (BOOL)deleteNickname:(NSData* _Nullable)ch error:(NSError* _Nullable* _Nullable)error;
+/**
+ * ExportPrivateIdentity encrypts and exports the private identity to a portable
+string.
+ */
+- (NSData* _Nullable)exportPrivateIdentity:(NSString* _Nullable)password error:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetChannels returns the IDs of all channels that have been joined.
+
+Returns:
+ - []byte - A JSON marshalled list of IDs.
+
+JSON Example:
+ {
+   "U4x/lrFkvxuXu59LtHLon1sUhPJSCcnZND6SugndnVID",
+   "15tNdkKbYXoMn58NO6VbDMDWFEyIhTWEGsvgcJsHWAgD"
+ }
+ */
+- (NSData* _Nullable)getChannels:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetID returns the channelManagerTracker ID for the ChannelsManager object.
+ */
+- (long)getID;
+/**
+ * GetIdentity returns the marshaled public identity ([channel.Identity]) that
+the channel is using.
+ */
+- (NSData* _Nullable)getIdentity:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetNickname returns the nickname set for a given channel. Returns an error if
+there is no nickname set.
+ */
+- (NSString* _Nonnull)getNickname:(NSData* _Nullable)ch error:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetShareURL generates a URL that can be used to share this channel with
+others on the given host.
+
+A URL comes in one of three forms based on the privacy level set when
+generating the channel. Each privacy level hides more information than the
+last with the lowest level revealing everything and the highest level
+revealing nothing. For any level above the lowest, a password is returned,
+which will be required when decoding the URL.
+
+The maxUses is the maximum number of times this URL can be used to join a
+channel. If it is set to 0, then it can be shared unlimited times. The max
+uses is set as a URL parameter using the key [broadcast.MaxUsesKey]. Note
+that this number is also encoded in the secret data for private and secret
+URLs, so if the number is changed in the URL, is will be verified when
+calling [ChannelsManager.JoinChannelFromURL]. There is no enforcement for
+public URLs.
+
+Parameters:
+ - cmixID - The tracked Cmix object ID.
+ - host - The URL to append the channel info to.
+ - maxUses - The maximum number of uses the link can be used (0 for
+   unlimited).
+ - marshalledChanId - A marshalled channel ID ([id.ID]).
+
+Returns:
+ - JSON of ShareURL.
+ */
+- (NSData* _Nullable)getShareURL:(long)cmixID host:(NSString* _Nullable)host maxUses:(long)maxUses marshalledChanId:(NSData* _Nullable)marshalledChanId error:(NSError* _Nullable* _Nullable)error;
+/**
+ * GetStorageTag returns the storage tag needed to reload the manager.
+ */
+- (NSString* _Nonnull)getStorageTag;
+/**
+ * JoinChannel joins the given channel. It will fail if the channel has already
+been joined.
+
+Parameters:
+ - channelPretty - A portable channel string. Should be received from
+   another user or generated via GenerateChannel.
+
+The pretty print will be of the format:
+ <Speakeasy-v3:Test_Channel|description:Channel description.|level:Public|created:1666718081766741100|secrets:+oHcqDbJPZaT3xD5NcdLY8OjOMtSQNKdKgLPmr7ugdU=|rCI0wr01dHFStjSFMvsBzFZClvDIrHLL5xbCOPaUOJ0=|493|1|7cBhJxVfQxWo+DypOISRpeWdQBhuQpAZtUbQHjBm8NQ=>
+
+Returns:
+ - []byte - JSON of [ChannelInfo], which describes all relevant channel info.
+ */
+- (NSData* _Nullable)joinChannel:(NSString* _Nullable)channelPretty error:(NSError* _Nullable* _Nullable)error;
+/**
+ * LeaveChannel leaves the given channel. It will return an error if the
+channel was not previously joined.
+
+Parameters:
+ - marshalledChanId - A JSON marshalled channel ID ([id.ID]).
+ */
+- (BOOL)leaveChannel:(NSData* _Nullable)marshalledChanId error:(NSError* _Nullable* _Nullable)error;
+/**
+ * RegisterReceiveHandler is used to register handlers for non-default message
+types. They can be processed by modules. It is important that such modules
+sync up with the event model implementation.
+
+There can only be one handler per [channels.MessageType], and this will
+return an error on any re-registration.
+
+Parameters:
+ - messageType - represents the [channels.MessageType] which will have a
+   registered listener.
+ - listenerCb - the callback which will be executed when a channel message
+   of messageType is received.
+ */
+- (BOOL)registerReceiveHandler:(long)messageType listenerCb:(id<BindingsChannelMessageReceptionCallback> _Nullable)listenerCb error:(NSError* _Nullable* _Nullable)error;
+/**
+ * ReplayChannel replays all messages from the channel within the network's
+memory (~3 weeks) over the event model.
+
+Parameters:
+ - marshalledChanId - A JSON marshalled channel ID ([id.ID]).
+ */
+- (BOOL)replayChannel:(NSData* _Nullable)marshalledChanId error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SendAdminGeneric is used to send a raw message over a channel encrypted with
+admin keys, identifying it as sent by the admin. In general, it should be
+wrapped in a function that defines the wire protocol. If the final message,
+before being sent over the wire, is too long, this will return an error. The
+message must be at most 510 bytes long.
+
+Parameters:
+ - adminPrivateKey - The PEM-encoded admin RSA private key.
+ - marshalledChanId - A JSON marshalled channel ID ([id.ID]).
+ - messageType - The message type of the message. This will be a valid
+   [channels.MessageType].
+ - message - The contents of the message. The message should be at most 510
+   bytes. This need not be of data type string, as the message could be a
+   specified format that the channel may recognize.
+ - leaseTimeMS - The lease of the message. This will be how long the message
+   is valid until, in milliseconds. As per the channels.Manager
+   documentation, this has different meanings depending on the use case.
+   These use cases may be generic enough that they will not be enumerated
+   here.
+ - cmixParamsJSON - A JSON marshalled [xxdk.CMIXParams]. This may be empty,
+   and GetDefaultCMixParams will be used internally.
+
+Returns:
+ - []byte - A JSON marshalled ChannelSendReport.
+ */
+- (NSData* _Nullable)sendAdminGeneric:(NSData* _Nullable)adminPrivateKey marshalledChanId:(NSData* _Nullable)marshalledChanId messageType:(long)messageType message:(NSData* _Nullable)message leaseTimeMS:(int64_t)leaseTimeMS cmixParamsJSON:(NSData* _Nullable)cmixParamsJSON error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SendGeneric is used to send a raw message over a channel. In general, it
+should be wrapped in a function that defines the wire protocol. If the final
+message, before being sent over the wire, is too long, this will return an
+error. Due to the underlying encoding using compression, it isn't possible to
+define the largest payload that can be sent, but it will always be possible
+to send a payload of 802 bytes at minimum. The meaning of validUntil depends
+on the use case.
+
+Parameters:
+ - marshalledChanId - A JSON marshalled channel ID ([id.ID]).
+ - messageType - The message type of the message. This will be a valid
+   [channels.MessageType].
+ - message - The contents of the message. This need not be of data type
+   string, as the message could be a specified format that the channel may
+   recognize.
+ - leaseTimeMS - The lease of the message. This will be how long the message
+   is valid until, in milliseconds. As per the channels.Manager
+   documentation, this has different meanings depending on the use case.
+   These use cases may be generic enough that they will not be enumerated
+   here.
+ - cmixParamsJSON - A JSON marshalled [xxdk.CMIXParams]. This may be empty,
+   and GetDefaultCMixParams will be used internally.
+
+Returns:
+ - []byte - A JSON marshalled ChannelSendReport.
+ */
+- (NSData* _Nullable)sendGeneric:(NSData* _Nullable)marshalledChanId messageType:(long)messageType message:(NSData* _Nullable)message leaseTimeMS:(int64_t)leaseTimeMS cmixParamsJSON:(NSData* _Nullable)cmixParamsJSON error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SendMessage is used to send a formatted message over a channel.
+Due to the underlying encoding using compression, it isn't possible to define
+the largest payload that can be sent, but it will always be possible to send
+a payload of 798 bytes at minimum.
+
+The message will auto delete validUntil after the round it is sent in,
+lasting forever if [channels.ValidForever] is used.
+
+Parameters:
+ - marshalledChanId - A JSON marshalled channel ID ([id.ID]).
+ - message - The contents of the message. The message should be at most 510
+   bytes. This is expected to be Unicode, and thus a string data type is
+   expected
+ - leaseTimeMS - The lease of the message. This will be how long the message
+   is valid until, in milliseconds. As per the channels.Manager
+   documentation, this has different meanings depending on the use case.
+   These use cases may be generic enough that they will not be enumerated
+   here.
+ - cmixParamsJSON - A JSON marshalled [xxdk.CMIXParams]. This may be
+   empty, and GetDefaultCMixParams will be used internally.
+
+Returns:
+ - []byte - A JSON marshalled ChannelSendReport
+ */
+- (NSData* _Nullable)sendMessage:(NSData* _Nullable)marshalledChanId message:(NSString* _Nullable)message leaseTimeMS:(int64_t)leaseTimeMS cmixParamsJSON:(NSData* _Nullable)cmixParamsJSON error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SendReaction is used to send a reaction to a message over a channel.
+The reaction must be a single emoji with no other characters, and will
+be rejected otherwise.
+Users will drop the reaction if they do not recognize the reactTo message.
+
+Parameters:
+ - marshalledChanId - A JSON marshalled channel ID ([id.ID]).
+ - reaction - The user's reaction. This should be a single emoji with no
+   other characters. As such, a Unicode string is expected.
+ - messageToReactTo - The marshalled [channel.MessageID] of the message you
+   wish to reply to. This may be found in the ChannelSendReport if replying
+   to your own. Alternatively, if reacting to another user's message, you may
+   retrieve it via the ChannelMessageReceptionCallback registered using
+   RegisterReceiveHandler.
+ - cmixParamsJSON - A JSON marshalled [xxdk.CMIXParams]. This may be empty,
+ and GetDefaultCMixParams will be used internally.
+
+Returns:
+ - []byte - A JSON marshalled ChannelSendReport.
+ */
+- (NSData* _Nullable)sendReaction:(NSData* _Nullable)marshalledChanId reaction:(NSString* _Nullable)reaction messageToReactTo:(NSData* _Nullable)messageToReactTo cmixParamsJSON:(NSData* _Nullable)cmixParamsJSON error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SendReply is used to send a formatted message over a channel. Due to the
+underlying encoding using compression, it isn't possible to define the
+largest payload that can be sent, but it will always be possible to send a
+payload of 766 bytes at minimum.
+
+If the message ID the reply is sent to is nonexistent, the other side will
+post the message as a normal message and not a reply. The message will auto
+delete validUntil after the round it is sent in, lasting forever if
+[channels.ValidForever] is used.
+
+Parameters:
+ - marshalledChanId - A JSON marshalled channel ID ([id.ID]).
+ - message - The contents of the message. The message should be at most 510
+   bytes. This is expected to be Unicode, and thus a string data type is
+   expected.
+ - messageToReactTo - The marshalled [channel.MessageID] of the message you
+   wish to reply to. This may be found in the ChannelSendReport if replying
+   to your own. Alternatively, if reacting to another user's message, you may
+   retrieve it via the ChannelMessageReceptionCallback registered using
+   RegisterReceiveHandler.
+ - leaseTimeMS - The lease of the message. This will be how long the message
+   is valid until, in milliseconds. As per the channels.Manager
+   documentation, this has different meanings depending on the use case.
+   These use cases may be generic enough that they will not be enumerated
+   here.
+ - cmixParamsJSON - A JSON marshalled [xxdk.CMIXParams]. This may be empty,
+   and GetDefaultCMixParams will be used internally.
+
+Returns:
+ - []byte - A JSON marshalled ChannelSendReport
+ */
+- (NSData* _Nullable)sendReply:(NSData* _Nullable)marshalledChanId message:(NSString* _Nullable)message messageToReactTo:(NSData* _Nullable)messageToReactTo leaseTimeMS:(int64_t)leaseTimeMS cmixParamsJSON:(NSData* _Nullable)cmixParamsJSON error:(NSError* _Nullable* _Nullable)error;
+/**
+ * SetNickname sets the nickname for a given channel. The nickname must be valid
+according to [IsNicknameValid].
+ */
+- (BOOL)setNickname:(NSString* _Nullable)newNick ch:(NSData* _Nullable)ch error:(NSError* _Nullable* _Nullable)error;
 @end
 
 /**
@@ -493,8 +890,8 @@ Returns:
 
 JSON Example:
  {
-  "FileTransfer{BatchBuilderThread, FilePartSendingThread#0, FilePartSendingThread#1, FilePartSendingThread#2, FilePartSendingThread#3}",
-  "MessageReception Worker 0"
+   "FileTransfer{BatchBuilderThread, FilePartSendingThread#0, FilePartSendingThread#1, FilePartSendingThread#2, FilePartSendingThread#3}",
+   "MessageReception Worker 0"
  }
  */
 - (NSData* _Nullable)getRunningProcesses:(NSError* _Nullable* _Nullable)error;
@@ -531,6 +928,12 @@ status with the following values:
  Stopping - 3000
  */
 - (long)networkFollowerStatus;
+/**
+ * ReadyToSend determines if the network is ready to send messages on. It
+returns true if the network is healthy and if the client has registered with
+at least 70% of the nodes. Returns false otherwise.
+ */
+- (BOOL)readyToSend;
 /**
  * RegisterClientErrorCallback registers the callback to handle errors from the
 long-running threads controlled by StartNetworkFollower and
@@ -811,6 +1214,13 @@ Returns:
  */
 - (BOOL)deleteAllRequests:(NSError* _Nullable* _Nullable)error;
 /**
+ * DeleteContact removes a partner from E2e's storage.
+
+Parameters:
+ - partnerID - the marshalled bytes of id.ID.
+ */
+- (BOOL)deleteContact:(NSData* _Nullable)partnerID error:(NSError* _Nullable* _Nullable)error;
+/**
  * DeletePartnerCallback deletes the callback that overrides the generic
 auth callback for the given partner ID.
 
@@ -1084,10 +1494,10 @@ The possible values for the status are:
  * FileSend is a public struct that contains the file contents and its name,
 type, and preview.
  {
-  "Name":"testfile.txt",
-  "Type":"text file",
-  "Preview":"aXQncyBtZSBhIHByZXZpZXc=",
-  "Contents":"VGhpcyBpcyB0aGUgZnVsbCBjb250ZW50cyBvZiB0aGUgZmlsZSBpbiBieXRlcw=="
+   "Name":"testfile.txt",
+   "Type":"text file",
+   "Preview":"aXQncyBtZSBhIHByZXZpZXc=",
+   "Contents":"VGhpcyBpcyB0aGUgZnVsbCBjb250ZW50cyBvZiB0aGUgZmlsZSBpbiBieXRlcw=="
  }
  */
 @interface BindingsFileSend : NSObject <goSeqRefInterface> {
@@ -1163,8 +1573,8 @@ Parameters:
  - tidBytes - file transfer ID
  - callback - callback that reports file reception progress
  - period - Duration (in ms) to wait between progress callbacks triggering.
-            This value should depend on how frequently you want to receive
-            updates, and should be tuned to your implementation.
+   This value should depend on how frequently you want to receive updates,
+   and should be tuned to your implementation.
  */
 - (BOOL)registerReceivedProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferReceiveProgressCallback> _Nullable)callback period:(long)period error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1178,8 +1588,8 @@ Parameters:
  - tidBytes - file transfer ID
  - callback - callback that reports file reception progress
  - period - Duration (in ms) to wait between progress callbacks triggering.
-            This value should depend on how frequently you want to receive
-            updates, and should be tuned to your implementation.
+   This value should depend on how frequently you want to receive updates,
+   and should be tuned to your implementation.
  */
 - (BOOL)registerSentProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(long)period error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1191,8 +1601,8 @@ Parameters:
  - retry - number of retries allowed
  - callback - callback that reports file sending progress
  - period - Duration (in ms) to wait between progress callbacks triggering.
-            This value should depend on how frequently you want to receive
-            updates, and should be tuned to your implementation.
+   This value should depend on how frequently you want to receive updates,
+   and should be tuned to your implementation.
 
 Returns:
  - []byte - unique file transfer ID
@@ -1567,10 +1977,10 @@ file transfer.
 
 Example JSON:
  {
-  "Completed":false,
-  "Transmitted":128,
-  "Total":2048,
-  "Err":null
+   "Completed":false,
+   "Transmitted":128,
+   "Total":2048,
+   "Err":null
  }
  */
 @interface BindingsProgress : NSObject <goSeqRefInterface> {
@@ -1586,17 +1996,56 @@ Example JSON:
 @end
 
 /**
+ * ReceivedChannelMessageReport is a report structure returned via the
+ChannelMessageReceptionCallback. This report gives the context for the
+channel the message was sent to and the message itself. This is returned via
+the callback as JSON marshalled bytes.
+
+JSON Example:
+ {
+   "ChannelId": "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+   "MessageId": "3S6DiVjWH9mLmjy1oaam/3x45bJQzOW6u2KgeUn59wA=",
+   "ReplyTo":"cxMyGUFJ+Ff1Xp2X+XkIpOnNAQEZmv8SNP5eYH4tCik=",
+   "MessageType": 42,
+   "SenderUsername": "hunter2",
+   "Content": "YmFuX2JhZFVTZXI=",
+   "Timestamp": 1662502150335283000,
+   "Lease": 25,
+   "Rounds": [ 1, 4, 9],
+ }
+ */
+@interface BindingsReceivedChannelMessageReport : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) NSData* _Nullable channelId;
+@property (nonatomic) NSData* _Nullable messageId;
+@property (nonatomic) long messageType;
+@property (nonatomic) NSString* _Nonnull nickname;
+@property (nonatomic) NSData* _Nullable pubKey;
+@property (nonatomic) long codeset;
+@property (nonatomic) NSData* _Nullable content;
+@property (nonatomic) int64_t timestamp;
+@property (nonatomic) int64_t lease;
+// skipped field ReceivedChannelMessageReport.RoundsList with unsupported type: gitlab.com/elixxir/client/bindings.RoundsList
+
+- (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
  * ReceivedFile is a public struct that contains the metadata of a new file
 transfer.
 
 Example JSON:
  {
-  "TransferID":"B4Z9cwU18beRoGbk5xBjbcd5Ryi9ZUFA2UBvi8FOHWo=",
-  "SenderID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
-  "Preview":"aXQncyBtZSBhIHByZXZpZXc=",
-  "Name":"testfile.txt",
-  "Type":"text file",
-  "Size":2048
+   "TransferID":"B4Z9cwU18beRoGbk5xBjbcd5Ryi9ZUFA2UBvi8FOHWo=",
+   "SenderID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
+   "Preview":"aXQncyBtZSBhIHByZXZpZXc=",
+   "Name":"testfile.txt",
+   "Type":"text file",
+   "Size":2048
  }
  */
 @interface BindingsReceivedFile : NSObject <goSeqRefInterface> {
@@ -1684,6 +2133,38 @@ JSON Example:
  * Marshal JSON marshals the RoundsList.
  */
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
+ * ShareURL is returned from ChannelsManager.GetShareURL. It includes the
+channel's share URL and password, if it needs one.
+
+JSON example for a public channel:
+ {
+   "url": "https://internet.speakeasy.tech/?0Name=name&1Description=desc&2Level=Public&3Created=1665489600000000000&e=%2FWNZvuHPuv%2Bx23XbZXVNzCi7y8rUSxkh75MpR9UrsCo%3D&k=ddX1CH52xH%2F%2Fb6lKrbvDghdSmCQr90ktsOAZ%2FrhEonI%3D&l=2&m=0&p=328&s=%2FD%2FoQP2mio3XAWfhmWF0xmZrpj4nAsb9JLXj%2B0Mzq9Y%3D&v=1",
+   "password": ""
+ }
+
+JSON example for a private channel:
+ {
+   "url": "https://internet.speakeasy.tech/?0Name=name&1Description=desc&3Created=1665489600000000000&d=5AZQirb%2FYrmUITLn%2FFzCaGek1APfJnd2q0KwORGj%2BnbGg26kTShG6cfD3w6c%2BA3RDzxuKDSDN0zS4n1LbjiGe0KYdb8eJVeyRZtld516hfojNDXNAwZq8zbeZy4jjbF627fcLHRNS%2FaII4uJ5UB3gLUeBeZGraaybCCu3FIj1N4RbcJ5cQgT7hBf93bHmJc%3D&m=0&v=1",
+   "password": "tribune gangrene labrador italics nutmeg process exhume legal"
+ }
+
+JSON example for a secret channel:
+ {
+   "url": "https://internet.speakeasy.tech/?d=w5evLthm%2Fq2j11g6PPtV0QoLaAqNCIER0OqxhxL%2FhpGVJI0057ZPgGBrKoJNE1%2FdoVuU35%2FhohuW%2BWvGlx6IuHoN6mDj0HfNj6Lo%2B8GwIaD6jOEwUcH%2FMKGsKnoqFsMaMPd5gXYgdHvA8l5SRe0gSCVqGKUaG6JgL%2FDu4iyjY7v4ykwZdQ7soWOcBLHDixGEkVLpwsCrPVHkT2K0W6gV74GIrQ%3D%3D&m=0&v=1",
+   "password": "frenzy contort staple thicket consuming affiliate scion demeanor"
+ }
+ */
+@interface BindingsShareURL : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) NSString* _Nonnull url;
+@property (nonatomic) NSString* _Nonnull password;
 @end
 
 /**
@@ -1865,6 +2346,19 @@ of JSON marshalling the response when received.
 FOUNDATION_EXPORT BOOL BindingsAsyncRequestRestLike(long e2eID, NSData* _Nullable recipient, NSData* _Nullable request, NSData* _Nullable paramsJSON, id<BindingsRestlikeCallback> _Nullable cb, NSError* _Nullable* _Nullable error);
 
 /**
+ * ConstructIdentity constructs a [channel.Identity] from a user's public key
+and codeset version.
+
+Parameters:
+ - pubKey - The Ed25519 public key.
+ - codesetVersion - The version of the codeset used to generate the identity.
+
+Returns:
+ - JSON of [channel.Identity].
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsConstructIdentity(NSData* _Nullable pubKey, long codesetVersion, NSError* _Nullable* _Nullable error);
+
+/**
  * CreateUserFriendlyErrorMessage will convert the passed in error string to an
 error string that is user-friendly if a substring match is found to a
 common error. Common errors is a map that can be updated using
@@ -1882,7 +2376,36 @@ Returns
 FOUNDATION_EXPORT NSString* _Nonnull BindingsCreateUserFriendlyErrorMessage(NSString* _Nullable errStr);
 
 /**
- * DeserializeGroup converts the results of Group.Serialize() into a Group
+ * DecodePrivateURL decodes the channel URL, using the password, into a channel
+pretty print. This function can only be used for private or secret channel
+URLs. To get the privacy level of a channel URL, use [GetShareUrlType].
+
+Parameters:
+ - url - The channel's share URL. Should be received from another user or
+   generated via [GetShareURL].
+ - password - The password needed to decrypt the secret data in the URL.
+
+Returns:
+ - The channel pretty print.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull BindingsDecodePrivateURL(NSString* _Nullable url, NSString* _Nullable password, NSError* _Nullable* _Nullable error);
+
+/**
+ * DecodePublicURL decodes the channel URL into a channel pretty print. This
+function can only be used for public channel URLs. To get the privacy level
+of a channel URL, use [GetShareUrlType].
+
+Parameters:
+ - url - The channel's share URL. Should be received from another user or
+   generated via [GetShareURL].
+
+Returns:
+ - The channel pretty print.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull BindingsDecodePublicURL(NSString* _Nullable url, NSError* _Nullable* _Nullable error);
+
+/**
+ * DeserializeGroup converts the results of Group.Serialize into a Group
 so that its methods can be called.
  */
 FOUNDATION_EXPORT BindingsGroup* _Nullable BindingsDeserializeGroup(NSData* _Nullable serializedGroupData, NSError* _Nullable* _Nullable error);
@@ -1901,6 +2424,57 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsDownloadAndVerifySignedNdfWithUrl(NS
 FOUNDATION_EXPORT void BindingsEnableGrpcLogs(id<BindingsLogWriter> _Nullable writer);
 
 /**
+ * GenerateChannel is used to create a channel a new channel of which you are
+the admin. It is only for making new channels, not joining existing ones.
+
+It returns a pretty print of the channel and the private key.
+
+Parameters:
+ - cmixID - The tracked cmix object ID. This can be retrieved using
+   [Cmix.GetID].
+ - name - The name of the new channel. The name must be between 3 and 24
+   characters inclusive. It can only include upper and lowercase unicode
+   letters, digits 0 through 9, and underscores (_). It cannot be changed
+   once a channel is created.
+ - description - The description of a channel. The description is optional
+   but cannot be longer than 144 characters and can include all unicode
+   characters. It cannot be changed once a channel is created.
+ - privacyLevel - The broadcast.PrivacyLevel of the channel. 0 = public,
+   1 = private, and 2 = secret. Refer to the comment below for more
+   information.
+
+Returns:
+ - []byte - [ChannelGeneration] describes a generated channel. It contains
+   both the public channel info and the private key for the channel in PEM
+   format.
+
+The [broadcast.PrivacyLevel] of a channel indicates the level of channel
+information revealed when sharing it via URL. For any channel besides public
+channels, the secret information is encrypted and a password is required to
+share and join a channel.
+ - A privacy level of [broadcast.Public] reveals all the information
+   including the name, description, privacy level, public key and salt.
+ - A privacy level of [broadcast.Private] reveals only the name and
+   description.
+ - A privacy level of [broadcast.Secret] reveals nothing.
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsGenerateChannel(long cmixID, NSString* _Nullable name, NSString* _Nullable description, long privacyLevel, NSError* _Nullable* _Nullable error);
+
+/**
+ * GenerateChannelIdentity creates a new private channel identity
+([channel.PrivateIdentity]). The public component can be retrieved as JSON
+via [GetPublicChannelIdentityFromPrivate].
+
+Parameters:
+ - cmixID - The tracked cmix object ID. This can be retrieved using
+   [Cmix.GetID].
+
+Returns:
+ - Marshalled bytes of [channel.PrivateIdentity].
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsGenerateChannelIdentity(long cmixID, NSError* _Nullable* _Nullable error);
+
+/**
  * GenerateSecret creates a secret password using a system-based pseudorandom
 number generator.
 
@@ -1909,6 +2483,50 @@ Parameters:
   higher in certain cases.
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsGenerateSecret(long numBytes);
+
+/**
+ * GetChannelDbCipherTrackerFromID returns the ChannelDbCipher with the
+corresponding ID in the tracker.
+ */
+FOUNDATION_EXPORT BindingsChannelDbCipher* _Nullable BindingsGetChannelDbCipherTrackerFromID(long id_, NSError* _Nullable* _Nullable error);
+
+/**
+ * GetChannelInfo returns the info about a channel from its public description.
+
+Parameters:
+ - prettyPrint - The pretty print of the channel.
+
+The pretty print will be of the format:
+ <Speakeasy-v3:Test_Channel|description:Channel description.|level:Public|created:1666718081766741100|secrets:+oHcqDbJPZaT3xD5NcdLY8OjOMtSQNKdKgLPmr7ugdU=|rCI0wr01dHFStjSFMvsBzFZClvDIrHLL5xbCOPaUOJ0=|493|1|7cBhJxVfQxWo+DypOISRpeWdQBhuQpAZtUbQHjBm8NQ=>
+
+Returns:
+ - []byte - JSON of [ChannelInfo], which describes all relevant channel info.
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetChannelInfo(NSString* _Nullable prettyPrint, NSError* _Nullable* _Nullable error);
+
+/**
+ * GetChannelJSON returns the JSON of the channel for the given pretty print.
+
+Parameters:
+ - prettyPrint - The pretty print of the channel.
+
+Returns:
+ - JSON of the [broadcast.Channel] object.
+
+Example JSON of [broadcast.Channel]:
+ {
+   "ReceptionID": "Ja/+Jh+1IXZYUOn+IzE3Fw/VqHOscomD0Q35p4Ai//kD",
+   "Name": "My_Channel",
+   "Description": "Here is information about my channel.",
+   "Salt": "+tlrU/htO6rrV3UFDfpQALUiuelFZ+Cw9eZCwqRHk+g=",
+   "RsaPubKeyHash": "PViT1mYkGBj6AYmE803O2RpA7BX24EjgBdldu3pIm4o=",
+   "RsaPubKeyLength": 5,
+   "RSASubPayloads": 1,
+   "Secret": "JxZt/wPx2luoPdHY6jwbXqNlKnixVU/oa9DgypZOuyI=",
+   "Level": 0
+ }
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetChannelJSON(NSString* _Nullable prettyPrint, NSError* _Nullable* _Nullable error);
 
 /**
  * GetDefaultCMixParams returns a JSON serialized object with all of the cMix
@@ -2009,9 +2627,80 @@ Returns:
 FOUNDATION_EXPORT NSData* _Nullable BindingsGetPubkeyFromContact(NSData* _Nullable marshaledContact, NSError* _Nullable* _Nullable error);
 
 /**
+ * GetPublicChannelIdentity constructs a public identity ([channel.Identity])
+from a bytes version and returns it JSON marshaled.
+
+Parameters:
+ - marshaledPublic - Bytes of the public identity ([channel.Identity]).
+
+Returns:
+ - JSON of the constructed [channel.Identity].
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetPublicChannelIdentity(NSData* _Nullable marshaledPublic, NSError* _Nullable* _Nullable error);
+
+/**
+ * GetPublicChannelIdentityFromPrivate returns the public identity
+([channel.Identity]) contained in the given private identity
+([channel.PrivateIdentity]).
+
+Parameters:
+ - marshaledPrivate - Bytes of the private identity
+   (channel.PrivateIdentity]).
+
+Returns:
+ - JSON of the public [channel.Identity].
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetPublicChannelIdentityFromPrivate(NSData* _Nullable marshaledPrivate, NSError* _Nullable* _Nullable error);
+
+/**
+ * GetSavedChannelPrivateKeyUNSAFE loads the private key from storage for the
+given channel ID.
+
+NOTE: This function is unsafe and only for debugging purposes only.
+
+Parameters:
+ - cmixID - ID of [Cmix] object in tracker.
+ - channelIdBase64 - The [id.ID] of the channel in base 64 encoding.
+
+Returns:
+ - The PEM file of the private key.
+ */
+FOUNDATION_EXPORT NSString* _Nonnull BindingsGetSavedChannelPrivateKeyUNSAFE(long cmixID, NSString* _Nullable channelIdBase64, NSError* _Nullable* _Nullable error);
+
+/**
+ * GetShareUrlType determines the [broadcast.PrivacyLevel] of the channel URL.
+If the URL is an invalid channel URL, an error is returned.
+
+Parameters:
+ - url - The channel share URL.
+
+Returns:
+ - An int that corresponds to the [broadcast.PrivacyLevel] as outlined below.
+
+Possible returns:
+ 0 = public channel
+ 1 = private channel
+ 2 = secret channel
+ */
+FOUNDATION_EXPORT BOOL BindingsGetShareUrlType(NSString* _Nullable url, long* _Nullable ret0_, NSError* _Nullable* _Nullable error);
+
+/**
  * GetVersion returns the xxdk.SEMVER.
  */
 FOUNDATION_EXPORT NSString* _Nonnull BindingsGetVersion(void);
+
+/**
+ * ImportPrivateIdentity generates a new [channel.PrivateIdentity] from exported
+data.
+
+Parameters:
+ - password - The password used to encrypt the identity.
+ - data - The encrypted data.
+
+Returns:
+ - JSON of [channel.PrivateIdentity].
+ */
+FOUNDATION_EXPORT NSData* _Nullable BindingsImportPrivateIdentity(NSString* _Nullable password, NSData* _Nullable data, NSError* _Nullable* _Nullable error);
 
 /**
  * InitFileTransfer creates a bindings-level file transfer manager.
@@ -2033,6 +2722,15 @@ Parameters:
  - cb - the callback to be called when a backup is triggered.
  */
 FOUNDATION_EXPORT BindingsBackup* _Nullable BindingsInitializeBackup(long e2eID, long udID, NSString* _Nullable backupPassPhrase, id<BindingsUpdateBackupFunc> _Nullable cb, NSError* _Nullable* _Nullable error);
+
+/**
+ * IsNicknameValid checks if a nickname is valid.
+
+Rules:
+ 1. A nickname must not be longer than 24 characters.
+ 2. A nickname must not be shorter than 1 character.
+ */
+FOUNDATION_EXPORT BOOL BindingsIsNicknameValid(NSString* _Nullable nick, NSError* _Nullable* _Nullable error);
 
 /**
  * IsRegisteredWithUD is a function which checks the internal state
@@ -2063,6 +2761,27 @@ Returns:
  - Stopper - an interface containing a function used to stop the listener
  */
 FOUNDATION_EXPORT id<BindingsStopper> _Nullable BindingsListen(long e2eID, NSString* _Nullable tag, id<BindingsSingleUseCallback> _Nullable cb, NSError* _Nullable* _Nullable error);
+
+/**
+ * LoadChannelsManager loads an existing [ChannelsManager].
+
+This is for loading a manager for an identity that has already been created.
+The channel manager should have previously been created with
+[NewChannelsManager] and the storage is retrievable with
+[ChannelsManager.GetStorageTag].
+
+Parameters:
+ - cmixID - The tracked cmix object ID. This can be retrieved using
+   [Cmix.GetID].
+ - storageTag - The storage tag associated with the previously created
+   channel manager and retrieved with [ChannelsManager.GetStorageTag].
+ - event - An interface that contains a function that initialises and returns
+   the event model that is bindings-compatible.
+ */
+FOUNDATION_EXPORT BindingsChannelsManager* _Nullable BindingsLoadChannelsManager(long cmixID, NSString* _Nullable storageTag, id<BindingsEventModelBuilder> _Nullable eventBuilder, NSError* _Nullable* _Nullable error);
+
+// skipped function LoadChannelsManagerGoEventModel with unsupported parameter or return types
+
 
 /**
  * LoadCmix will load an existing user storage from the storageDir using the
@@ -2154,14 +2873,39 @@ Returns:
 FOUNDATION_EXPORT BOOL BindingsMultiLookupUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdMultiLookupCallback> _Nullable cb, NSData* _Nullable lookupIds, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * NewBroadcastChannel creates a bindings-layer broadcast channel and starts
-listening for new messages.
+ * NewChannelsDatabaseCipher constructs a ChannelDbCipher object.
 
 Parameters:
- - cmixId - internal ID of cmix
- - channelDefinition - JSON marshalled ChannelDef object
+ - cmixID - The tracked [Cmix] object ID.
+ - password - The password for storage. This should be the same password
+   passed into [NewCmix].
+ - plaintTextBlockSize - The maximum size of a payload to be encrypted.
+   A payload passed into [ChannelDbCipher.Encrypt] that is larger than
+   plaintTextBlockSize will result in an error.
  */
-FOUNDATION_EXPORT BindingsChannel* _Nullable BindingsNewBroadcastChannel(long cmixId, NSData* _Nullable channelDefinition, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT BindingsChannelDbCipher* _Nullable BindingsNewChannelsDatabaseCipher(long cmixID, NSData* _Nullable password, long plaintTextBlockSize, NSError* _Nullable* _Nullable error);
+
+/**
+ * NewChannelsManager creates a new [ChannelsManager] from a new private
+identity ([channel.PrivateIdentity]).
+
+This is for creating a manager for an identity for the first time. For
+generating a new one channel identity, use [GenerateChannelIdentity]. To
+reload this channel manager, use [LoadChannelsManager], passing in the
+storage tag retrieved by [ChannelsManager.GetStorageTag].
+
+Parameters:
+ - cmixID - The tracked Cmix object ID. This can be retrieved using
+   [Cmix.GetID].
+ - privateIdentity - Bytes of a private identity ([channel.PrivateIdentity])
+   that is generated by [GenerateChannelIdentity].
+ - event -  An interface that contains a function that initialises and returns
+   the event model that is bindings-compatible.
+ */
+FOUNDATION_EXPORT BindingsChannelsManager* _Nullable BindingsNewChannelsManager(long cmixID, NSData* _Nullable privateIdentity, id<BindingsEventModelBuilder> _Nullable eventBuilder, NSError* _Nullable* _Nullable error);
+
+// skipped function NewChannelsManagerGoEventModel with unsupported parameter or return types
+
 
 /**
  * NewCmix creates user storage, generates keys, connects, and registers with
@@ -2209,6 +2953,9 @@ Parameters:
    an upper bound of randomRangeMS.  Suggested value: 1000.
  */
 FOUNDATION_EXPORT BindingsDummyTraffic* _Nullable BindingsNewDummyTrafficManager(long cmixId, long maxNumMessages, long avgSendDeltaMS, long randomRangeMS, NSError* _Nullable* _Nullable error);
+
+// skipped function NewEventModel with unsupported parameter or return types
+
 
 /**
  * NewGroupChat creates a bindings-layer group chat manager.
@@ -2384,9 +3131,9 @@ Returns:
 FOUNDATION_EXPORT NSData* _Nullable BindingsSearchUD(long e2eID, NSData* _Nullable udContact, id<BindingsUdSearchCallback> _Nullable cb, NSData* _Nullable factListJSON, NSData* _Nullable singleRequestParamsJSON, NSError* _Nullable* _Nullable error);
 
 /**
- * SetDashboardURL is a function which modifies the base dashboard URL
-that is returned as part of any send report. Internally, this is defaulted
-to "https://dashboard.xx.network". This should only be called if the user
+ * SetDashboardURL is a function which modifies the base dashboard URL that is
+returned as part of any send report. Internally, this is defaulted to
+"https://dashboard.xx.network". This should only be called if the user
 explicitly wants to modify the dashboard URL. This function is not
 thread-safe, and as such should only be called on setup.
 
@@ -2408,6 +3155,20 @@ Returns:
  - []byte - marshalled bytes of the modified [contact.Contact]
  */
 FOUNDATION_EXPORT NSData* _Nullable BindingsSetFactsOnContact(NSData* _Nullable marshaledContact, NSData* _Nullable factListJSON, NSError* _Nullable* _Nullable error);
+
+/**
+ * SetOffset will set an internal offset variable. All calls to [netTime.Now]
+will have this offset applied to this value.
+
+Parameters:
+ - offset is a time by which netTime.Now will be offset. This value may be
+   negative or positive. This expects a 64-bit integer value which will
+   represent the number in microseconds this offset will be.
+ */
+FOUNDATION_EXPORT void BindingsSetOffset(int64_t offset);
+
+// skipped function SetTimeSource with unsupported parameter or return types
+
 
 /**
  * StoreReceptionIdentity stores the given identity in Cmix storage with the
@@ -2461,9 +3222,13 @@ FOUNDATION_EXPORT BOOL BindingsUpdateCommonErrors(NSString* _Nullable jsonFile, 
 
 @class BindingsAuthCallbacks;
 
-@class BindingsBroadcastListener;
+@class BindingsChannelMessageReceptionCallback;
 
 @class BindingsClientError;
+
+@class BindingsEventModel;
+
+@class BindingsEventModelBuilder;
 
 @class BindingsFileTransferReceiveProgressCallback;
 
@@ -2521,19 +3286,17 @@ FOUNDATION_EXPORT BOOL BindingsUpdateCommonErrors(NSString* _Nullable jsonFile, 
 @end
 
 /**
- * BroadcastListener is the public function type bindings can use to listen for
-broadcast messages.
-
-Parameters:
- - []byte - the JSON marshalled bytes of the BroadcastMessage object, which
-   can be passed into WaitForRoundResult to see if the broadcast succeeded.
+ * ChannelMessageReceptionCallback is the callback that returns the context for
+a channel message via the Callback.
+It must return a unique UUID for the message by which it can be referenced
+later
  */
-@interface BindingsBroadcastListener : NSObject <goSeqRefInterface, BindingsBroadcastListener> {
+@interface BindingsChannelMessageReceptionCallback : NSObject <goSeqRefInterface, BindingsChannelMessageReceptionCallback> {
 }
 @property(strong, readonly) _Nonnull id _ref;
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
-- (void)callback:(NSData* _Nullable)p0 p1:(NSError* _Nullable)p1;
+- (long)callback:(NSData* _Nullable)receivedChannelMessageReport err:(NSError* _Nullable)err;
 @end
 
 @interface BindingsClientError : NSObject <goSeqRefInterface, BindingsClientError> {
@@ -2542,6 +3305,157 @@ Parameters:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (void)report:(NSString* _Nullable)source message:(NSString* _Nullable)message trace:(NSString* _Nullable)trace;
+@end
+
+/**
+ * EventModel is an interface which an external party which uses the channels
+system passed an object which adheres to in order to get events on the
+channel.
+ */
+@interface BindingsEventModel : NSObject <goSeqRefInterface, BindingsEventModel> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+/**
+ * JoinChannel is called whenever a channel is joined locally.
+
+Parameters:
+ - channel - Returns the pretty print representation of a channel.
+ */
+- (void)joinChannel:(NSString* _Nullable)channel;
+/**
+ * LeaveChannel is called whenever a channel is left locally.
+
+Parameters:
+ - ChannelId - The marshalled channel [id.ID].
+ */
+- (void)leaveChannel:(NSData* _Nullable)channelID;
+/**
+ * ReceiveMessage is called whenever a message is received on a given
+channel. It may be called multiple times on the same message. It is
+incumbent on the user of the API to filter such called by message ID.
+
+Parameters:
+ - channelID - The marshalled channel [id.ID].
+ - messageID - The bytes of the [channel.MessageID] of the received
+   message.
+ - nickname - The nickname of the sender of the message.
+ - text - The content of the message.
+ - timestamp - Time the message was received; represented as nanoseconds
+   since unix epoch.
+ - pubKey - The sender's Ed25519 public key.
+ - codeset - The codeset version.
+ - lease - The number of nanoseconds that the message is valid for.
+ - roundId - The ID of the round that the message was received on.
+ - mType - the type of the message, always 1 for this call
+ - status - the [channels.SentStatus] of the message.
+
+Statuses will be enumerated as such:
+ Sent      =  0
+ Delivered =  1
+ Failed    =  2
+
+Returns a non-negative unique UUID for the message that it can be
+referenced by later with [EventModel.UpdateSentStatus].
+ */
+- (int64_t)receiveMessage:(NSData* _Nullable)channelID messageID:(NSData* _Nullable)messageID nickname:(NSString* _Nullable)nickname text:(NSString* _Nullable)text pubKey:(NSData* _Nullable)pubKey codeset:(long)codeset timestamp:(int64_t)timestamp lease:(int64_t)lease roundId:(int64_t)roundId mType:(int64_t)mType status:(int64_t)status;
+/**
+ * ReceiveReaction is called whenever a reaction to a message is received
+on a given channel. It may be called multiple times on the same reaction.
+It is incumbent on the user of the API to filter such called by message
+ID.
+
+Messages may arrive our of order, so a reply in theory can arrive before
+the initial message. As a result, it may be important to buffer
+reactions.
+
+Parameters:
+ - channelID - The marshalled channel [id.ID].
+ - messageID - The bytes of the [channel.MessageID] of the received
+   message.
+ - reactionTo - The [channel.MessageID] for the message that received a
+   reply.
+ - nickname - The nickname of the sender of the message.
+ - reaction - The contents of the reaction message.
+ - pubKey - The sender's Ed25519 public key.
+ - codeset - The codeset version.
+ - timestamp - Time the message was received; represented as nanoseconds
+   since unix epoch.
+ - lease - The number of nanoseconds that the message is valid for.
+ - roundId - The ID of the round that the message was received on.
+ - mType - the type of the message, always 1 for this call
+ - status - the [channels.SentStatus] of the message.
+
+Statuses will be enumerated as such:
+ Sent      =  0
+ Delivered =  1
+ Failed    =  2
+
+Returns a non-negative unique uuid for the message by which it can be
+referenced later with UpdateSentStatus
+ */
+- (int64_t)receiveReaction:(NSData* _Nullable)channelID messageID:(NSData* _Nullable)messageID reactionTo:(NSData* _Nullable)reactionTo nickname:(NSString* _Nullable)nickname reaction:(NSString* _Nullable)reaction pubKey:(NSData* _Nullable)pubKey codeset:(long)codeset timestamp:(int64_t)timestamp lease:(int64_t)lease roundId:(int64_t)roundId mType:(int64_t)mType status:(int64_t)status;
+/**
+ * ReceiveReply is called whenever a message is received that is a reply on
+a given channel. It may be called multiple times on the same message. It
+is incumbent on the user of the API to filter such called by message ID.
+
+Messages may arrive our of order, so a reply in theory can arrive before
+the initial message. As a result, it may be important to buffer replies.
+
+Parameters:
+ - channelID - The marshalled channel [id.ID].
+ - messageID - The bytes of the [channel.MessageID] of the received
+   message.
+ - reactionTo - The [channel.MessageID] for the message that received a
+   reply.
+ - nickname - The nickname of the sender of the message.
+ - text - The content of the message.
+ - pubKey - The sender's Ed25519 public key.
+ - codeset - The codeset version.
+ - timestamp - Time the message was received; represented as nanoseconds
+   since unix epoch.
+ - lease - The number of nanoseconds that the message is valid for.
+ - roundId - The ID of the round that the message was received on.
+ - mType - the type of the message, always 1 for this call
+ - status - the [channels.SentStatus] of the message.
+
+Statuses will be enumerated as such:
+ Sent      =  0
+ Delivered =  1
+ Failed    =  2
+
+Returns a non-negative unique UUID for the message that it can be
+referenced by later with [EventModel.UpdateSentStatus].
+ */
+- (int64_t)receiveReply:(NSData* _Nullable)channelID messageID:(NSData* _Nullable)messageID reactionTo:(NSData* _Nullable)reactionTo nickname:(NSString* _Nullable)nickname text:(NSString* _Nullable)text pubKey:(NSData* _Nullable)pubKey codeset:(long)codeset timestamp:(int64_t)timestamp lease:(int64_t)lease roundId:(int64_t)roundId mType:(int64_t)mType status:(int64_t)status;
+/**
+ * UpdateSentStatus is called whenever the sent status of a message has
+changed.
+
+Parameters:
+ - messageID - The bytes of the [channel.MessageID] of the received
+   message.
+ - status - the [channels.SentStatus] of the message.
+
+Statuses will be enumerated as such:
+ Sent      =  0
+ Delivered =  1
+ Failed    =  2
+ */
+- (void)updateSentStatus:(int64_t)uuid messageID:(NSData* _Nullable)messageID timestamp:(int64_t)timestamp roundID:(int64_t)roundID status:(int64_t)status;
+@end
+
+/**
+ * EventModelBuilder builds an event model
+ */
+@interface BindingsEventModelBuilder : NSObject <goSeqRefInterface, BindingsEventModelBuilder> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (id<BindingsEventModel> _Nullable)build:(NSString* _Nullable)path;
 @end
 
 /**
