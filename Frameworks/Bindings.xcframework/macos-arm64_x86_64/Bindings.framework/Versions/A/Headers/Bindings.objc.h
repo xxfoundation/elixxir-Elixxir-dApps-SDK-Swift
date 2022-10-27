@@ -905,6 +905,11 @@ may not enter the stopped state appropriately. This can be used instead.
  */
 - (BOOL)hasRunningProcessies;
 /**
+ * IncreaseParallelNodeRegistration increases the number of parallel node
+registrations by num
+ */
+- (BOOL)increaseParallelNodeRegistration:(long)num error:(NSError* _Nullable* _Nullable)error;
+/**
  * IsHealthy returns true if the network is read to be in a healthy state where
 messages can be sent.
  */
