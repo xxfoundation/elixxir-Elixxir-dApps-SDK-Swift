@@ -33,6 +33,7 @@
 @class BindingsGroupChatMessage;
 @class BindingsGroupReport;
 @class BindingsGroupSendReport;
+@class BindingsIsReadyInfo;
 @class BindingsMessage;
 @class BindingsNodeRegistrationReport;
 @class BindingsNotificationReport;
@@ -847,6 +848,16 @@ health changes. Returns a registration ID that can be used to unregister.
  */
 - (int64_t)addHealthCallback:(id<BindingsNetworkHealthCallback> _Nullable)nhc;
 /**
+ * ChangeNumberOfNodeRegistrations changes the number of parallel node
+registrations up to the initialized maximum.
+
+Parameters:
+ - toRun - The number of parallel node registrations.
+ - timeoutMS - The timeout, in milliseconds, to wait when changing node
+   registrations before failing.
+ */
+- (BOOL)changeNumberOfNodeRegistrations:(long)toRun timeoutMS:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
+/**
  * Connect performs auth key negotiation with the given recipient and returns a
 Connection object for the newly created partner.Manager.
 
@@ -905,15 +916,23 @@ may not enter the stopped state appropriately. This can be used instead.
  */
 - (BOOL)hasRunningProcessies;
 /**
- * IncreaseParallelNodeRegistration increases the number of parallel node
-registrations by num
- */
-- (BOOL)increaseParallelNodeRegistration:(long)num error:(NSError* _Nullable* _Nullable)error;
-/**
  * IsHealthy returns true if the network is read to be in a healthy state where
 messages can be sent.
  */
 - (BOOL)isHealthy;
+/**
+ * IsReady returns true if at least percentReady of node registrations has
+completed. If not all have completed, then it returns false and howClose will
+be a percent (0-1) of node registrations completed.
+
+Parameters:
+ - percentReady - The percentage of nodes required to be registered with to
+   be ready. This is a number between 0 and 1.
+
+Returns:
+ - JSON of [IsReadyInfo].
+ */
+- (NSData* _Nullable)isReady:(double)percentReady error:(NSError* _Nullable* _Nullable)error;
 /**
  * MakeLegacyReceptionIdentity generates the legacy identity for receiving
 messages. As with all legacy calls, this should primarily be used
@@ -933,6 +952,15 @@ status with the following values:
  Stopping - 3000
  */
 - (long)networkFollowerStatus;
+/**
+ * PauseNodeRegistrations stops all node registrations and returns a function to
+resume them.
+
+Parameters:
+ - timeoutMS - The timeout, in milliseconds, to wait when stopping threads
+   before failing.
+ */
+- (BOOL)pauseNodeRegistrations:(long)timeoutMS error:(NSError* _Nullable* _Nullable)error;
 /**
  * ReadyToSend determines if the network is ready to send messages on. It
 returns true if the network is healthy and if the client has registered with
@@ -1879,6 +1907,26 @@ Example GroupSendReport JSON:
 @property (nonatomic) int64_t timestamp;
 @property (nonatomic) NSData* _Nullable messageID;
 - (NSData* _Nullable)marshal:(NSError* _Nullable* _Nullable)error;
+@end
+
+/**
+ * IsReadyInfo contains information on if the network is ready and how close it
+is to being ready.
+
+Example JSON:
+ {
+   "IsReady": true,
+   "HowClose": 0.534
+ }
+ */
+@interface BindingsIsReadyInfo : NSObject <goSeqRefInterface> {
+}
+@property(strong, readonly) _Nonnull id _ref;
+
+- (nonnull instancetype)initWithRef:(_Nonnull id)ref;
+- (nonnull instancetype)init;
+@property (nonatomic) BOOL isReady;
+@property (nonatomic) double howClose;
 @end
 
 /**
