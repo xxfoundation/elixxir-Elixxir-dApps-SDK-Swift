@@ -5,10 +5,12 @@ public struct CMix {
   public var getReceptionRegistrationValidationSignature: CMixGetReceptionRegistrationValidationSignature
   public var makeReceptionIdentity: CMixMakeReceptionIdentity
   public var isHealthy: CMixIsHealthy
+  public var isReady: CMixIsReady
   public var getNodeRegistrationStatus: CMixGetNodeRegistrationStatus
+  public var changeNumberOfNodeRegistrations: CMixChangeNumberOfNodeRegistrations
+  public var pauseNodeRegistrations: CMixPauseNodeRegistrations
   public var hasRunningProcesses: CMixHasRunningProcesses
   public var getRunningProcesses: CMixGetRunningProcesses
-  public var increaseParallelNodeRegistration: CMixIncreaseParallelNodeRegistration
   public var networkFollowerStatus: CMixNetworkFollowerStatus
   public var startNetworkFollower: CMixStartNetworkFollower
   public var stopNetworkFollower: CMixStopNetworkFollower
@@ -26,10 +28,12 @@ extension CMix {
       getReceptionRegistrationValidationSignature: .live(bindingsCMix),
       makeReceptionIdentity: .live(bindingsCMix),
       isHealthy: .live(bindingsCMix),
+      isReady: .live(bindingsCMix),
       getNodeRegistrationStatus: .live(bindingsCMix),
+      changeNumberOfNodeRegistrations: .live(bindingsCMix),
+      pauseNodeRegistrations: .live(bindingsCMix),
       hasRunningProcesses: .live(bindingsCMix),
       getRunningProcesses: .live(bindingsCMix),
-      increaseParallelNodeRegistration: .live(bindingsCMix),
       networkFollowerStatus: .live(bindingsCMix),
       startNetworkFollower: .live(bindingsCMix),
       stopNetworkFollower: .live(bindingsCMix),
@@ -48,10 +52,12 @@ extension CMix {
     getReceptionRegistrationValidationSignature: .unimplemented,
     makeReceptionIdentity: .unimplemented,
     isHealthy: .unimplemented,
+    isReady: .unimplemented,
     getNodeRegistrationStatus: .unimplemented,
+    changeNumberOfNodeRegistrations: .unimplemented,
+    pauseNodeRegistrations: .unimplemented,
     hasRunningProcesses: .unimplemented,
     getRunningProcesses: .unimplemented,
-    increaseParallelNodeRegistration: .unimplemented,
     networkFollowerStatus: .unimplemented,
     startNetworkFollower: .unimplemented,
     stopNetworkFollower: .unimplemented,
