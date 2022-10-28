@@ -5,6 +5,7 @@ public struct CMix {
   public var getReceptionRegistrationValidationSignature: CMixGetReceptionRegistrationValidationSignature
   public var makeReceptionIdentity: CMixMakeReceptionIdentity
   public var isHealthy: CMixIsHealthy
+  public var isReady: CMixIsReady
   public var getNodeRegistrationStatus: CMixGetNodeRegistrationStatus
   public var changeNumberOfNodeRegistrations: CMixChangeNumberOfNodeRegistrations
   public var pauseNodeRegistrations: CMixPauseNodeRegistrations
@@ -27,6 +28,7 @@ extension CMix {
       getReceptionRegistrationValidationSignature: .live(bindingsCMix),
       makeReceptionIdentity: .live(bindingsCMix),
       isHealthy: .live(bindingsCMix),
+      isReady: .live(bindingsCMix),
       getNodeRegistrationStatus: .live(bindingsCMix),
       changeNumberOfNodeRegistrations: .live(bindingsCMix),
       pauseNodeRegistrations: .live(bindingsCMix),
@@ -50,6 +52,7 @@ extension CMix {
     getReceptionRegistrationValidationSignature: .unimplemented,
     makeReceptionIdentity: .unimplemented,
     isHealthy: .unimplemented,
+    isReady: .unimplemented,
     getNodeRegistrationStatus: .unimplemented,
     changeNumberOfNodeRegistrations: .unimplemented,
     pauseNodeRegistrations: .unimplemented,
