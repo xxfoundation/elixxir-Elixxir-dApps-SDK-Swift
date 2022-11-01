@@ -2,15 +2,18 @@ import Foundation
 
 public struct Progress: Equatable {
   public init(
+    transferId: Data,
     completed: Bool,
     transmitted: Int,
     total: Int
   ) {
+    self.transferId = transferId
     self.completed = completed
     self.transmitted = transmitted
     self.total = total
   }
 
+  public var transferId: Data
   public var completed: Bool
   public var transmitted: Int
   public var total: Int
@@ -18,6 +21,7 @@ public struct Progress: Equatable {
 
 extension Progress: Codable {
   enum CodingKeys: String, CodingKey {
+    case transferId = "TransferID"
     case completed = "Completed"
     case transmitted = "Transmitted"
     case total = "Total"
