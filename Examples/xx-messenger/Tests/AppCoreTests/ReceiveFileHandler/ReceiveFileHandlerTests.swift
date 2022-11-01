@@ -139,14 +139,6 @@ final class ReceiveFileHandlerTests: XCTestCase {
     ])
 
     actions = []
-    let receivingFileProgressError = "receiving-file-progress"
-    receivingFileCallback?(.failed(.progressError(receivingFileProgressError)))
-
-    XCTAssertNoDifference(actions, [
-      .didCatchError(ReceiveFileHandler.ProgressError(message: receivingFileProgressError) as NSError)
-    ])
-
-    actions = []
     receivingFileCallback?(.progress(transmitted: 1, total: 2))
 
     XCTAssertNoDifference(actions, [

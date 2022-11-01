@@ -5,14 +5,6 @@ import XXMessengerClient
 import XXModels
 
 public struct SendImage {
-  public struct ProgressError: Error, Equatable {
-    public init(message: String) {
-      self.message = message
-    }
-
-    public var message: String
-  }
-
   public typealias OnError = (Error) -> Void
   public typealias Completion = () -> Void
 
@@ -77,9 +69,6 @@ extension SendImage {
 
           case .failed(_, .error(let error)):
             onError(error)
-
-          case .failed(_, .progressError(let message)):
-            onError(ProgressError(message: message))
 
           case .failed(_, .close(let error)):
             onError(error)

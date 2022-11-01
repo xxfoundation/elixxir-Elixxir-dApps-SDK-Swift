@@ -47,8 +47,7 @@ final class MessengerSendFileTests: XCTestCase {
       progress: Progress(
         completed: false,
         transmitted: 1,
-        total: 10,
-        error: nil
+        total: 10
       ),
       partTracker: .unimplemented
     )))
@@ -56,8 +55,7 @@ final class MessengerSendFileTests: XCTestCase {
       progress: Progress(
         completed: false,
         transmitted: 6,
-        total: 10,
-        error: nil
+        total: 10
       ),
       partTracker: .unimplemented
     )))
@@ -65,8 +63,7 @@ final class MessengerSendFileTests: XCTestCase {
       progress: Progress(
         completed: true,
         transmitted: 10,
-        total: 10,
-        error: nil
+        total: 10
       ),
       partTracker: .unimplemented
     )))
@@ -124,46 +121,6 @@ final class MessengerSendFileTests: XCTestCase {
     XCTAssertNoDifference(didCloseSend, [transferId])
   }
 
-  func testSendFileProgressError() throws {
-    var didCloseSend: [Data] = []
-    var didReceiveCallback: [MessengerSendFile.CallbackInfo] = []
-    var fileTransferProgressCallback: FileTransferProgressCallback!
-
-    var env: MessengerEnvironment = .unimplemented
-    env.fileTransfer.get = {
-      var fileTransfer: FileTransfer = .unimplemented
-      fileTransfer.send.run = { _, callback in
-        fileTransferProgressCallback = callback
-        return "transferId".data(using: .utf8)!
-      }
-      fileTransfer.closeSend.run = { id in
-        didCloseSend.append(id)
-      }
-      return fileTransfer
-    }
-    let sendFile: MessengerSendFile = .live(env)
-
-    let transferId = try sendFile(.stub) { info in
-      didReceiveCallback.append(info)
-    }
-
-    let error = "something went wrong"
-    fileTransferProgressCallback.handle(.success(.init(
-      progress: .init(
-        completed: false,
-        transmitted: 0,
-        total: 0,
-        error: error
-      ),
-      partTracker: .unimplemented
-    )))
-
-    XCTAssertNoDifference(didReceiveCallback, [
-      .failed(id: transferId, .progressError(error)),
-    ])
-    XCTAssertNoDifference(didCloseSend, [transferId])
-  }
-
   func testSendFileCloseError() throws {
     let closeError = NSError(domain: "test", code: 1234)
 
@@ -192,8 +149,7 @@ final class MessengerSendFileTests: XCTestCase {
       progress: .init(
         completed: true,
         transmitted: 1,
-        total: 1,
-        error: nil
+        total: 1
       ),
       partTracker: .unimplemented
     )))

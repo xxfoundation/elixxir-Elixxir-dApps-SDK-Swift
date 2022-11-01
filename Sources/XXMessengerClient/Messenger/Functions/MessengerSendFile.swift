@@ -25,7 +25,6 @@ public struct MessengerSendFile {
   public enum CallbackInfo: Equatable {
     public enum Failure: Equatable {
       case error(NSError)
-      case progressError(String)
       case close(NSError)
     }
 
@@ -81,10 +80,7 @@ extension MessengerSendFile {
             close(id: transferId)
 
           case .success(let cb):
-            if let error = cb.progress.error {
-              callback(.failed(id: transferId, .progressError(error)))
-              close(id: transferId)
-            } else if cb.progress.completed {
+            if cb.progress.completed {
               callback(.finished(id: transferId))
               close(id: transferId)
             } else {

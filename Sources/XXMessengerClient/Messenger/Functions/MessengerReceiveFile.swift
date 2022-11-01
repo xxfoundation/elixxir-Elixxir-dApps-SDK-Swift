@@ -19,7 +19,6 @@ public struct MessengerReceiveFile {
   public enum CallbackInfo: Equatable {
     public enum Failure: Equatable {
       case callbackError(NSError)
-      case progressError(String)
       case receiveError(NSError)
     }
 
@@ -56,9 +55,7 @@ extension MessengerReceiveFile {
         callback: FileTransferProgressCallback { result in
           switch result {
           case .success(let info):
-            if let error = info.progress.error {
-              callback(.failed(.progressError(error)))
-            } else if info.progress.completed {
+            if info.progress.completed {
               do {
                 callback(.finished(try fileTransfer.receive(transferId: params.transferId)))
               } catch {

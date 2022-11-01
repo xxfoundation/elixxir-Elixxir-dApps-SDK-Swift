@@ -48,8 +48,7 @@ final class MessengerReceiveFileTests: XCTestCase {
         progress: Progress(
           completed: false,
           transmitted: 1,
-          total: 3,
-          error: nil
+          total: 3
         ),
         partTracker: .unimplemented
       )
@@ -65,8 +64,7 @@ final class MessengerReceiveFileTests: XCTestCase {
         progress: Progress(
           completed: false,
           transmitted: 2,
-          total: 3,
-          error: nil
+          total: 3
         ),
         partTracker: .unimplemented
       )
@@ -82,8 +80,7 @@ final class MessengerReceiveFileTests: XCTestCase {
         progress: Progress(
           completed: true,
           transmitted: 3,
-          total: 3,
-          error: nil
+          total: 3
         ),
         partTracker: .unimplemented
       )
@@ -108,43 +105,6 @@ final class MessengerReceiveFileTests: XCTestCase {
         MessengerReceiveFile.Error.fileTransferNotStarted
       )
     }
-  }
-
-  func testReceiveFileProgressError() throws {
-    let error = "Something went wrong..."
-
-    var receivedProgressCallback: FileTransferProgressCallback?
-    var didReceiveCallback: [MessengerReceiveFile.CallbackInfo] = []
-
-    var env: MessengerEnvironment = .unimplemented
-    env.fileTransfer.get = {
-      var fileTransfer: FileTransfer = .unimplemented
-      fileTransfer.registerReceivedProgressCallback.run = { _, _, callback in
-        receivedProgressCallback = callback
-      }
-      return fileTransfer
-    }
-    let receiveFile: MessengerReceiveFile = .live(env)
-
-    try receiveFile(.stub) { info in
-      didReceiveCallback.append(info)
-    }
-
-    receivedProgressCallback?.handle(.success(
-      FileTransferProgressCallback.Callback(
-        progress: Progress(
-          completed: false,
-          transmitted: 1,
-          total: 3,
-          error: error
-        ),
-        partTracker: .unimplemented
-      )
-    ))
-
-    XCTAssertNoDifference(didReceiveCallback, [
-      .failed(.progressError(error))
-    ])
   }
 
   func testReceiveFileCallbackError() throws {
@@ -202,8 +162,7 @@ final class MessengerReceiveFileTests: XCTestCase {
         progress: Progress(
           completed: true,
           transmitted: 3,
-          total: 3,
-          error: nil
+          total: 3
         ),
         partTracker: .unimplemented
       )
