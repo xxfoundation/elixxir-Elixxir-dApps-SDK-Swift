@@ -5,14 +5,6 @@ import XXMessengerClient
 import XXModels
 
 public struct ReceiveFileHandler {
-  public struct ProgressError: Error {
-    public init(message: String) {
-      self.message = message
-    }
-
-    public var message: String
-  }
-
   public typealias OnError = (Error) -> Void
 
   public var run: (@escaping OnError) -> Cancellable
@@ -70,14 +62,11 @@ extension ReceiveFileHandler {
                 data: data
               )
 
-            case .failed(.receiveError(let error)):
+            case .failed(.receive(let error)):
               onError(error)
 
-            case .failed(.callbackError(let error)):
+            case .failed(.callback(let error)):
               onError(error)
-
-            case .failed(.progressError(let message)):
-              onError(ProgressError(message: message))
             }
           }
         } catch {

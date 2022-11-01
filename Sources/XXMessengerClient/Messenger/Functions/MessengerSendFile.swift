@@ -24,8 +24,7 @@ public struct MessengerSendFile {
 
   public enum CallbackInfo: Equatable {
     public enum Failure: Equatable {
-      case error(NSError)
-      case progressError(String)
+      case callback(NSError)
       case close(NSError)
     }
 
@@ -63,8 +62,7 @@ extension MessengerSendFile {
           callback(.failed(id: id, .close(error as NSError)))
         }
       }
-      var transferId: Data!
-      transferId = try fileTransfer.send(
+      let transferId = try fileTransfer.send(
         params: FileTransferSend.Params(
           payload: params.file,
           recipientId: params.recipientId,
@@ -72,29 +70,21 @@ extension MessengerSendFile {
           period: params.callbackIntervalMS
         ),
         callback: FileTransferProgressCallback { result in
-          guard let transferId else {
-            fatalError("Bindings issue: file transfer progress callback was called before send function returned transfer id.")
+          if let error = result.error {
+            callback(.failed(id: result.progress.transferId, .callback(error as NSError)))
+            close(id: result.progress.transferId)
+            return
           }
-          switch result {
-          case .failure(let error):
-            callback(.failed(id: transferId, .error(error)))
-            close(id: transferId)
-
-          case .success(let cb):
-            if let error = cb.progress.error {
-              callback(.failed(id: transferId, .progressError(error)))
-              close(id: transferId)
-            } else if cb.progress.completed {
-              callback(.finished(id: transferId))
-              close(id: transferId)
-            } else {
-              callback(.progress(
-                id: transferId,
-                transmitted: cb.progress.transmitted,
-                total: cb.progress.total
-              ))
-            }
+          if result.progress.completed {
+            callback(.finished(id: result.progress.transferId))
+            close(id: result.progress.transferId)
+            return
           }
+          callback(.progress(
+            id: result.progress.transferId,
+            transmitted: result.progress.transmitted,
+            total: result.progress.total
+          ))
         }
       )
       return transferId
