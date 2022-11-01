@@ -252,24 +252,34 @@ Statuses will be enumerated as such:
 
 @protocol BindingsFileTransferReceiveProgressCallback <NSObject>
 /**
- * Callback is called when a file part is sent or an error occurs.
+ * Callback is called when a file part is received or an error occurs. Once
+a transfer completes, the file can be received using
+[FileTransfer.Receive].
 
 Parameters:
- - payload - the JSON marshalled bytes of a Progress object.
- - t - tracker that allows the lookup of the status of any file part
- - err - any errors that occurred during sending
+ - payload - JSON of [Progress], which describes the progress of the
+   current transfer.
+ - t - file part tracker that allows the lookup of the status of
+   individual file parts.
+ - err - Fatal errors during receiving. If an error is returned, the
+   transfer has failed and will not resume.
  */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
 @end
 
 @protocol BindingsFileTransferSentProgressCallback <NSObject>
 /**
- * Callback is called when a file part is sent or an error occurs.
+ * Callback is called when a file part is sent or an error occurs. Once a
+transfer completes, it should be closed using [FileTransfer.CloseSend].
 
 Parameters:
- - payload - the JSON marshalled bytes of a Progress object.
- - t - tracker that allows the lookup of the status of any file part
- - err - any errors that occurred during sending
+ - payload - JSON of [Progress], which describes the progress of the
+   current transfer.
+ - t - file part tracker that allows the lookup of the status of
+   individual file parts.
+ - err - Fatal errors during sending. If an error is returned, the
+   transfer has failed and will not resume. It must be cleared using
+   [FileTransfer.CloseSend].
  */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
 @end
@@ -319,10 +329,10 @@ Parameters:
  * Callback is called when a new file transfer is received.
 
 Parameters:
- - payload - the JSON marshalled bytes of a ReceivedFile object.
- - err - any errors that occurred during reception
+ - payload - JSON of [ReceivedFile], which contains information about the
+   incoming file transfer.
  */
-- (void)callback:(NSData* _Nullable)payload err:(NSError* _Nullable)err;
+- (void)callback:(NSData* _Nullable)payload;
 @end
 
 @protocol BindingsReporterFunc <NSObject>
@@ -1524,13 +1534,15 @@ The possible values for the status are:
 @end
 
 /**
- * FileSend is a public struct that contains the file contents and its name,
-type, and preview.
+ * FileSend contains the file and its metadata to send. This structure is JSON
+marshalled and passed as the payload to [FileTransfer.Send].
+
+Example JSON:
  {
    "Name": "testfile.txt",
    "Type": "text file",
-   "Preview": "aXQnCyBtZSBhIHByZXZpZXc=",
-   "Contents": "VGhpCyBpCyB0aGUgZnVsbCBjb250ZW50cyBvZiB0aGUgZm6lsZSBPbiBieXRl2w=="
+   "Preview": "RMlsZSBwCmV2aWV3Lg==",
+   "Contents": "RMlsZSBjb250ZW50cy4="
  }
  */
 @interface BindingsFileSend : NSObject <goSeqRefInterface> {
@@ -1539,15 +1551,31 @@ type, and preview.
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
+/**
+ * Name is the human-readable file name. Get max length from
+[FileTransfer.MaxFileNameLen].
+ */
 @property (nonatomic) NSString* _Nonnull name;
+/**
+ * Type is a shorthand that identifies the type of file. Get max length from
+[FileTransfer.MaxFileTypeLen].
+ */
 @property (nonatomic) NSString* _Nonnull type;
+/**
+ * Preview of the file data (e.g. a thumbnail). Get max length from
+[FileTransfer.MaxPreviewSize].
+ */
 @property (nonatomic) NSData* _Nullable preview;
+/**
+ * Contents is the full file contents. Get max length from
+[FileTransfer.MaxFileSize].
+ */
 @property (nonatomic) NSData* _Nullable contents;
 @end
 
 /**
  * FileTransfer object is a bindings-layer struct which wraps a
-fileTransfer.FileTransfer interface.
+[fileTransfer.FileTransfer] interface.
  */
 @interface BindingsFileTransfer : NSObject <goSeqRefInterface> {
 }
@@ -1557,14 +1585,14 @@ fileTransfer.FileTransfer interface.
 - (nonnull instancetype)init;
 /**
  * CloseSend deletes a file from the internal storage once a transfer has
-completed or reached the retry limit. Returns an error if the transfer has
-not run out of retries.
+completed or reached the retry limit. If neither of those condition are met,
+an error is returned.
 
 This function should be called once a transfer completes or errors out (as
 reported by the progress callback).
 
 Parameters:
- - tidBytes - file transfer ID
+ - tidBytes - the file transfer's unique [fileTransfer.TransferID].
  */
 - (BOOL)closeSend:(NSData* _Nullable)tidBytes error:(NSError* _Nullable* _Nullable)error;
 /**
@@ -1586,59 +1614,87 @@ Parameters:
 /**
  * Receive returns the full file on the completion of the transfer. It deletes
 internal references to the data and unregisters any attached progress
-callbacks. Returns an error if the transfer is not complete, the full file
+callback. Returns an error if the transfer is not complete, the full file
 cannot be verified, or if the transfer cannot be found.
 
-Receive can only be called once the progress callback returns that the
-file transfer is complete.
+Receive can only be called once the progress callback returns that the file
+transfer is complete.
 
 Parameters:
- - tidBytes - file transfer ID
+ - tidBytes - The file transfer's unique [fileTransfer.TransferID].
  */
 - (NSData* _Nullable)receive:(NSData* _Nullable)tidBytes error:(NSError* _Nullable* _Nullable)error;
 /**
  * RegisterReceivedProgressCallback allows for the registration of a callback to
 track the progress of an individual received file transfer.
 
-This should be done when a new transfer is received on the ReceiveCallback.
+The callback will be called immediately when added to report the current
+progress of the transfer. It will then call every time a file part is
+received, the transfer completes, or a fatal error occurs. It is called at
+most once every period regardless of the number of progress updates.
+
+In the event that the client is closed and resumed, this function must be
+used to re-register any callbacks previously registered.
+
+Once the callback reports that the transfer has completed, the recipient can
+get the full file by calling Receive.
 
 Parameters:
- - tidBytes - file transfer ID
- - callback - callback that reports file reception progress
- - period - Duration (in ms) to wait between progress callbacks triggering.
-   This value should depend on how frequently you want to receive updates,
-   and should be tuned to your implementation.
+ - tidBytes - The file transfer's unique [fileTransfer.TransferID].
+ - callback - A callback that reports the progress of the file transfer. The
+   callback is called once on initialization, on every progress update (or
+   less if restricted by the period), or on fatal error.
+ - period - The progress callback will be limited from triggering only once
+   per period. It is a duration in milliseconds. This value should depend on
+   how frequently you want to receive updates, and should be tuned to your
+   implementation.
  */
 - (BOOL)registerReceivedProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferReceiveProgressCallback> _Nullable)callback period:(long)period error:(NSError* _Nullable* _Nullable)error;
 /**
  * RegisterSentProgressCallback allows for the registration of a callback to
 track the progress of an individual sent file transfer.
 
-SentProgressCallback is auto registered on Send; this function should be
-called when resuming clients or registering extra callbacks.
+The callback will be called immediately when added to report the current
+progress of the transfer. It will then call every time a file part
+arrives, the transfer completes, or a fatal error occurs. It is called at
+most once every period regardless of the number of progress updates.
+
+In the event that the client is closed and resumed, this function must be
+used to re-register any callbacks previously registered with this
+function or Send.
 
 Parameters:
- - tidBytes - file transfer ID
- - callback - callback that reports file reception progress
- - period - Duration (in ms) to wait between progress callbacks triggering.
-   This value should depend on how frequently you want to receive updates,
-   and should be tuned to your implementation.
+ - tidBytes - The file transfer's unique [fileTransfer.TransferID].
+ - callback - A callback that reports the progress of the file transfer. The
+   callback is called once on initialization, on every progress update (or
+   less if restricted by the period), or on fatal error.
+ - period - The progress callback will be limited from triggering only once
+   per period. It is a duration in milliseconds. This value should depend on
+   how frequently you want to receive updates, and should be tuned to your
+   implementation.
  */
 - (BOOL)registerSentProgressCallback:(NSData* _Nullable)tidBytes callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(long)period error:(NSError* _Nullable* _Nullable)error;
 /**
- * Send is the bindings-level function for sending a file.
+ * Send initiates the sending of a file to a recipient and returns a transfer ID
+that uniquely identifies this file transfer. Progress for the file transfer
+is reported to that passed in callback.
 
 Parameters:
- - payload - JSON marshalled FileSend
- - recipientID - marshalled recipient id.ID
- - retry - number of retries allowed
- - callback - callback that reports file sending progress
- - period - Duration (in ms) to wait between progress callbacks triggering.
-   This value should depend on how frequently you want to receive updates,
-   and should be tuned to your implementation.
+ - payload - JSON of [FileSend], which contains the file contents and its
+   metadata.
+ - recipientID - marshalled bytes of the recipient's [id.ID].
+ - retry - The number of sending retries allowed on send failure (e.g. a
+   retry of 2.0 with 6 parts means 12 total possible sends).
+ - callback - A callback that reports the progress of the file transfer. The
+   callback is called once on initialization, on every progress update (or
+   less if restricted by the period), or on fatal error.
+ - period - The progress callback will be limited from triggering only once
+   per period. It is a duration in milliseconds. This value should depend on
+   how frequently you want to receive updates, and should be tuned to your
+   implementation.
 
 Returns:
- - []byte - unique file transfer ID
+ - The bytes of the unique [fileTransfer.TransferID].
  */
 - (NSData* _Nullable)send:(NSData* _Nullable)payload recipientID:(NSData* _Nullable)recipientID retry:(float)retry callback:(id<BindingsFileTransferSentProgressCallback> _Nullable)callback period:(long)period error:(NSError* _Nullable* _Nullable)error;
 @end
@@ -2025,8 +2081,9 @@ false, this report may be ignored.
 @end
 
 /**
- * Progress is a public struct that represents the progress of an in-progress
-file transfer.
+ * Progress contains the progress information of a transfer. It is returned by
+[FileTransferSentProgressCallback.Callback] and
+[FileTransferReceiveProgressCallback.Callback].
 
 Example JSON:
  {
@@ -2089,8 +2146,9 @@ JSON Example:
 @end
 
 /**
- * ReceivedFile is a public struct that contains the metadata of a new file
-transfer.
+ * ReceivedFile contains the metadata of a new received file transfer. It is
+received from a sender on a new file transfer. It is returned by
+[ReceiveFileCallback.Callback].
 
 Example JSON:
  {
@@ -2762,8 +2820,15 @@ FOUNDATION_EXPORT NSData* _Nullable BindingsImportPrivateIdentity(NSString* _Nul
  * InitFileTransfer creates a bindings-level file transfer manager.
 
 Parameters:
- - e2eID - e2e object ID in the tracker
- - paramsJSON - JSON marshalled fileTransfer.Params
+ - e2eID - ID of [E2e] object in tracker.
+ - receiveFileCallback - A callback that is called when a new file transfer
+   is received.
+ - e2eFileTransferParamsJson - JSON of
+   [gitlab.com/elixxir/client/fileTransfer/e2e.Params].
+ - fileTransferParamsJson - JSON of [fileTransfer.Params].
+
+Returns:
+ - New [FileTransfer] object.
  */
 FOUNDATION_EXPORT BindingsFileTransfer* _Nullable BindingsInitFileTransfer(long e2eID, id<BindingsReceiveFileCallback> _Nullable receiveFileCallback, NSData* _Nullable e2eFileTransferParamsJson, NSData* _Nullable fileTransferParamsJson, NSError* _Nullable* _Nullable error);
 
@@ -3524,12 +3589,17 @@ called with the progress of a received file.
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 /**
- * Callback is called when a file part is sent or an error occurs.
+ * Callback is called when a file part is received or an error occurs. Once
+a transfer completes, the file can be received using
+[FileTransfer.Receive].
 
 Parameters:
- - payload - the JSON marshalled bytes of a Progress object.
- - t - tracker that allows the lookup of the status of any file part
- - err - any errors that occurred during sending
+ - payload - JSON of [Progress], which describes the progress of the
+   current transfer.
+ - t - file part tracker that allows the lookup of the status of
+   individual file parts.
+ - err - Fatal errors during receiving. If an error is returned, the
+   transfer has failed and will not resume.
  */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
 @end
@@ -3544,12 +3614,17 @@ a callback that is called when the sent progress updates.
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 /**
- * Callback is called when a file part is sent or an error occurs.
+ * Callback is called when a file part is sent or an error occurs. Once a
+transfer completes, it should be closed using [FileTransfer.CloseSend].
 
 Parameters:
- - payload - the JSON marshalled bytes of a Progress object.
- - t - tracker that allows the lookup of the status of any file part
- - err - any errors that occurred during sending
+ - payload - JSON of [Progress], which describes the progress of the
+   current transfer.
+ - t - file part tracker that allows the lookup of the status of
+   individual file parts.
+ - err - Fatal errors during sending. If an error is returned, the
+   transfer has failed and will not resume. It must be cleared using
+   [FileTransfer.CloseSend].
  */
 - (void)callback:(NSData* _Nullable)payload t:(BindingsFilePartTracker* _Nullable)t err:(NSError* _Nullable)err;
 @end
@@ -3668,10 +3743,10 @@ that is called when a file is received.
  * Callback is called when a new file transfer is received.
 
 Parameters:
- - payload - the JSON marshalled bytes of a ReceivedFile object.
- - err - any errors that occurred during reception
+ - payload - JSON of [ReceivedFile], which contains information about the
+   incoming file transfer.
  */
-- (void)callback:(NSData* _Nullable)payload err:(NSError* _Nullable)err;
+- (void)callback:(NSData* _Nullable)payload;
 @end
 
 /**
