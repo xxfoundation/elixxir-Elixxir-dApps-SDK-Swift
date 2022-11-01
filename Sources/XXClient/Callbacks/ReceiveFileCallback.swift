@@ -26,17 +26,14 @@ extension ReceiveFileCallback {
 
       let callback: ReceiveFileCallback
 
-      func callback(_ payload: Data?, err: Error?) {
-        if let error = err {
-          callback.handle(.failure(error as NSError))
-        } else if let data = payload {
-          do {
-            callback.handle(.success(try ReceivedFile.decode(data)))
-          } catch {
-            callback.handle(.failure(error as NSError))
-          }
-        } else {
+      func callback(_ payload: Data?) {
+        guard let data = payload else {
           fatalError("BindingsReceiveFileCallback received `nil` payload and `nil` error")
+        }
+        do {
+          callback.handle(.success(try ReceivedFile.decode(data)))
+        } catch {
+          callback.handle(.failure(error as NSError))
         }
       }
     }
