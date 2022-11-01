@@ -98,7 +98,7 @@ final class SendImageTests: XCTestCase {
 
     actions = []
     let sendError = NSError(domain: "send-error", code: 1)
-    sendFileCallback?(.failed(id: transferId, .error(sendError)))
+    sendFileCallback?(.failed(id: transferId, .callback(sendError)))
 
     XCTAssertNoDifference(actions, [
       .didFail(sendError),

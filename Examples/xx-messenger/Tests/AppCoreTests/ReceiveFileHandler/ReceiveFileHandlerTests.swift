@@ -124,7 +124,7 @@ final class ReceiveFileHandlerTests: XCTestCase {
 
     actions = []
     let receivingFileError = NSError(domain: "receiving-file", code: 2)
-    receivingFileCallback?(.failed(.receiveError(receivingFileError)))
+    receivingFileCallback?(.failed(.receive(receivingFileError)))
 
     XCTAssertNoDifference(actions, [
       .didCatchError(receivingFileError)
@@ -132,7 +132,7 @@ final class ReceiveFileHandlerTests: XCTestCase {
 
     actions = []
     let receivingFileCallbackError = NSError(domain: "receiving-file-callback", code: 3)
-    receivingFileCallback?(.failed(.callbackError(receivingFileCallbackError)))
+    receivingFileCallback?(.failed(.callback(receivingFileCallbackError)))
 
     XCTAssertNoDifference(actions, [
       .didCatchError(receivingFileCallbackError)

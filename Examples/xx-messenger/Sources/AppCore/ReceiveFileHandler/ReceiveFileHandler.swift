@@ -62,10 +62,10 @@ extension ReceiveFileHandler {
                 data: data
               )
 
-            case .failed(.receiveError(let error)):
+            case .failed(.receive(let error)):
               onError(error)
 
-            case .failed(.callbackError(let error)):
+            case .failed(.callback(let error)):
               onError(error)
             }
           }

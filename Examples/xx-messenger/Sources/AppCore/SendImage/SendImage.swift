@@ -67,7 +67,7 @@ extension SendImage {
               progress: 1
             )
 
-          case .failed(_, .error(let error)):
+          case .failed(_, .callback(let error)):
             onError(error)
 
           case .failed(_, .close(let error)):
