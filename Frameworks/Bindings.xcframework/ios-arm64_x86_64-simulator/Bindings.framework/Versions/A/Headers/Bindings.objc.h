@@ -1527,10 +1527,10 @@ The possible values for the status are:
  * FileSend is a public struct that contains the file contents and its name,
 type, and preview.
  {
-   "Name":"testfile.txt",
-   "Type":"text file",
-   "Preview":"aXQncyBtZSBhIHByZXZpZXc=",
-   "Contents":"VGhpcyBpcyB0aGUgZnVsbCBjb250ZW50cyBvZiB0aGUgZmlsZSBpbiBieXRlcw=="
+   "Name": "testfile.txt",
+   "Type": "text file",
+   "Preview": "aXQnCyBtZSBhIHByZXZpZXc=",
+   "Contents": "VGhpCyBpCyB0aGUgZnVsbCBjb250ZW50cyBvZiB0aGUgZm6lsZSBPbiBieXRl2w=="
  }
  */
 @interface BindingsFileSend : NSObject <goSeqRefInterface> {
@@ -2030,10 +2030,10 @@ file transfer.
 
 Example JSON:
  {
-   "Completed":false,
-   "Transmitted":128,
-   "Total":2048,
-   "Err":null
+   "TransferID": "RyJcMqtI3IIM1+YMxRwCcFiOX6AGuIzS+vQaPnqXVT8=",
+   "Completed": false,
+   "Transmitted": 128,
+   "Total": 2048
  }
  */
 @interface BindingsProgress : NSObject <goSeqRefInterface> {
@@ -2042,10 +2042,11 @@ Example JSON:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
+// skipped field Progress.TransferID with unsupported type: *gitlab.com/elixxir/crypto/fileTransfer.TransferID
+
 @property (nonatomic) BOOL completed;
 @property (nonatomic) long transmitted;
 @property (nonatomic) long total;
-@property (nonatomic) NSError* _Nullable err;
 @end
 
 /**
@@ -2093,12 +2094,12 @@ transfer.
 
 Example JSON:
  {
-   "TransferID":"B4Z9cwU18beRoGbk5xBjbcd5Ryi9ZUFA2UBvi8FOHWo=",
-   "SenderID":"emV6aW1hAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD",
-   "Preview":"aXQncyBtZSBhIHByZXZpZXc=",
-   "Name":"testfile.txt",
-   "Type":"text file",
-   "Size":2048
+   "TransferID": "0U+QY1nMOUzQGxGpqZyxDw8Cd6+qm8t870CzLtVoUM8=",
+   "SenderID": "UL3+S8XdJHAfUtCUm7iZMxW8orR8Nd5JM9Ky7/5jds8D",
+   "Preview": "aXQNcyBtZSBhIHByZXZpZXc=",
+   "Name": "testfile.txt",
+   "Type": "text file",
+   "Size": 2048
  }
  */
 @interface BindingsReceivedFile : NSObject <goSeqRefInterface> {
@@ -2107,8 +2108,10 @@ Example JSON:
 
 - (nonnull instancetype)initWithRef:(_Nonnull id)ref;
 - (nonnull instancetype)init;
-@property (nonatomic) NSData* _Nullable transferID;
-@property (nonatomic) NSData* _Nullable senderID;
+// skipped field ReceivedFile.TransferID with unsupported type: *gitlab.com/elixxir/crypto/fileTransfer.TransferID
+
+// skipped field ReceivedFile.SenderID with unsupported type: *gitlab.com/xx_network/primitives/id.ID
+
 @property (nonatomic) NSData* _Nullable preview;
 @property (nonatomic) NSString* _Nonnull name;
 @property (nonatomic) NSString* _Nonnull type;
