@@ -1480,10 +1480,10 @@ report.
 
 Example JSON:
  {
-  "Priority":1,
-  "Category":"Test Events",
-  "EventType":"Ping",
-  "Details":"This is an example of an event report"
+  "Priority": 1,
+  "Category": "Test Events",
+  "EventType": "Ping",
+  "Details": "This is an example of an event report"
  }
  */
 @interface BindingsEventReport : NSObject <goSeqRefInterface> {
