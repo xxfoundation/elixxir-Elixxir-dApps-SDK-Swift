@@ -36,6 +36,7 @@ public struct HomeView: View {
           if let failure = viewStore.failure {
             Section {
               Text(failure)
+                .textSelection(.enabled)
               Button {
                 viewStore.send(.messenger(.start))
               } label: {
