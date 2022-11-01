@@ -43,30 +43,36 @@ final class MessengerSendFileTests: XCTestCase {
       )
     ])
 
-    fileTransferProgressCallback.handle(.success(.init(
+    fileTransferProgressCallback.handle(.init(
       progress: Progress(
+        transferId: newTransferId,
         completed: false,
         transmitted: 1,
         total: 10
       ),
-      partTracker: .unimplemented
-    )))
-    fileTransferProgressCallback.handle(.success(.init(
+      partTracker: .unimplemented,
+      error: nil
+    ))
+    fileTransferProgressCallback.handle(.init(
       progress: Progress(
+        transferId: newTransferId,
         completed: false,
         transmitted: 6,
         total: 10
       ),
-      partTracker: .unimplemented
-    )))
-    fileTransferProgressCallback.handle(.success(.init(
+      partTracker: .unimplemented,
+      error: nil
+    ))
+    fileTransferProgressCallback.handle(.init(
       progress: Progress(
+        transferId: newTransferId,
         completed: true,
         transmitted: 10,
         total: 10
       ),
-      partTracker: .unimplemented
-    )))
+      partTracker: .unimplemented,
+      error: nil
+    ))
 
     XCTAssertNoDifference(didReceiveCallback, [
       .progress(id: transferId, transmitted: 1, total: 10),
@@ -90,6 +96,9 @@ final class MessengerSendFileTests: XCTestCase {
   }
 
   func testSendFileCallbackFailure() throws {
+    let newTransferId = "transferId".data(using: .utf8)!
+    let error = NSError(domain: "test", code: 1234)
+
     var didCloseSend: [Data] = []
     var didReceiveCallback: [MessengerSendFile.CallbackInfo] = []
     var fileTransferProgressCallback: FileTransferProgressCallback!
@@ -99,7 +108,7 @@ final class MessengerSendFileTests: XCTestCase {
       var fileTransfer: FileTransfer = .unimplemented
       fileTransfer.send.run = { _, callback in
         fileTransferProgressCallback = callback
-        return "transferId".data(using: .utf8)!
+        return newTransferId
       }
       fileTransfer.closeSend.run = { id in
         didCloseSend.append(id)
@@ -111,18 +120,26 @@ final class MessengerSendFileTests: XCTestCase {
     let transferId = try sendFile(.stub) { info in
       didReceiveCallback.append(info)
     }
-
-    let error = NSError(domain: "test", code: 1234)
-    fileTransferProgressCallback.handle(.failure(error))
+    fileTransferProgressCallback.handle(.init(
+      progress: .init(
+        transferId: newTransferId,
+        completed: false,
+        transmitted: 0,
+        total: 0
+      ),
+      partTracker: .unimplemented,
+      error: error
+    ))
 
     XCTAssertNoDifference(didReceiveCallback, [
-      .failed(id: transferId, .error(error)),
+      .failed(id: newTransferId, .callback(error)),
     ])
-    XCTAssertNoDifference(didCloseSend, [transferId])
+    XCTAssertNoDifference(didCloseSend, [newTransferId])
   }
 
   func testSendFileCloseError() throws {
     let closeError = NSError(domain: "test", code: 1234)
+    let newTransferId = "transferId".data(using: .utf8)!
 
     var didReceiveCallback: [MessengerSendFile.CallbackInfo] = []
     var fileTransferProgressCallback: FileTransferProgressCallback!
@@ -132,7 +149,7 @@ final class MessengerSendFileTests: XCTestCase {
       var fileTransfer: FileTransfer = .unimplemented
       fileTransfer.send.run = { _, callback in
         fileTransferProgressCallback = callback
-        return "transferId".data(using: .utf8)!
+        return newTransferId
       }
       fileTransfer.closeSend.run = { id in
         throw closeError
@@ -145,18 +162,20 @@ final class MessengerSendFileTests: XCTestCase {
       didReceiveCallback.append(info)
     }
 
-    fileTransferProgressCallback.handle(.success(.init(
+    fileTransferProgressCallback.handle(.init(
       progress: .init(
+        transferId: newTransferId,
         completed: true,
         transmitted: 1,
         total: 1
       ),
-      partTracker: .unimplemented
-    )))
+      partTracker: .unimplemented,
+      error: nil
+    ))
 
     XCTAssertNoDifference(didReceiveCallback, [
-      .finished(id: transferId),
-      .failed(id: transferId, .close(closeError)),
+      .finished(id: newTransferId),
+      .failed(id: newTransferId, .close(closeError)),
     ])
   }
 }

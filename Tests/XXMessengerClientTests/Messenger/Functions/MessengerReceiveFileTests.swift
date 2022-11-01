@@ -43,15 +43,15 @@ final class MessengerReceiveFileTests: XCTestCase {
     XCTAssertNoDifference(didReceiveCallback, [])
 
     didReceiveCallback = []
-    didRegisterReceivedProgressCallbackWithCallback.first?.handle(.success(
-      FileTransferProgressCallback.Callback(
-        progress: Progress(
-          completed: false,
-          transmitted: 1,
-          total: 3
-        ),
-        partTracker: .unimplemented
-      )
+    didRegisterReceivedProgressCallbackWithCallback.first?.handle(.init(
+      progress: .init(
+        transferId: params.transferId,
+        completed: false,
+        transmitted: 1,
+        total: 3
+      ),
+      partTracker: .unimplemented,
+      error: nil
     ))
 
     XCTAssertNoDifference(didReceiveCallback, [
@@ -59,15 +59,15 @@ final class MessengerReceiveFileTests: XCTestCase {
     ])
 
     didReceiveCallback = []
-    didRegisterReceivedProgressCallbackWithCallback.first?.handle(.success(
-      FileTransferProgressCallback.Callback(
-        progress: Progress(
-          completed: false,
-          transmitted: 2,
-          total: 3
-        ),
-        partTracker: .unimplemented
-      )
+    didRegisterReceivedProgressCallbackWithCallback.first?.handle(.init(
+      progress: .init(
+        transferId: params.transferId,
+        completed: false,
+        transmitted: 2,
+        total: 3
+      ),
+      partTracker: .unimplemented,
+      error: nil
     ))
 
     XCTAssertNoDifference(didReceiveCallback, [
@@ -75,15 +75,15 @@ final class MessengerReceiveFileTests: XCTestCase {
     ])
 
     didReceiveCallback = []
-    didRegisterReceivedProgressCallbackWithCallback.first?.handle(.success(
-      FileTransferProgressCallback.Callback(
-        progress: Progress(
-          completed: true,
-          transmitted: 3,
-          total: 3
-        ),
-        partTracker: .unimplemented
-      )
+    didRegisterReceivedProgressCallbackWithCallback.first?.handle(.init(
+      progress: Progress(
+        transferId: params.transferId,
+        completed: true,
+        transmitted: 3,
+        total: 3
+      ),
+      partTracker: .unimplemented,
+      error: nil
     ))
 
     XCTAssertNoDifference(didReceiveTransferId, [
@@ -127,14 +127,19 @@ final class MessengerReceiveFileTests: XCTestCase {
       didReceiveCallback.append(info)
     }
 
-    receivedProgressCallback?.handle(.failure(error))
+    receivedProgressCallback?.handle(.init(
+      progress: Progress(transferId: Data(), completed: false, transmitted: 0, total: 0),
+      partTracker: .unimplemented,
+      error: error
+    ))
 
     XCTAssertNoDifference(didReceiveCallback, [
-      .failed(.callbackError(error))
+      .failed(.callback(error))
     ])
   }
 
   func testReceiveFileReceiveError() throws {
+    let params: MessengerReceiveFile.Params = .stub
     let error = NSError(domain: "test", code: 123)
 
     var receivedProgressCallback: FileTransferProgressCallback?
@@ -153,23 +158,23 @@ final class MessengerReceiveFileTests: XCTestCase {
     }
     let receiveFile: MessengerReceiveFile = .live(env)
 
-    try receiveFile(.stub) { info in
+    try receiveFile(params) { info in
       didReceiveCallback.append(info)
     }
 
-    receivedProgressCallback?.handle(.success(
-      FileTransferProgressCallback.Callback(
-        progress: Progress(
-          completed: true,
-          transmitted: 3,
-          total: 3
-        ),
-        partTracker: .unimplemented
-      )
+    receivedProgressCallback?.handle(.init(
+      progress: Progress(
+        transferId: params.transferId,
+        completed: true,
+        transmitted: 3,
+        total: 3
+      ),
+      partTracker: .unimplemented,
+      error: nil
     ))
 
     XCTAssertNoDifference(didReceiveCallback, [
-      .failed(.receiveError(error))
+      .failed(.receive(error))
     ])
   }
 }
