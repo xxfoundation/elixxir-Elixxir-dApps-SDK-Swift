@@ -149,6 +149,7 @@ public struct ChatView: View {
             Text("\(fileTransfer.name) (\(fileTransfer.type))")
             if fileTransfer.progress < 1 {
               ProgressView(value: fileTransfer.progress)
+                .tint(.green)
             }
             if fileTransfer.type == "image",
                let data = fileTransfer.data,
