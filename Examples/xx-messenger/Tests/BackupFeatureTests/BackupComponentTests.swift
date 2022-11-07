@@ -63,7 +63,6 @@ final class BackupFeatureTests: XCTestCase {
   func testStartBackup() {
     var actions: [Action]!
     var isBackupRunning: [Bool] = [true]
-    let username = "test-username"
     let passphrase = "backup-password"
 
     let store = TestStore(
@@ -72,12 +71,6 @@ final class BackupFeatureTests: XCTestCase {
     )
     store.dependencies.app.mainQueue = .immediate
     store.dependencies.app.bgQueue = .immediate
-    store.dependencies.app.messenger.myContact.run = { includeFacts in
-      actions.append(.didGetMyContact(includingFacts: includeFacts))
-      var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
-      contact.getFactsFromContact.run = { _ in [Fact(type: .username, value: username)] }
-      return contact
-    }
     store.dependencies.app.messenger.startBackup.run = { passphrase, params in
       actions.append(.didStartBackup(passphrase: passphrase, params: params))
     }
@@ -102,12 +95,9 @@ final class BackupFeatureTests: XCTestCase {
     }
 
     XCTAssertNoDifference(actions, [
-      .didGetMyContact(
-        includingFacts: .types([.username])
-      ),
       .didStartBackup(
         passphrase: passphrase,
-        params: .init(username: username)
+        params: nil
       )
     ])
 
@@ -115,38 +105,6 @@ final class BackupFeatureTests: XCTestCase {
       $0.isRunning = true
       $0.isStarting = false
       $0.passphrase = ""
-    }
-  }
-
-  func testStartBackupWithoutContactUsername() {
-    var isBackupRunning: [Bool] = [false]
-
-    let store = TestStore(
-      initialState: BackupComponent.State(
-        passphrase: "1234"
-      ),
-      reducer: BackupComponent()
-    )
-    store.dependencies.app.mainQueue = .immediate
-    store.dependencies.app.bgQueue = .immediate
-    store.dependencies.app.messenger.myContact.run = { _ in
-      var contact = Contact.unimplemented("contact-data".data(using: .utf8)!)
-      contact.getFactsFromContact.run = { _ in [] }
-      return contact
-    }
-    store.dependencies.app.messenger.isBackupRunning.run = {
-      isBackupRunning.removeFirst()
-    }
-
-    store.send(.startTapped) {
-      $0.isStarting = true
-    }
-
-    let failure = BackupComponent.State.Error.contactUsernameMissing
-    store.receive(.didStart(failure: failure as NSError)) {
-      $0.isRunning = false
-      $0.isStarting = false
-      $0.alert = .error(failure)
     }
   }
 
@@ -163,7 +121,7 @@ final class BackupFeatureTests: XCTestCase {
     )
     store.dependencies.app.mainQueue = .immediate
     store.dependencies.app.bgQueue = .immediate
-    store.dependencies.app.messenger.myContact.run = { _ in throw failure }
+    store.dependencies.app.messenger.startBackup.run = { _, _ in throw failure }
     store.dependencies.app.messenger.isBackupRunning.run = {
       isBackupRunning.removeFirst()
     }
@@ -192,11 +150,6 @@ final class BackupFeatureTests: XCTestCase {
     )
     store.dependencies.app.mainQueue = .immediate
     store.dependencies.app.bgQueue = .immediate
-    store.dependencies.app.messenger.myContact.run = { _ in
-      var contact = Contact.unimplemented("data".data(using: .utf8)!)
-      contact.getFactsFromContact.run = { _ in [Fact(type: .username, value: "username")] }
-      return contact
-    }
     store.dependencies.app.messenger.startBackup.run = { _, _ in
       throw failure
     }
@@ -397,9 +350,8 @@ final class BackupFeatureTests: XCTestCase {
 
 private enum Action: Equatable {
   case didRegisterObserver
-  case didStartBackup(passphrase: String, params: BackupParams)
+  case didStartBackup(passphrase: String, params: String?)
   case didResumeBackup
   case didStopBackup
   case didRemoveBackup
-  case didGetMyContact(includingFacts: MessengerMyContact.IncludeFacts?)
 }

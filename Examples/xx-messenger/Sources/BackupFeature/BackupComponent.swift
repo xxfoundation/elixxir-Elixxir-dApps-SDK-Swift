@@ -11,10 +11,6 @@ public struct BackupComponent: ReducerProtocol {
       case passphrase
     }
 
-    public enum Error: String, Swift.Error, Equatable {
-      case contactUsernameMissing
-    }
-
     public init(
       isRunning: Bool = false,
       isStarting: Bool = false,
@@ -102,14 +98,7 @@ public struct BackupComponent: ReducerProtocol {
         state.focusedField = nil
         return Effect.run { [state] subscriber in
           do {
-            let contact = try messenger.myContact(includeFacts: .types([.username]))
-            guard let username = try contact.getFact(.username)?.value else {
-              throw State.Error.contactUsernameMissing
-            }
-            try messenger.startBackup(
-              password: state.passphrase,
-              params: BackupParams(username: username)
-            )
+            try messenger.startBackup(password: state.passphrase)
             subscriber.send(.didStart(failure: nil))
           } catch {
             subscriber.send(.didStart(failure: error as NSError))

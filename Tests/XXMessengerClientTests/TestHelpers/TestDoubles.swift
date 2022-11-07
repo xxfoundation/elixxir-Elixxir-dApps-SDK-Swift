@@ -18,12 +18,6 @@ extension Message {
   }
 }
 
-extension BackupParams {
-  static let stub = BackupParams(
-    username: "stub-username"
-  )
-}
-
 extension ReceivedFile {
   static func stub(_ id: Int) -> ReceivedFile {
     ReceivedFile(
