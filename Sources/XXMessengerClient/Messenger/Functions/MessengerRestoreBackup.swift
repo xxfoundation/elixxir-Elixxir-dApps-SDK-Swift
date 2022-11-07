@@ -5,14 +5,14 @@ import XCTestDynamicOverlay
 public struct MessengerRestoreBackup {
   public struct Result: Equatable {
     public init(
-      restoredParams: BackupParams,
+      restoredParams: String,
       restoredContacts: [Data]
     ) {
       self.restoredParams = restoredParams
       self.restoredContacts = restoredContacts
     }
 
-    public var restoredParams: BackupParams
+    public var restoredParams: String
     public var restoredContacts: [Data]
   }
 
@@ -42,8 +42,6 @@ extension MessengerRestoreBackup {
         sessionPassword: password,
         backupFileContents: backupData
       )
-      let paramsData = report.params.data(using: .utf8)!
-      let params = try BackupParams.decode(paramsData)
       let cMix = try env.loadCMix(
         storageDir: storageDir,
         password: password,
@@ -68,7 +66,7 @@ extension MessengerRestoreBackup {
       )
       env.ud.set(ud)
       return Result(
-        restoredParams: params,
+        restoredParams: report.params,
         restoredContacts: report.restoredContacts
       )
     }

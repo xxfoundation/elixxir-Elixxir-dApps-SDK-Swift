@@ -6,6 +6,7 @@ import XXClient
 final class MessengerBackupParamsTests: XCTestCase {
   func testBackupParams() throws {
     var didAddJSON: [String] = []
+    let params = "test-123"
 
     var env: MessengerEnvironment = .unimplemented
     env.backup.get = {
@@ -16,11 +17,9 @@ final class MessengerBackupParamsTests: XCTestCase {
     }
     let backup: MessengerBackupParams = .live(env)
 
-    try backup(.stub)
+    try backup(params)
 
-    XCTAssertNoDifference(didAddJSON, [
-      String(data: try BackupParams.stub.encode(), encoding: .utf8)!
-    ])
+    XCTAssertNoDifference(didAddJSON, [params])
   }
 
   func testBackupParamsWhenNoBackup() {
@@ -28,7 +27,7 @@ final class MessengerBackupParamsTests: XCTestCase {
     env.backup.get = { nil }
     let backup: MessengerBackupParams = .live(env)
 
-    XCTAssertThrowsError(try backup(.stub)) { error in
+    XCTAssertThrowsError(try backup("")) { error in
       XCTAssertNoDifference(
         error as NSError,
         MessengerBackupParams.Error.notRunning as NSError
@@ -45,7 +44,7 @@ final class MessengerBackupParamsTests: XCTestCase {
     }
     let backup: MessengerBackupParams = .live(env)
 
-    XCTAssertThrowsError(try backup(.stub)) { error in
+    XCTAssertThrowsError(try backup("")) { error in
       XCTAssertNoDifference(
         error as NSError,
         MessengerBackupParams.Error.notRunning as NSError

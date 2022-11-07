@@ -6,9 +6,9 @@ public struct MessengerBackupParams {
     case notRunning
   }
 
-  public var run: (BackupParams) throws -> Void
+  public var run: (String) throws -> Void
 
-  public func callAsFunction(_ params: BackupParams) throws {
+  public func callAsFunction(_ params: String) throws {
     try run(params)
   }
 }
@@ -19,9 +19,7 @@ extension MessengerBackupParams {
       guard let backup = env.backup(), backup.isRunning() else {
         throw Error.notRunning
       }
-      let paramsData = try params.encode()
-      let paramsString = String(data: paramsData, encoding: .utf8)!
-      backup.addJSON(paramsString)
+      backup.addJSON(params)
     }
   }
 }

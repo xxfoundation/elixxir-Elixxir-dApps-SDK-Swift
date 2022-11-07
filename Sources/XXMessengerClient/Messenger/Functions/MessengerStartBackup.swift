@@ -9,11 +9,11 @@ public struct MessengerStartBackup {
     case notLoggedIn
   }
 
-  public var run: (String, BackupParams) throws -> Void
+  public var run: (String, String?) throws -> Void
 
   public func callAsFunction(
     password: String,
-    params: BackupParams
+    params: String? = nil
   ) throws {
     try run(password, params)
   }
@@ -31,8 +31,6 @@ extension MessengerStartBackup {
       guard let ud = env.ud() else {
         throw Error.notLoggedIn
       }
-      let paramsData = try params.encode()
-      let paramsString = String(data: paramsData, encoding: .utf8)!
       var didAddParams = false
       var semaphore: DispatchSemaphore? = .init(value: 0)
       let backup = try env.initializeBackup(
@@ -41,9 +39,9 @@ extension MessengerStartBackup {
         password: password,
         callback: .init { data in
           semaphore?.wait()
-          if !didAddParams {
+          if let params, !didAddParams {
             if let backup = env.backup() {
-              backup.addJSON(paramsString)
+              backup.addJSON(params)
               didAddParams = true
             }
           } else {

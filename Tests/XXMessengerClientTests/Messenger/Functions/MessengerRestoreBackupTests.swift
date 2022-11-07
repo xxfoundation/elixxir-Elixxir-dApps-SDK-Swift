@@ -10,10 +10,9 @@ final class MessengerRestoreBackupTests: XCTestCase {
     let ndfData = "ndf-data".data(using: .utf8)!
     let password = "password".data(using: .utf8)!
     let backupContacts: [Data] = (1...3).map { "contact-\($0)" }.map { $0.data(using: .utf8)! }
-    let backupParams = BackupParams.stub
     let backupReport = BackupReport(
       restoredContacts: backupContacts,
-      params: String(data: try! JSONEncoder().encode(backupParams), encoding: .utf8)!
+      params: "backup-report-params"
     )
     let cMixParams = "cmix-params".data(using: .utf8)!
     let e2eParams = "e2e-params".data(using: .utf8)!
@@ -157,7 +156,7 @@ final class MessengerRestoreBackupTests: XCTestCase {
     ])
 
     XCTAssertNoDifference(result, MessengerRestoreBackup.Result(
-      restoredParams: backupParams,
+      restoredParams: backupReport.params,
       restoredContacts: backupContacts
     ))
   }
