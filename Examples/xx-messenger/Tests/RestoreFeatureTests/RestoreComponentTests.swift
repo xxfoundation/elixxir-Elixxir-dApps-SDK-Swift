@@ -82,7 +82,7 @@ final class RestoreComponentTests: XCTestCase {
       Fact(type: .phone, value: "restored-fact-phone"),
     ]
     let restoreResult = MessengerRestoreBackup.Result(
-      restoredParams: BackupParams(username: "restored-param-username"),
+      restoredParams: "",
       restoredContacts: [
         "contact-1-id".data(using: .utf8)!,
         "contact-2-id".data(using: .utf8)!,
