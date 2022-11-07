@@ -63,7 +63,6 @@ final class BackupFeatureTests: XCTestCase {
   func testStartBackup() {
     var actions: [Action]!
     var isBackupRunning: [Bool] = [true]
-    let username = "test-username"
     let passphrase = "backup-password"
 
     let store = TestStore(
