@@ -2,25 +2,25 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct GetNotificationsReport {
-  public var run: (Int, String, Data) throws -> NotificationReport
+  public var run: (Int, String, MessageServiceList) throws -> NotificationReport
 
   public func callAsFunction(
     e2eId: Int,
     notificationCSV: String,
-    marshaledServices: Data
+    services: MessageServiceList
   ) throws -> NotificationReport {
-    try run(e2eId, notificationCSV, marshaledServices)
+    try run(e2eId, notificationCSV, services)
   }
 }
 
 extension GetNotificationsReport {
   public static func live() -> GetNotificationsReport {
-    GetNotificationsReport { e2eId, notificationCSV, marshaledServices in
+    GetNotificationsReport { e2eId, notificationCSV, services in
       var error: NSError?
       let result = BindingsGetNotificationsReport(
         e2eId,
         notificationCSV,
-        marshaledServices,
+        try services.encode(),
         &error
       )
       if let error = error {
