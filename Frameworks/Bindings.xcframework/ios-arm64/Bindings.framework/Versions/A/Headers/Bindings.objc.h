@@ -1037,16 +1037,26 @@ most likely be in an unrecoverable state and need to be trashed.
  * TrackServices will return via a callback the list of services the
 backend keeps track of, which is formally referred to as a
 [message.ServiceList]. This may be passed into other bindings call which
-may need context on the available services for this client. This is the equivalent
-of GetPreimages in APIv0. The callback will be called every time a new service
-is added or an existing service is deleted. This serves as a way for
-the caller to have the most up-to-date list of existing services.
+may need context on the available services for this client. This will
+provide services for all identities that the client tracks.
 
 Parameters:
   - cb - A TrackServicesCallback, which will be passed the marshalled
     message.ServiceList.
  */
 - (void)trackServices:(id<BindingsTrackServicesCallback> _Nullable)cb;
+/**
+ * TrackServicesWithIdentity will return via a callback the list of services the
+backend keeps track of for the provided identity. This may be passed into
+other bindings call which may need context on the available services for this
+single identity. This will only return services for the given identity.
+
+Parameters:
+  - e2eID - e2e object ID in the tracker.
+  - cb - A TrackServicesCallback, which will be passed the marshalled
+    message.ServiceList.
+ */
+- (BOOL)trackServicesWithIdentity:(long)e2eId cb:(id<BindingsTrackServicesCallback> _Nullable)cb error:(NSError* _Nullable* _Nullable)error;
 /**
  * WaitForNetwork will block until either the network is healthy or the passed
 timeout is reached. It will return true if the network is healthy.
@@ -2722,19 +2732,18 @@ notifications are for this user. // This returns the JSON-marshalled
 NotificationReports.
 
 Parameters:
-  - e2eID - e2e object ID in the tracker
   - notificationCSV - the notification data received from the
     notifications' server.
   - marshalledServices - the JSON-marshalled list of services the backend
-    keeps track of. Refer to Cmix.TrackServices for information about this. This
-    is the equivalent to preimages in APIv0.
+    keeps track of. Refer to Cmix.TrackServices or
+    Cmix.TrackServicesWithIdentity for information about this.
 
 Returns:
   - []byte - A JSON marshalled NotificationReports. Some NotificationReport's
     within in this structure may have their NotificationReport.ForMe
     set to false. These may be ignored.
  */
-FOUNDATION_EXPORT NSData* _Nullable BindingsGetNotificationsReport(long e2eId, NSString* _Nullable notificationCSV, NSData* _Nullable marshalledServices, NSError* _Nullable* _Nullable error);
+FOUNDATION_EXPORT NSData* _Nullable BindingsGetNotificationsReport(NSString* _Nullable notificationCSV, NSData* _Nullable marshalledServices, NSError* _Nullable* _Nullable error);
 
 /**
  * GetPubkeyFromContact returns the DH public key in the [contact.Contact]
