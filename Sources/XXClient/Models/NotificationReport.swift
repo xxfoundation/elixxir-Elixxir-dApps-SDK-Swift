@@ -1,7 +1,7 @@
 import Foundation
 
 public struct NotificationReport: Equatable {
-  public enum ReportType: String, Equatable {
+  public enum ReportType: String, Equatable, CaseIterable {
     case `default`
     case request
     case reset

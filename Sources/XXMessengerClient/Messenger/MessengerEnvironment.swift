@@ -16,6 +16,7 @@ public struct MessengerEnvironment {
   public var getE2EFileTransferParams: GetE2EFileTransferParams
   public var getE2EParams: GetE2EParams
   public var getFileTransferParams: GetFileTransferParams
+  public var getNotificationsReport: GetNotificationsReport
   public var getSingleUseParams: GetSingleUseParams
   public var initFileTransfer: InitFileTransfer
   public var initializeBackup: InitializeBackup
@@ -68,6 +69,7 @@ extension MessengerEnvironment {
       getE2EFileTransferParams: .liveDefault,
       getE2EParams: .liveDefault,
       getFileTransferParams: .liveDefault,
+      getNotificationsReport: .live,
       getSingleUseParams: .liveDefault,
       initFileTransfer: .live,
       initializeBackup: .live,
@@ -115,6 +117,7 @@ extension MessengerEnvironment {
     getE2EFileTransferParams: .unimplemented,
     getE2EParams: .unimplemented,
     getFileTransferParams: .unimplemented,
+    getNotificationsReport: .unimplemented,
     getSingleUseParams: .unimplemented,
     initFileTransfer: .unimplemented,
     initializeBackup: .unimplemented,
