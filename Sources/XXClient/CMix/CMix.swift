@@ -20,6 +20,7 @@ public struct CMix {
   public var waitForRoundResult: CMixWaitForRoundResult
   public var connect: CMixConnect
   public var trackServices: CMixTrackServices
+  public var trackServicesWithIdentity: CMixTrackServicesWithIdentity
 }
 
 extension CMix {
@@ -43,7 +44,8 @@ extension CMix {
       addHealthCallback: .live(bindingsCMix),
       waitForRoundResult: .live(bindingsCMix),
       connect: .live(bindingsCMix),
-      trackServices: .live(bindingsCMix)
+      trackServices: .live(bindingsCMix),
+      trackServicesWithIdentity: .live(bindingsCMix)
     )
   }
 }
@@ -68,6 +70,7 @@ extension CMix {
     addHealthCallback: .unimplemented,
     waitForRoundResult: .unimplemented,
     connect: .unimplemented,
-    trackServices: .unimplemented
+    trackServices: .unimplemented,
+    trackServicesWithIdentity: .unimplemented
   )
 }
