@@ -4,6 +4,7 @@ import XXClient
 public struct MessengerTrackServices {
   public enum Error: Swift.Error, Equatable {
     case notLoaded
+    case notConnected
   }
 
   public typealias OnError = (Swift.Error) -> Void
@@ -21,6 +22,9 @@ extension MessengerTrackServices {
       guard let cMix = env.cMix() else {
         throw Error.notLoaded
       }
+      guard let e2e = env.e2e() else {
+        throw Error.notConnected
+      }
       let callback = TrackServicesCallback { result in
         switch result {
         case .success(let serviceList):
@@ -30,7 +34,10 @@ extension MessengerTrackServices {
           onError(error)
         }
       }
-      cMix.trackServices(callback: callback)
+      try cMix.trackServicesWithIdentity(
+        e2eId: e2e.getId(),
+        callback: callback
+      )
     }
   }
 }

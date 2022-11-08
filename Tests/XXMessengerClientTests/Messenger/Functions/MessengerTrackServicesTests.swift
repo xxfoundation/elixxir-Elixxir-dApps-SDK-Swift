@@ -9,7 +9,9 @@ final class MessengerTrackServicesTests: XCTestCase {
     struct Failure: Error, Equatable {}
     let failure = Failure()
     let serviceList = MessageServiceList.stub()
+    let e2eId = 123
 
+    var didTrackServicesWithIdentity: [Int] = []
     var didSetServiceList: [MessageServiceList?] = []
     var didReceiveError: [Error] = []
     var callbacks: [TrackServicesCallback] = []
@@ -20,10 +22,16 @@ final class MessengerTrackServicesTests: XCTestCase {
     }
     env.cMix.get = {
       var cMix: CMix = .unimplemented
-      cMix.trackServices.run = { callback in
+      cMix.trackServicesWithIdentity.run = { e2eId, callback in
+        didTrackServicesWithIdentity.append(e2eId)
         callbacks.append(callback)
       }
       return cMix
+    }
+    env.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getId.run = { e2eId }
+      return e2e
     }
     let track: MessengerTrackServices = .live(env)
 
@@ -31,6 +39,7 @@ final class MessengerTrackServicesTests: XCTestCase {
       didReceiveError.append(error)
     })
 
+    XCTAssertNoDifference(didTrackServicesWithIdentity, [e2eId])
     XCTAssertEqual(callbacks.count, 1)
 
     didSetServiceList = []
@@ -56,8 +65,22 @@ final class MessengerTrackServicesTests: XCTestCase {
 
     XCTAssertThrowsError(try track(onError: unimplemented())) { error in
       XCTAssertNoDifference(
-        error as NSError,
-        MessengerTrackServices.Error.notLoaded as NSError
+        error as? MessengerTrackServices.Error,
+        .notLoaded
+      )
+    }
+  }
+
+  func testTrackWhenNotConnected() {
+    var env: MessengerEnvironment = .unimplemented
+    env.cMix.get = { .unimplemented }
+    env.e2e.get = { nil }
+    let track: MessengerTrackServices = .live(env)
+
+    XCTAssertThrowsError(try track(onError: unimplemented())) { error in
+      XCTAssertNoDifference(
+        error as? MessengerTrackServices.Error,
+        .notConnected
       )
     }
   }
