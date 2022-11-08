@@ -5,7 +5,7 @@ import XCTestDynamicOverlay
 public struct MessengerWaitForNodes {
   public typealias Progress = (NodeRegistrationReport) -> Void
 
-  public enum Error: Swift.Error {
+  public enum Error: Swift.Error, Equatable {
     case notLoaded
     case timeout
   }

@@ -16,7 +16,7 @@ public struct MessengerStop {
     public var retries: Int
   }
 
-  public enum Error: Swift.Error {
+  public enum Error: Swift.Error, Equatable {
     case notLoaded
     case timedOut
   }

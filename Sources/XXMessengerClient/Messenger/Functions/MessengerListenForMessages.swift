@@ -2,7 +2,7 @@ import XCTestDynamicOverlay
 import XXClient
 
 public struct MessengerListenForMessages {
-  public enum Error: Swift.Error {
+  public enum Error: Swift.Error, Equatable {
     case notConnected
   }
 

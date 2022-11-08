@@ -7,7 +7,7 @@ public struct MessengerMyContact {
     case types(Set<FactType>)
   }
 
-  public enum Error: Swift.Error {
+  public enum Error: Swift.Error, Equatable {
     case notConnected
     case notLoggedIn
   }
