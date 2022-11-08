@@ -3,7 +3,6 @@ import XCTestDynamicOverlay
 
 public struct MessengerGetNotificationReport {
   public enum Error: Swift.Error, Equatable {
-    case notConnected
     case serviceListMissing
   }
 
@@ -17,14 +16,10 @@ public struct MessengerGetNotificationReport {
 extension MessengerGetNotificationReport {
   public static func live(_ env: MessengerEnvironment) -> MessengerGetNotificationReport {
     MessengerGetNotificationReport { notificationCSV in
-      guard let e2e = env.e2e() else {
-        throw Error.notConnected
-      }
       guard let serviceList = env.serviceList() else {
         throw Error.serviceListMissing
       }
       return try env.getNotificationsReport(
-        e2eId: e2e.getId(),
         notificationCSV: notificationCSV,
         services: serviceList
       )
