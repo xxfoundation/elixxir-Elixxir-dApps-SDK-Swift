@@ -117,7 +117,7 @@ final class MessengerSendFileTests: XCTestCase {
     }
     let sendFile: MessengerSendFile = .live(env)
 
-    let transferId = try sendFile(.stub) { info in
+    _ = try sendFile(.stub) { info in
       didReceiveCallback.append(info)
     }
     fileTransferProgressCallback.handle(.init(
@@ -158,7 +158,7 @@ final class MessengerSendFileTests: XCTestCase {
     }
     let sendFile: MessengerSendFile = .live(env)
 
-    let transferId = try sendFile(.stub) { info in
+    _ = try sendFile(.stub) { info in
       didReceiveCallback.append(info)
     }
 
