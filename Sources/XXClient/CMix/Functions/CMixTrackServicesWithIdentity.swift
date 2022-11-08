@@ -5,18 +5,18 @@ public struct CMixTrackServicesWithIdentity {
   public var run: (Int, TrackServicesCallback) throws -> Void
 
   public func callAsFunction(
-    _ identity: Int,
+    e2eId: Int,
     callback: TrackServicesCallback
   ) throws -> Void {
-    try run(identity, callback)
+    try run(e2eId, callback)
   }
 }
 
 extension CMixTrackServicesWithIdentity {
   public static func live(_ bindingsCMix: BindingsCmix) -> CMixTrackServicesWithIdentity {
-    CMixTrackServicesWithIdentity { identity, callback in
+    CMixTrackServicesWithIdentity { e2eId, callback in
       try bindingsCMix.trackServices(
-        withIdentity: identity,
+        withIdentity: e2eId,
         cb: callback.makeBindingsHealthCallback()
       )
     }
