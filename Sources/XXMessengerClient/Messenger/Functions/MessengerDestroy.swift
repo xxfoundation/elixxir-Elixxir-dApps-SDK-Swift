@@ -25,6 +25,7 @@ extension MessengerDestroy {
       env.e2e.set(nil)
       env.cMix.set(nil)
       env.isListeningForMessages.set(false)
+      env.serviceList.set(nil)
       try env.fileManager.removeItem(env.storageDir)
       try env.passwordStorage.remove()
     }
