@@ -30,3 +30,28 @@ extension ReceivedFile {
     )
   }
 }
+
+extension MessageServiceList {
+  static func stub() -> MessageServiceList {
+    (1...3).map { .stub($0) }
+  }
+}
+
+extension MessageServiceListElement {
+  static func stub(_ id: Int) -> MessageServiceListElement {
+    MessageServiceListElement(
+      id: "id-\(id)".data(using: .utf8)!,
+      services: (1...3).map { $0 + 10 * id }.map { .stub($0) }
+    )
+  }
+}
+
+extension MessageService {
+  static func stub(_ id: Int) -> MessageService {
+    MessageService(
+      identifier: "identifier-\(id)".data(using: .utf8)!,
+      tag: "tag-\(id)",
+      metadata: "metadata-\(id)".data(using: .utf8)!
+    )
+  }
+}

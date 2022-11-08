@@ -38,6 +38,7 @@ public struct MessengerEnvironment {
   public var registerLogWriter: RegisterLogWriter
   public var resumeBackup: ResumeBackup
   public var searchUD: SearchUD
+  public var serviceList: Stored<MessageServiceList?>
   public var setLogLevel: SetLogLevel
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
@@ -89,6 +90,7 @@ extension MessengerEnvironment {
       registerLogWriter: .live,
       resumeBackup: .live,
       searchUD: .live,
+      serviceList: .inMemory(),
       setLogLevel: .live,
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
@@ -135,6 +137,7 @@ extension MessengerEnvironment {
     registerLogWriter: .unimplemented,
     resumeBackup: .unimplemented,
     searchUD: .unimplemented,
+    serviceList: .unimplemented(),
     setLogLevel: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
