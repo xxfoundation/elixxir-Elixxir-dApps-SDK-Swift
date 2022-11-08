@@ -14,23 +14,22 @@ public struct GetNotificationsReport {
 }
 
 extension GetNotificationsReport {
-  public static func live() -> GetNotificationsReport {
-    GetNotificationsReport { e2eId, notificationCSV, services in
-      var error: NSError?
-      let result = BindingsGetNotificationsReport(
-        e2eId,
-        notificationCSV,
-        try services.encode(),
-        &error
-      )
-      if let error = error {
-        throw error
-      }
-      guard let result = result else {
-        fatalError("BindingsGetNotificationsReport returned nil without providing error")
-      }
-      return try NotificationReport.decode(result)
+  public static let live = GetNotificationsReport {
+    e2eId, notificationCSV, services in
+    var error: NSError?
+    let result = BindingsGetNotificationsReport(
+      e2eId,
+      notificationCSV,
+      try services.encode(),
+      &error
+    )
+    if let error = error {
+      throw error
     }
+    guard let result = result else {
+      fatalError("BindingsGetNotificationsReport returned nil without providing error")
+    }
+    return try NotificationReport.decode(result)
   }
 }
 
