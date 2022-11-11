@@ -4,7 +4,7 @@ public struct MessageService: Equatable {
   public init(
     identifier: Data,
     tag: String,
-    metadata: Data
+    metadata: Data?
   ) {
     self.identifier = identifier
     self.tag = tag
@@ -13,7 +13,7 @@ public struct MessageService: Equatable {
 
   public var identifier: Data
   public var tag: String
-  public var metadata: Data
+  public var metadata: Data?
 }
 
 extension MessageService: Codable {
