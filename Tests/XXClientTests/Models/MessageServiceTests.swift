@@ -29,6 +29,31 @@ final class MessageServiceTests: XCTestCase {
     XCTAssertNoDifference(decodedModel, model)
   }
 
+  func testCodingWithoutMetadata() throws {
+    let identifierB64 = "AQID"
+    let tag = "TestTag 2"
+    let jsonString = """
+    {
+     "Identifier": "\(identifierB64)",
+     "Tag": "\(tag)",
+     "Metadata": null
+    }
+    """
+    let jsonData = jsonString.data(using: .utf8)!
+    let model = try MessageService.decode(jsonData)
+
+    XCTAssertNoDifference(model, MessageService(
+      identifier: Data(base64Encoded: identifierB64)!,
+      tag: tag,
+      metadata: nil
+    ))
+
+    let encodedModel = try model.encode()
+    let decodedModel = try MessageService.decode(encodedModel)
+
+    XCTAssertNoDifference(decodedModel, model)
+  }
+
   func testCodingArray() throws {
     let models = [
       MessageService(
