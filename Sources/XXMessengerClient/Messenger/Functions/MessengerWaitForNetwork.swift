@@ -2,7 +2,7 @@ import XXClient
 import XCTestDynamicOverlay
 
 public struct MessengerWaitForNetwork {
-  public enum Error: Swift.Error {
+  public enum Error: Swift.Error, Equatable {
     case notLoaded
     case timeout
   }

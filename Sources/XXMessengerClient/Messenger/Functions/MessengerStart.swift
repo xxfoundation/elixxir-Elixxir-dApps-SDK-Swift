@@ -2,7 +2,7 @@ import XXClient
 import XCTestDynamicOverlay
 
 public struct MessengerStart {
-  public enum Error: Swift.Error {
+  public enum Error: Swift.Error, Equatable {
     case notLoaded
   }
 

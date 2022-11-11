@@ -1,3 +1,4 @@
+import Foundation
 import XCTestDynamicOverlay
 
 public struct Stored<Value> {
@@ -29,6 +30,26 @@ private final class Memory<Value> {
   }
 
   var value: Value
+}
+
+extension Stored {
+  public static func userDefaults<T>(
+    key: String,
+    userDefaults: UserDefaults = .standard
+  ) -> Stored<T?> where T: Codable {
+    let encoder = JSONEncoder()
+    let decoder = JSONDecoder()
+    return Stored<T?>(
+      get: {
+        guard let data = userDefaults.data(forKey: key) else { return nil }
+        return try? decoder.decode(T.self, from: data)
+      },
+      set: { newValue in
+        let data = try? encoder.encode(newValue)
+        userDefaults.set(data, forKey: key)
+      }
+    )
+  }
 }
 
 extension Stored {

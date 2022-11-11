@@ -16,6 +16,7 @@ public struct MessengerEnvironment {
   public var getE2EFileTransferParams: GetE2EFileTransferParams
   public var getE2EParams: GetE2EParams
   public var getFileTransferParams: GetFileTransferParams
+  public var getNotificationsReport: GetNotificationsReport
   public var getSingleUseParams: GetSingleUseParams
   public var initFileTransfer: InitFileTransfer
   public var initializeBackup: InitializeBackup
@@ -38,6 +39,7 @@ public struct MessengerEnvironment {
   public var registerLogWriter: RegisterLogWriter
   public var resumeBackup: ResumeBackup
   public var searchUD: SearchUD
+  public var serviceList: Stored<MessageServiceList?>
   public var setLogLevel: SetLogLevel
   public var sleep: (TimeInterval) -> Void
   public var storageDir: String
@@ -67,6 +69,7 @@ extension MessengerEnvironment {
       getE2EFileTransferParams: .liveDefault,
       getE2EParams: .liveDefault,
       getFileTransferParams: .liveDefault,
+      getNotificationsReport: .live,
       getSingleUseParams: .liveDefault,
       initFileTransfer: .live,
       initializeBackup: .live,
@@ -89,6 +92,7 @@ extension MessengerEnvironment {
       registerLogWriter: .live,
       resumeBackup: .live,
       searchUD: .live,
+      serviceList: .inMemory(),
       setLogLevel: .live,
       sleep: { Thread.sleep(forTimeInterval: $0) },
       storageDir: MessengerEnvironment.defaultStorageDir,
@@ -113,6 +117,7 @@ extension MessengerEnvironment {
     getE2EFileTransferParams: .unimplemented,
     getE2EParams: .unimplemented,
     getFileTransferParams: .unimplemented,
+    getNotificationsReport: .unimplemented,
     getSingleUseParams: .unimplemented,
     initFileTransfer: .unimplemented,
     initializeBackup: .unimplemented,
@@ -135,6 +140,7 @@ extension MessengerEnvironment {
     registerLogWriter: .unimplemented,
     resumeBackup: .unimplemented,
     searchUD: .unimplemented,
+    serviceList: .unimplemented(),
     setLogLevel: .unimplemented,
     sleep: XCTUnimplemented("\(Self.self).sleep"),
     storageDir: "unimplemented",
