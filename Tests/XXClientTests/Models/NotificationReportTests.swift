@@ -28,4 +28,43 @@ final class NotificationReportTests: XCTestCase {
 
     XCTAssertNoDifference(decodedModel, model)
   }
+
+  func testCodingArray() throws {
+    let source1B64 = "dGVzdGVyMTIzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    let source2B64 = "ciI1cpyUUY/UPaVeMy1zBFWbZRgiZSXhY+cVoM+fCxwD"
+    let jsonString = """
+    [
+      {
+        "ForMe": true,
+        "Type": "\(NotificationReport.ReportType.default.rawValue)",
+        "Source": "\(source1B64)"
+      },
+      {
+        "ForMe": false,
+        "Type": "\(NotificationReport.ReportType.request.rawValue)",
+        "Source": "\(source2B64)"
+      },
+    ]
+    """
+    let jsonData = jsonString.data(using: .utf8)!
+    let models = try [NotificationReport].decode(jsonData)
+
+    XCTAssertNoDifference(models, [
+      NotificationReport(
+        forMe: true,
+        type: .default,
+        source: Data(base64Encoded: source1B64)!
+      ),
+      NotificationReport(
+        forMe: false,
+        type: .request,
+        source: Data(base64Encoded: source2B64)!
+      )
+    ])
+
+    let encodedModels = try models.encode()
+    let decodedModels = try [NotificationReport].decode(encodedModels)
+
+    XCTAssertNoDifference(decodedModels, models)
+  }
 }
