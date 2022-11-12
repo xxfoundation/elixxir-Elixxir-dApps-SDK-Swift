@@ -6,9 +6,9 @@ public struct MessengerGetNotificationReport {
     case serviceListMissing
   }
 
-  public var run: (String) throws -> NotificationReport
+  public var run: (String) throws -> [NotificationReport]
 
-  public func callAsFunction(notificationCSV: String) throws -> NotificationReport {
+  public func callAsFunction(notificationCSV: String) throws -> [NotificationReport] {
     try run(notificationCSV)
   }
 }
