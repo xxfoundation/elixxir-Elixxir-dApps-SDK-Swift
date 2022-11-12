@@ -4,11 +4,11 @@ import XCTestDynamicOverlay
 import XXClient
 @testable import XXMessengerClient
 
-final class MessengerGetNotificationReportTests: XCTestCase {
+final class MessengerGetNotificationReportsTests: XCTestCase {
   func testGetReport() throws {
     let serviceList = MessageServiceList.stub()
     let notificationCSV = "notification-csv"
-    let notificationReport = NotificationReport.stub()
+    let notificationReports = [NotificationReport].stub()
 
     struct GetNotificationsReportParams: Equatable {
       var notificationCSV: String
@@ -25,11 +25,11 @@ final class MessengerGetNotificationReportTests: XCTestCase {
         notificationCSV: notificationCSV,
         serviceList: serviceList
       ))
-      return notificationReport
+      return notificationReports
     }
-    let getReport: MessengerGetNotificationReport = .live(env)
+    let getReports: MessengerGetNotificationReports = .live(env)
 
-    let report = try getReport(notificationCSV: notificationCSV)
+    let reports = try getReports(notificationCSV: notificationCSV)
 
     XCTAssertNoDifference(didGetNotificationsReport, [
       .init(
@@ -37,25 +37,31 @@ final class MessengerGetNotificationReportTests: XCTestCase {
         serviceList: serviceList
       )
     ])
-    XCTAssertNoDifference(report, notificationReport)
+    XCTAssertNoDifference(reports, notificationReports)
   }
 
   func testGetReportWhenServiceListMissing() {
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = { .unimplemented }
     env.serviceList.get = { nil }
-    let getReport: MessengerGetNotificationReport = .live(env)
+    let getReports: MessengerGetNotificationReports = .live(env)
 
-    XCTAssertThrowsError(try getReport(notificationCSV: "")) { error in
+    XCTAssertThrowsError(try getReports(notificationCSV: "")) { error in
       XCTAssertNoDifference(
-        error as? MessengerGetNotificationReport.Error,
+        error as? MessengerGetNotificationReports.Error,
         .serviceListMissing
       )
     }
   }
 }
 
-extension NotificationReport {
+private extension Array where Element == NotificationReport {
+  static func stub() -> [NotificationReport] {
+    [.stub(), .stub(), .stub()]
+  }
+}
+
+private extension NotificationReport {
   static func stub() -> NotificationReport {
     NotificationReport(
       forMe: .random(),

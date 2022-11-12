@@ -2,12 +2,12 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct GetNotificationsReport {
-  public var run: (String, MessageServiceList) throws -> NotificationReport
+  public var run: (String, MessageServiceList) throws -> [NotificationReport]
 
   public func callAsFunction(
     notificationCSV: String,
     services: MessageServiceList
-  ) throws -> NotificationReport {
+  ) throws -> [NotificationReport] {
     try run(notificationCSV, services)
   }
 }
@@ -26,7 +26,7 @@ extension GetNotificationsReport {
     guard let result = result else {
       fatalError("BindingsGetNotificationsReport returned nil without providing error")
     }
-    return try NotificationReport.decode(result)
+    return try [NotificationReport].decode(result)
   }
 }
 
