@@ -4,7 +4,7 @@ import XCTestDynamicOverlay
 import XXClient
 @testable import XXMessengerClient
 
-final class MessengerGetNotificationReportTests: XCTestCase {
+final class MessengerGetNotificationReportsTests: XCTestCase {
   func testGetReport() throws {
     let serviceList = MessageServiceList.stub()
     let notificationCSV = "notification-csv"
@@ -27,9 +27,9 @@ final class MessengerGetNotificationReportTests: XCTestCase {
       ))
       return notificationReports
     }
-    let getReport: MessengerGetNotificationReport = .live(env)
+    let getReports: MessengerGetNotificationReports = .live(env)
 
-    let reports = try getReport(notificationCSV: notificationCSV)
+    let reports = try getReports(notificationCSV: notificationCSV)
 
     XCTAssertNoDifference(didGetNotificationsReport, [
       .init(
@@ -44,11 +44,11 @@ final class MessengerGetNotificationReportTests: XCTestCase {
     var env: MessengerEnvironment = .unimplemented
     env.e2e.get = { .unimplemented }
     env.serviceList.get = { nil }
-    let getReport: MessengerGetNotificationReport = .live(env)
+    let getReports: MessengerGetNotificationReports = .live(env)
 
-    XCTAssertThrowsError(try getReport(notificationCSV: "")) { error in
+    XCTAssertThrowsError(try getReports(notificationCSV: "")) { error in
       XCTAssertNoDifference(
-        error as? MessengerGetNotificationReport.Error,
+        error as? MessengerGetNotificationReports.Error,
         .serviceListMissing
       )
     }

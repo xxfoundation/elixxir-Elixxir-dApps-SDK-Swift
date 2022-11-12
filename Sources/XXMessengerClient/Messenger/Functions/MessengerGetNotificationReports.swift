@@ -1,7 +1,7 @@
 import XXClient
 import XCTestDynamicOverlay
 
-public struct MessengerGetNotificationReport {
+public struct MessengerGetNotificationReports {
   public enum Error: Swift.Error, Equatable {
     case serviceListMissing
   }
@@ -13,9 +13,9 @@ public struct MessengerGetNotificationReport {
   }
 }
 
-extension MessengerGetNotificationReport {
-  public static func live(_ env: MessengerEnvironment) -> MessengerGetNotificationReport {
-    MessengerGetNotificationReport { notificationCSV in
+extension MessengerGetNotificationReports {
+  public static func live(_ env: MessengerEnvironment) -> MessengerGetNotificationReports {
+    MessengerGetNotificationReports { notificationCSV in
       guard let serviceList = env.serviceList() else {
         throw Error.serviceListMissing
       }
@@ -27,8 +27,8 @@ extension MessengerGetNotificationReport {
   }
 }
 
-extension MessengerGetNotificationReport {
-  public static let unimplemented = MessengerGetNotificationReport(
+extension MessengerGetNotificationReports {
+  public static let unimplemented = MessengerGetNotificationReports(
     run: XCTUnimplemented("\(Self.self)")
   )
 }
