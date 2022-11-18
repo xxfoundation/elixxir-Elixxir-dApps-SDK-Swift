@@ -37,7 +37,7 @@ extension AppDependencies {
       ),
       backupStorage: .onDisk(),
       mainQueue: DispatchQueue.main.eraseToAnyScheduler(),
-      bgQueue: DispatchQueue.global(qos: .background).eraseToAnyScheduler(),
+      bgQueue: DispatchQueue(label: "xx-messenger", qos: .userInitiated).eraseToAnyScheduler(),
       now: now,
       sendMessage: .live(
         messenger: messenger,
