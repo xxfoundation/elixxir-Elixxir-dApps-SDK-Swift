@@ -48,6 +48,7 @@ public struct Messenger {
   public var receiveFile: MessengerReceiveFile
   public var trackServices: MessengerTrackServices
   public var getNotificationReports: MessengerGetNotificationReports
+  public var startGroupChat: MessengerStartGroupChat
 }
 
 extension Messenger {
@@ -99,7 +100,8 @@ extension Messenger {
       sendFile: .live(env),
       receiveFile: .live(env),
       trackServices: .live(env),
-      getNotificationReports: .live(env)
+      getNotificationReports: .live(env),
+      startGroupChat: .live(env)
     )
   }
 }
@@ -152,6 +154,7 @@ extension Messenger {
     sendFile: .unimplemented,
     receiveFile: .unimplemented,
     trackServices: .unimplemented,
-    getNotificationReports: .unimplemented
+    getNotificationReports: .unimplemented,
+    startGroupChat: .unimplemented
   )
 }
