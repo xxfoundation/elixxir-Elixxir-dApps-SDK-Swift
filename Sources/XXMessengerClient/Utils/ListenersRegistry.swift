@@ -31,9 +31,6 @@ extension ListenersRegistry {
 extension ListenersRegistry {
   public static let unimplemented = ListenersRegistry(
     register: XCTUnimplemented("\(Self.self).register", placeholder: Cancellable {}),
-    registered: XCTUnimplemented("\(Self.self).registered", placeholder: Listener(
-      name: "unimplemented",
-      handle: { _ in }
-    ))
+    registered: XCTUnimplemented("\(Self.self).registered", placeholder: .unimplemented)
   )
 }
