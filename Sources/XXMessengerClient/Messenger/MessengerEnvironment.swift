@@ -18,6 +18,7 @@ public struct MessengerEnvironment {
   public var getFileTransferParams: GetFileTransferParams
   public var getNotificationsReport: GetNotificationsReport
   public var getSingleUseParams: GetSingleUseParams
+  public var groupRequests: GroupRequestCallbacksRegistry
   public var initFileTransfer: InitFileTransfer
   public var initializeBackup: InitializeBackup
   public var isListeningForMessages: Stored<Bool>
@@ -71,6 +72,7 @@ extension MessengerEnvironment {
       getFileTransferParams: .liveDefault,
       getNotificationsReport: .live,
       getSingleUseParams: .liveDefault,
+      groupRequests: .live(),
       initFileTransfer: .live,
       initializeBackup: .live,
       isListeningForMessages: .inMemory(false),
@@ -119,6 +121,7 @@ extension MessengerEnvironment {
     getFileTransferParams: .unimplemented,
     getNotificationsReport: .unimplemented,
     getSingleUseParams: .unimplemented,
+    groupRequests: .unimplemented,
     initFileTransfer: .unimplemented,
     initializeBackup: .unimplemented,
     isListeningForMessages: .unimplemented(placeholder: false),

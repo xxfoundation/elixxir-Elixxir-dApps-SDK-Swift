@@ -55,3 +55,11 @@ extension MessageService {
     )
   }
 }
+
+extension Group {
+  static func stub(_ id: Int) -> Group {
+    var group = Group.unimplemented
+    group.getId.run = { "group-\(id)".data(using: .utf8)! }
+    return group
+  }
+}
