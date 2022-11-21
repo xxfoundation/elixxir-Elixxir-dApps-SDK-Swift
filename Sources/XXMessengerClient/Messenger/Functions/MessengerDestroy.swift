@@ -19,6 +19,7 @@ extension MessengerDestroy {
           env.sleep(1)
         }
       }
+      env.groupChat.set(nil)
       env.fileTransfer.set(nil)
       env.backup.set(nil)
       env.ud.set(nil)

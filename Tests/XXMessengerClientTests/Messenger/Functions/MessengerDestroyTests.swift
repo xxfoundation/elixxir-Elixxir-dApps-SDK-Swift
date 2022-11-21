@@ -10,6 +10,7 @@ final class MessengerDestroyTests: XCTestCase {
     var didStopNetworkFollower = 0
     var didSleep: [TimeInterval] = []
     var didRemoveItem: [String] = []
+    var didSetGroupChat: [GroupChat?] = []
     var didSetFileTransfer: [FileTransfer?] = []
     var didSetBackup: [Backup?] = []
     var didSetUD: [UserDiscovery?] = []
@@ -29,6 +30,7 @@ final class MessengerDestroyTests: XCTestCase {
     }
     env.sleep = { didSleep.append($0) }
     env.storageDir = storageDir
+    env.groupChat.set = { didSetGroupChat.append($0) }
     env.fileTransfer.set = { didSetFileTransfer.append($0) }
     env.backup.set = { didSetBackup.append($0) }
     env.ud.set = { didSetUD.append($0) }
@@ -44,6 +46,7 @@ final class MessengerDestroyTests: XCTestCase {
 
     XCTAssertNoDifference(didStopNetworkFollower, 1)
     XCTAssertNoDifference(didSleep, [1, 1])
+    XCTAssertNoDifference(didSetGroupChat.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetFileTransfer.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetBackup.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetUD.map { $0 == nil }, [true])
@@ -76,6 +79,7 @@ final class MessengerDestroyTests: XCTestCase {
   func testRemoveDirectoryFailure() {
     struct Error: Swift.Error, Equatable {}
     let error = Error()
+    var didSetGroupChat: [GroupChat?] = []
     var didSetFileTransfer: [FileTransfer?] = []
     var didSetBackup: [Backup?] = []
     var didSetUD: [UserDiscovery?] = []
@@ -86,6 +90,7 @@ final class MessengerDestroyTests: XCTestCase {
 
     var env: MessengerEnvironment = .unimplemented
     env.cMix.get = { nil }
+    env.groupChat.set = { didSetGroupChat.append($0) }
     env.fileTransfer.set = { didSetFileTransfer.append($0) }
     env.backup.set = { didSetBackup.append($0) }
     env.ud.set = { didSetUD.append($0) }
@@ -99,6 +104,7 @@ final class MessengerDestroyTests: XCTestCase {
     XCTAssertThrowsError(try destroy()) { err in
       XCTAssertEqual(err as? Error, error)
     }
+    XCTAssertNoDifference(didSetGroupChat.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetFileTransfer.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetBackup.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetUD.map { $0 == nil }, [true])
@@ -113,6 +119,7 @@ final class MessengerDestroyTests: XCTestCase {
     let error = Error()
     let storageDir = "test-storage-dir"
     var didRemoveItem: [String] = []
+    var didSetGroupChat: [GroupChat?] = []
     var didSetFileTransfer: [FileTransfer?] = []
     var didSetBackup: [Backup?] = []
     var didSetUD: [UserDiscovery?] = []
@@ -123,6 +130,7 @@ final class MessengerDestroyTests: XCTestCase {
 
     var env: MessengerEnvironment = .unimplemented
     env.cMix.get = { nil }
+    env.groupChat.set = { didSetGroupChat.append($0) }
     env.fileTransfer.set = { didSetFileTransfer.append($0) }
     env.backup.set = { didSetBackup.append($0) }
     env.ud.set = { didSetUD.append($0) }
@@ -138,6 +146,7 @@ final class MessengerDestroyTests: XCTestCase {
     XCTAssertThrowsError(try destroy()) { err in
       XCTAssertEqual(err as? Error, error)
     }
+    XCTAssertNoDifference(didSetGroupChat.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetFileTransfer.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetBackup.map { $0 == nil }, [true])
     XCTAssertNoDifference(didSetUD.map { $0 == nil }, [true])
