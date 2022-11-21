@@ -98,6 +98,9 @@ let ud = messenger.ud()
 
 // get Backup:
 let backup = messenger.backup()
+
+// get GroupChat
+let groupChat = messenger.groupChat()
 ```
 
 ## 💾 Backup
@@ -216,4 +219,27 @@ let transferId = try messenger.sendFile(.init(file: file, recipientId: ...)) { i
     // handle error...
   }
 }
+```
+
+## 💬 Group Chat
+
+### Setup
+
+```swift
+// register callbacks:
+let groupRequestsCancellable = messenger.registerGroupRequestHandler(.init { group in
+  // handle group request...
+})
+let groupChatProcessorCancellable = messenger.registerGroupChatProcessor(.init { result in
+  switch result {
+    case .success(let callback):
+    // handle group chat processor callback...
+    
+    case .failure(let error):
+    // handle error...
+  }
+})
+
+// start group chat manager:
+try messenger.startGroupChat()
 ```

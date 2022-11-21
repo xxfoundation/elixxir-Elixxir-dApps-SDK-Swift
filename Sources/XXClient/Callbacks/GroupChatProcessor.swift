@@ -2,6 +2,8 @@ import Bindings
 import XCTestDynamicOverlay
 
 public struct GroupChatProcessor {
+  public typealias Result = Swift.Result<Callback, NSError>
+
   public struct Callback: Equatable {
     public init(
       decryptedMessage: GroupChatMessage,
@@ -29,14 +31,14 @@ public struct GroupChatProcessor {
 
   public init(
     name: String = "GroupChatProcessor",
-    handle: @escaping (Result<Callback, NSError>) -> Void
+    handle: @escaping (Result) -> Void
   ) {
     self.name = name
     self.handle = handle
   }
 
   public var name: String
-  public var handle: (Result<Callback, NSError>) -> Void
+  public var handle: (Result) -> Void
 }
 
 extension GroupChatProcessor {

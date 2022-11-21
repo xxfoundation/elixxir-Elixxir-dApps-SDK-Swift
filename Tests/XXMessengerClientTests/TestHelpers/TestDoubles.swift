@@ -55,3 +55,36 @@ extension MessageService {
     )
   }
 }
+
+extension Group {
+  static func stub(_ id: Int) -> Group {
+    var group = Group.unimplemented
+    group.getId.run = { "group-\(id)".data(using: .utf8)! }
+    return group
+  }
+}
+
+extension GroupChatMessage {
+  static func stub() -> GroupChatMessage {
+    GroupChatMessage(
+      groupId: "\(Int.random(in: 100...999))".data(using: .utf8)!,
+      senderId: "\(Int.random(in: 100...999))".data(using: .utf8)!,
+      messageId: "\(Int.random(in: 100...999))".data(using: .utf8)!,
+      payload: "\(Int.random(in: 100...999))".data(using: .utf8)!,
+      timestamp: Int64.random(in: 100...999)
+    )
+  }
+}
+
+extension GroupChatProcessor.Callback {
+  static func stub() -> GroupChatProcessor.Callback {
+    GroupChatProcessor.Callback(
+      decryptedMessage: .stub(),
+      msg: "\(Int.random(in: 100...999))".data(using: .utf8)!,
+      receptionId: "\(Int.random(in: 100...999))".data(using: .utf8)!,
+      ephemeralId: Int64.random(in: 100...999),
+      roundId: Int64.random(in: 100...999),
+      roundUrl: "\(Int.random(in: 100...999))"
+    )
+  }
+}

@@ -18,6 +18,9 @@ public struct MessengerEnvironment {
   public var getFileTransferParams: GetFileTransferParams
   public var getNotificationsReport: GetNotificationsReport
   public var getSingleUseParams: GetSingleUseParams
+  public var groupChat: Stored<GroupChat?>
+  public var groupChatProcessors: GroupChatProcessorRegistry
+  public var groupRequests: GroupRequestCallbacksRegistry
   public var initFileTransfer: InitFileTransfer
   public var initializeBackup: InitializeBackup
   public var isListeningForMessages: Stored<Bool>
@@ -31,6 +34,7 @@ public struct MessengerEnvironment {
   public var ndfEnvironment: NDFEnvironment
   public var newCMix: NewCMix
   public var newCMixFromBackup: NewCMixFromBackup
+  public var newGroupChat: NewGroupChat
   public var newOrLoadUd: NewOrLoadUd
   public var newUdManagerFromBackup: NewUdManagerFromBackup
   public var passwordStorage: PasswordStorage
@@ -71,6 +75,9 @@ extension MessengerEnvironment {
       getFileTransferParams: .liveDefault,
       getNotificationsReport: .live,
       getSingleUseParams: .liveDefault,
+      groupChat: .inMemory(),
+      groupChatProcessors: .live(),
+      groupRequests: .live(),
       initFileTransfer: .live,
       initializeBackup: .live,
       isListeningForMessages: .inMemory(false),
@@ -84,6 +91,7 @@ extension MessengerEnvironment {
       ndfEnvironment: .mainnet,
       newCMix: .live,
       newCMixFromBackup: .live,
+      newGroupChat: .live,
       newOrLoadUd: .live,
       newUdManagerFromBackup: .live,
       passwordStorage: .keychain,
@@ -119,6 +127,9 @@ extension MessengerEnvironment {
     getFileTransferParams: .unimplemented,
     getNotificationsReport: .unimplemented,
     getSingleUseParams: .unimplemented,
+    groupChat: .unimplemented(),
+    groupChatProcessors: .unimplemented,
+    groupRequests: .unimplemented,
     initFileTransfer: .unimplemented,
     initializeBackup: .unimplemented,
     isListeningForMessages: .unimplemented(placeholder: false),
@@ -132,6 +143,7 @@ extension MessengerEnvironment {
     ndfEnvironment: .unimplemented,
     newCMix: .unimplemented,
     newCMixFromBackup: .unimplemented,
+    newGroupChat: .unimplemented,
     newOrLoadUd: .unimplemented,
     newUdManagerFromBackup: .unimplemented,
     passwordStorage: .unimplemented,
