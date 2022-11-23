@@ -1,200 +1,38 @@
 # Elixxir dApps Swift SDK
 
-![Swift 5.6](https://img.shields.io/badge/swift-5.6-orange.svg)
-![platform iOS](https://img.shields.io/badge/platform-iOS-blue.svg)
-
-## 📱 Demo
-
-Refer to this [demo](https://git.xx.network/elixxir/shielded-help-demo/elixxir-dapp-demo) to see an example of how to build an app with the SDK to send `E2E` messages and send `RestLike` messsage.
-
-Also you can checkout included example iOS application.
+![Swift 5.7](https://img.shields.io/badge/swift-5.7-orange.svg)
+![platform iOS, macOS](https://img.shields.io/badge/platform-iOS,_macOS-blue.svg)
 
 ## 📖 Documentation 
 
-You can find full documentation with step by step guide [here](https://xxdk-dev.xx.network/mobile%20docs/ios-sdk)
+- [XXClient Quick Start Guide](Docs/XXClient-quick-start-guide.md)
+- [XXMessengerClient](Docs/XXMessengerClient.md)
 
+## 📱 Examples
 
-## 🚀 Quick Start
-
-Add `ElixxirDAppsSDK` library as a dependency to your project using Swift Package Manager.
-
-
-### ▶️ Instantiating client
-
-Create a new client and store it on disk:
-
-```swift
-let downloadNDF: NDFDownloader = .live
-let createClient: ClientCreator = .live
-try createClient(
-  directoryURL: ...,
-  ndf: try downloadNDF(.mainnet),
-  password: ...
-)
-```
-
-Load existing client from disk:
-
-```swift
-let loadClient: ClientLoader = .live
-let client = try loadClient(
-  directoryURL: ..., 
-  password: ...
-)
-```
-
-You can also use a convenient `ClientStorage` wrapper to manage a client stored on disk:
-
-```swift
-let storage: ClientStorage = .live(
-  passwordStorage: .init(
-    save: { password in
-      // securely save provided client's password
-    },
-    load: {
-      // load securely stored client's password
-    }
-  )
-)
-let client: Client
-if storage.hasStoredClient() {
-  client = try storage.loadClient()
-} else {
-  client = try storage.createClient()
-}
-```
-
-Check out included example iOS application for the `PasswordStorage` implementation that uses the iOS keychain.
-
-### ▶️ Connecting to the network
-
-Start network follower:
-
-```
-let client: Client = ...
-try client.networkFollower.start(timeoutMS: 10_000)
-```
-
-Wait until connected:
-
-```
-let client: Client = ...
-let isNetworkHealthy = client.waitForNetwork(timeoutMS: 30_000)
-```
-
-### ▶️ Making a new identity
-
-Use the client to make a new identity:
-
-```swift
-let client: Client = ...
-let myIdentity = try client.makeIdentity()
-```
-### ▶️ Create new E2E client
-
-```swift
-let client: Client = ...
-let clientE2E = try ClientE2ELogin.live(with: client)
-```
-
-### ▶️ Connecting to remote
-
-Perform auth key negotiation with the given recipient to get the `Connection`:
-
-```swift
-let client: Client = ...
-let clientE2E: ClientE2E = ...
-let connection = try client.connect(
-  withAuthentication: false,
-  recipientContact: ..., 
-  e2eId: clientE2E.getId()
-)
-```
-
-Pass `true` for the `withAuthentication` parameter if you want to prove id ownership to remote as well.
-
-### ▶️ Sending messages
-
-Send a message to the connection's partner:
-
-```swift
-let connection: Connection = ...
-let report = try connection.send(
-  messageType: 1, 
-  payload: ...
-)
-```
-
-Check if the round succeeded:
-
-```swift
-let client: Client = ...
-try client.waitForDelivery(roundList: ..., timeoutMS: 30_000) { result in
-  switch result {
-    case .delivered(let roundResults):
-      ...
-    case .notDelivered(let timedOut):
-      ...
-  }
-}
-```
-
-### ▶️ Receiving messages
-
-Use connection's message listener to receive messages from partner:
-
-```swift
-let connection: Connection = ...
-connection.listen(messageType: 1) { message in
-  ...
-}
-```
-
-### ▶️ Using rest-like API
-
-Use `RestlikeRequestSender` to perform rest-like requests:
-
-```swift
-let client: Client = ...
-let connection: Connection = ...
-let sendRestlike: RestlikeRequestSender = .live(authenticated: false)
-let response = try sendRestlike(
-  clientId: client.getId(),
-  connectionId: connection.getId(),
-  request: ...
-)
-```
-
-Pass `true` for the `authenticated` parameter if you want to perform authenticated requests.
+Check out included [examples](Examples).
 
 ## 🛠 Development
 
-Open `ElixxirDAppsSDK.xcworkspace` in Xcode (≥13.4).
+Open `Package.swift` in Xcode (≥14).
 
 ### Project structure
 
 ```
-ElixxirDAppsSDK [Xcode Workspace]
- ├─ elixxir-dapps-sdk-swift [Swift Package]
- |   └─ ElixxirDAppsSDK [Library]
- └─ Example [Xcode Project]
-     ├─ ExampleApp (iOS) [iOS App Target]
-     ├─ example-app [Swift Package]
-     |   ├─ AppFeature [Library]
-     |   └─ ...
-     └─ example-app-icon [Swift Package] 
-         ├─ ExampleAppIcon [Library]
-         └─ example-app-icon-export [Executable]
+elixxir-dapps-sdk-swift [Swift Package]
+ ├─ XXClient [Library]
+ └─ XXMessengerClient [Library]
 ```
 
 ### Build schemes
 
-- Use `exlixxir-dapps-sdk-swift` scheme to build and test the package with `ElixxirDAppsSDK` library.
-- Use `ExampleApp (iOS)` to build and run the example app.
-- Use `example-app` scheme to build and test the example app package with all contained libraries.
-- Use `ExampleAppIcon` scheme with macOS target to build and preview the example app icon.
-- Use `example-app-icon-export` scheme with macOS target to build and update the example app icon.
-- Use other schemes, like `AppFeature`, for building and testing individual libraries in isolation.
+- Use `exlixxir-dapps-sdk-swift-Package` scheme to build and test the package.
+- Use other schemes (like `XXClient`) for building and testing individual libraries in isolation.
+
+
+### Bindings
+
+The package uses `Bindings.xcframework` dependency, built from [go client](https://git.xx.network/elixxir/client) repository. Use `build-bindings.sh` script to update the framework. Information about currently used version is contained in [Frameworks/Bindings.txt](Frameworks/Bindings.txt) file.
 
 ## 📄 License
 
