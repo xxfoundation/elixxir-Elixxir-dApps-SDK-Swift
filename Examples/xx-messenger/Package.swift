@@ -38,7 +38,7 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-      .upToNextMajor(from: "0.43.0")
+      .upToNextMajor(from: "0.47.2")
     ),
     .package(
       url: "https://git.xx.network/elixxir/client-ios-db.git",
@@ -46,15 +46,15 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/darrarski/swift-composable-presentation.git",
-      .upToNextMajor(from: "0.6.0")
+      .upToNextMajor(from: "0.6.1")
     ),
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
-      .upToNextMajor(from: "0.5.0")
+      .upToNextMajor(from: "0.6.0")
     ),
     .package(
       url: "https://github.com/pointfreeco/swift-custom-dump.git",
-      .upToNextMajor(from: "0.6.0")
+      .upToNextMajor(from: "0.6.1")
     ),
     .package(
       url: "https://github.com/apple/swift-log.git",
