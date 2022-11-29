@@ -64,6 +64,14 @@ final class AppComponentTests: XCTestCase {
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
+    store.dependencies.app.groupRequestHandler.run = { _ in
+      actions.append(.didStartGroupRequestHandler)
+      return Cancellable {}
+    }
+    store.dependencies.app.groupMessageHandler.run = { _ in
+      actions.append(.didStartGroupMessageHandler)
+      return Cancellable {}
+    }
 
     actions = []
     store.send(.start)
@@ -76,6 +84,8 @@ final class AppComponentTests: XCTestCase {
       .didStartAuthHandler,
       .didStartMessageListener,
       .didStartReceiveFileHandler,
+      .didStartGroupRequestHandler,
+      .didStartGroupMessageHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -117,6 +127,14 @@ final class AppComponentTests: XCTestCase {
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
+    store.dependencies.app.groupRequestHandler.run = { _ in
+      actions.append(.didStartGroupRequestHandler)
+      return Cancellable {}
+    }
+    store.dependencies.app.groupMessageHandler.run = { _ in
+      actions.append(.didStartGroupMessageHandler)
+      return Cancellable {}
+    }
 
     actions = []
     store.send(.start)
@@ -129,6 +147,8 @@ final class AppComponentTests: XCTestCase {
       .didStartAuthHandler,
       .didStartMessageListener,
       .didStartReceiveFileHandler,
+      .didStartGroupRequestHandler,
+      .didStartGroupMessageHandler,
       .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
@@ -170,6 +190,14 @@ final class AppComponentTests: XCTestCase {
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
+    store.dependencies.app.groupRequestHandler.run = { _ in
+      actions.append(.didStartGroupRequestHandler)
+      return Cancellable {}
+    }
+    store.dependencies.app.groupMessageHandler.run = { _ in
+      actions.append(.didStartGroupMessageHandler)
+      return Cancellable {}
+    }
 
     actions = []
     store.send(.welcome(.finished)) {
@@ -183,6 +211,8 @@ final class AppComponentTests: XCTestCase {
       .didStartAuthHandler,
       .didStartMessageListener,
       .didStartReceiveFileHandler,
+      .didStartGroupRequestHandler,
+      .didStartGroupMessageHandler,
       .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
@@ -224,6 +254,14 @@ final class AppComponentTests: XCTestCase {
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
+    store.dependencies.app.groupRequestHandler.run = { _ in
+      actions.append(.didStartGroupRequestHandler)
+      return Cancellable {}
+    }
+    store.dependencies.app.groupMessageHandler.run = { _ in
+      actions.append(.didStartGroupMessageHandler)
+      return Cancellable {}
+    }
 
     actions = []
     store.send(.restore(.finished)) {
@@ -237,6 +275,8 @@ final class AppComponentTests: XCTestCase {
       .didStartAuthHandler,
       .didStartMessageListener,
       .didStartReceiveFileHandler,
+      .didStartGroupRequestHandler,
+      .didStartGroupMessageHandler,
       .didRegisterBackupCallback,
       .didLoadMessenger,
     ])
@@ -275,6 +315,14 @@ final class AppComponentTests: XCTestCase {
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
+    store.dependencies.app.groupRequestHandler.run = { _ in
+      actions.append(.didStartGroupRequestHandler)
+      return Cancellable {}
+    }
+    store.dependencies.app.groupMessageHandler.run = { _ in
+      actions.append(.didStartGroupMessageHandler)
+      return Cancellable {}
+    }
 
     actions = []
     store.send(.home(.deleteAccount(.success))) {
@@ -288,6 +336,8 @@ final class AppComponentTests: XCTestCase {
       .didStartAuthHandler,
       .didStartMessageListener,
       .didStartReceiveFileHandler,
+      .didStartGroupRequestHandler,
+      .didStartGroupMessageHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -378,6 +428,14 @@ final class AppComponentTests: XCTestCase {
       actions.append(.didRegisterBackupCallback)
       return Cancellable {}
     }
+    store.dependencies.app.groupRequestHandler.run = { _ in
+      actions.append(.didStartGroupRequestHandler)
+      return Cancellable {}
+    }
+    store.dependencies.app.groupMessageHandler.run = { _ in
+      actions.append(.didStartGroupMessageHandler)
+      return Cancellable {}
+    }
 
     actions = []
     store.send(.start)
@@ -390,6 +448,8 @@ final class AppComponentTests: XCTestCase {
       .didStartAuthHandler,
       .didStartMessageListener,
       .didStartReceiveFileHandler,
+      .didStartGroupRequestHandler,
+      .didStartGroupMessageHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -447,6 +507,18 @@ final class AppComponentTests: XCTestCase {
     store.dependencies.app.backupStorage.store = { data in
       actions.append(.didStoreBackup(data))
     }
+    store.dependencies.app.groupRequestHandler.run = { _ in
+      actions.append(.didStartGroupRequestHandler)
+      return Cancellable {
+        actions.append(.didCancelGroupRequestHandler)
+      }
+    }
+    store.dependencies.app.groupMessageHandler.run = { _ in
+      actions.append(.didStartGroupMessageHandler)
+      return Cancellable {
+        actions.append(.didCancelGroupMessageHandler)
+      }
+    }
 
     actions = []
     store.send(.start)
@@ -458,6 +530,8 @@ final class AppComponentTests: XCTestCase {
       .didStartAuthHandler,
       .didStartMessageListener,
       .didStartReceiveFileHandler,
+      .didStartGroupRequestHandler,
+      .didStartGroupMessageHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -473,10 +547,14 @@ final class AppComponentTests: XCTestCase {
       .didCancelAuthHandler,
       .didCancelMessageListener,
       .didCancelReceiveFileHandler,
+      .didCancelGroupRequestHandler,
+      .didCancelGroupMessageHandler,
       .didCancelBackupCallback,
       .didStartAuthHandler,
       .didStartMessageListener,
       .didStartReceiveFileHandler,
+      .didStartGroupRequestHandler,
+      .didStartGroupMessageHandler,
       .didRegisterBackupCallback,
     ])
 
@@ -519,6 +597,8 @@ final class AppComponentTests: XCTestCase {
       .didCancelAuthHandler,
       .didCancelMessageListener,
       .didCancelReceiveFileHandler,
+      .didCancelGroupRequestHandler,
+      .didCancelGroupMessageHandler,
       .didCancelBackupCallback,
     ])
   }
@@ -539,4 +619,8 @@ private enum Action: Equatable {
   case didStoreBackup(Data)
   case didSetLogLevel(LogLevel)
   case didStartLogging
+  case didStartGroupRequestHandler
+  case didCancelGroupRequestHandler
+  case didStartGroupMessageHandler
+  case didCancelGroupMessageHandler
 }
