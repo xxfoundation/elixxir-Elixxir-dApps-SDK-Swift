@@ -119,6 +119,10 @@ public struct HomeComponent: ReducerProtocol {
                 try messenger.startFileTransfer()
               }
 
+              if messenger.isGroupChatRunning() == false {
+                try messenger.startGroupChat()
+              }
+
               if messenger.isLoggedIn() == false {
                 if try messenger.isRegistered() == false {
                   return .success(.messenger(.didStartUnregistered))
