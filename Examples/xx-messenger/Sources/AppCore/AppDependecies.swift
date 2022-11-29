@@ -17,6 +17,8 @@ public struct AppDependencies {
   public var receiveFileHandler: ReceiveFileHandler
   public var log: Logger
   public var loadData: URLDataLoader
+  public var groupRequestHandler: GroupRequestHandler
+  public var groupMessageHandler: GroupMessageHandler
 }
 
 extension AppDependencies {
@@ -59,7 +61,15 @@ extension AppDependencies {
         now: now
       ),
       log: .live(),
-      loadData: .live
+      loadData: .live,
+      groupRequestHandler: .live(
+        messenger: messenger,
+        db: dbManager.getDB
+      ),
+      groupMessageHandler: .live(
+        messenger: messenger,
+        db: dbManager.getDB
+      )
     )
   }
 
@@ -79,7 +89,9 @@ extension AppDependencies {
     messageListener: .unimplemented,
     receiveFileHandler: .unimplemented,
     log: .unimplemented,
-    loadData: .unimplemented
+    loadData: .unimplemented,
+    groupRequestHandler: .unimplemented,
+    groupMessageHandler: .unimplemented
   )
 }
 
