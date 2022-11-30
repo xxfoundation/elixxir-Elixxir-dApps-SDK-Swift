@@ -287,6 +287,7 @@ let package = Package(
         .target(name: "AppCore"),
         .target(name: "BackupFeature"),
         .target(name: "ContactsFeature"),
+        .target(name: "GroupsFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "UserSearchFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),

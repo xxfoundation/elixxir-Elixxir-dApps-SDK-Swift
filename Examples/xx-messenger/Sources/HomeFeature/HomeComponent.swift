@@ -5,6 +5,7 @@ import ComposableArchitecture
 import ComposablePresentation
 import ContactsFeature
 import Foundation
+import GroupsFeature
 import RegisterFeature
 import UserSearchFeature
 import XCTestDynamicOverlay
@@ -23,7 +24,8 @@ public struct HomeComponent: ReducerProtocol {
       register: RegisterComponent.State? = nil,
       contacts: ContactsComponent.State? = nil,
       userSearch: UserSearchComponent.State? = nil,
-      backup: BackupComponent.State? = nil
+      backup: BackupComponent.State? = nil,
+      groups: GroupsComponent.State? = nil
     ) {
       self.failure = failure
       self.isNetworkHealthy = isNetworkHealthy
@@ -33,6 +35,7 @@ public struct HomeComponent: ReducerProtocol {
       self.contacts = contacts
       self.userSearch = userSearch
       self.backup = backup
+      self.groups = groups
     }
 
     public var failure: String?
@@ -44,6 +47,7 @@ public struct HomeComponent: ReducerProtocol {
     public var contacts: ContactsComponent.State?
     public var userSearch: UserSearchComponent.State?
     public var backup: BackupComponent.State?
+    public var groups: GroupsComponent.State?
   }
 
   public enum Action: Equatable {
@@ -79,10 +83,13 @@ public struct HomeComponent: ReducerProtocol {
     case didDismissContacts
     case backupButtonTapped
     case didDismissBackup
+    case groupsButtonTapped
+    case didDismissGroups
     case register(RegisterComponent.Action)
     case contacts(ContactsComponent.Action)
     case userSearch(UserSearchComponent.Action)
     case backup(BackupComponent.Action)
+    case groups(GroupsComponent.Action)
   }
 
   public init() {}
@@ -264,7 +271,15 @@ public struct HomeComponent: ReducerProtocol {
         state.backup = nil
         return .none
 
-      case .register(_), .contacts(_), .userSearch(_), .backup(_):
+      case .groupsButtonTapped:
+        state.groups = GroupsComponent.State()
+        return .none
+
+      case .didDismissGroups:
+        state.groups = nil
+        return .none
+
+      case .register(_), .contacts(_), .userSearch(_), .backup(_), .groups(_):
         return .none
       }
     }
@@ -291,6 +306,12 @@ public struct HomeComponent: ReducerProtocol {
       id: .notNil(),
       action: /Action.backup,
       presented: { BackupComponent() }
+    )
+    .presenting(
+      state: .keyPath(\.groups),
+      id: .notNil(),
+      action: /Action.groups,
+      presented: { GroupsComponent() }
     )
   }
 }
