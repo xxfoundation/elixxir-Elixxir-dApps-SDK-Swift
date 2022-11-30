@@ -1,6 +1,7 @@
 import Combine
 import ComposableArchitecture
 import CustomDump
+import NewGroupFeature
 import XCTest
 import XXModels
 @testable import GroupsFeature
@@ -72,6 +73,21 @@ final class GroupsComponentTests: XCTestCase {
     )
 
     store.send(.didSelectGroup(.stub(2)))
+  }
+
+  func testNewGroup() {
+    let store = TestStore(
+      initialState: GroupsComponent.State(),
+      reducer: GroupsComponent()
+    )
+
+    store.send(.newGroupButtonTapped) {
+      $0.newGroup = NewGroupComponent.State()
+    }
+
+    store.send(.newGroupDismissed) {
+      $0.newGroup = nil
+    }
   }
 }
 

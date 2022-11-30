@@ -1,5 +1,7 @@
 import AppCore
 import ComposableArchitecture
+import ComposablePresentation
+import NewGroupFeature
 import SwiftUI
 import XXModels
 
@@ -21,6 +23,10 @@ public struct GroupsView: View {
   public var body: some View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
+        newGroupButton {
+          viewStore.send(.newGroupButtonTapped)
+        }
+
         ForEach(viewStore.groups) { group in
           groupView(group) {
             viewStore.send(.didSelectGroup(group))
@@ -28,7 +34,29 @@ public struct GroupsView: View {
         }
       }
       .navigationTitle("Groups")
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.newGroup,
+          action: Component.Action.newGroup
+        ),
+        onDeactivate: { viewStore.send(.newGroupDismissed) },
+        destination: NewGroupView.init
+      ))
       .task { viewStore.send(.start) }
+    }
+  }
+
+  func newGroupButton(action: @escaping () -> Void) -> some View {
+    Section {
+      Button {
+        action()
+      } label: {
+        HStack {
+          Text("New Group")
+          Spacer()
+          Image(systemName: "chevron.forward")
+        }
+      }
     }
   }
 

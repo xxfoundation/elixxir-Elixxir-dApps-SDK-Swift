@@ -1,23 +1,31 @@
 import AppCore
 import ComposableArchitecture
+import ComposablePresentation
 import Foundation
+import NewGroupFeature
 import XXModels
 
 public struct GroupsComponent: ReducerProtocol {
   public struct State: Equatable {
     public init(
-      groups: IdentifiedArrayOf<Group> = []
+      groups: IdentifiedArrayOf<Group> = [],
+      newGroup: NewGroupComponent.State? = nil
     ) {
       self.groups = groups
+      self.newGroup = newGroup
     }
 
     public var groups: IdentifiedArrayOf<XXModels.Group> = []
+    public var newGroup: NewGroupComponent.State?
   }
 
   public enum Action: Equatable {
     case start
     case didFetchGroups([XXModels.Group])
     case didSelectGroup(XXModels.Group)
+    case newGroupButtonTapped
+    case newGroupDismissed
+    case newGroup(NewGroupComponent.Action)
   }
 
   public init() {}
@@ -45,7 +53,24 @@ public struct GroupsComponent: ReducerProtocol {
 
       case .didSelectGroup(_):
         return .none
+
+      case .newGroupButtonTapped:
+        state.newGroup = NewGroupComponent.State()
+        return .none
+
+      case .newGroupDismissed:
+        state.newGroup = nil
+        return .none
+
+      case .newGroup(_):
+        return .none
       }
     }
+    .presenting(
+      state: .keyPath(\.newGroup),
+      id: .notNil(),
+      action: /Action.newGroup,
+      presented: { NewGroupComponent() }
+    )
   }
 }
