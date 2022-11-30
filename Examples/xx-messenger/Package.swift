@@ -25,6 +25,7 @@ let package = Package(
     .library(name: "GroupsFeature", targets: ["GroupsFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "MyContactFeature", targets: ["MyContactFeature"]),
+    .library(name: "NewGroupFeature", targets: ["NewGroupFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "ResetAuthFeature", targets: ["ResetAuthFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
@@ -320,6 +321,25 @@ let package = Package(
       name: "MyContactFeatureTests",
       dependencies: [
         .target(name: "MyContactFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "NewGroupFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "NewGroupFeatureTests",
+      dependencies: [
+        .target(name: "NewGroupFeature"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings
