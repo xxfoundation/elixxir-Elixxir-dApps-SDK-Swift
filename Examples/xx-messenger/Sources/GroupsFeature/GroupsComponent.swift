@@ -62,6 +62,10 @@ public struct GroupsComponent: ReducerProtocol {
         state.newGroup = nil
         return .none
 
+      case .newGroup(.didFinish):
+        state.newGroup = nil
+        return .none
+
       case .newGroup(_):
         return .none
       }

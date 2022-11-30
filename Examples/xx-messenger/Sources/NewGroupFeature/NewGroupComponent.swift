@@ -7,6 +7,7 @@ public struct NewGroupComponent: ReducerProtocol {
 
   public enum Action: Equatable {
     case start
+    case didFinish
   }
 
   public init() {}
@@ -14,6 +15,9 @@ public struct NewGroupComponent: ReducerProtocol {
   public func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
     switch action {
     case .start:
+      return .none
+
+    case .didFinish:
       return .none
     }
   }

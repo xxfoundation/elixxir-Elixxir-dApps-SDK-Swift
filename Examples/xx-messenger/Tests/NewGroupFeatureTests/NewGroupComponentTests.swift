@@ -10,5 +10,15 @@ final class NewGroupComponentTests: XCTestCase {
     )
 
     store.send(.start)
+    store.send(.didFinish)
+  }
+
+  func testFinish() {
+    let store = TestStore(
+      initialState: NewGroupComponent.State(),
+      reducer: NewGroupComponent()
+    )
+
+    store.send(.didFinish)
   }
 }

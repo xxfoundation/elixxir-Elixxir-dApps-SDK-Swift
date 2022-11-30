@@ -75,7 +75,7 @@ final class GroupsComponentTests: XCTestCase {
     store.send(.didSelectGroup(.stub(2)))
   }
 
-  func testNewGroup() {
+  func testPresentNewGroup() {
     let store = TestStore(
       initialState: GroupsComponent.State(),
       reducer: GroupsComponent()
@@ -86,6 +86,32 @@ final class GroupsComponentTests: XCTestCase {
     }
 
     store.send(.newGroupDismissed) {
+      $0.newGroup = nil
+    }
+  }
+
+  func testDismissNewGroup() {
+    let store = TestStore(
+      initialState: GroupsComponent.State(
+        newGroup: NewGroupComponent.State()
+      ),
+      reducer: GroupsComponent()
+    )
+
+    store.send(.newGroupDismissed) {
+      $0.newGroup = nil
+    }
+  }
+
+  func testNewGroupDidFinish() {
+    let store = TestStore(
+      initialState: GroupsComponent.State(
+        newGroup: NewGroupComponent.State()
+      ),
+      reducer: GroupsComponent()
+    )
+
+    store.send(.newGroup(.didFinish)) {
       $0.newGroup = nil
     }
   }
