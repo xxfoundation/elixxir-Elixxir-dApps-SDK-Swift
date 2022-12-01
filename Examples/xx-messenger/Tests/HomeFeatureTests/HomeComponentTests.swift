@@ -3,6 +3,7 @@ import BackupFeature
 import ComposableArchitecture
 import ContactsFeature
 import CustomDump
+import GroupsFeature
 import RegisterFeature
 import UserSearchFeature
 import XCTest
@@ -538,6 +539,30 @@ final class HomeComponentTests: XCTestCase {
 
     store.send(.didDismissBackup) {
       $0.backup = nil
+    }
+  }
+
+  func testGroupsButtonTapped() {
+    let store = TestStore(
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
+    )
+
+    store.send(.groupsButtonTapped) {
+      $0.groups = GroupsComponent.State()
+    }
+  }
+
+  func testDidDismissGroups() {
+    let store = TestStore(
+      initialState: HomeComponent.State(
+        groups: GroupsComponent.State()
+      ),
+      reducer: HomeComponent()
+    )
+
+    store.send(.didDismissGroups) {
+      $0.groups = nil
     }
   }
 }

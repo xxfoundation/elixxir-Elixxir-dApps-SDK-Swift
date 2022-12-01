@@ -3,6 +3,7 @@ import BackupFeature
 import ComposableArchitecture
 import ComposablePresentation
 import ContactsFeature
+import GroupsFeature
 import RegisterFeature
 import SwiftUI
 import UserSearchFeature
@@ -109,6 +110,16 @@ public struct HomeView: View {
                 Image(systemName: "chevron.forward")
               }
             }
+
+            Button {
+              viewStore.send(.groupsButtonTapped)
+            } label: {
+              HStack {
+                Text("Groups")
+                Spacer()
+                Image(systemName: "chevron.forward")
+              }
+            }
           } header: {
             Text("Contacts")
           }
@@ -180,6 +191,16 @@ public struct HomeView: View {
             viewStore.send(.didDismissBackup)
           },
           destination: BackupView.init(store:)
+        ))
+        .background(NavigationLinkWithStore(
+          store.scope(
+            state: \.groups,
+            action: HomeComponent.Action.groups
+          ),
+          onDeactivate: {
+            viewStore.send(.didDismissGroups)
+          },
+          destination: GroupsView.init(store:)
         ))
       }
       .navigationViewStyle(.stack)
