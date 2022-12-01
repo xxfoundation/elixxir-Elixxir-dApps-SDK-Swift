@@ -97,6 +97,25 @@ final class NewGroupComponentTests: XCTestCase {
     }
   }
 
+  func testEnterGroupName() {
+    let store = TestStore(
+      initialState: NewGroupComponent.State(),
+      reducer: NewGroupComponent()
+    )
+
+    store.send(.binding(.set(\.$focusedField, .name))) {
+      $0.focusedField = .name
+    }
+
+    store.send(.binding(.set(\.$name, "My New Group"))) {
+      $0.name = "My New Group"
+    }
+
+    store.send(.binding(.set(\.$focusedField, nil))) {
+      $0.focusedField = nil
+    }
+  }
+
   func testFinish() {
     let store = TestStore(
       initialState: NewGroupComponent.State(),
