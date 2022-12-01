@@ -40,7 +40,7 @@ public struct GroupsComponent: ReducerProtocol {
       case .start:
         return Effect
           .catching { try db() }
-          .flatMap { $0.fetchGroupsPublisher.callAsFunction(.init()) }
+          .flatMap { $0.fetchGroupsPublisher(.init()) }
           .assertNoFailure()
           .map(Action.didFetchGroups)
           .subscribe(on: bgQueue)

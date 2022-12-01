@@ -7,6 +7,7 @@ import XXModels
 
 public struct GroupsView: View {
   public typealias Component = GroupsComponent
+  typealias ViewStore = ComposableArchitecture.ViewStore<ViewState, Component.Action>
 
   public init(store: StoreOf<Component>) {
     self.store = store
@@ -15,22 +16,20 @@ public struct GroupsView: View {
   let store: StoreOf<Component>
 
   struct ViewState: Equatable {
-    init(state: Component.State) {}
+    init(state: Component.State) {
+      groups = state.groups
+    }
 
-    var groups: IdentifiedArrayOf<XXModels.Group> = []
+    var groups: IdentifiedArrayOf<XXModels.Group>
   }
 
   public var body: some View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
-        newGroupButton {
-          viewStore.send(.newGroupButtonTapped)
-        }
+        newGroupButton(viewStore)
 
         ForEach(viewStore.groups) { group in
-          groupView(group) {
-            viewStore.send(.didSelectGroup(group))
-          }
+          groupView(group, viewStore)
         }
       }
       .navigationTitle("Groups")
@@ -46,10 +45,10 @@ public struct GroupsView: View {
     }
   }
 
-  func newGroupButton(action: @escaping () -> Void) -> some View {
+  func newGroupButton(_ viewStore: ViewStore) -> some View {
     Section {
       Button {
-        action()
+        viewStore.send(.newGroupButtonTapped)
       } label: {
         HStack {
           Text("New Group")
@@ -60,13 +59,10 @@ public struct GroupsView: View {
     }
   }
 
-  func groupView(
-    _ group: XXModels.Group,
-    onSelect: @escaping () -> Void
-  ) -> some View {
+  func groupView(_ group: XXModels.Group, _ viewStore: ViewStore) -> some View {
     Section {
       Button {
-        onSelect()
+        viewStore.send(.didSelectGroup(group))
       } label: {
         HStack {
           Label(group.name, systemImage: "person.3")
@@ -75,8 +71,8 @@ public struct GroupsView: View {
           Spacer()
           Image(systemName: "chevron.forward")
         }
-        GroupAuthStatusView(group.authStatus)
       }
+      GroupAuthStatusView(group.authStatus)
     }
   }
 }
