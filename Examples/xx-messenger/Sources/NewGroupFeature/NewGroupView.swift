@@ -19,13 +19,19 @@ public struct NewGroupView: View {
       contacts = state.contacts
       members = state.members
       name = state.name
+      message = state.message
       focusedField = state.focusedField
+      isCreating = state.isCreating
+      failure = state.failure
     }
 
     var contacts: IdentifiedArrayOf<XXModels.Contact>
     var members: IdentifiedArrayOf<XXModels.Contact>
     var name: String
+    var message: String
     var focusedField: Component.State.Field?
+    var isCreating: Bool
+    var failure: String?
   }
 
   public var body: some View {
@@ -34,6 +40,13 @@ public struct NewGroupView: View {
         Section {
           membersView(viewStore)
           nameView(viewStore)
+          messageView(viewStore)
+        }
+        Section {
+          createButton(viewStore)
+          if let failure = viewStore.failure {
+            Text(failure)
+          }
         }
       }
       .navigationTitle("New Group")
@@ -61,6 +74,7 @@ public struct NewGroupView: View {
         }
       }
     }
+    .disabled(viewStore.isCreating)
   }
 
   func nameView(_ viewStore: ViewStore) -> some View {
@@ -69,6 +83,33 @@ public struct NewGroupView: View {
       send: { .set(\.$name, $0) }
     ))
     .focused($focusedField, equals: .name)
+    .disabled(viewStore.isCreating)
+  }
+
+  func messageView(_ viewStore: ViewStore) -> some View {
+    TextField("Initial message", text: viewStore.binding(
+      get: \.message,
+      send: { .set(\.$message, $0) }
+    ))
+    .focused($focusedField, equals: .message)
+    .disabled(viewStore.isCreating)
+  }
+
+  func createButton(_ viewStore: ViewStore) -> some View {
+    Button {
+      viewStore.send(.createButtonTapped)
+    } label: {
+      HStack {
+        Text("Create group")
+        Spacer()
+        if viewStore.isCreating {
+          ProgressView()
+        } else {
+          Image(systemName: "play.fill")
+        }
+      }
+    }
+    .disabled(viewStore.isCreating)
   }
 }
 
