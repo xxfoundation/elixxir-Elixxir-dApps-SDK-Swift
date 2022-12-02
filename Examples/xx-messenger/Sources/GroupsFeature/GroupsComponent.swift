@@ -2,6 +2,7 @@ import AppCore
 import ComposableArchitecture
 import ComposablePresentation
 import Foundation
+import GroupFeature
 import NewGroupFeature
 import XXModels
 
@@ -9,23 +10,28 @@ public struct GroupsComponent: ReducerProtocol {
   public struct State: Equatable {
     public init(
       groups: IdentifiedArrayOf<Group> = [],
-      newGroup: NewGroupComponent.State? = nil
+      newGroup: NewGroupComponent.State? = nil,
+      group: GroupComponent.State? = nil
     ) {
       self.groups = groups
       self.newGroup = newGroup
+      self.group = group
     }
 
     public var groups: IdentifiedArrayOf<XXModels.Group> = []
     public var newGroup: NewGroupComponent.State?
+    public var group: GroupComponent.State?
   }
 
   public enum Action: Equatable {
     case start
     case didFetchGroups([XXModels.Group])
     case didSelectGroup(XXModels.Group)
+    case didDismissGroup
     case newGroupButtonTapped
     case newGroupDismissed
     case newGroup(NewGroupComponent.Action)
+    case group(GroupComponent.Action)
   }
 
   public init() {}
@@ -51,7 +57,12 @@ public struct GroupsComponent: ReducerProtocol {
         state.groups = IdentifiedArray(uniqueElements: groups)
         return .none
 
-      case .didSelectGroup(_):
+      case .didSelectGroup(let group):
+        state.group = GroupComponent.State(group: group)
+        return .none
+
+      case .didDismissGroup:
+        state.group = nil
         return .none
 
       case .newGroupButtonTapped:
@@ -66,7 +77,7 @@ public struct GroupsComponent: ReducerProtocol {
         state.newGroup = nil
         return .none
 
-      case .newGroup(_):
+      case .newGroup(_), .group(_):
         return .none
       }
     }
@@ -75,6 +86,12 @@ public struct GroupsComponent: ReducerProtocol {
       id: .notNil(),
       action: /Action.newGroup,
       presented: { NewGroupComponent() }
+    )
+    .presenting(
+      state: .keyPath(\.group),
+      id: .notNil(),
+      action: /Action.group,
+      presented: { GroupComponent() }
     )
   }
 }

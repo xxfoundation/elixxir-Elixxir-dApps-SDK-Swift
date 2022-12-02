@@ -287,6 +287,7 @@ let package = Package(
       name: "GroupsFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "GroupFeature"),
         .target(name: "NewGroupFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
