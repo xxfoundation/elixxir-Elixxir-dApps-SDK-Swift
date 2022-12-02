@@ -2,12 +2,16 @@ import Combine
 import ComposableArchitecture
 import CustomDump
 import XCTest
+import XXClient
+import XXMessengerClient
 import XXModels
 @testable import GroupFeature
 
 final class GroupComponentTests: XCTestCase {
   enum Action: Equatable {
     case didFetchGroupInfos(GroupInfo.Query)
+    case didJoinGroup(Data)
+    case didSaveGroup(XXModels.Group)
   }
 
   var actions: [Action]!
@@ -56,6 +60,85 @@ final class GroupComponentTests: XCTestCase {
     }
 
     groupInfosSubject.send(completion: .finished)
+  }
+
+  func testJoinGroup() {
+    var groupInfo = GroupInfo.stub()
+    groupInfo.group.authStatus = .pending
+
+    let store = TestStore(
+      initialState: GroupComponent.State(
+        groupId: groupInfo.group.id,
+        groupInfo: groupInfo
+      ),
+      reducer: GroupComponent()
+    )
+
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.groupChat.get = {
+      var groupChat: GroupChat = .unimplemented
+      groupChat.joinGroup.run = { serializedGroupData in
+        self.actions.append(.didJoinGroup(serializedGroupData))
+      }
+      return groupChat
+    }
+    store.dependencies.app.dbManager.getDB.run = {
+      var db: Database = .unimplemented
+      db.saveGroup.run = { group in
+        self.actions.append(.didSaveGroup(group))
+        return group
+      }
+      return db
+    }
+
+    store.send(.joinButtonTapped) {
+      $0.isJoining = true
+    }
+
+    XCTAssertNoDifference(actions, [
+      .didJoinGroup(groupInfo.group.serialized),
+      .didSaveGroup({
+        var group = groupInfo.group
+        group.authStatus = .participating
+        return group
+      }())
+    ])
+
+    store.receive(.didJoin) {
+      $0.isJoining = false
+    }
+  }
+
+  func testJoinGroupFailure() {
+    let groupInfo = GroupInfo.stub()
+    struct Failure: Error {}
+    let failure = Failure()
+
+    let store = TestStore(
+      initialState: GroupComponent.State(
+        groupId: groupInfo.group.id,
+        groupInfo: groupInfo
+      ),
+      reducer: GroupComponent()
+    )
+
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.groupChat.get = {
+      var groupChat: GroupChat = .unimplemented
+      groupChat.joinGroup.run = { _ in throw failure }
+      return groupChat
+    }
+
+    store.send(.joinButtonTapped) {
+      $0.isJoining = true
+    }
+
+    store.receive(.didFailToJoin(failure.localizedDescription)) {
+      $0.isJoining = false
+      $0.joinFailure = failure.localizedDescription
+    }
   }
 }
 

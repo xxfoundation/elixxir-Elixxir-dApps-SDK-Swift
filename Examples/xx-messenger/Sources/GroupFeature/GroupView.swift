@@ -16,9 +16,13 @@ public struct GroupView: View {
   struct ViewState: Equatable {
     init(state: Component.State) {
       info = state.groupInfo
+      isJoining = state.isJoining
+      joinFailure = state.joinFailure
     }
 
     var info: XXModels.GroupInfo?
+    var isJoining: Bool
+    var joinFailure: String?
   }
 
   public var body: some View {
@@ -41,6 +45,27 @@ public struct GroupView: View {
 
           Section("Status") {
             GroupAuthStatusView(info.group.authStatus)
+
+            if case .pending = info.group.authStatus {
+              Button {
+                viewStore.send(.joinButtonTapped)
+              } label: {
+                HStack {
+                  Text("Join")
+                  Spacer()
+                  if viewStore.isJoining {
+                    ProgressView()
+                  } else {
+                    Image(systemName: "play.fill")
+                  }
+                }
+              }
+              .disabled(viewStore.isJoining)
+            }
+
+            if let failure = viewStore.joinFailure {
+              Text(failure)
+            }
           }
         }
       }
