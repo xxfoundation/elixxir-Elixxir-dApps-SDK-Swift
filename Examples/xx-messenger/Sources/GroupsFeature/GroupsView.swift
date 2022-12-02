@@ -1,6 +1,7 @@
 import AppCore
 import ComposableArchitecture
 import ComposablePresentation
+import GroupFeature
 import NewGroupFeature
 import SwiftUI
 import XXModels
@@ -40,6 +41,14 @@ public struct GroupsView: View {
         ),
         onDeactivate: { viewStore.send(.newGroupDismissed) },
         destination: NewGroupView.init
+      ))
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.group,
+          action: Component.Action.group
+        ),
+        onDeactivate: { viewStore.send(.didDismissGroup) },
+        destination: GroupView.init
       ))
       .task { viewStore.send(.start) }
     }
