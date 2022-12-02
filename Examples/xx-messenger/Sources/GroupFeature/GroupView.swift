@@ -15,17 +15,33 @@ public struct GroupView: View {
 
   struct ViewState: Equatable {
     init(state: Component.State) {
-      group = state.group
+      info = state.groupInfo
     }
 
-    var group: XXModels.Group
+    var info: XXModels.GroupInfo?
   }
 
   public var body: some View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       Form {
-        Section("Group name") {
-          Text(viewStore.group.name)
+        if let info = viewStore.info {
+          Section("Name") {
+            Text(info.group.name)
+          }
+
+          Section("Leader") {
+            Label(info.leader.username ?? "", systemImage: "person.badge.shield.checkmark")
+          }
+
+          Section("Members") {
+            ForEach(info.members.filter { $0 != info.leader }) { contact in
+              Label(contact.username ?? "", systemImage: "person")
+            }
+          }
+
+          Section("Status") {
+            GroupAuthStatusView(info.group.authStatus)
+          }
         }
       }
       .navigationTitle("Group")
@@ -40,13 +56,30 @@ public struct GroupView_Previews: PreviewProvider {
     NavigationView {
       GroupView(store: Store(
         initialState: GroupComponent.State(
-          group: .init(
-            id: "group-id".data(using: .utf8)!,
-            name: "Preview group",
-            leaderId: "group-leader-id".data(using: .utf8)!,
-            createdAt: Date(timeIntervalSince1970: TimeInterval(86_400)),
-            authStatus: .participating,
-            serialized: "group-serialized".data(using: .utf8)!
+          groupId: "group-id".data(using: .utf8)!,
+          groupInfo: .init(
+            group: .init(
+              id: "group-id".data(using: .utf8)!,
+              name: "Preview group",
+              leaderId: "group-leader-id".data(using: .utf8)!,
+              createdAt: Date(timeIntervalSince1970: TimeInterval(86_400)),
+              authStatus: .participating,
+              serialized: "group-serialized".data(using: .utf8)!
+            ),
+            leader: .init(
+              id: "group-leader-id".data(using: .utf8)!,
+              username: "Group leader"
+            ),
+            members: [
+              .init(
+                id: "member-1-id".data(using: .utf8)!,
+                username: "Member 1"
+              ),
+              .init(
+                id: "member-2-id".data(using: .utf8)!,
+                username: "Member 2"
+              ),
+            ]
           )
         ),
         reducer: EmptyReducer()

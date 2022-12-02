@@ -58,7 +58,7 @@ public struct GroupsComponent: ReducerProtocol {
         return .none
 
       case .didSelectGroup(let group):
-        state.group = GroupComponent.State(group: group)
+        state.group = GroupComponent.State(groupId: group.id)
         return .none
 
       case .didDismissGroup:
