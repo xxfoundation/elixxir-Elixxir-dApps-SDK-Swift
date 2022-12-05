@@ -11,6 +11,7 @@ public struct ChatComponent: ReducerProtocol {
   public struct State: Equatable, Identifiable {
     public enum ID: Equatable, Hashable {
       case contact(XXModels.Contact.ID)
+      case group(XXModels.Group.ID)
     }
 
     public struct Message: Equatable, Identifiable {
@@ -93,25 +94,33 @@ public struct ChatComponent: ReducerProtocol {
           let myContactId = try messenger.e2e.tryGet().getContact().getId()
           state.myContactId = myContactId
           let queryChat: XXModels.Message.Query.Chat
-          let receivedFileTransfersQuery: XXModels.FileTransfer.Query
-          let sentFileTransfersQuery: XXModels.FileTransfer.Query
+          let receivedFileTransfersPublisher: AnyPublisher<[XXModels.FileTransfer], Error>
+          let sentFileTransfersPublisher: AnyPublisher<[XXModels.FileTransfer], Error>
           switch state.id {
           case .contact(let contactId):
             queryChat = .direct(myContactId, contactId)
-            receivedFileTransfersQuery = .init(
+            receivedFileTransfersPublisher = try db().fetchFileTransfersPublisher(.init(
               contactId: contactId,
               isIncoming: true
-            )
-            sentFileTransfersQuery = .init(
+            ))
+            sentFileTransfersPublisher = try db().fetchFileTransfersPublisher(.init(
               contactId: myContactId,
               isIncoming: false
-            )
+            ))
+          case .group(let groupId):
+            queryChat = .group(groupId)
+            receivedFileTransfersPublisher = Just([])
+              .setFailureType(to: Error.self)
+              .eraseToAnyPublisher()
+            sentFileTransfersPublisher = Just([])
+              .setFailureType(to: Error.self)
+              .eraseToAnyPublisher()
           }
           let messagesQuery = XXModels.Message.Query(chat: queryChat)
           return Publishers.CombineLatest3(
             try db().fetchMessagesPublisher(messagesQuery),
-            try db().fetchFileTransfersPublisher(receivedFileTransfersQuery),
-            try db().fetchFileTransfersPublisher(sentFileTransfersQuery)
+            receivedFileTransfersPublisher,
+            sentFileTransfersPublisher
           )
           .map { messages, receivedFileTransfers, sentFileTransfers in
             (messages, receivedFileTransfers + sentFileTransfers)
@@ -163,6 +172,9 @@ public struct ChatComponent: ReducerProtocol {
                 subscriber.send(completion: .finished)
               }
             )
+          case .group(let groupId):
+            // TODO: send group message
+            fatalError()
           }
           return AnyCancellable {}
         }
@@ -175,21 +187,18 @@ public struct ChatComponent: ReducerProtocol {
         return .none
 
       case .imagePicked(let data):
-        let chatId = state.id
+        guard case .contact(let recipientId) = state.id else { return .none }
         return Effect.run { subscriber in
-          switch chatId {
-          case .contact(let recipientId):
-            sendImage(
-              data,
-              to: recipientId,
-              onError: { error in
-                subscriber.send(.sendFailed(error.localizedDescription))
-              },
-              completion: {
-                subscriber.send(completion: .finished)
-              }
-            )
-          }
+          sendImage(
+            data,
+            to: recipientId,
+            onError: { error in
+              subscriber.send(.sendFailed(error.localizedDescription))
+            },
+            completion: {
+              subscriber.send(completion: .finished)
+            }
+          )
           return AnyCancellable {}
         }
         .subscribe(on: bgQueue)

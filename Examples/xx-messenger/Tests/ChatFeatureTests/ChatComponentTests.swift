@@ -9,7 +9,7 @@ import XXModels
 @testable import ChatFeature
 
 final class ChatComponentTests: XCTestCase {
-  func testStart() {
+  func testStartDirectChat() {
     let contactId = "contact-id".data(using: .utf8)!
     let myContactId = "my-contact-id".data(using: .utf8)!
 
@@ -139,6 +139,112 @@ final class ChatComponentTests: XCTestCase {
     fileTransfersPublisher.send(completion: .finished)
   }
 
+  func testStartGroupChat() {
+    let groupId = "group-id".data(using: .utf8)!
+    let myContactId = "my-contact-id".data(using: .utf8)!
+    let firstMemberId = "member-1-id".data(using: .utf8)!
+    let secondMemberId = "member-2-id".data(using: .utf8)!
+
+    let store = TestStore(
+      initialState: ChatComponent.State(id: .group(groupId)),
+      reducer: ChatComponent()
+    )
+
+    var didFetchMessagesWithQuery: [XXModels.Message.Query] = []
+    let messagesPublisher = PassthroughSubject<[XXModels.Message], Error>()
+
+    store.dependencies.app.mainQueue = .immediate
+    store.dependencies.app.bgQueue = .immediate
+    store.dependencies.app.messenger.e2e.get = {
+      var e2e: E2E = .unimplemented
+      e2e.getContact.run = {
+        var contact: XXClient.Contact = .unimplemented(Data())
+        contact.getIdFromContact.run = { _ in myContactId }
+        return contact
+      }
+      return e2e
+    }
+    store.dependencies.app.dbManager.getDB.run = {
+      var db: Database = .unimplemented
+      db.fetchMessagesPublisher.run = { query in
+        didFetchMessagesWithQuery.append(query)
+        return messagesPublisher.eraseToAnyPublisher()
+      }
+      return db
+    }
+
+    store.send(.start) {
+      $0.myContactId = myContactId
+    }
+
+    XCTAssertNoDifference(didFetchMessagesWithQuery, [
+      .init(chat: .group(groupId))
+    ])
+
+    messagesPublisher.send([
+      .init(
+        id: 0,
+        senderId: myContactId,
+        recipientId: nil,
+        groupId: groupId,
+        date: Date(timeIntervalSince1970: 0),
+        status: .sent,
+        isUnread: false,
+        text: "Message 0"
+      ),
+      .init(
+        id: 1,
+        senderId: firstMemberId,
+        recipientId: nil,
+        groupId: groupId,
+        date: Date(timeIntervalSince1970: 1),
+        status: .received,
+        isUnread: false,
+        text: "Message 1"
+      ),
+      .init(
+        id: 2,
+        senderId: secondMemberId,
+        recipientId: nil,
+        groupId: groupId,
+        date: Date(timeIntervalSince1970: 2),
+        status: .received,
+        isUnread: false,
+        text: "Message 2"
+      ),
+    ])
+
+    let expectedMessages = IdentifiedArrayOf<ChatComponent.State.Message>(uniqueElements: [
+      .init(
+        id: 0,
+        date: Date(timeIntervalSince1970: 0),
+        senderId: myContactId,
+        text: "Message 0",
+        status: .sent
+      ),
+      .init(
+        id: 1,
+        date: Date(timeIntervalSince1970: 1),
+        senderId: firstMemberId,
+        text: "Message 1",
+        status: .received
+      ),
+      .init(
+        id: 2,
+        date: Date(timeIntervalSince1970: 2),
+        senderId: secondMemberId,
+        text: "Message 2",
+        status: .received
+      ),
+    ])
+
+    store.receive(.didFetchMessages(expectedMessages)) {
+      $0.messages = expectedMessages
+    }
+
+    messagesPublisher.send(completion: .finished)
+  }
+
   func testStartFailure() {
     let store = TestStore(
       initialState: ChatComponent.State(id: .contact("contact-id".data(using: .utf8)!)),
@@ -165,7 +271,7 @@ final class ChatComponentTests: XCTestCase {
     }
   }
 
-  func testSend() {
+  func testSendDirectMessage() {
     struct SendMessageParams: Equatable {
       var text: String
       var recipientId: Data
