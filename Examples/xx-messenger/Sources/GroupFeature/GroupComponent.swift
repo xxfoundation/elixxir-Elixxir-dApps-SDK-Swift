@@ -1,5 +1,7 @@
 import AppCore
+import ChatFeature
 import ComposableArchitecture
+import ComposablePresentation
 import Foundation
 import XXMessengerClient
 import XXModels
@@ -10,18 +12,21 @@ public struct GroupComponent: ReducerProtocol {
       groupId: XXModels.Group.ID,
       groupInfo: XXModels.GroupInfo? = nil,
       isJoining: Bool = false,
-      joinFailure: String? = nil
+      joinFailure: String? = nil,
+      chat: ChatComponent.State? = nil
     ) {
       self.groupId = groupId
       self.groupInfo = groupInfo
       self.isJoining = isJoining
       self.joinFailure = joinFailure
+      self.chat = chat
     }
 
     public var groupId: XXModels.Group.ID
     public var groupInfo: XXModels.GroupInfo?
     public var isJoining: Bool
     public var joinFailure: String?
+    public var chat: ChatComponent.State?
   }
 
   public enum Action: Equatable {
@@ -30,6 +35,9 @@ public struct GroupComponent: ReducerProtocol {
     case joinButtonTapped
     case didJoin
     case didFailToJoin(String)
+    case chatButtonTapped
+    case didDismissChat
+    case chat(ChatComponent.Action)
   }
 
   public init() {}
@@ -88,7 +96,24 @@ public struct GroupComponent: ReducerProtocol {
         state.isJoining = false
         state.joinFailure = failure
         return .none
+
+      case .chatButtonTapped:
+        state.chat = ChatComponent.State(id: .group(state.groupId))
+        return .none
+
+      case .didDismissChat:
+        state.chat = nil
+        return .none
+
+      case .chat(_):
+        return .none
       }
     }
+    .presenting(
+      state: .keyPath(\.chat),
+      id: .notNil(),
+      action: /Action.chat,
+      presented: { ChatComponent() }
+    )
   }
 }

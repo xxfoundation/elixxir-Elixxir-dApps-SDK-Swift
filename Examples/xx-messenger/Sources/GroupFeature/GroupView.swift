@@ -1,5 +1,7 @@
 import AppCore
+import ChatFeature
 import ComposableArchitecture
+import ComposablePresentation
 import SwiftUI
 import XXModels
 
@@ -68,8 +70,28 @@ public struct GroupView: View {
             }
           }
         }
+
+        Section {
+          Button {
+            viewStore.send(.chatButtonTapped)
+          } label: {
+            HStack {
+              Text("Chat")
+              Spacer()
+              Image(systemName: "chevron.forward")
+            }
+          }
+        }
       }
       .navigationTitle("Group")
+      .background(NavigationLinkWithStore(
+        store.scope(
+          state: \.chat,
+          action: Component.Action.chat
+        ),
+        onDeactivate: { viewStore.send(.didDismissChat) },
+        destination: ChatView.init(store:)
+      ))
       .task { viewStore.send(.start) }
     }
   }
