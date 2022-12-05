@@ -10,7 +10,7 @@ import XXModels
 public struct ChatComponent: ReducerProtocol {
   public struct State: Equatable, Identifiable {
     public enum ID: Equatable, Hashable {
-      case contact(Data)
+      case contact(XXModels.Contact.ID)
     }
 
     public struct Message: Equatable, Identifiable {
