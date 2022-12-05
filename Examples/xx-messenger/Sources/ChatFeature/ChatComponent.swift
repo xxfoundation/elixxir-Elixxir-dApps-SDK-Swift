@@ -78,6 +78,7 @@ public struct ChatComponent: ReducerProtocol {
   @Dependency(\.app.messenger) var messenger: Messenger
   @Dependency(\.app.dbManager.getDB) var db: DBManagerGetDB
   @Dependency(\.app.sendMessage) var sendMessage: SendMessage
+  @Dependency(\.app.sendGroupMessage) var sendGroupMessage: SendGroupMessage
   @Dependency(\.app.sendImage) var sendImage: SendImage
   @Dependency(\.app.mainQueue) var mainQueue: AnySchedulerOf<DispatchQueue>
   @Dependency(\.app.bgQueue) var bgQueue: AnySchedulerOf<DispatchQueue>
@@ -173,8 +174,16 @@ public struct ChatComponent: ReducerProtocol {
               }
             )
           case .group(let groupId):
-            // TODO: send group message
-            fatalError()
+            sendGroupMessage(
+              text: text,
+              to: groupId,
+              onError: { error in
+                subscriber.send(.sendFailed(error.localizedDescription))
+              },
+              completion: {
+                subscriber.send(completion: .finished)
+              }
+            )
           }
           return AnyCancellable {}
         }
