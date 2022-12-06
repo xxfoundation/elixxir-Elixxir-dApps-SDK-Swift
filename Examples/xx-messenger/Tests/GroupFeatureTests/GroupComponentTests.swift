@@ -1,3 +1,4 @@
+import ChatFeature
 import Combine
 import ComposableArchitecture
 import CustomDump
@@ -138,6 +139,26 @@ final class GroupComponentTests: XCTestCase {
     store.receive(.didFailToJoin(failure.localizedDescription)) {
       $0.isJoining = false
       $0.joinFailure = failure.localizedDescription
+    }
+  }
+
+  func testPresentChat() {
+    let groupInfo = GroupInfo.stub()
+
+    let store = TestStore(
+      initialState: GroupComponent.State(
+        groupId: groupInfo.group.id,
+        groupInfo: groupInfo
+      ),
+      reducer: GroupComponent()
+    )
+
+    store.send(.chatButtonTapped) {
+      $0.chat = ChatComponent.State(id: .group(groupInfo.id))
+    }
+
+    store.send(.didDismissChat) {
+      $0.chat = nil
     }
   }
 }

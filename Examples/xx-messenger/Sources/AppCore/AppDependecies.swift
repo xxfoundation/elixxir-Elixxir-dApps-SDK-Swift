@@ -12,6 +12,7 @@ public struct AppDependencies {
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var now: () -> Date
   public var sendMessage: SendMessage
+  public var sendGroupMessage: SendGroupMessage
   public var sendImage: SendImage
   public var messageListener: MessageListenerHandler
   public var receiveFileHandler: ReceiveFileHandler
@@ -42,6 +43,11 @@ extension AppDependencies {
       bgQueue: DispatchQueue(label: "xx-messenger", qos: .userInitiated).eraseToAnyScheduler(),
       now: now,
       sendMessage: .live(
+        messenger: messenger,
+        db: dbManager.getDB,
+        now: now
+      ),
+      sendGroupMessage: .live(
         messenger: messenger,
         db: dbManager.getDB,
         now: now
@@ -85,6 +91,7 @@ extension AppDependencies {
       placeholder: Date(timeIntervalSince1970: 0)
     ),
     sendMessage: .unimplemented,
+    sendGroupMessage: .unimplemented,
     sendImage: .unimplemented,
     messageListener: .unimplemented,
     receiveFileHandler: .unimplemented,

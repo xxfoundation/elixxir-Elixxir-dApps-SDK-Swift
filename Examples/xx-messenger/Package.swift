@@ -267,6 +267,7 @@ let package = Package(
       name: "GroupFeature",
       dependencies: [
         .target(name: "AppCore"),
+        .target(name: "ChatFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
         .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
         .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
