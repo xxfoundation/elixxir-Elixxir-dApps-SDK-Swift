@@ -22,6 +22,8 @@ final class ChatComponentTests: XCTestCase {
     let messagesPublisher = PassthroughSubject<[XXModels.Message], Error>()
     var didFetchFileTransfersWithQuery: [XXModels.FileTransfer.Query] = []
     let fileTransfersPublisher = PassthroughSubject<[XXModels.FileTransfer], Error>()
+    var didFetchContactsWithQuery: [XXModels.Contact.Query] = []
+    let contactsPublisher = PassthroughSubject<[XXModels.Contact], Error>()
 
     store.dependencies.app.mainQueue = .immediate
     store.dependencies.app.bgQueue = .immediate
@@ -40,6 +42,10 @@ final class ChatComponentTests: XCTestCase {
         didFetchMessagesWithQuery.append(query)
         return messagesPublisher.eraseToAnyPublisher()
       }
+      db.fetchContactsPublisher.run = { query in
+        didFetchContactsWithQuery.append(query)
+        return contactsPublisher.eraseToAnyPublisher()
+      }
       db.fetchFileTransfersPublisher.run = { query in
         didFetchFileTransfersWithQuery.append(query)
         return fileTransfersPublisher.eraseToAnyPublisher()
@@ -57,6 +63,9 @@ final class ChatComponentTests: XCTestCase {
     XCTAssertNoDifference(didFetchFileTransfersWithQuery, [
       .init(contactId: contactId, isIncoming: true),
       .init(contactId: myContactId, isIncoming: false),
+    ])
+    XCTAssertNoDifference(didFetchContactsWithQuery, [
+      .init(),
     ])
 
     let receivedFileTransfer = FileTransfer(
@@ -111,12 +120,17 @@ final class ChatComponentTests: XCTestCase {
       receivedFileTransfer,
       sentFileTransfer,
     ])
+    contactsPublisher.send([
+      .init(id: myContactId, username: "My username"),
+      .init(id: contactId, username: "Contact username"),
+    ])
 
     let expectedMessages = IdentifiedArrayOf<ChatComponent.State.Message>(uniqueElements: [
       .init(
         id: 1,
         date: Date(timeIntervalSince1970: 1),
         senderId: contactId,
+        senderName: "Contact username",
         text: "Message 1",
         status: .received,
         fileTransfer: receivedFileTransfer
@@ -125,6 +139,7 @@ final class ChatComponentTests: XCTestCase {
         id: 2,
         date: Date(timeIntervalSince1970: 2),
         senderId: myContactId,
+        senderName: "My username",
         text: "Message 2",
         status: .sent,
         fileTransfer: sentFileTransfer
@@ -137,6 +152,7 @@ final class ChatComponentTests: XCTestCase {
 
     messagesPublisher.send(completion: .finished)
     fileTransfersPublisher.send(completion: .finished)
+    contactsPublisher.send(completion: .finished)
   }
 
   func testStartGroupChat() {
@@ -152,6 +168,8 @@ final class ChatComponentTests: XCTestCase {
 
     var didFetchMessagesWithQuery: [XXModels.Message.Query] = []
     let messagesPublisher = PassthroughSubject<[XXModels.Message], Error>()
+    var didFetchContactsWithQuery: [XXModels.Contact.Query] = []
+    let contactsPublisher = PassthroughSubject<[XXModels.Contact], Error>()
 
     store.dependencies.app.mainQueue = .immediate
     store.dependencies.app.bgQueue = .immediate
@@ -170,6 +188,10 @@ final class ChatComponentTests: XCTestCase {
         didFetchMessagesWithQuery.append(query)
         return messagesPublisher.eraseToAnyPublisher()
       }
+      db.fetchContactsPublisher.run = { query in
+        didFetchContactsWithQuery.append(query)
+        return contactsPublisher.eraseToAnyPublisher()
+      }
       return db
     }
 
@@ -179,6 +201,9 @@ final class ChatComponentTests: XCTestCase {
 
     XCTAssertNoDifference(didFetchMessagesWithQuery, [
       .init(chat: .group(groupId))
+    ])
+    XCTAssertNoDifference(didFetchContactsWithQuery, [
+      .init(),
     ])
 
     messagesPublisher.send([
@@ -213,12 +238,18 @@ final class ChatComponentTests: XCTestCase {
         text: "Message 2"
       ),
     ])
+    contactsPublisher.send([
+      .init(id: myContactId, username: "My username"),
+      .init(id: firstMemberId, username: "First username"),
+      .init(id: secondMemberId, username: "Second username"),
+    ])
 
     let expectedMessages = IdentifiedArrayOf<ChatComponent.State.Message>(uniqueElements: [
       .init(
         id: 0,
         date: Date(timeIntervalSince1970: 0),
         senderId: myContactId,
+        senderName: "My username",
         text: "Message 0",
         status: .sent
       ),
@@ -226,6 +257,7 @@ final class ChatComponentTests: XCTestCase {
         id: 1,
         date: Date(timeIntervalSince1970: 1),
         senderId: firstMemberId,
+        senderName: "First username",
         text: "Message 1",
         status: .received
       ),
@@ -233,6 +265,7 @@ final class ChatComponentTests: XCTestCase {
         id: 2,
         date: Date(timeIntervalSince1970: 2),
         senderId: secondMemberId,
+        senderName: "Second username",
         text: "Message 2",
         status: .received
       ),
@@ -243,6 +276,7 @@ final class ChatComponentTests: XCTestCase {
     }
 
     messagesPublisher.send(completion: .finished)
+    contactsPublisher.send(completion: .finished)
   }
 
   func testStartFailure() {

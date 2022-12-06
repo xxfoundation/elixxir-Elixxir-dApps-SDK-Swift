@@ -147,6 +147,13 @@ public struct ChatView: View {
 
     var body: some View {
       VStack {
+        if let sender = message.senderName {
+          Text(sender)
+            .foregroundColor(.secondary)
+            .font(.footnote)
+            .frame(maxWidth: .infinity, alignment: alignment)
+        }
+
         Text("\(message.date.formatted()), \(statusText)")
           .foregroundColor(.secondary)
           .font(.footnote)
@@ -216,6 +223,7 @@ public struct ChatView_Previews: PreviewProvider {
               id: 1,
               date: Date(),
               senderId: "contact-id".data(using: .utf8)!,
+              senderName: "Contact",
               text: "Hello!",
               status: .received
             ),
@@ -223,6 +231,7 @@ public struct ChatView_Previews: PreviewProvider {
               id: 2,
               date: Date(),
               senderId: "my-contact-id".data(using: .utf8)!,
+              senderName: "Me",
               text: "Hi!",
               status: .sent
             ),
@@ -230,6 +239,7 @@ public struct ChatView_Previews: PreviewProvider {
               id: 3,
               date: Date(),
               senderId: "contact-id".data(using: .utf8)!,
+              senderName: "Contact",
               text: "",
               status: .received,
               fileTransfer: .init(
@@ -245,6 +255,7 @@ public struct ChatView_Previews: PreviewProvider {
               id: 4,
               date: Date(),
               senderId: "my-contact-id".data(using: .utf8)!,
+              senderName: "Me",
               text: "",
               status: .sent,
               fileTransfer: .init(

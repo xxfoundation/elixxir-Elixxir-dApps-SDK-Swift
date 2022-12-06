@@ -19,6 +19,7 @@ public struct ChatComponent: ReducerProtocol {
         id: Int64,
         date: Date,
         senderId: Data,
+        senderName: String?,
         text: String,
         status: XXModels.Message.Status,
         fileTransfer: XXModels.FileTransfer? = nil
@@ -26,6 +27,7 @@ public struct ChatComponent: ReducerProtocol {
         self.id = id
         self.date = date
         self.senderId = senderId
+        self.senderName = senderName
         self.text = text
         self.status = status
         self.fileTransfer = fileTransfer
@@ -34,6 +36,7 @@ public struct ChatComponent: ReducerProtocol {
       public var id: Int64
       public var date: Date
       public var senderId: Data
+      public var senderName: String?
       public var text: String
       public var status: XXModels.Message.Status
       public var fileTransfer: XXModels.FileTransfer?
@@ -120,20 +123,21 @@ public struct ChatComponent: ReducerProtocol {
           let messagesQuery = XXModels.Message.Query(chat: queryChat)
           return Publishers.CombineLatest3(
             try db().fetchMessagesPublisher(messagesQuery),
-            receivedFileTransfersPublisher,
-            sentFileTransfersPublisher
+            try db().fetchContactsPublisher(.init()),
+            Publishers.CombineLatest(
+              receivedFileTransfersPublisher,
+              sentFileTransfersPublisher
+            ).map(+)
           )
-          .map { messages, receivedFileTransfers, sentFileTransfers in
-            (messages, receivedFileTransfers + sentFileTransfers)
-          }
           .assertNoFailure()
-          .map { messages, fileTransfers in
-            messages.compactMap { message in
+          .map { messages, contacts, fileTransfers -> [State.Message] in
+            messages.compactMap { message -> State.Message? in
               guard let id = message.id else { return nil }
               return State.Message(
                 id: id,
                 date: message.date,
                 senderId: message.senderId,
+                senderName: contacts.first { $0.id == message.senderId }?.username,
                 text: message.text,
                 status: message.status,
                 fileTransfer: fileTransfers.first { $0.id == message.fileTransferId }
