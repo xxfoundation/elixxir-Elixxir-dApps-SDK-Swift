@@ -16,6 +16,7 @@ public struct ChatView: View {
     var failure: String?
     var sendFailure: String?
     var text: String
+    var disableImagePicker: Bool
 
     init(state: ChatComponent.State) {
       myContactId = state.myContactId
@@ -23,6 +24,12 @@ public struct ChatView: View {
       failure = state.failure
       sendFailure = state.sendFailure
       text = state.text
+      switch state.id {
+      case .contact(_):
+        disableImagePicker = false
+      case .group(_):
+        disableImagePicker = true
+      }
     }
   }
 
@@ -109,6 +116,7 @@ public struct ChatView: View {
                   }
                 }
               }
+              .disabled(viewStore.disableImagePicker)
             }
           }
           .padding()
