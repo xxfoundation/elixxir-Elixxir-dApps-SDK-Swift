@@ -10,7 +10,8 @@ import XXModels
 public struct ChatComponent: ReducerProtocol {
   public struct State: Equatable, Identifiable {
     public enum ID: Equatable, Hashable {
-      case contact(Data)
+      case contact(XXModels.Contact.ID)
+      case group(XXModels.Group.ID)
     }
 
     public struct Message: Equatable, Identifiable {
@@ -18,6 +19,7 @@ public struct ChatComponent: ReducerProtocol {
         id: Int64,
         date: Date,
         senderId: Data,
+        senderName: String?,
         text: String,
         status: XXModels.Message.Status,
         fileTransfer: XXModels.FileTransfer? = nil
@@ -25,6 +27,7 @@ public struct ChatComponent: ReducerProtocol {
         self.id = id
         self.date = date
         self.senderId = senderId
+        self.senderName = senderName
         self.text = text
         self.status = status
         self.fileTransfer = fileTransfer
@@ -33,6 +36,7 @@ public struct ChatComponent: ReducerProtocol {
       public var id: Int64
       public var date: Date
       public var senderId: Data
+      public var senderName: String?
       public var text: String
       public var status: XXModels.Message.Status
       public var fileTransfer: XXModels.FileTransfer?
@@ -77,6 +81,7 @@ public struct ChatComponent: ReducerProtocol {
   @Dependency(\.app.messenger) var messenger: Messenger
   @Dependency(\.app.dbManager.getDB) var db: DBManagerGetDB
   @Dependency(\.app.sendMessage) var sendMessage: SendMessage
+  @Dependency(\.app.sendGroupMessage) var sendGroupMessage: SendGroupMessage
   @Dependency(\.app.sendImage) var sendImage: SendImage
   @Dependency(\.app.mainQueue) var mainQueue: AnySchedulerOf<DispatchQueue>
   @Dependency(\.app.bgQueue) var bgQueue: AnySchedulerOf<DispatchQueue>
@@ -93,37 +98,46 @@ public struct ChatComponent: ReducerProtocol {
           let myContactId = try messenger.e2e.tryGet().getContact().getId()
           state.myContactId = myContactId
           let queryChat: XXModels.Message.Query.Chat
-          let receivedFileTransfersQuery: XXModels.FileTransfer.Query
-          let sentFileTransfersQuery: XXModels.FileTransfer.Query
+          let receivedFileTransfersPublisher: AnyPublisher<[XXModels.FileTransfer], Error>
+          let sentFileTransfersPublisher: AnyPublisher<[XXModels.FileTransfer], Error>
           switch state.id {
           case .contact(let contactId):
             queryChat = .direct(myContactId, contactId)
-            receivedFileTransfersQuery = .init(
+            receivedFileTransfersPublisher = try db().fetchFileTransfersPublisher(.init(
               contactId: contactId,
               isIncoming: true
-            )
-            sentFileTransfersQuery = .init(
+            ))
+            sentFileTransfersPublisher = try db().fetchFileTransfersPublisher(.init(
               contactId: myContactId,
               isIncoming: false
-            )
+            ))
+          case .group(let groupId):
+            queryChat = .group(groupId)
+            receivedFileTransfersPublisher = Just([])
+              .setFailureType(to: Error.self)
+              .eraseToAnyPublisher()
+            sentFileTransfersPublisher = Just([])
+              .setFailureType(to: Error.self)
+              .eraseToAnyPublisher()
           }
           let messagesQuery = XXModels.Message.Query(chat: queryChat)
           return Publishers.CombineLatest3(
             try db().fetchMessagesPublisher(messagesQuery),
-            try db().fetchFileTransfersPublisher(receivedFileTransfersQuery),
-            try db().fetchFileTransfersPublisher(sentFileTransfersQuery)
+            try db().fetchContactsPublisher(.init()),
+            Publishers.CombineLatest(
+              receivedFileTransfersPublisher,
+              sentFileTransfersPublisher
+            ).map(+)
           )
-          .map { messages, receivedFileTransfers, sentFileTransfers in
-            (messages, receivedFileTransfers + sentFileTransfers)
-          }
           .assertNoFailure()
-          .map { messages, fileTransfers in
-            messages.compactMap { message in
+          .map { messages, contacts, fileTransfers -> [State.Message] in
+            messages.compactMap { message -> State.Message? in
               guard let id = message.id else { return nil }
               return State.Message(
                 id: id,
                 date: message.date,
                 senderId: message.senderId,
+                senderName: contacts.first { $0.id == message.senderId }?.username,
                 text: message.text,
                 status: message.status,
                 fileTransfer: fileTransfers.first { $0.id == message.fileTransferId }
@@ -163,6 +177,17 @@ public struct ChatComponent: ReducerProtocol {
                 subscriber.send(completion: .finished)
               }
             )
+          case .group(let groupId):
+            sendGroupMessage(
+              text: text,
+              to: groupId,
+              onError: { error in
+                subscriber.send(.sendFailed(error.localizedDescription))
+              },
+              completion: {
+                subscriber.send(completion: .finished)
+              }
+            )
           }
           return AnyCancellable {}
         }
@@ -175,21 +200,18 @@ public struct ChatComponent: ReducerProtocol {
         return .none
 
       case .imagePicked(let data):
-        let chatId = state.id
+        guard case .contact(let recipientId) = state.id else { return .none }
         return Effect.run { subscriber in
-          switch chatId {
-          case .contact(let recipientId):
-            sendImage(
-              data,
-              to: recipientId,
-              onError: { error in
-                subscriber.send(.sendFailed(error.localizedDescription))
-              },
-              completion: {
-                subscriber.send(completion: .finished)
-              }
-            )
-          }
+          sendImage(
+            data,
+            to: recipientId,
+            onError: { error in
+              subscriber.send(.sendFailed(error.localizedDescription))
+            },
+            completion: {
+              subscriber.send(completion: .finished)
+            }
+          )
           return AnyCancellable {}
         }
         .subscribe(on: bgQueue)

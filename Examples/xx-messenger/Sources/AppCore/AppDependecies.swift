@@ -12,11 +12,14 @@ public struct AppDependencies {
   public var bgQueue: AnySchedulerOf<DispatchQueue>
   public var now: () -> Date
   public var sendMessage: SendMessage
+  public var sendGroupMessage: SendGroupMessage
   public var sendImage: SendImage
   public var messageListener: MessageListenerHandler
   public var receiveFileHandler: ReceiveFileHandler
   public var log: Logger
   public var loadData: URLDataLoader
+  public var groupRequestHandler: GroupRequestHandler
+  public var groupMessageHandler: GroupMessageHandler
 }
 
 extension AppDependencies {
@@ -44,6 +47,11 @@ extension AppDependencies {
         db: dbManager.getDB,
         now: now
       ),
+      sendGroupMessage: .live(
+        messenger: messenger,
+        db: dbManager.getDB,
+        now: now
+      ),
       sendImage: .live(
         messenger: messenger,
         db: dbManager.getDB,
@@ -59,7 +67,15 @@ extension AppDependencies {
         now: now
       ),
       log: .live(),
-      loadData: .live
+      loadData: .live,
+      groupRequestHandler: .live(
+        messenger: messenger,
+        db: dbManager.getDB
+      ),
+      groupMessageHandler: .live(
+        messenger: messenger,
+        db: dbManager.getDB
+      )
     )
   }
 
@@ -75,11 +91,14 @@ extension AppDependencies {
       placeholder: Date(timeIntervalSince1970: 0)
     ),
     sendMessage: .unimplemented,
+    sendGroupMessage: .unimplemented,
     sendImage: .unimplemented,
     messageListener: .unimplemented,
     receiveFileHandler: .unimplemented,
     log: .unimplemented,
-    loadData: .unimplemented
+    loadData: .unimplemented,
+    groupRequestHandler: .unimplemented,
+    groupMessageHandler: .unimplemented
   )
 }
 

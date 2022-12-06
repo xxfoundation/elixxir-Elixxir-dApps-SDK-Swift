@@ -51,6 +51,7 @@ public struct Messenger {
   public var getNotificationReports: MessengerGetNotificationReports
   public var registerGroupRequestHandler: MessengerRegisterGroupRequestHandler
   public var registerGroupChatProcessor: MessengerRegisterGroupChatProcessor
+  public var isGroupChatRunning: MessengerIsGroupChatRunning
   public var startGroupChat: MessengerStartGroupChat
 }
 
@@ -107,6 +108,7 @@ extension Messenger {
       getNotificationReports: .live(env),
       registerGroupRequestHandler: .live(env),
       registerGroupChatProcessor: .live(env),
+      isGroupChatRunning: .live(env),
       startGroupChat: .live(env)
     )
   }
@@ -164,6 +166,7 @@ extension Messenger {
     getNotificationReports: .unimplemented,
     registerGroupRequestHandler: .unimplemented,
     registerGroupChatProcessor: .unimplemented,
+    isGroupChatRunning: .unimplemented,
     startGroupChat: .unimplemented
   )
 }

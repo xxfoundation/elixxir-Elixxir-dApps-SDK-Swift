@@ -3,6 +3,7 @@ import BackupFeature
 import ComposableArchitecture
 import ContactsFeature
 import CustomDump
+import GroupsFeature
 import RegisterFeature
 import UserSearchFeature
 import XCTest
@@ -22,6 +23,7 @@ final class HomeComponentTests: XCTestCase {
     var messengerDidConnect = 0
     var messengerDidListenForMessages = 0
     var messengerDidStartFileTransfer = 0
+    var messengerDidStartGroupChat = 0
 
     store.dependencies.app.bgQueue = .immediate
     store.dependencies.app.mainQueue = .immediate
@@ -34,6 +36,8 @@ final class HomeComponentTests: XCTestCase {
     store.dependencies.app.messenger.startFileTransfer.run = { messengerDidStartFileTransfer += 1 }
     store.dependencies.app.messenger.isLoggedIn.run = { false }
     store.dependencies.app.messenger.isRegistered.run = { false }
+    store.dependencies.app.messenger.isGroupChatRunning.run = { false }
+    store.dependencies.app.messenger.startGroupChat.run = { messengerDidStartGroupChat += 1 }
 
     store.send(.messenger(.start))
 
@@ -41,6 +45,7 @@ final class HomeComponentTests: XCTestCase {
     XCTAssertNoDifference(messengerDidConnect, 1)
     XCTAssertNoDifference(messengerDidListenForMessages, 1)
     XCTAssertNoDifference(messengerDidStartFileTransfer, 1)
+    XCTAssertNoDifference(messengerDidStartGroupChat, 1)
 
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartUnregistered)) {
@@ -60,6 +65,7 @@ final class HomeComponentTests: XCTestCase {
     var messengerDidStartFileTransfer = 0
     var messengerDidLogIn = 0
     var messengerDidResumeBackup = 0
+    var messengerDidStartGroupChat = 0
 
     store.dependencies.app.bgQueue = .immediate
     store.dependencies.app.mainQueue = .immediate
@@ -84,6 +90,8 @@ final class HomeComponentTests: XCTestCase {
       }
       return cMix
     }
+    store.dependencies.app.messenger.isGroupChatRunning.run = { false }
+    store.dependencies.app.messenger.startGroupChat.run = { messengerDidStartGroupChat += 1 }
 
     store.send(.messenger(.start))
 
@@ -93,6 +101,7 @@ final class HomeComponentTests: XCTestCase {
     XCTAssertNoDifference(messengerDidStartFileTransfer, 1)
     XCTAssertNoDifference(messengerDidLogIn, 1)
     XCTAssertNoDifference(messengerDidResumeBackup, 1)
+    XCTAssertNoDifference(messengerDidStartGroupChat, 1)
 
     store.receive(.networkMonitor(.stop))
     store.receive(.messenger(.didStartRegistered))
@@ -131,6 +140,7 @@ final class HomeComponentTests: XCTestCase {
       }
       return cMix
     }
+    store.dependencies.app.messenger.isGroupChatRunning.run = { true }
 
     store.send(.register(.finished)) {
       $0.register = nil
@@ -209,6 +219,7 @@ final class HomeComponentTests: XCTestCase {
     store.dependencies.app.messenger.isFileTransferRunning.run = { true }
     store.dependencies.app.messenger.isLoggedIn.run = { false }
     store.dependencies.app.messenger.isRegistered.run = { throw error }
+    store.dependencies.app.messenger.isGroupChatRunning.run = { true }
 
     store.send(.messenger(.start))
 
@@ -236,6 +247,7 @@ final class HomeComponentTests: XCTestCase {
     store.dependencies.app.messenger.isLoggedIn.run = { false }
     store.dependencies.app.messenger.isRegistered.run = { true }
     store.dependencies.app.messenger.logIn.run = { throw error }
+    store.dependencies.app.messenger.isGroupChatRunning.run = { true }
 
     store.send(.messenger(.start))
 
@@ -527,6 +539,30 @@ final class HomeComponentTests: XCTestCase {
 
     store.send(.didDismissBackup) {
       $0.backup = nil
+    }
+  }
+
+  func testGroupsButtonTapped() {
+    let store = TestStore(
+      initialState: HomeComponent.State(),
+      reducer: HomeComponent()
+    )
+
+    store.send(.groupsButtonTapped) {
+      $0.groups = GroupsComponent.State()
+    }
+  }
+
+  func testDidDismissGroups() {
+    let store = TestStore(
+      initialState: HomeComponent.State(
+        groups: GroupsComponent.State()
+      ),
+      reducer: HomeComponent()
+    )
+
+    store.send(.didDismissGroups) {
+      $0.groups = nil
     }
   }
 }

@@ -123,6 +123,26 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "GroupFeatureTests"
+               BuildableName = "GroupFeatureTests"
+               BlueprintName = "GroupFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "GroupsFeatureTests"
+               BuildableName = "GroupsFeatureTests"
+               BlueprintName = "GroupsFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "HomeFeatureTests"
                BuildableName = "HomeFeatureTests"
                BlueprintName = "HomeFeatureTests"
@@ -136,6 +156,16 @@
                BlueprintIdentifier = "MyContactFeatureTests"
                BuildableName = "MyContactFeatureTests"
                BlueprintName = "MyContactFeatureTests"
+               ReferencedContainer = "container:..">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "NewGroupFeatureTests"
+               BuildableName = "NewGroupFeatureTests"
+               BlueprintName = "NewGroupFeatureTests"
                ReferencedContainer = "container:..">
             </BuildableReference>
          </TestableReference>

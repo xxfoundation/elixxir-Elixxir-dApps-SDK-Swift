@@ -41,6 +41,8 @@ struct AppComponent: ReducerProtocol {
   @Dependency(\.app.log) var log: Logger
   @Dependency(\.app.mainQueue) var mainQueue: AnySchedulerOf<DispatchQueue>
   @Dependency(\.app.bgQueue) var bgQueue: AnySchedulerOf<DispatchQueue>
+  @Dependency(\.app.groupRequestHandler) var groupRequestHandler: GroupRequestHandler
+  @Dependency(\.app.groupMessageHandler) var groupMessageHandler: GroupMessageHandler
 
   var body: some ReducerProtocol<State, Action> {
     BindingReducer()
@@ -80,7 +82,12 @@ struct AppComponent: ReducerProtocol {
             cancellables.append(receiveFileHandler(onError: { error in
               log(.error(error as NSError))
             }))
-
+            cancellables.append(groupRequestHandler(onError: { error in
+              log(.error(error as NSError))
+            }))
+            cancellables.append(groupMessageHandler(onError: { error in
+              log(.error(error as NSError))
+            }))
             cancellables.append(messenger.registerBackupCallback(.init { data in
               try? backupStorage.store(data)
             }))

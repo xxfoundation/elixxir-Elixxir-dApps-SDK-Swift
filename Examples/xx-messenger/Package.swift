@@ -22,8 +22,11 @@ let package = Package(
     .library(name: "ContactFeature", targets: ["ContactFeature"]),
     .library(name: "ContactLookupFeature", targets: ["ContactLookupFeature"]),
     .library(name: "ContactsFeature", targets: ["ContactsFeature"]),
+    .library(name: "GroupFeature", targets: ["GroupFeature"]),
+    .library(name: "GroupsFeature", targets: ["GroupsFeature"]),
     .library(name: "HomeFeature", targets: ["HomeFeature"]),
     .library(name: "MyContactFeature", targets: ["MyContactFeature"]),
+    .library(name: "NewGroupFeature", targets: ["NewGroupFeature"]),
     .library(name: "RegisterFeature", targets: ["RegisterFeature"]),
     .library(name: "ResetAuthFeature", targets: ["ResetAuthFeature"]),
     .library(name: "RestoreFeature", targets: ["RestoreFeature"]),
@@ -38,7 +41,7 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-      .upToNextMajor(from: "0.43.0")
+      .upToNextMajor(from: "0.47.2")
     ),
     .package(
       url: "https://git.xx.network/elixxir/client-ios-db.git",
@@ -46,15 +49,15 @@ let package = Package(
     ),
     .package(
       url: "https://github.com/darrarski/swift-composable-presentation.git",
-      .upToNextMajor(from: "0.6.0")
+      .upToNextMajor(from: "0.6.1")
     ),
     .package(
       url: "https://github.com/pointfreeco/xctest-dynamic-overlay.git",
-      .upToNextMajor(from: "0.5.0")
+      .upToNextMajor(from: "0.6.0")
     ),
     .package(
       url: "https://github.com/pointfreeco/swift-custom-dump.git",
-      .upToNextMajor(from: "0.6.0")
+      .upToNextMajor(from: "0.6.1")
     ),
     .package(
       url: "https://github.com/apple/swift-log.git",
@@ -261,11 +264,55 @@ let package = Package(
       swiftSettings: swiftSettings
     ),
     .target(
+      name: "GroupFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .target(name: "ChatFeature"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "GroupFeatureTests",
+      dependencies: [
+        .target(name: "GroupFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "GroupsFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .target(name: "GroupFeature"),
+        .target(name: "NewGroupFeature"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "ComposablePresentation", package: "swift-composable-presentation"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "GroupsFeatureTests",
+      dependencies: [
+        .target(name: "GroupsFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
       name: "HomeFeature",
       dependencies: [
         .target(name: "AppCore"),
         .target(name: "BackupFeature"),
         .target(name: "ContactsFeature"),
+        .target(name: "GroupsFeature"),
         .target(name: "RegisterFeature"),
         .target(name: "UserSearchFeature"),
         .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
@@ -298,6 +345,25 @@ let package = Package(
       name: "MyContactFeatureTests",
       dependencies: [
         .target(name: "MyContactFeature"),
+        .product(name: "CustomDump", package: "swift-custom-dump"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "NewGroupFeature",
+      dependencies: [
+        .target(name: "AppCore"),
+        .product(name: "ComposableArchitecture", package: "swift-composable-architecture"),
+        .product(name: "XXClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXMessengerClient", package: "elixxir-dapps-sdk-swift"),
+        .product(name: "XXModels", package: "client-ios-db"),
+      ],
+      swiftSettings: swiftSettings
+    ),
+    .testTarget(
+      name: "NewGroupFeatureTests",
+      dependencies: [
+        .target(name: "NewGroupFeature"),
         .product(name: "CustomDump", package: "swift-custom-dump"),
       ],
       swiftSettings: swiftSettings

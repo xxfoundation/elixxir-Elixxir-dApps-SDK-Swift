@@ -16,6 +16,7 @@ public struct ChatView: View {
     var failure: String?
     var sendFailure: String?
     var text: String
+    var disableImagePicker: Bool
 
     init(state: ChatComponent.State) {
       myContactId = state.myContactId
@@ -23,6 +24,12 @@ public struct ChatView: View {
       failure = state.failure
       sendFailure = state.sendFailure
       text = state.text
+      switch state.id {
+      case .contact(_):
+        disableImagePicker = false
+      case .group(_):
+        disableImagePicker = true
+      }
     }
   }
 
@@ -109,6 +116,7 @@ public struct ChatView: View {
                   }
                 }
               }
+              .disabled(viewStore.disableImagePicker)
             }
           }
           .padding()
@@ -139,6 +147,13 @@ public struct ChatView: View {
 
     var body: some View {
       VStack {
+        if let sender = message.senderName {
+          Text(sender)
+            .foregroundColor(.secondary)
+            .font(.footnote)
+            .frame(maxWidth: .infinity, alignment: alignment)
+        }
+
         Text("\(message.date.formatted()), \(statusText)")
           .foregroundColor(.secondary)
           .font(.footnote)
@@ -208,6 +223,7 @@ public struct ChatView_Previews: PreviewProvider {
               id: 1,
               date: Date(),
               senderId: "contact-id".data(using: .utf8)!,
+              senderName: "Contact",
               text: "Hello!",
               status: .received
             ),
@@ -215,6 +231,7 @@ public struct ChatView_Previews: PreviewProvider {
               id: 2,
               date: Date(),
               senderId: "my-contact-id".data(using: .utf8)!,
+              senderName: "Me",
               text: "Hi!",
               status: .sent
             ),
@@ -222,6 +239,7 @@ public struct ChatView_Previews: PreviewProvider {
               id: 3,
               date: Date(),
               senderId: "contact-id".data(using: .utf8)!,
+              senderName: "Contact",
               text: "",
               status: .received,
               fileTransfer: .init(
@@ -237,6 +255,7 @@ public struct ChatView_Previews: PreviewProvider {
               id: 4,
               date: Date(),
               senderId: "my-contact-id".data(using: .utf8)!,
+              senderName: "Me",
               text: "",
               status: .sent,
               fileTransfer: .init(
