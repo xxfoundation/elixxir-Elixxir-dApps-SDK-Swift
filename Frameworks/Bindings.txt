@@ -1,4 +1,4 @@
-https://git.xx.network/elixxir/client/-/commit/1cbd62536d1c282233080c90f07f86a69cf78698
+https://git.xx.network/elixxir/client/-/commit/d2a6e4be73efec27924656b9864bdf1e8554bf1b
 go version go1.19.4 darwin/arm64
 Xcode 14.2 Build version 14C18
 gomobile bind target: ios,iossimulator,macos
