@@ -1007,6 +1007,8 @@ StopNetworkFollower.
  * RemoveHealthCallback removes a health callback using its registration ID.
  */
 - (void)removeHealthCallback:(int64_t)funcID;
+// skipped method Cmix.SetTrackNetworkPeriod with unsupported parameter or return types
+
 /**
  * StartNetworkFollower kicks off the tracking of the network. It starts long-
 running network threads and returns an object for checking state and
